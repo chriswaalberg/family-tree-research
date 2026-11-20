@@ -55,7 +55,7 @@ Each item: `{"bestand": "media/grandma-1950.jpg", "titel": "Grandma Riet, 1950",
 
 - `bestand`: path next to `index.html` (e.g. `media/…`), an `https://` address or a `data:` URL.
 - `titel`: caption. Without it the viewer shows the file name.
-- `soort`: `foto` (photo), `scan` or `document` (informational only).
+- `soort`: `foto` (photo), `scan` or `document`. It decides how ▶ Swipe shows the item: only a `foto` becomes the portrait on a person's first card; a `scan`, `document` or item without `soort` is never used as a picture there, only as a small "view document" button that opens it large. Elsewhere `soort` is informational.
 
 Images (`.jpg`, `.png`, `.gif`, `.webp`, …) appear as thumbnails in the detail panel; a click opens them large, with arrows to the next one. Other files (e.g. `.pdf`) appear as a link. For a living person with `"levenden_tonen": false` the viewer shows no media.
 

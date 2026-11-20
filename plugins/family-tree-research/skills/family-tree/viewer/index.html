@@ -544,6 +544,12 @@ main{padding-top:6px}
 .sw .sw-pp{font-size:15px}
 .sw .sw-route{display:flex;gap:6px;flex-wrap:wrap;font-size:11.5px;margin-top:6px;opacity:.85}
 .sw .sw-route span{opacity:.6}.sw .sw-route span.on{opacity:1;font-weight:700}
+.sw .sw-route button{all:unset;cursor:pointer;pointer-events:auto;opacity:.75;text-decoration:underline;text-decoration-color:rgba(255,255,255,.35);text-underline-offset:2px}
+.sw .sw-route .sw-nx{margin-left:6px;opacity:.55;font-style:italic}
+.sw .sw-por{display:block;width:min(44cqw,200px);aspect-ratio:4/5;object-fit:cover;border-radius:14px;margin:0 0 18px;box-shadow:0 10px 30px rgba(0,0,0,.45);border:3px solid rgba(255,255,255,.85)}
+.sw .sw-docs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.sw .sw-doc{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border-radius:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);font-size:13px;font-weight:600}
+.sw .sw-doc img{width:34px;height:34px;object-fit:cover;border-radius:6px}
 .sw .sw-hint{position:absolute;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom,0px));text-align:center;font-size:12.5px;opacity:.75;z-index:4;pointer-events:none;padding:0 20px}
 .sw .sw-nav{all:unset;position:absolute;top:50%;margin-top:-24px;width:48px;height:48px;border-radius:50%;display:none;place-items:center;cursor:pointer;background:rgba(255,255,255,.12);color:#fff;font-size:22px;z-index:6}
 @media (min-width:700px){.sw .sw-nav{display:grid}}
@@ -557,7 +563,6 @@ main{padding-top:6px}
 .sw .sw-card[data-kind=img] .sw-fig img{width:100%;height:100%;max-height:none;object-fit:cover}
 .sw .sw-card[data-kind=img]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:60%;background:linear-gradient(0deg,rgba(0,0,0,.92) 35%,rgba(0,0,0,0))}
 .sw .sw-card[data-kind=img] .sw-k,.sw .sw-card[data-kind=img] .sw-cap{position:relative;z-index:2}
-.sw .sw-pbg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.35;filter:blur(2px)}
 .sw .sw-big{display:block;position:absolute;right:-10px;bottom:30px;font:800 120px/1 Fraunces,Georgia,serif;opacity:.1;pointer-events:none}
 .sw .sw-k{color:#dcb56a}
 .sw .sw-t p,.sw p.sw-t{font-weight:500}
@@ -1720,10 +1725,10 @@ function drawFamilie(){
 /* ===== SWIPE (experimental Swipe Stories: full-screen cards that play by themselves, built from the Story view) ===== */
 Object.assign(I18N.nl,{sw_btn:"Swipe",sw_btn_t:"Het verhaal als kaarten die vanzelf doorlopen (experiment)",sw_close:"Sluiten",sw_pause:"Pauze",sw_play:"Verder",sw_next:"Volgende",sw_prev:"Vorige",
  sw_hint:"Tik rechts: verder · tik links: terug · vasthouden: pauze · omhoog vegen: een generatie verder terug",
- sw_family:"Gezin",sw_era:"Meegemaakt",sw_death:"Afscheid",sw_photo:"Een foto uit die tijd",sw_birth:"Geboren"});
+ sw_family:"Gezin",sw_era:"Meegemaakt",sw_doc:"Bekijk document",sw_view:"Bekijk beeld",sw_nextp:"hierna: {name}",sw_route:"Afgelegde route",sw_death:"Afscheid",sw_photo:"Een foto uit die tijd",sw_birth:"Geboren"});
 Object.assign(I18N.en,{sw_btn:"Swipe",sw_btn_t:"The story as cards that play by themselves (experiment)",sw_close:"Close",sw_pause:"Pause",sw_play:"Play",sw_next:"Next",sw_prev:"Previous",
  sw_hint:"Tap right: next · tap left: back · hold: pause · swipe up: one generation further back",
- sw_family:"Family",sw_era:"Lived through",sw_death:"Farewell",sw_photo:"A photo from that time",sw_birth:"Born"});
+ sw_family:"Family",sw_era:"Lived through",sw_doc:"View document",sw_view:"View image",sw_nextp:"next: {name}",sw_route:"Route so far",sw_death:"Farewell",sw_photo:"A photo from that time",sw_birth:"Born"});
 let SW=null;
 const SW_KIND={vh_begin:"b",vh_born_dp:"b",vh_born_d:"b",vh_born_p:"b",vh_born_none:"b",vh_age:"b",vh_ageX:"b",vh_living:"b",
   vh_kidsN:"f",vh_kids1:"f",vh_kidsSolo:"f",vh_kidsN_living:"f",vh_kids1_living:"f",vh_kidsSolo_living:"f",vh_other:"f",vh_moveLand:"f",vh_movePlace:"f",
@@ -1744,13 +1749,17 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     const lc=k===0?"#b48a3c":(LINE_COL[code.length>=2?code.slice(0,2):(code==="v"?"vv":"mv")]||"#b48a3c");
     const rel=k===0?_t("vh_step0"):_t("vh_stepN",{k,rel:vhCap(vhRelWord(k,p.x)),root:rfn});
     const S=swSentences(i,child,flags),T=a=>a.map(s=>`<p>${slEsc(s)}</p>`).join("");
-    const imgs=(typeof mediaList==="function"&&!p.living)?mediaList(p).filter(mediaIsImg):[];
+    /* media: only soort "foto" becomes a portrait on the intro card; scans, documents (and media without soort) are small buttons that open the media viewer */
+    const imgs=(typeof mediaList==="function"&&!p.living)?mediaList(p).filter(mediaIsImg):[],isFoto=m=>/^(foto|photo)$/i.test(m.soort||"");
+    const foto=imgs.find(isFoto),docs=imgs.filter(m=>!isFoto(m));
+    const por=foto?`<img class="sw-por" src="${slEsc(foto.bestand)}" alt="${slEsc(mediaName(foto))}">`:"";
+    const docb=docs.length?`<div class="sw-docs">${docs.slice(0,3).map((m,j)=>`<button type="button" class="sw-doc" data-doc="${j}" title="${slEsc(mediaName(m))}"><img src="${slEsc(m.bestand)}" alt=""><span>${_t(/^(scan|document)$/i.test(m.soort||"")?"sw_doc":"sw_view")}</span></button>`).join("")}</div>`:"";
     /* certainty / adoption as a small label */
     let chips="";if(child!=null){const st=vhStatus(child,i),c=certOf(child,i),key=st==="zeker"?"zeker":st==="waarschijnlijk"?"waarschijnlijk":st==="mogelijk"?"mogelijk":st==="fout"?"fout":"open";
       if(c&&c[3]&&!/^(biologisch|biological)$/i.test(c[3]))chips+=`<span class="sw-chip" style="--cc:#b48a3c">♥ ${_t("vh_adopt")}</span>`;
       chips+=`<span class="sw-chip" style="--cc:${CERT[st]||CERT["niet gecheckt"]}">${key==="zeker"?"✓ ":key==="fout"?"⚠ ":""}${_t("vh_c_"+key)}</span>`}
     const add=(kind,html,o)=>cards.push(Object.assign({kind,html,k},o||{}));
-    add("intro",`<div class="sw-k">${slEsc(rel)}${k&&adoptSet(root).has(i)?" · "+_t("ks_fam_adopt"):""}</div><div class="sw-big">${p.by||""}</div><h2>${slEsc(p.n)}</h2><div class="sw-yy">${slEsc(yrs(p))}</div>${chips?`<div class="sw-chips">${chips}</div>`:""}<div class="sw-t">${T(S.b)}</div>`,{bg:imgs[0]&&imgs[0].bestand,len:S.b.join(" ").length});
+    add("intro",`${por}<div class="sw-k">${slEsc(rel)}${k&&adoptSet(root).has(i)?" · "+_t("ks_fam_adopt"):""}</div><div class="sw-big">${por?"":p.by||""}</div><h2>${slEsc(p.n)}</h2><div class="sw-yy">${slEsc(yrs(p))}</div>${chips?`<div class="sw-chips">${chips}</div>`:""}<div class="sw-t">${T(S.b)}</div>${docb}`,{por,docs,len:S.b.join(" ").length});
     if(vhHas(p)){const ps=vhParas(lab(p.verhaal)).split("</p>").filter(x=>x.trim()).map(x=>x+"</p>");
       ps.forEach((x,j)=>add("story",`<div class="sw-k">✦ ${slEsc(_t("vh_title",{name:fn}))}</div><div class="sw-t">${x}</div>${j===ps.length-1?`<div class="sw-note">${vhSources(p)}</div>`:""}`,{len:x.length}));
       (p.verhaal_beelden||[]).filter(b=>b&&b.bestand).forEach(b=>add("img",`<figure class="sw-fig"><img src="${slEsc(b.bestand)}" alt=""></figure><div class="sw-cap"><b>${slEsc(lab(b.titel)||"")}</b>${[b.maker,b.datering].filter(Boolean).map(slEsc).join(" · ")}</div>`,{img:1}))}
@@ -1792,7 +1801,7 @@ function swCard(){return SW.gens[SW.g].cards[SW.c]}
 function swShow(dir){const el=$("sw"),G=SW.gens[SW.g],c=G.cards[SW.c],box=el.querySelector(".sw-cards");
   SW.t=0;SW.dur=swDur(c);
   const n=document.createElement("div");n.className="sw-card in "+dir;n.dataset.kind=c.kind;n.style.setProperty("--lc",G.lc);n.style.setProperty("--dur",(SW.dur||8000)+"ms");
-  n.innerHTML=(c.bg?`<div class="sw-pbg" style="background-image:url('${slEsc(c.bg)}')"></div>`:"")+`<div class="sw-body">${c.html}</div>`;
+  n.innerHTML=`<div class="sw-body">${c.html}</div>`;
   [...box.children].forEach(o=>{o.className="sw-card out "+dir;const kill=()=>o.remove();o.addEventListener("animationend",kill,{once:true});
     if(dir==="none"||getComputedStyle(o).animationName==="none"||getComputedStyle(o).display==="none")kill()});
   box.appendChild(n);n.addEventListener("animationend",e=>{if(e.target===n)n.classList.remove("in",dir)},{once:false});
@@ -1800,7 +1809,10 @@ function swShow(dir){const el=$("sw"),G=SW.gens[SW.g],c=G.cards[SW.c],box=el.que
   el.querySelector(".sw-bars").innerHTML=G.cards.map(()=>"<i><b></b></i>").join("");
   const p=P[G.i];el.querySelector(".sw-av").textContent=p.by||"•";el.querySelector(".sw-av").style.background=G.lc;
   el.querySelector(".sw-who b").textContent=p.n;el.querySelector(".sw-who span").textContent=SW.g===0?_t("vh_step0"):vhCap(vhRelWord(SW.g,p.x));
-  el.querySelector(".sw-route").innerHTML=SW.gens.map((g,k)=>`<span class="${k===SW.g?"on":""}">${slEsc(g.fn)}</span>`).join("<span>›</span>");
+  /* route: only the part already travelled; earlier names jump back; on the last card a quiet "next: …" */
+  const nx=SW.c===G.cards.length-1&&c.kind!=="fork"&&SW.gens[SW.g+1];
+  el.querySelector(".sw-route").innerHTML=SW.gens.slice(0,SW.g+1).map((g,k)=>k===SW.g?`<span class="on">${slEsc(g.fn)}</span>`:`<button type="button" data-back="${k}">${slEsc(g.fn)}</button>`).join("<span>›</span>")+(nx?`<span class="sw-nx">${slEsc(_t("sw_nextp",{name:nx.fn}))}</span>`:"");
+  el.querySelector(".sw-route").setAttribute("aria-label",_t("sw_route"));
   el.querySelector(".sw-hint").textContent=SW.hint?_t("sw_hint"):"";
   el.querySelector(".sw-x").title=_t("sw_close");swPP();swBars()}
 function swBars(){const el=$("sw");if(!el||!SW)return;el.querySelectorAll(".sw-bars b").forEach((b,j)=>b.style.width=(j<SW.c?100:j>SW.c?0:SW.dur?Math.min(100,SW.t/SW.dur*100):100)+"%")}
@@ -1828,8 +1840,11 @@ function swWire(el){let x0=0,y0=0,t0=0,ht=0,down=false;
     else if(b.classList.contains("sw-pp")){SW.paused=!SW.paused;swPP()}
     else if(b.dataset.nav)swStep(+b.dataset.nav);
     else if(b.dataset.go!=null)swChoose(+b.dataset.go);
+    else if(b.dataset.back!=null){SW.hint=false;SW.g=+b.dataset.back;SW.c=0;swShow("down")}
+    else if(b.dataset.doc!=null){const d=swCard().docs||[];if(!d.length)return;const was=SW.paused;SW.paused=true;swPP();mediaView(d,+b.dataset.doc);
+      const dlg=$("mediaDlg");if(dlg)dlg.addEventListener("close",()=>{if(SW){SW.paused=was;swPP()}},{once:true})}
     else if(b.dataset.a==="restart"){SW.path=swPlan([SW.path[0]]);swBuild();SW.g=0;SW.c=0;swShow("down")}});
-  addEventListener("keydown",e=>{if(!SW||el.hidden)return;
+  addEventListener("keydown",e=>{if(!SW||el.hidden)return;const md=$("mediaDlg");if(md&&md.open)return;
     const k=e.key;if(k==="Escape")swClose();else if(k==="ArrowRight")swStep(1);else if(k==="ArrowLeft")swStep(-1);
     else if(k==="ArrowUp")swGen(1);else if(k==="ArrowDown")swGen(-1);else if(k===" "){SW.paused=!SW.paused;swPP()}else return;e.preventDefault()})}
 /* language switch: rebuild the cards in place */

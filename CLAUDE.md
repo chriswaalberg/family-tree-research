@@ -72,8 +72,8 @@ The viewer is one file (~1,700 lines, CSS + HTML + JS). Find your way by these m
   - `drawVerhaal`: the chapters, father/mother choice, route bar, "Remarkable relative" asides, certainty and adoption callouts.
 - `/* ===== SWIPE` (experimental Swipe Stories, button `#swBtn` next to `#storyBtn`; CSS under `/* ===== SWIPE` too): full-screen cards that play by themselves, overlay `#sw`.
   - `swSentences`: vhTemplate's sentences sorted by kind (birth, family, death, era) by wrapping `_t` for one call, so the Story view's code stays untouched. New template keys go into `SW_KIND`.
-  - `swBuild`: cards per ancestor (intro with certainty/adoption chip, own story per paragraph or family, the `vhTijdgeest` block cut into life/photo/events cards, lived-through, remarkable relatives, farewell, fork or end). `swPlan` = chosen path + richest continuation.
-  - `swShow`/`swTick`/`swStep`/`swGen`/`swWire`: player (timer per card, tap left/right, hold = pause, swipe up/down = generation, arrow keys/space/Esc). Starts at `state.root`; `setLang` calls `swRelang`.
+  - `swBuild`: cards per ancestor (intro with certainty/adoption chip, a portrait only from media with `soort:"foto"` and small "view document" buttons for scans/documents, own story per paragraph or family, the `vhTijdgeest` block cut into life/photo/events cards, lived-through, remarkable relatives, farewell, fork or end). `swPlan` = chosen path + richest continuation.
+  - `swShow`/`swTick`/`swStep`/`swGen`/`swWire`: player (timer per card, tap left/right, hold = pause, swipe up/down = generation, arrow keys/space/Esc). Starts at `state.root`; `setLang` calls `swRelang`. The route at the top shows only the generations already travelled (earlier names jump back) plus a quiet "next: …" on the last card.
 - Menu: Story is a separate gold button (`#storyBtn`, CSS under `/* story-knop`) before the tab group `#tabs`; `render()` sets its `aria-pressed`. `#swBtn` follows it (icon only below 560 px).
 - `/* ===== DATA` → `function prepareData` (also sets the language: `LANG=(d.taal||d.lang)==="nl"?"nl":"en"`), `const VIEWS`, and the `fetch("data.json")` line that `standalone_viewer.py` looks for.
 
