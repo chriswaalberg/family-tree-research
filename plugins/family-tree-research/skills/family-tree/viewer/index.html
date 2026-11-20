@@ -713,7 +713,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.14",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.15",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1977,7 +1977,8 @@ function swShow(dir){const el=$("sw"),G=SW.gens[SW.g],c=G.cards[SW.c],box=el.que
   SW.t=0;SW.dur=swDur(c);
   const n=document.createElement("div");n.className="sw-card in "+dir;n.dataset.kind=c.kind;n.style.setProperty("--lc",G.lc);n.style.setProperty("--dur",(SW.dur||8000)+"ms");
   n.innerHTML=`<div class="sw-body">${c.html}</div>`;
-  [...box.children].forEach(o=>{o.className="sw-card out "+dir;const kill=()=>o.remove();o.addEventListener("animationend",kill,{once:true});
+  /* only swap the animation classes: the fit classes from swFit (f1-f3, fscroll) and its inline styles stay until the old card is gone */
+  [...box.children].forEach(o=>{o.classList.remove("in","none","next","prev","up","down");o.classList.add("out",dir);const kill=()=>o.remove();o.addEventListener("animationend",kill,{once:true});
     if(dir==="none"||getComputedStyle(o).animationName==="none"||getComputedStyle(o).display==="none")kill()});
   box.appendChild(n);n.addEventListener("animationend",e=>{if(e.target===n)n.classList.remove("in",dir)},{once:false});
   /* header */
