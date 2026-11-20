@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.8.2"
+  version: "0.9.0"
 ---
 
 # Family-tree research, hand in hand
@@ -69,7 +69,7 @@ The core:
 - **No parent without a source.** A new ancestor only enters the tree with a concrete source (record, registration, with link or location). In doubt = *probable* or *possible*, never quietly *certain*.
 - Don't actively search archives for **living people** (their records are usually not public anyway). What the user tells you about them simply goes into the tree and the viewer.
 - Record everything: `data/relations.csv` (status + source per parent-child relation), `data/worklog.md` (what you searched, what you found, and what you did *not* find), `reports/questions.md` (open questions and contradictions).
-- **One route failing isn't the end.** If the Chrome extension is missing or blocked (often by the user's organisation), switch yourself to your fetch tools, then a shell (`curl` to public APIs), then the browser built into the Claude desktop app; see "How to reach the archives" in `references/sources.md`. Don't wait for the user to suggest it.
+- **One route failing isn't the end.** If the Chrome extension is missing or blocked (often by the user's organisation), switch yourself to your fetch tools, then a shell (`curl` to public APIs), then the browser built into the Claude desktop app; and if an API fails, try the website itself. See "How to reach the archives" in `references/sources.md`. Don't wait for the user to suggest it.
 - Can't get in somewhere because of a login, paywall or captcha? Don't work around it. Say so honestly, tell the user exactly what to look up (archive, place, period, name) and ask for a screenshot or photo. Then read it yourself.
 - After every round: update the GEDCOM, rebuild data.json, republish the viewer, and tell in a few sentences what's new and what's next.
 
@@ -95,7 +95,7 @@ The viewer has a **Story** view: from the start person step by step back in time
 For each place where many ancestors lived, build a zeitgeist (`zeitgeist/zeitgeist.json`, format in `viewer/DATA-FORMAT.md`, "Zeitgeist"): a few paragraphs about daily life per period, local events with year and source (storms, disasters, epidemics, war, buildings, notable incidents) and old prints, drawings or photos of the place. The viewer links it automatically to everyone who lived there at the time.
 
 - Start with the place with the most ancestors. Search local history sites, monument registers, museum collections and lists of disasters; give a source for every event and invent nothing.
-- Images: only freely usable work (public domain or CC0), with artist, date and source. The Rijksmuseum has an open search API (`data.rijksmuseum.nl/search/collection?description=<place>&imageAvailable=true`, objects via `id.rijksmuseum.nl/<id>`, images via IIIF); for other countries use national museum/library open-data collections and Wikimedia Commons. If those sites are blocked from your environment, use the user's browser; if saving doesn't work, record title, artist and link per image so it can be done later.
+- Images: only freely usable work (public domain or CC0), with artist, date and source. The Rijksmuseum has an open search API (`data.rijksmuseum.nl/search/collection?description=<place>&imageAvailable=true`, objects via `id.rijksmuseum.nl/<id>`, images via IIIF); for other countries use national museum/library open-data collections and Wikimedia Commons. If the API is blocked, don't conclude the museum is closed: try its website (rijksmuseum.nl) in the browser, where search, object pages and images often still work (see "A blocked API is not a blocked site" in `references/sources.md`). If saving doesn't work, record title, artist and link per image so it can be done later.
 - **Check every image before you use it.** Rijksmuseum objects (Linked Art JSON) say `publicdomain/mark` (free) or `rightsstatements.org/vocab/InC` (copyright; often no image online at all). On Wikimedia Commons, read the licence via the API (`prop=imageinfo&iiprop=extmetadata`). Public domain and CC0 are fine; CC BY / CC BY-SA too, with photographer and licence in `maker`. Don't link to pages where the image can't actually be seen.
 - **Place images by time and age.** Mark images of a specific event with `"gebeurtenis": true` and images about children with `"kind": true` (see DATA-FORMAT.md). Then a famine photo of children lands with the ancestor who was a child then.
 - 20th century: national museums often have little that is free. Look for photographers who died more than 70 years ago (in the Netherlands e.g. Emmy Andriesse, d. 1953), government photo archives released as CC0 (Dutch National Archives / Anefo) and CC BY-SA collections on Wikimedia Commons (e.g. IISG).

@@ -474,26 +474,54 @@ main{padding-top:6px}
 }
 .vh-evl{display:block;margin-top:3px;font-size:13px;color:#7a6050}
 
-/* story-knop: Story staat los, in goud, vóór de andere views */
-.views{display:flex;align-items:center;gap:10px;min-width:0;max-width:100%}
-.storybtn{display:inline-flex;align-items:center;gap:7px;flex:none;border:0;border-radius:10px;padding:8px 16px;font:700 14px/1.2 Inter,system-ui,sans-serif;color:#2a1c12;background:linear-gradient(#e8c983,#c9a24a);box-shadow:0 2px 10px rgba(201,162,74,.35);cursor:pointer}
-.storybtn::before{content:"\2726"}
-.storybtn:hover{background:linear-gradient(#f0d595,#d3ad55)}
-.storybtn[aria-pressed="true"]{outline:2px solid #fbf3e4;outline-offset:2px}
-.storybtn:focus-visible{outline:2px solid #e8d5aa;outline-offset:2px}
-@media (max-width:700px){.views{flex:1 1 100%}.views .tabs{flex:1 1 auto}}
-@media (max-width:560px){.storybtn{padding:7px 11px;font-size:13px}}
 
+/* ===== bovenbalk: Story · Cards · Family tree, daaronder de stamboom-views; instellingen in de balk onder de kop ===== */
+.topband .brand{align-items:center}.topband .btxt{flex:1;min-width:0}
+.tools{display:flex;align-items:center;gap:8px;margin-left:auto;align-self:flex-start}
+.topband .bar{flex-wrap:wrap}
+.modes{display:inline-flex;gap:2px;padding:3px;border-radius:12px;background:rgba(255,240,215,.07);border:1px solid rgba(255,240,215,.12);flex:none}
+.mode{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:9px;padding:8px 16px;background:none;color:#e6d6bb;font:600 14.5px/1.2 Inter,system-ui,sans-serif;cursor:pointer}
+.mode:hover{color:#fff4df;background:rgba(255,240,215,.06)}
+.mode:focus-visible{outline:2px solid #e8d5aa;outline-offset:2px}
+.m-story::before{content:"\2726"}
+.m-cards::before{content:"\25B6";font-size:10px}
+.mode[aria-pressed="true"]{background:var(--parch2);color:var(--walnut);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.topband #tabs[hidden]{display:none}
+.topband .langsw{border-color:rgba(255,240,215,.18)}.topband .langsw button[aria-pressed="true"]{background:rgba(255,240,215,.16);color:#fff4df}
+.rootbtn{all:unset;cursor:pointer;color:inherit;font:inherit;border-bottom:2px dashed rgba(220,181,106,.5);display:inline;line-height:inherit}
+.rootbtn svg{width:.6em;height:.6em;margin-left:.15em;vertical-align:.08em}.rootbtn .nw{white-space:nowrap}
+
+.rootbtn:hover{color:#fff;border-bottom-color:var(--gold2)}.rootbtn:focus-visible{outline:2px solid #e8d5aa;outline-offset:2px}
+.rootbtn svg{color:var(--gold2)}
+/* instellingenbalk: generaties en kleur links, legenda als gewone tekst */
+.legwrap{display:flex;align-items:center;flex-wrap:wrap;gap:8px 22px}.legwrap[hidden]{display:none}
+.setctl{display:flex;align-items:center;gap:10px 20px;flex-wrap:wrap}.setctl:empty{display:none}
+.legwrap .ctllab{color:var(--muted-foreground)}
+.legwrap .gsl-track{background:rgba(70,45,20,.14)}.legwrap .gsl-ticks i{background:rgba(70,45,20,.22)}.legwrap .gsl-ticks i.on{background:rgba(156,118,51,.8)}
+.legwrap .select{height:32px;border-radius:10px;border:1px solid var(--line);background-color:var(--paper);color:var(--ink);padding:0 30px 0 10px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%239c7633' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;appearance:none;-webkit-appearance:none}
+#legend>span{background:none;border:0;padding:0;color:#6f5f4f}
+/* startpersoon kiezen */
+.rootdlg{border:0;border-radius:16px;padding:18px;width:min(92vw,420px);background:var(--paper);color:var(--ink);box-shadow:0 20px 60px rgba(40,25,10,.35)}
+.rootdlg::backdrop{background:rgba(20,16,12,.55)}
+.rootdlg h2{font:700 20px Fraunces,Georgia,serif;margin:0 0 4px}.rootdlg p{margin:0 0 12px;color:var(--muted-foreground);font-size:13.5px}
+.rp-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.rp-list button,.rp-search{all:unset;cursor:pointer;display:flex;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#fff}
+.rp-list button:hover,.rp-search:hover{border-color:var(--gold)}.rp-list button.on{border-color:var(--gold);background:#f6eddd}
+.rp-list button span{color:var(--muted-foreground)}.rp-search{color:#6b5a48;font-weight:600;justify-content:flex-start;box-sizing:border-box;width:100%}
+@media (max-width:700px){
+  .topband .brand{align-items:flex-start}.tools{gap:6px}.topband .crest{display:none}.topband h1{font-size:21px;line-height:1.15}
+  .topband .sbtn{min-width:0;width:34px;padding:0;justify-content:center!important}.topband .sbtn span,.topband .sbtn .kbd{display:none}
+  .modes{display:flex;width:100%}.mode{flex:1;padding:8px 6px;font-size:13.5px}
+  .topband .tabs{flex:1 1 100%}.topband .tabs>[role=tablist]{width:100%;display:flex}.topband .tabs>[role=tablist]>[role=tab]{flex:1;padding:6px 2px;font-size:12.5px}
+  .legwrap{gap:6px 14px}
+}
 /* taalswitch */
 .langsw{display:inline-flex;align-items:center;border:1px solid rgba(232,213,170,.35);border-radius:8px;overflow:hidden;flex:none}
 .langsw button{background:transparent;color:inherit;border:0;padding:5px 9px;font:600 12px/1.2 Inter,system-ui,sans-serif;letter-spacing:.05em;opacity:.7;cursor:pointer}
 .langsw button:hover{opacity:1}
 .langsw button[aria-pressed="true"]{background:#c9a24a;color:#2a1c12;opacity:1}
 .langsw button:focus-visible{outline:2px solid #e8d5aa;outline-offset:-2px}
-.swbtn{display:inline-flex;align-items:center;gap:6px;flex:none;border:1.5px solid #c9a24a;border-radius:10px;padding:7px 12px;font:700 13px/1.2 Inter,system-ui,sans-serif;color:#e8c983;background:transparent;cursor:pointer}
-.swbtn::before{content:"\25B6";font-size:10px}
-.swbtn:hover{background:rgba(201,162,74,.15)}.swbtn:focus-visible{outline:2px solid #e8d5aa;outline-offset:2px}
-@media (max-width:560px){.swbtn{padding:6px 10px;font-size:0;gap:0}.swbtn::before{font-size:12px}}
 /* ===== SWIPE (experimental Swipe Stories: look 'Photo', fade transition) ===== */
 .sw{position:fixed;inset:0;z-index:200;background:#120c08;display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none;font-family:Inter,system-ui,sans-serif;color:#fff;--sw-top:0px;top:var(--sw-top)}
 .sw[hidden]{display:none!important}
@@ -577,26 +605,25 @@ main{padding-top:6px}
 <body>
 <div class="topband"><header>
   <div class="brand"><svg class="crest" aria-hidden="true" viewBox="0 0 48 48" width="44" height="44"><circle cx="24" cy="24" r="22.5" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/><path d="M24 39V22M24 30l-7-6M24 27l7-6M17 24l-5-4M17 24v-6M31 21l5-4M31 21v-6M24 22v-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="24" cy="13.5" r="2.4" fill="currentColor"/><circle cx="12" cy="19.5" r="2" fill="currentColor"/><circle cx="17" cy="16.5" r="2" fill="currentColor"/><circle cx="36" cy="16.5" r="2" fill="currentColor"/><circle cx="31" cy="13.5" r="2" fill="currentColor"/><path d="M15 39h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-  <div><h1 id="title"></h1>
-  <p id="summary"></p></div></div>
+  <div class="btxt"><h1 id="title"></h1>
+  <p id="summary"></p></div>
+  <div class="tools"><div class="langsw" id="langsw" role="group" aria-label="Language / Taal"><button type="button" data-l="en" lang="en" title="English">EN</button><button type="button" data-l="nl" lang="nl" title="Nederlands">NL</button></div>
+    <button type="button" class="btn sbtn" data-variant="outline" id="searchBtn" aria-haspopup="dialog"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><span data-t="search"></span><kbd class="kbd">/</kbd></button></div></div>
   <div class="bar">
-    <div class="views"><button type="button" class="storybtn" id="storyBtn" data-v="verhaal" data-t="v_verhaal" aria-pressed="false"></button><button type="button" class="swbtn" id="swBtn" data-t="sw_btn" data-t-title="sw_btn_t"></button>
+    <div class="modes" role="group" data-t-aria="modes"><button type="button" class="mode m-story" id="storyBtn" data-v="verhaal" aria-pressed="false"><span data-t="v_verhaal"></span></button><button type="button" class="mode m-cards" id="swBtn" data-t-title="sw_btn_t"><span data-t="sw_btn"></span></button><button type="button" class="mode m-tree" id="treeBtn" aria-pressed="false"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 48 48"><path d="M24 40V22M24 31l-8-7M24 27l8-7M16 24l-5-4M32 20l5-4M24 22v-8" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg><span data-t="v_tree"></span></button></div>
     <div class="tabs" id="tabs"><nav role="tablist" aria-orientation="horizontal" data-t-aria="tabs">
       <button type="button" role="tab" data-v="familie" data-t="v_familie"></button>
       <button type="button" role="tab" data-v="stamlijn" data-t="v_stamlijn"></button>
       <button type="button" role="tab" data-v="tijdlijn" data-t="v_tijdlijn"></button>
       <button type="button" role="tab" data-v="waaier" data-t="v_waaier"></button>
       <button type="button" role="tab" data-v="kosmos" data-t="v_kosmos"></button>
-    </nav></div></div>
+    </nav></div>
     <div id="starts" role="group" hidden></div>
-    <div class="langsw" id="langsw" role="group" aria-label="Language / Taal"><button type="button" data-l="en" lang="en" title="English">EN</button><button type="button" data-l="nl" lang="nl" title="Nederlands">NL</button></div>
-    <button type="button" class="btn sbtn" data-variant="outline" id="searchBtn" aria-haspopup="dialog"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><span data-t="search"></span><kbd class="kbd">/</kbd></button>
     <button type="button" class="btn" data-variant="ghost" data-size="sm" id="back" data-t-title="backTitle"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg><span data-t="back"></span></button>
-    <div id="genWrap" class="ctlgrp"><span class="ctllab" data-t="gens"></span><div id="gens" class="gsl" role="slider" tabindex="0" aria-valuemin="3" aria-valuemax="12" aria-valuenow="7"><div class="gsl-track"><div class="gsl-fill"></div></div><div class="gsl-ticks"></div><div class="gsl-thumb"><span>7</span></div></div></div>
-    <div id="colorWrap" class="ctlgrp"><span class="ctllab" data-t="color"></span><select id="color" class="select" data-t-aria="color"></select></div>
   </div>
 </header></div>
-<div class="legwrap"><div id="legend"></div></div>
+<div class="legwrap" id="setbar"><div class="setctl"><div id="genWrap" class="ctlgrp"><span class="ctllab" data-t="gens"></span><div id="gens" class="gsl" role="slider" tabindex="0" aria-valuemin="3" aria-valuemax="12" aria-valuenow="7"><div class="gsl-track"><div class="gsl-fill"></div></div><div class="gsl-ticks"></div><div class="gsl-thumb"><span>7</span></div></div></div>
+  <div id="colorWrap" class="ctlgrp"><span class="ctllab" data-t="color"></span><select id="color" class="select" data-t-aria="color"></select></div></div><div id="legend"></div></div>
 <main>
   <div class="stage" id="stage"><div id="loading">…</div></div>
   <p class="hint" id="hint"></p>
@@ -611,8 +638,8 @@ main{padding-top:6px}
 <script>
 /* ================= TEKSTEN (NL / EN) ================= */
 const I18N={
-nl:{loading:"Stamboom laden…",loadError:"Kon de stamboom niet laden ({msg}).",title:"Stamboom",titleFam:"Stamboom {name}",
- v_familie:"Familie",v_stamlijn:"Stamlijn",v_tijdlijn:"Tijdlijn",v_waaier:"Waaier",v_kosmos:"Kosmos",tabs:"Weergave",startPeople:"Startpersoon",
+nl:{loading:"Stamboom laden…",loadError:"Kon de stamboom niet laden ({msg}).",title:"Stamboom",titleFam:"Stamboom {name}",titleOf:"Stamboom van {name}",
+ v_familie:"Familie",v_stamlijn:"Stamlijn",v_tree:"Stamboom",modes:"Wat wil je zien?",rp_title:"Begin bij…",rp_sub:"Het verhaal, de kaarten en de stamboom beginnen allemaal bij deze persoon.",rp_other:"Iemand anders zoeken…",rp_btn:"Andere startpersoon kiezen",v_tijdlijn:"Tijdlijn",v_waaier:"Waaier",v_kosmos:"Kosmos",tabs:"Weergave",startPeople:"Startpersoon",
  search:"Zoek een persoon",searchPh:"Naam, jaartal of plaats",searchEmpty:"Typ een naam, jaartal of plaats",searchNone:"Niemand gevonden",searchAnc:"Voorouders van {name}",searchOthers:"Anderen",searchPeople:"Personen",genShort:"gen. {n}",
  back:"Terug",backTitle:"Vorige startpersoon",gens:"Generaties",color:"Kleur",
  c_lijn:"Grootouderlijn",c_land:"Land van geboorte",c_zek_v:"Zekerheid (verificatie)",c_zek_d:"Zekerheid (directe lijn)",
@@ -638,8 +665,8 @@ nl:{loading:"Stamboom laden…",loadError:"Kon de stamboom niet laden ({msg}).",
  showParents:"Toon ouders",hideParents:"Verberg ouders",showSibs:"Toon {n} broers en zussen",showSib1:"Toon broer of zus",hideSibs:"Verberg broers en zussen",hideSib1:"Verberg broer of zus",showKids:"Toon kinderen",
  zoomIn:"Inzoomen",zoomOut:"Uitzoomen",home:"Naar startpersoon",living:"Levend",
  notFound:"Nog niet gevonden",emptyTitle:"Nog niet gevonden",emptyBody:"Voor {name} zijn nog geen ouders gevonden. Zodra er ouders in de stamboom staan, verschijnt hier de {view}.",emptyPeople:"Deze stamboom bevat nog geen personen."},
-en:{loading:"Loading family tree…",loadError:"Could not load the family tree ({msg}).",title:"Family tree",titleFam:"{name} family tree",
- v_familie:"Family",v_stamlijn:"Line",v_tijdlijn:"Timeline",v_waaier:"Fan",v_kosmos:"Cosmos",tabs:"View",startPeople:"Start person",
+en:{loading:"Loading family tree…",loadError:"Could not load the family tree ({msg}).",title:"Family tree",titleFam:"{name} family tree",titleOf:"Family tree of {name}",
+ v_familie:"Family",v_stamlijn:"Line",v_tree:"Family tree",modes:"What do you want to see?",rp_title:"Start with…",rp_sub:"The story, the cards and the family tree all start with this person.",rp_other:"Find someone else…",rp_btn:"Choose another start person",v_tijdlijn:"Timeline",v_waaier:"Fan",v_kosmos:"Cosmos",tabs:"View",startPeople:"Start person",
  search:"Find a person",searchPh:"Name, year or place",searchEmpty:"Type a name, year or place",searchNone:"No one found",searchAnc:"Ancestors of {name}",searchOthers:"Others",searchPeople:"People",genShort:"gen. {n}",
  back:"Back",backTitle:"Previous start person",gens:"Generations",color:"Colour",
  c_lijn:"Grandparent line",c_land:"Country of birth",c_zek_v:"Certainty (verification)",c_zek_d:"Certainty (direct line)",
@@ -950,7 +977,7 @@ function drawTijdlijn(){
   /* ---- DOM ---- */
   const wrap=document.createElement("div");wrap.className="tl";
   const bar=document.createElement("div");bar.className="boombar";
-  bar.innerHTML=`<span class="bl">${_t("tl_bar",{name:slEsc(short(P[base]))})}</span><span style="flex:1"></span>${[4,5,6,8,10,14].map(g=>`<button class="btn" data-size="sm" data-variant="${G===g?"primary":"outline"}" data-g="${g}">${_t("tl_gen",{n:g})}</button>`).join("")}`;
+  bar.innerHTML=`<span class="bl">${_t("tl_bar",{name:slEsc(short(P[base]))})}</span><span style="flex:1"></span>`;
   wrap.appendChild(bar);
   const body=document.createElement("div");body.className="tlbody";wrap.appendChild(body);
   const sc=document.createElement("div");sc.className="tlscroll";body.appendChild(sc);
@@ -1005,7 +1032,6 @@ function drawTijdlijn(){
   function placePop(n){const x=(PAD+n.x)*Z,y=Y(n.y)*Z,WW=W*Z,HH=H*Z;let L=x+14,T=y-10;if(L+300>WW)L=x-314;if(T+pop.offsetHeight>HH)T=HH-pop.offsetHeight-6;const pw=pop.offsetWidth,ph=pop.offsetHeight;L=Math.min(Math.max(L,sc.scrollLeft+50),sc.scrollLeft+sc.clientWidth-pw-8);T=Math.min(Math.max(T,sc.scrollTop+6),sc.scrollTop+sc.clientHeight-ph-6);pop.style.left=L+"px";pop.style.top=T+"px"}
   function close(){pop.style.display="none";hl.innerHTML="";openN=null}
   svg.addEventListener("click",close);
-  bar.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{state.tlGens=+b.dataset.g;render()});
   sc.addEventListener("scroll",()=>{axis.style.transform=`translateY(${-sc.scrollTop}px)`});
   /* zoom (scrollwiel / knoppen) en slepen, net als bij Familie */
   const zoomTo=(nz,ax,ay)=>{nz=Math.max(.25,Math.min(3,nz));if(ax==null){ax=sc.clientWidth/2;ay=sc.clientHeight/2}
@@ -1389,7 +1415,7 @@ function initSearch(){
   const dlg=$("searchDlg"),inp=$("sq"),menu=$("sres");let idx=null,items=[],cur=-1;
   const open=()=>{if(!idx)idx=P.map((p,i)=>({i,t:NORM([p.n,p.by,p.dy,p.bplac,p.dplac].filter(Boolean).join(" "))}));inp.value="";run();dlg.showModal();setTimeout(()=>inp.focus(),20)};
   const mark=k=>{items.forEach((e,j)=>e.dataset.selected=j===k?"true":"false");cur=k;if(items[k])items[k].scrollIntoView({block:"nearest"})};
-  const pick=i=>{dlg.close();setRoot(i)};
+  const pick=i=>{const r=SEARCH_ROOT;SEARCH_ROOT=false;dlg.close();r?setRootHard(i):setRoot(i)};
   function run(){
     const toks=NORM(inp.value).split(/\s+/).filter(Boolean);
     if(!toks.length){menu.innerHTML="";items=[];cur=-1;menu.dataset.empty=_t("searchEmpty");return}
@@ -1403,7 +1429,7 @@ function initSearch(){
     menu.innerHTML=grp(_t("searchAnc",{name:slEsc(short(P[state.root]))}),anc,i=>it(i,_t("genShort",{n:st.gen.get(i)})))+grp(anc.length?_t("searchOthers"):_t("searchPeople"),rest,i=>it(i,""));
     items=[...menu.querySelectorAll("[role=menuitem]")];mark(items.length?0:-1);
   }
-  $("searchBtn").onclick=open;
+  $("searchBtn").onclick=()=>{SEARCH_ROOT=false;open()};SEARCH_OPEN=open;dlg.addEventListener("close",()=>{SEARCH_ROOT=false});
   inp.oninput=run;
   inp.onkeydown=e=>{if(e.key==="ArrowDown"){e.preventDefault();mark(Math.min(items.length-1,cur+1))}else if(e.key==="ArrowUp"){e.preventDefault();mark(Math.max(0,cur-1))}else if(e.key==="Enter"&&items[cur]){e.preventDefault();pick(+items[cur].dataset.i)}};
   menu.onclick=e=>{const m=e.target.closest("[role=menuitem]");if(m)pick(+m.dataset.i)};
@@ -1723,10 +1749,10 @@ function drawFamilie(){
 }
 
 /* ===== SWIPE (experimental Swipe Stories: full-screen cards that play by themselves, built from the Story view) ===== */
-Object.assign(I18N.nl,{sw_btn:"Swipe",sw_btn_t:"Het verhaal als kaarten die vanzelf doorlopen (experiment)",sw_close:"Sluiten",sw_pause:"Pauze",sw_play:"Verder",sw_next:"Volgende",sw_prev:"Vorige",
+Object.assign(I18N.nl,{sw_btn:"Kaarten",sw_btn_t:"Het verhaal als kaarten die vanzelf doorlopen",sw_close:"Sluiten",sw_pause:"Pauze",sw_play:"Verder",sw_next:"Volgende",sw_prev:"Vorige",
  sw_hint:"Tik rechts: verder · tik links: terug · vasthouden: pauze · omhoog vegen: een generatie verder terug",
  sw_family:"Gezin",sw_era:"Meegemaakt",sw_doc:"Bekijk document",sw_view:"Bekijk beeld",sw_nextp:"hierna: {name}",sw_route:"Afgelegde route",sw_death:"Afscheid",sw_photo:"Een foto uit die tijd",sw_birth:"Geboren"});
-Object.assign(I18N.en,{sw_btn:"Swipe",sw_btn_t:"The story as cards that play by themselves (experiment)",sw_close:"Close",sw_pause:"Pause",sw_play:"Play",sw_next:"Next",sw_prev:"Previous",
+Object.assign(I18N.en,{sw_btn:"Cards",sw_btn_t:"The story as cards that play by themselves",sw_close:"Close",sw_pause:"Pause",sw_play:"Play",sw_next:"Next",sw_prev:"Previous",
  sw_hint:"Tap right: next · tap left: back · hold: pause · swipe up: one generation further back",
  sw_family:"Family",sw_era:"Lived through",sw_doc:"View document",sw_view:"View image",sw_nextp:"next: {name}",sw_route:"Route so far",sw_death:"Farewell",sw_photo:"A photo from that time",sw_birth:"Born"});
 let SW=null;
@@ -1798,7 +1824,7 @@ function swOpen(root){
   swShow("none");el.querySelector(".sw-x").focus();SW.raf=requestAnimationFrame(swTick)}
 function swClose(){const el=$("sw");if(!el)return;el.hidden=true;document.documentElement.style.overflow="";if(SW)cancelAnimationFrame(SW.raf);SW=null;const b=$("swBtn");if(b)b.focus()}
 function swCard(){return SW.gens[SW.g].cards[SW.c]}
-function swShow(dir){const el=$("sw"),G=SW.gens[SW.g],c=G.cards[SW.c],box=el.querySelector(".sw-cards");
+function swShow(dir){const el=$("sw"),G=SW.gens[SW.g],c=G.cards[SW.c],box=el.querySelector(".sw-cards");SW.shownAt=performance.now();
   SW.t=0;SW.dur=swDur(c);
   const n=document.createElement("div");n.className="sw-card in "+dir;n.dataset.kind=c.kind;n.style.setProperty("--lc",G.lc);n.style.setProperty("--dur",(SW.dur||8000)+"ms");
   n.innerHTML=`<div class="sw-body">${c.html}</div>`;
@@ -1827,6 +1853,8 @@ function swGen(d){SW.hint=false;if(d>0){if(SW.g<SW.gens.length-1){SW.g++;SW.c=0;
   else if(SW.g>0){SW.g--;SW.c=0;swShow("down")}}
 function swChoose(q){const k=SW.g;SW.path=swPlan(SW.path.slice(0,k+1).concat(q));swBuild();SW.g=k+1;SW.c=0;swShow("up")}
 function swWire(el){let x0=0,y0=0,t0=0,ht=0,down=false;
+  /* a tap that moves to the next card must not also press a button or link that appears in the same spot: ignore those for a moment */
+  el.addEventListener("click",e=>{if(SW&&performance.now()-(SW.shownAt||0)<450&&e.target.closest(".sw-card a,.sw-card button,.sw-route button")){e.preventDefault();e.stopImmediatePropagation()}},true);
   el.addEventListener("pointerdown",e=>{if(!SW||e.target.closest("a,button"))return;down=true;x0=e.clientX;y0=e.clientY;t0=performance.now();
     ht=setTimeout(()=>{if(SW){SW.hold=true;swPP()}},220)});
   const end=e=>{if(!down||!SW)return;down=false;clearTimeout(ht);const dx=e.clientX-x0,dy=e.clientY-y0,held=SW.hold;SW.hold=false;swPP();
@@ -1903,7 +1931,7 @@ function prepareData(d){
   const ttl=d.titel||(fam?_t("titleFam",{name:fam}):_t("title"));
   META={starts,perView,regios,plaatsen:pl,titel:ttl.charAt(0).toUpperCase()+ttl.slice(1)};
   return people}
-function applyTexts(){document.title=META.titel;$("title").textContent=META.titel;
+function applyTexts(){
   document.querySelectorAll("[data-t]").forEach(e=>e.textContent=_t(e.dataset.t));
   document.querySelectorAll("[data-t-aria]").forEach(e=>e.setAttribute("aria-label",_t(e.dataset.tAria)));
   document.querySelectorAll("[data-t-title]").forEach(e=>e.title=_t(e.dataset.tTitle));
@@ -1920,28 +1948,37 @@ function setRoot(i){if(state.view==="stamlijn"&&i!==state.root&&slOpen(i))return
   if(i===state.root)return;state.hist.push(state.root);state.root=i;render()}
 window.__render=()=>render();
 /* generatie-slider: eigen component (track met streepje per generatie, getal in de knop) */
-function initGenSlider(){const sl=$("gens"),MIN=3,MAX=12,ticks=sl.querySelector(".gsl-ticks"),thumb=sl.querySelector(".gsl-thumb");
-  ticks.innerHTML=Array.from({length:MAX-MIN+1},(_,k)=>`<i data-v="${MIN+k}"></i>`).join("");
+/* generaties: één schuif in de instellingenbalk; Fan en Cosmos gebruiken state.gens (3–12), Tijdlijn state.tlGens (3–14) */
+let GSL_SHOW=null;
+function initGenSlider(){const sl=$("gens"),MIN=3,ticks=sl.querySelector(".gsl-ticks"),thumb=sl.querySelector(".gsl-thumb");
+  const key=()=>state.view==="tijdlijn"?"tlGens":"gens",MAX=()=>state.view==="tijdlijn"?14:12,cur=()=>state[key()]||5;
   sl.setAttribute("aria-label",_t("gens"));
-  const show=v=>{const f=(v-MIN)/(MAX-MIN);sl.style.setProperty("--f",f);thumb.firstChild.textContent=v;sl.setAttribute("aria-valuenow",v);
+  const show=v=>{const mx=MAX();if(ticks.children.length!==mx-MIN+1)ticks.innerHTML=Array.from({length:mx-MIN+1},(_,k)=>`<i data-v="${MIN+k}"></i>`).join("");
+    const f=(v-MIN)/(mx-MIN);sl.style.setProperty("--f",f);thumb.firstChild.textContent=v;sl.setAttribute("aria-valuenow",v);sl.setAttribute("aria-valuemax",mx);
     ticks.querySelectorAll("i").forEach(t=>t.classList.toggle("on",+t.dataset.v<=v))};
-  const set=v=>{v=Math.max(MIN,Math.min(MAX,Math.round(v)));if(v===state.gens)return;state.gens=v;show(v);render()};
-  const fromX=x=>{const r=sl.getBoundingClientRect(),pad=13;return MIN+(Math.max(0,Math.min(1,(x-r.left-pad)/(r.width-2*pad))))*(MAX-MIN)};
+  const set=v=>{v=Math.max(MIN,Math.min(MAX(),Math.round(v)));if(v===cur())return;state[key()]=v;show(v);render()};
+  const fromX=x=>{const r=sl.getBoundingClientRect(),pad=13;return MIN+(Math.max(0,Math.min(1,(x-r.left-pad)/(r.width-2*pad))))*(MAX()-MIN)};
   sl.addEventListener("pointerdown",e=>{sl.setPointerCapture(e.pointerId);sl.classList.add("drag");set(fromX(e.clientX))});
   sl.addEventListener("pointermove",e=>{if(sl.classList.contains("drag"))set(fromX(e.clientX))});
   const up=()=>sl.classList.remove("drag");sl.addEventListener("pointerup",up);sl.addEventListener("pointercancel",up);
-  sl.addEventListener("keydown",e=>{const d={ArrowRight:1,ArrowUp:1,ArrowLeft:-1,ArrowDown:-1}[e.key];if(d){e.preventDefault();set(state.gens+d)}else if(e.key==="Home"){e.preventDefault();set(MIN)}else if(e.key==="End"){e.preventDefault();set(MAX)}});
-  show(state.gens)}
+  sl.addEventListener("keydown",e=>{const d={ArrowRight:1,ArrowUp:1,ArrowLeft:-1,ArrowDown:-1}[e.key];if(d){e.preventDefault();set(cur()+d)}else if(e.key==="Home"){e.preventDefault();set(MIN)}else if(e.key==="End"){e.preventDefault();set(MAX())}});
+  GSL_SHOW=()=>show(cur());show(cur())}
 function render(){
   const v=state.view;
-  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v?"true":"false"));$("storyBtn").setAttribute("aria-pressed",v==="verhaal"?"true":"false");
+  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v?"true":"false"));$("storyBtn").setAttribute("aria-pressed",v==="verhaal"?"true":"false");$("treeBtn").setAttribute("aria-pressed",v!=="verhaal"?"true":"false");$("tabs").hidden=v==="verhaal";if(v!=="verhaal")state.lastTree=v;
   document.querySelectorAll("#starts [data-p]").forEach(b=>b.dataset.variant=+b.dataset.p===state.root?"primary":"outline");
-  const ctl=(v==="waaier"||v==="kosmos")&&parentsOf(state.root).length>0;$("genWrap").style.display=ctl?"":"none";$("colorWrap").style.display=ctl?"":"none";
+  const hasP=parentsOf(state.root).length>0,ctl=(v==="waaier"||v==="kosmos")&&hasP;$("genWrap").style.display=ctl||(v==="tijdlijn"&&hasP)?"":"none";$("colorWrap").style.display=ctl?"":"none";if(typeof GSL_SHOW==="function")GSL_SHOW();
   const opts=[["lijn",_t("c_lijn")],["land",_t("c_land")],["zekerheid",v==="waaier"?_t("c_zek_v"):_t("c_zek_d")]];
   $("color").innerHTML=opts.map(([k,l])=>`<option value="${k}"${k===state.color?" selected":""}>${l}</option>`).join("");
   $("back").disabled=!state.hist.length;
   const st=ancestorStats(state.root),n=st.gen.size-1,maxG=n?Math.max(...st.gen.values()):0,rp=P[state.root];
-  $("summary").textContent=n?_t(maxG===1?"summary1":"summary",{name:rp.n,years:yrs(rp),n,g:maxG}):_t("summaryNone",{name:rp.n,years:yrs(rp)});{const k=adoptSet(state.root).size;if(n&&k)$("summary").textContent+=_t("sumAdopt",{k})}
+  /* de naam van de startpersoon is een knop: hier kies je bij wie alles begint */
+  /* kop: "Family tree of {naam}"; de naam is een knop, daar kies je bij wie alles begint (de titel hangt dus af van wie je bekijkt) */
+  {const [t1,t2]=_t("titleOf",{name:"\u0001"}).split("\u0001");
+   $("title").innerHTML=slEsc(t1)+`<button type="button" class="rootbtn" id="rootBtn" title="${_t("rp_btn")}" aria-haspopup="dialog">${(()=>{const w=String(rp.n).split(" "),l=w.pop();return (w.length?slEsc(w.join(" "))+" ":"")+`<span class="nw">${slEsc(l)}<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>`})()}</button>`+slEsc(t2||"");$("rootBtn").onclick=rootPick;
+   document.title=_t("titleOf",{name:rp.n});
+   const s=(n?_t(maxG===1?"summary1":"summary",{name:"\u0001",years:yrs(rp),n,g:maxG}):_t("summaryNone",{name:"\u0001",years:yrs(rp)}))+(n&&adoptSet(state.root).size?_t("sumAdopt",{k:adoptSet(state.root).size}):"");
+   $("summary").textContent=s.replace(/^\u0001\s*·\s*/,"").replace("\u0001",rp.n)}
   const stage=$("stage");stage.innerHTML="";{const sh=$("slsheet");if(sh)sh.remove()}
   $("legend").style.display="";$("hint").textContent="";
   const noAnc=!parentsOf(state.root).length;
@@ -1954,8 +1991,17 @@ function render(){
   if(v==="waaier"){stage.appendChild(drawFan());legend(colorLegend(state.color).concat([[_t("lg_dup"),"#c0392b","ring"],[_t("lg_missing"),"#f6f1ea"]],adoptSet(state.root).size?[[_t("lg_adopt"),ADOPT_COL]]:[]));$("hint").textContent=_t("hint_waaier")}
   if(v==="kosmos"){stage.appendChild(drawCosmos());legend(colorLegend(state.color).concat([[_t("lg_inlaw"),"#8d7f6e","ring"]],adoptSet(state.root).size?[[_t("lg_adopt_k"),ADOPT_COL,"ring"]]:[]));$("hint").textContent=_t("hint_kosmos")}
   }
+  $("setbar").hidden=$("legend").style.display==="none"&&$("genWrap").style.display==="none";
   if(location.hash.slice(1)!==v)history.replaceState(null,"","#"+v);
 }
+/* startpersoon kiezen: de startpersonen uit de data, de huidige, of iemand zoeken */
+let SEARCH_ROOT=false,SEARCH_OPEN=null;
+function rootPick(){let d=$("rootDlg");if(!d){d=document.createElement("dialog");d.id="rootDlg";d.className="rootdlg";document.body.appendChild(d);d.addEventListener("click",e=>{if(e.target===d)d.close()})}
+  const ids=[...new Set([state.root].concat(META.starts.map(s=>s.persoon)))].filter(i=>P[i]);
+  d.innerHTML=`<h2>${_t("rp_title")}</h2><p>${_t("rp_sub")}</p><div class="rp-list">${ids.map(i=>`<button type="button" data-p="${i}" class="${i===state.root?"on":""}"><b>${slEsc(P[i].n)}</b><span>${slEsc(yrs(P[i]))}</span></button>`).join("")}</div><button type="button" class="rp-search">⌕ ${_t("rp_other")}</button>`;
+  d.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{d.close();setRootHard(+b.dataset.p)});
+  d.querySelector(".rp-search").onclick=()=>{d.close();SEARCH_ROOT=true;if(SEARCH_OPEN)SEARCH_OPEN()};
+  d.showModal()}
 
 /* taalswitch: EN/NL in de kopbalk; keuze onthouden per browser (localStorage, mag ontbreken) */
 function langTitle(){const fam=(D&&D.familienaam)||"",raw=D&&D.titel,t=raw?(typeof raw==="object"?(raw[LANG]||raw.en||raw.nl||""):raw):(fam?_t("titleFam",{name:fam}):_t("title"));
@@ -1981,6 +2027,7 @@ fetch("data.json").then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.
   $("color").onchange=e=>{state.color=e.target.value;render()};
   document.querySelectorAll("#tabs button,#storyBtn").forEach(b=>b.onclick=()=>{state.view=b.dataset.v;render()});
   $("swBtn").onclick=()=>swOpen(state.root);
+  $("treeBtn").onclick=()=>{state.view=state.lastTree||"familie";render()};
   addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(VIEWS.includes(h)&&h!==state.view){state.view=h;render()}});
   render();
 }).catch(e=>{$("stage").innerHTML=`<div id="loading">${_t("loadError",{msg:slEsc(e.message)})}</div>`;console.error(e)});

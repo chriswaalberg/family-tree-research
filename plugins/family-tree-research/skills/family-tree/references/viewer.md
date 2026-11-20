@@ -1,17 +1,17 @@
 # Building and updating the viewer
 
-The viewer (`viewer/index.html`) contains nothing about a specific family: everything comes from `data.json`. Views: **Family** (vertical tree with side branches), **Line** (couple by couple upwards), **Story** (step by step back in time, choosing father or mother each time; the **▶ Swipe** button next to it plays the same story as full-screen cards, experimental), **Timeline** (ancestors by birth year), **Fan** and **Cosmos**. Search, details per person with source and certainty, English/Dutch, works on phones. Full data format: `viewer/DATA-FORMAT.md`.
+The viewer (`viewer/index.html`) contains nothing about a specific family: everything comes from `data.json`. At the top: **Story** (step by step back in time, choosing father or mother each time), **▶ Cards** (the same story as full-screen cards that play by themselves) and **Family tree**, with the tree views **Family** (vertical tree with side branches), **Line** (couple by couple upwards), **Timeline** (ancestors by birth year), **Fan** and **Cosmos**. The title reads "Family tree of {start person}"; click the name to start with someone else. Search, details per person with source and certainty, English/Dutch, works on phones. Full data format: `viewer/DATA-FORMAT.md`.
 
 ## 1. Building data.json
 
 ```
 python3 -I scripts/make_viewer_data.py source/tree.ged data/data.json \
   --csv data/relations.csv --regions data/regions.json --stories data/stories.json --zeitgeist zeitgeist/zeitgeist.json \
-  --start @I1@:Sanne --title "The Jansen family" --lang en
+  --start @I1@:Sanne --lang en
 ```
 
 - Only the GEDCOM is required. Without `--csv` everything gets "not checked".
-- Several `--start` are allowed (e.g. the user and their children); the first one opens by default.
+- Several `--start` are allowed (e.g. the user and their children); the first one opens by default, the others are offered when the reader clicks the name in the title.
 - `--lang en` or `--lang nl`: the user's language (default en). The Dutch options (`--taal`, `--titel`, `--verhalen`, `--tijdgeest`, `--regios`, `--media-map`) still work.
 - **Living people**: everything is shown, including dates and places. If the user wants that hidden for living people (e.g. for a viewer that's shared widely), use `--hide-living`.
 - Check the output: number of people, "CSV: N relations read, 0 rows skipped". Rows skipped? Find out why (wrong id, relation doesn't exist in the GEDCOM).
@@ -68,8 +68,8 @@ python3 -I scripts/standalone_viewer.py viewer/index.html data/data.json family-
 - Click a person for details: dates, places, source, how certain the relation is, and photos and documents if there are any.
 - Lines: solid = certain, dashed = probable/possible, dotted = not checked yet, red = wrong, double gold = raised as their own child.
 - Story: start at the start person and choose father or mother each time; the gold star marks the richest trail. When it gets uncertain, the story says so.
-- ▶ Swipe (experimental, nice for children): the same story as full-screen cards that play by themselves. Tap right/left for next/back, hold to pause, swipe up for the next generation. It starts at the current start person.
-- At the top you switch views; with search you jump to someone and can make them the start person. The EN/NL switch changes the language (handy when sharing with family abroad).
+- ▶ Cards (nice for children): the same story as full-screen cards that play by themselves. Tap right/left for next/back, hold to pause, swipe up for the next generation.
+- The name in the title ("Family tree of Sanne ▾") is the start person: click it to start the story, the cards and the tree with someone else. Under "Family tree" you switch between the tree views; the bar below the header holds the generations slider, the colour choice and the legend. The EN/NL switch changes the language (handy when sharing with family abroad).
 
 ## 4. Checking
 
