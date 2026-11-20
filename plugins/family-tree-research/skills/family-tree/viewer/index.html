@@ -609,6 +609,15 @@ main{padding-top:6px}
 .sw .sw-card[data-kind=img] .sw-fig img{width:100%;height:100%;max-height:none;object-fit:cover}
 .sw .sw-card[data-kind=img]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:60%;background:linear-gradient(0deg,rgba(0,0,0,.92) 35%,rgba(0,0,0,0))}
 .sw .sw-card[data-kind=img] .sw-k,.sw .sw-card[data-kind=img] .sw-cap{position:relative;z-index:2}
+/* text on the image (swOverlay): photo full-screen, dark gradient from below, the text over it, a small credit line */
+.sw .sw-card[data-kind=ov]{background:#000;justify-content:flex-end}
+.sw .sw-card[data-kind=ov] .sw-body{position:static}
+.sw .sw-card[data-kind=ov] .sw-fig{position:absolute;inset:0;overflow:hidden}
+.sw .sw-card[data-kind=ov] .sw-fig img{width:100%;height:100%;max-height:none;object-fit:cover}
+.sw .sw-card[data-kind=ov]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:72%;background:linear-gradient(0deg,rgba(0,0,0,.9) 40%,rgba(0,0,0,0));pointer-events:none}
+.sw .sw-card[data-kind=ov] .sw-k,.sw .sw-card[data-kind=ov] .sw-t,.sw .sw-card[data-kind=ov] .sw-note,.sw .sw-card[data-kind=ov] .sw-ovc{position:relative;z-index:2}
+.sw .sw-card[data-kind=ov] .sw-t p{text-shadow:0 1px 12px rgba(0,0,0,.6)}
+.sw .sw-ovc{font-size:12px;line-height:1.35;opacity:.75;margin-top:6px}.sw .sw-ovc a{color:inherit}
 /* paper (clipping, scan, document, map): nothing cropped, on a calm paper colour, caption below */
 .sw .sw-card[data-kind=img][data-paper]{background:#1d140e;justify-content:center}
 .sw .sw-card[data-kind=img][data-paper]::after{display:none}
@@ -719,7 +728,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.20",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.21",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1967,7 +1976,8 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     if(vhHas(p)){const paras=vhParaList(swCardText(p)),imgs=swCardImgs(p),slot=vhImgSlots(paras,imgs),py=vhParaYears(paras,p);
       /* each paragraph (or each card of the card version) a card, and the images that belong to it right after it */
       paras.forEach((x,j)=>{add("story",`<div class="sw-k">✦ ${slEsc(_t("vh_title",{name:fn}))}</div><div class="sw-t"><p>${vhMd(x)}</p></div>${j===paras.length-1?`<div class="sw-note">${vhSources(p)}</div>`:""}`,{len:x.length,y:py[j],hook:j===0&&swCardText(p)!==lab(p.verhaal)});
-        imgs.forEach((b,k)=>{if(slot[k]!==j)return;add("img",`${b.soort?`<div class="sw-k">${slEsc(vhKind(b))}</div>`:""}<figure class="sw-fig"><img src="${slEsc(b.bestand)}" alt=""></figure><div class="sw-cap"><b>${slEsc(lab(b.titel)||"")}</b>${[b.maker,b.datering].filter(Boolean).map(slEsc).join(" · ")}${b.bijschrift?`<span>${slEsc(lab(b.bijschrift))}</span>`:""}${b.scan?`<button type="button" class="sw-scan" data-scan="1">⤢ ${_t("sw_scan")}</button>`:""}</div>`,{img:1,paper:SW_PAPER.test(b.soort||""),y:py[j],scan:b.scan?vhScanItems(b.bestand,b.scan,lab(b.titel)||""):null})})})}
+        imgs.forEach((b,k)=>{if(slot[k]!==j)return;add("img",`${b.soort?`<div class="sw-k">${slEsc(vhKind(b))}</div>`:""}<figure class="sw-fig"><img src="${slEsc(b.bestand)}" alt=""></figure><div class="sw-cap"><b>${slEsc(lab(b.titel)||"")}</b>${[b.maker,b.datering].filter(Boolean).map(slEsc).join(" · ")}${b.bijschrift?`<span>${slEsc(lab(b.bijschrift))}</span>`:""}${b.scan?`<button type="button" class="sw-scan" data-scan="1">⤢ ${_t("sw_scan")}</button>`:""}</div>`,{img:1,paper:SW_PAPER.test(b.soort||""),y:py[j],scan:b.scan?vhScanItems(b.bestand,b.scan,lab(b.titel)||""):null,
+          ov:{from:"story",src:b.bestand,cred:[b.soort?vhKind(b):"",lab(b.titel),b.maker,b.datering].filter(Boolean).map(slEsc).join(" · ")}})})})}
     /* a separate family card only when there is more than the children (another partner, a move to another country); otherwise the children (and a move within the country) are on the intro card */
     else if(S.f.length)add("family",`<div class="sw-k">${_t("sw_family")}</div><div class="sw-big">${p.ch.length>1?p.ch.length:""}</div><div class="sw-t">${T(S.k.concat(S.f))}</div>`,{len:S.k.concat(S.f).join(" ").length,y:Math.min(...p.ch.map(c=>P[c].by||Infinity))});
     /* zeitgeist: the Story view's own block, cut into pieces with a year (one card per piece; neighbouring events are merged after sorting) */
@@ -1983,7 +1993,9 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
           if(f&&sp){const lo=sp[0]-SW_LIFE_BEFORE,hi=sp[1];if(f.dir>0?hi<f.y:f.dir<0?lo>f.y:(f.y<lo||f.y>hi))return}
           add("life",`<div class="sw-k">${slEsc(x.head)}</div><div class="sw-t">${el.outerHTML}</div>`,{len:el.textContent.length,y:f&&f.dir>=0?Math.max(f.y,x.y||0)||f.y:x.y})})}
       else if(x.type==="img"){const im=x.el.querySelector("img"),cap=x.el.querySelector("figcaption");
-        add("img",`<div class="sw-k">${slEsc((x.el.querySelector(".vh-fk")||{}).textContent||_t("tg_k_x"))}</div><figure class="sw-fig"><img src="${slEsc(im.getAttribute("src"))}" alt="${slEsc(im.alt)}"></figure><div class="sw-cap">${cap?cap.innerHTML.replace("</b> · ","</b>"):""}</div>`,{img:1,paper:SW_PAPER.test(x.el.dataset.soort||""),y:x.y})}
+        add("img",`<div class="sw-k">${slEsc((x.el.querySelector(".vh-fk")||{}).textContent||_t("tg_k_x"))}</div><figure class="sw-fig"><img src="${slEsc(im.getAttribute("src"))}" alt="${slEsc(im.alt)}"></figure><div class="sw-cap">${cap?cap.innerHTML.replace("</b> · ","</b>"):""}</div>`,{img:1,paper:SW_PAPER.test(x.el.dataset.soort||""),y:x.y,
+          ov:{from:"tg",src:im.getAttribute("src"),cred:(()=>{const k=(x.el.querySelector(".vh-fk")||{}).textContent||"";if(!cap)return slEsc(k);const c=cap.cloneNode(true);c.querySelectorAll("span").forEach(e=>e.remove());c.querySelectorAll("a").forEach(a=>a.textContent=a.textContent.replace(/\s*\(.*\)\s*$/,""));
+            return (k?slEsc(k)+" · ":"")+c.innerHTML.replace(/<\/?b>/g,"")})()}})}
       else evq.push(x)}
     const evs=swPickEvents(evq),evLen=x=>{const d=document.createElement("div");d.innerHTML=x.html;return d.textContent.length};
     /* "lived through": one card per war or era, each at its own year (WW1 at 1914, WW2 at 1940) */
@@ -2009,8 +2021,20 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     /* the first card of a card version is the hook: always right after the intro */
     const head=cards.filter(c=>c.kind==="intro"||c.hook),tail=cards.filter(c=>c.kind==="death"||c.kind==="fork"||c.kind==="end"),mid=vhSortByYear(cards.filter(c=>!head.includes(c)&&!tail.includes(c)));
     const merged=[];for(const c of mid){const l=merged[merged.length-1];if(c.kind==="events"&&l&&l.kind==="events"&&l.len+c.len<=220){l.li+=c.li;l.len+=c.len;l.html=`<div class="sw-k">${slEsc(l.head)}</div><ul class="sw-ev">${l.li}</ul>`}else merged.push(c)}
-    return {i,lc,fn,cards:head.concat(merged,tail)}})}
-function swDur(c){if(c.stay)return 0;if(c.img)return c.paper?12000:7000;return Math.max(5000,Math.min(15000,3200+48*(c.len||60)))}
+    return {i,lc,fn,cards:swOverlay(head.concat(merged,tail))}})}
+/* text on the image (like Stories): a story card and the story image right after it, or a life card and the zeitgeist image right
+   after (else right before) it, become one card: the photo full-screen, the text over it, a small credit line below.
+   Clippings, scans, documents and maps stay cards of their own. */
+function swOverlay(cs){const ok=(c,from)=>c&&c.kind==="img"&&!c.paper&&!c.scan&&c.ov&&c.ov.from===from&&!c.used,pair=new Map();
+  /* a story card takes the story image right after it */
+  cs.forEach((c,j)=>{if(c.kind==="story"&&ok(cs[j+1],"story")){cs[j+1].used=1;pair.set(c,cs[j+1])}});
+  /* a life card takes this person's zeitgeist image closest in year (a neighbour wins a tie) */
+  cs.forEach((c,j)=>{if(c.kind!=="life")return;let best=null,bd=Infinity;
+    cs.forEach((d,k)=>{if(!ok(d,"tg"))return;const dy=Math.abs((d.y!=null?d.y:c.y||0)-(c.y||0))+Math.abs(k-j)/100;if(dy<bd){bd=dy;best=d}});
+    if(best){best.used=1;pair.set(c,best)}});
+  return cs.filter(c=>!c.used).map(c=>{const im=pair.get(c);if(!im)return c;
+    return Object.assign({},c,{kind:"ov",bg:im.ov.src,html:`<figure class="sw-fig"><img src="${slEsc(im.ov.src)}" alt=""></figure>${c.html}${im.ov.cred?`<div class="sw-ovc">${im.ov.cred}</div>`:""}`})})}
+function swDur(c){if(c.stay)return 0;if(c.img)return c.paper?12000:7000;return Math.max(5000,Math.min(15000,3200+48*(c.len||60)))+(c.kind==="ov"?1500:0)}
 function swOpen(root){
   if(!$("sw")){const d=document.createElement("div");d.id="sw";d.className="sw";d.hidden=true;d.setAttribute("role","dialog");d.setAttribute("aria-modal","true");
     d.innerHTML=`<button type="button" class="sw-nav l" data-nav="-1">‹</button><div class="sw-phone"><div class="sw-cards"></div><div class="sw-top"><div class="sw-bars"></div><div class="sw-head"><div class="sw-av"></div><div class="sw-who"><b></b><span></span></div><button type="button" class="sw-pp"></button><button type="button" class="sw-x">✕</button></div><div class="sw-route"></div></div><div class="sw-hint"></div></div><button type="button" class="sw-nav r" data-nav="1">›</button>`;
