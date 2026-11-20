@@ -5,13 +5,15 @@
 You usually have more than one way onto the internet. If one route doesn't work, **don't stop: try the next one yourself**, without waiting for the user to suggest it. A route can fail because a tool is missing or switched off (for example the Chrome extension disabled by the user's organisation, or no browser at all), not because the archive refuses you. Try them in this order:
 
 1. **Fetch/search tools** (WebFetch, WebSearch, or whatever fetch tool you have). They don't need Chrome. Good for record pages, the Open Archives API and Wikipedia.
-2. **A shell, if you have one** (Cowork's sandbox, Claude Code's terminal): call public APIs directly, e.g. `curl -s "https://api.openarchieven.nl/1.1/records/search.json?name=..."` or Python `urllib`. Its network can be different from the fetch tools', so a site that failed in one may work in the other.
-3. **A browser**: the Chrome extension (Claude in Chrome), or a browser built into the app if there is one. Needed for sites that only work with JavaScript, and for viewing scans.
+2. **A shell, if you have one** (Cowork's sandbox, Claude Code's terminal): call public APIs directly, e.g. `curl -s "https://api.openarchieven.nl/1.1/records/search.json?name=..."` or Python `urllib`. Its network can be different from the fetch tools', so a site that failed in one may work in the other. A cloud sandbox often only reaches domains on an allowed list; a blocked domain there says nothing about the archive itself.
+3. **A browser**: the Chrome extension (Claude in Chrome), or the **browser built into the Claude desktop app** if you have one. The built-in browser runs on the user's own computer, separate from their Chrome, so it often works when Chrome is blocked by their organisation or a site is blocked from the cloud. It only works while the desktop app is open. Use a browser for sites that only work with JavaScript and for scan viewers (e.g. Riksarkivet).
 4. **The user**: tell them exactly what to look up (archive, place, period, name) and ask for a screenshot or photo (see research.md).
 
 Tell the user in one short sentence which route you're switching to ("Chrome isn't available here, so I'll fetch the archive directly"). In the progress file, note per site which route works (e.g. "Open Archives: API via fetch works; Chrome blocked by organisation"), so a next session starts with the route that works.
 
 Using another tool is fine. Getting around a site's own barrier is not: if a site asks for a **login, a payment or a captcha**, or clearly refuses automated access, don't try to get in another way. Ask the user.
+
+**Sites with a login** (Ancestry, MyHeritage, ArkivDigital): if the user has an account, they can sign in themselves, once, in Chrome or in the built-in browser. The built-in browser keeps its own profile, so they stay signed in there. Never type their password yourself. Without an account: ask for a screenshot.
 
 ## Netherlands
 
