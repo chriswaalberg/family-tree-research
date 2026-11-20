@@ -474,6 +474,16 @@ main{padding-top:6px}
 }
 .vh-evl{display:block;margin-top:3px;font-size:13px;color:#7a6050}
 
+/* story-knop: Story staat los, in goud, vóór de andere views */
+.views{display:flex;align-items:center;gap:10px;min-width:0;max-width:100%}
+.storybtn{display:inline-flex;align-items:center;gap:7px;flex:none;border:0;border-radius:10px;padding:8px 16px;font:700 14px/1.2 Inter,system-ui,sans-serif;color:#2a1c12;background:linear-gradient(#e8c983,#c9a24a);box-shadow:0 2px 10px rgba(201,162,74,.35);cursor:pointer}
+.storybtn::before{content:"\2726"}
+.storybtn:hover{background:linear-gradient(#f0d595,#d3ad55)}
+.storybtn[aria-pressed="true"]{outline:2px solid #fbf3e4;outline-offset:2px}
+.storybtn:focus-visible{outline:2px solid #e8d5aa;outline-offset:2px}
+@media (max-width:700px){.views{flex:1 1 100%}.views .tabs{flex:1 1 auto}}
+@media (max-width:560px){.storybtn{padding:7px 11px;font-size:13px}}
+
 /* taalswitch */
 .langsw{display:inline-flex;align-items:center;border:1px solid rgba(232,213,170,.35);border-radius:8px;overflow:hidden;flex:none}
 .langsw button{background:transparent;color:inherit;border:0;padding:5px 9px;font:600 12px/1.2 Inter,system-ui,sans-serif;letter-spacing:.05em;opacity:.7;cursor:pointer}
@@ -488,14 +498,14 @@ main{padding-top:6px}
   <div><h1 id="title"></h1>
   <p id="summary"></p></div></div>
   <div class="bar">
+    <div class="views"><button type="button" class="storybtn" id="storyBtn" data-v="verhaal" data-t="v_verhaal" aria-pressed="false"></button>
     <div class="tabs" id="tabs"><nav role="tablist" aria-orientation="horizontal" data-t-aria="tabs">
       <button type="button" role="tab" data-v="familie" data-t="v_familie"></button>
       <button type="button" role="tab" data-v="stamlijn" data-t="v_stamlijn"></button>
-      <button type="button" role="tab" data-v="verhaal" data-t="v_verhaal"></button>
       <button type="button" role="tab" data-v="tijdlijn" data-t="v_tijdlijn"></button>
       <button type="button" role="tab" data-v="waaier" data-t="v_waaier"></button>
       <button type="button" role="tab" data-v="kosmos" data-t="v_kosmos"></button>
-    </nav></div>
+    </nav></div></div>
     <div id="starts" role="group" hidden></div>
     <div class="langsw" id="langsw" role="group" aria-label="Language / Taal"><button type="button" data-l="en" lang="en" title="English">EN</button><button type="button" data-l="nl" lang="nl" title="Nederlands">NL</button></div>
     <button type="button" class="btn sbtn" data-variant="outline" id="searchBtn" aria-haspopup="dialog"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><span data-t="search"></span><kbd class="kbd">/</kbd></button>
@@ -1694,7 +1704,7 @@ function initGenSlider(){const sl=$("gens"),MIN=3,MAX=12,ticks=sl.querySelector(
   show(state.gens)}
 function render(){
   const v=state.view;
-  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v?"true":"false"));
+  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v?"true":"false"));$("storyBtn").setAttribute("aria-pressed",v==="verhaal"?"true":"false");
   document.querySelectorAll("#starts [data-p]").forEach(b=>b.dataset.variant=+b.dataset.p===state.root?"primary":"outline");
   const ctl=(v==="waaier"||v==="kosmos")&&parentsOf(state.root).length>0;$("genWrap").style.display=ctl?"":"none";$("colorWrap").style.display=ctl?"":"none";
   const opts=[["lijn",_t("c_lijn")],["land",_t("c_land")],["zekerheid",v==="waaier"?_t("c_zek_v"):_t("c_zek_d")]];
@@ -1739,7 +1749,7 @@ fetch("data.json").then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.
   $("back").onclick=()=>{if(state.hist.length){state.root=state.hist.pop();render()}};
   initGenSlider();
   $("color").onchange=e=>{state.color=e.target.value;render()};
-  document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{state.view=b.dataset.v;render()});
+  document.querySelectorAll("#tabs button,#storyBtn").forEach(b=>b.onclick=()=>{state.view=b.dataset.v;render()});
   addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(VIEWS.includes(h)&&h!==state.view){state.view=h;render()}});
   render();
 }).catch(e=>{$("stage").innerHTML=`<div id="loading">${_t("loadError",{msg:slEsc(e.message)})}</div>`;console.error(e)});

@@ -67,6 +67,7 @@ The viewer is one file (~1,700 lines, CSS + HTML + JS). Find your way by these m
   - `vhAssignImages(path)`: spreads zeitgeist images over the whole trail. Images with `kind:true` first go to someone who was under 16 at the time (max. 2), then one per person alive at the time, then two; plain views may go to someone born up to 25 years later only as a last resort; `gebeurtenis:true` images only to people alive then.
   - `vhTijdgeest`: renders "Life in …", the assigned images and "Around that time" (max 4 local + 1 national event; a national event in the same year as a local one is dropped; optional `links`).
   - `drawVerhaal`: the chapters, father/mother choice, route bar, "Remarkable relative" asides, certainty and adoption callouts.
+- Menu: Story is a separate gold button (`#storyBtn`, CSS under `/* story-knop`) before the tab group `#tabs`; `render()` sets its `aria-pressed`.
 - `/* ===== DATA` → `function prepareData` (also sets the language: `LANG=(d.taal||d.lang)==="nl"?"nl":"en"`), `const VIEWS`, and the `fetch("data.json")` line that `standalone_viewer.py` looks for.
 
 ## Releasing a new version
