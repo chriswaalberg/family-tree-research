@@ -490,6 +490,83 @@ main{padding-top:6px}
 .langsw button:hover{opacity:1}
 .langsw button[aria-pressed="true"]{background:#c9a24a;color:#2a1c12;opacity:1}
 .langsw button:focus-visible{outline:2px solid #e8d5aa;outline-offset:-2px}
+.swbtn{display:inline-flex;align-items:center;gap:6px;flex:none;border:1.5px solid #c9a24a;border-radius:10px;padding:7px 12px;font:700 13px/1.2 Inter,system-ui,sans-serif;color:#e8c983;background:transparent;cursor:pointer}
+.swbtn::before{content:"\25B6";font-size:10px}
+.swbtn:hover{background:rgba(201,162,74,.15)}.swbtn:focus-visible{outline:2px solid #e8d5aa;outline-offset:2px}
+@media (max-width:560px){.swbtn{padding:6px 10px;font-size:0;gap:0}.swbtn::before{font-size:12px}}
+/* ===== SWIPE (experimental Swipe Stories: look 'Photo', fade transition) ===== */
+.sw{position:fixed;inset:0;z-index:200;background:#120c08;display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none;font-family:Inter,system-ui,sans-serif;color:#fff;--sw-top:0px;top:var(--sw-top)}
+.sw[hidden]{display:none!important}
+.sw .sw-phone{container-type:inline-size;position:relative;height:100%;width:min(100vw,calc((100dvh - var(--sw-top))*9/16));overflow:hidden;background:#1d140e}
+@media (min-width:700px){.sw .sw-phone{height:calc(100% - 32px);border-radius:22px;box-shadow:0 20px 60px rgba(0,0,0,.6);width:min(100vw,calc((100dvh - var(--sw-top) - 32px)*9/16))}}
+.sw .sw-cards{position:absolute;inset:0;perspective:1400px;overflow:hidden}
+.sw .sw-card{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;overflow:hidden;backface-visibility:hidden;will-change:transform,opacity}
+.sw .sw-body{position:relative;padding:96px 24px 56px;max-height:100%;overflow:hidden;box-sizing:border-box}
+.sw .sw-k{font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;margin-bottom:10px}
+.sw h2{font-family:Fraunces,Georgia,serif;font-weight:700;margin:0 0 6px;line-height:1.08;font-size:clamp(30px,9cqw,44px)}
+.sw .sw-yy{font-size:15px;opacity:.8;margin-bottom:14px}
+.sw .sw-t p,.sw p.sw-t{font-size:clamp(19px,5.4cqw,23px);line-height:1.38;margin:0 0 .6em}
+.sw .sw-t a,.sw .sw-cap a{color:inherit}
+.sw .sw-note{font-size:14px;opacity:.75;line-height:1.4;margin-top:10px}
+.sw .sw-chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 14px}
+.sw .sw-chip{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:99px;background:color-mix(in srgb,var(--cc) 22%,transparent);border:1px solid var(--cc)}
+.sw .sw-big{display:none}
+.sw .sw-ev{list-style:none;padding:0;margin:0}
+.sw .sw-ev li{display:flex;gap:12px;font-size:clamp(16px,4.6cqw,19px);line-height:1.35;margin-bottom:12px}
+.sw .sw-ev li>b{font-family:Fraunces,Georgia,serif;font-size:1.25em;flex:none;min-width:3.1em}
+.sw .sw-ev .vh-evl{display:block;font-size:13px;opacity:.8;margin-top:3px}
+.sw .sw-ev a{color:inherit;font-size:13px}
+.sw .sw-fig{margin:0}
+.sw .sw-fig img{display:block;width:100%;height:auto;max-height:52dvh;object-fit:cover}
+.sw .sw-cap{font-size:13px;line-height:1.4;opacity:.9;margin-top:10px}
+.sw .sw-cap b{display:block;font-family:Fraunces,Georgia,serif;font-size:21px;line-height:1.2;margin-bottom:4px}
+.sw .sw-cap span{display:block;margin-top:6px;font-size:15px}
+.sw .sw-opts{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.sw .sw-opt{all:unset;cursor:pointer;display:block;padding:14px 16px;border-radius:14px;border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08)}
+.sw .sw-opt.rec{border-color:#dcb56a}
+.sw .sw-opt small{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+.sw .sw-opt b{display:block;font-family:Fraunces,Georgia,serif;font-size:22px;margin:2px 0}
+.sw .sw-opt span{font-size:14px;opacity:.85}
+.sw .sw-opt .st{color:#dcb56a;opacity:1;font-weight:600;font-size:12px;float:right}
+.sw .sw-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.sw .sw-btn{all:unset;cursor:pointer;padding:10px 16px;border-radius:99px;border:1.5px solid currentColor;font-weight:600;font-size:15px}
+/* top: progress, header, route */
+.sw .sw-top{position:absolute;left:0;right:0;top:0;z-index:5;padding:calc(8px + env(safe-area-inset-top,0px)) 10px 22px;background:linear-gradient(180deg,rgba(0,0,0,.5),rgba(0,0,0,0));pointer-events:none}
+.sw .sw-bars{display:flex;gap:4px}
+.sw .sw-bars i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.35);overflow:hidden}
+.sw .sw-bars i b{display:block;height:100%;width:0;background:#fff}
+.sw .sw-head{display:flex;align-items:center;gap:10px;margin-top:10px}
+.sw .sw-av{width:34px;height:34px;border-radius:50%;flex:none;display:grid;place-items:center;font:700 11px Inter,sans-serif;background:var(--lc);border:2px solid #fff;color:#fff}
+.sw .sw-who{flex:1;min-width:0;line-height:1.2}
+.sw .sw-who b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sw .sw-who span{font-size:12px;opacity:.85}
+.sw .sw-x,.sw .sw-pp{all:unset;pointer-events:auto;cursor:pointer;width:34px;height:34px;display:grid;place-items:center;font-size:20px;border-radius:50%}
+.sw .sw-pp{font-size:15px}
+.sw .sw-route{display:flex;gap:6px;flex-wrap:wrap;font-size:11.5px;margin-top:6px;opacity:.85}
+.sw .sw-route span{opacity:.6}.sw .sw-route span.on{opacity:1;font-weight:700}
+.sw .sw-hint{position:absolute;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom,0px));text-align:center;font-size:12.5px;opacity:.75;z-index:4;pointer-events:none;padding:0 20px}
+.sw .sw-nav{all:unset;position:absolute;top:50%;margin-top:-24px;width:48px;height:48px;border-radius:50%;display:none;place-items:center;cursor:pointer;background:rgba(255,255,255,.12);color:#fff;font-size:22px;z-index:6}
+@media (min-width:700px){.sw .sw-nav{display:grid}}
+.sw .sw-nav.l{right:calc(50% + min(50vw,(100dvh - var(--sw-top) - 32px)*9/32) + 18px)}
+.sw .sw-nav.r{left:calc(50% + min(50vw,(100dvh - var(--sw-top) - 32px)*9/32) + 18px)}
+.sw.paused .sw-pp{background:rgba(255,255,255,.2)}
+.sw .sw-card{background:radial-gradient(120% 80% at 20% 10%,color-mix(in srgb,var(--lc) 70%,#000) 0%,#0e0a07 75%)}
+.sw .sw-card[data-kind=img]{background:#000;justify-content:flex-end}
+.sw .sw-card[data-kind=img] .sw-body{position:static;padding-top:0}
+.sw .sw-card[data-kind=img] .sw-fig{position:absolute;inset:0;overflow:hidden}
+.sw .sw-card[data-kind=img] .sw-fig img{width:100%;height:100%;max-height:none;object-fit:cover}
+.sw .sw-card[data-kind=img]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:60%;background:linear-gradient(0deg,rgba(0,0,0,.92) 35%,rgba(0,0,0,0))}
+.sw .sw-card[data-kind=img] .sw-k,.sw .sw-card[data-kind=img] .sw-cap{position:relative;z-index:2}
+.sw .sw-pbg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.35;filter:blur(2px)}
+.sw .sw-big{display:block;position:absolute;right:-10px;bottom:30px;font:800 120px/1 Fraunces,Georgia,serif;opacity:.1;pointer-events:none}
+.sw .sw-k{color:#dcb56a}
+.sw .sw-t p,.sw p.sw-t{font-weight:500}
+.sw .sw-card.out{pointer-events:none}
+.sw .sw-card.in{animation:swFadeIn .38s ease-out both}
+.sw .sw-card.out{animation:swFadeOut .3s ease-in both}
+@keyframes swFadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes swFadeOut{to{opacity:0}}
+@media (prefers-reduced-motion:reduce){.sw .sw-card.in,.sw .sw-card.out,.sw .sw-card .sw-body{animation:swFadeOut .15s reverse both!important}.sw .sw-card.out{animation:swFadeOut .15s both!important}}
 </style>
 </head>
 <body>
@@ -498,7 +575,7 @@ main{padding-top:6px}
   <div><h1 id="title"></h1>
   <p id="summary"></p></div></div>
   <div class="bar">
-    <div class="views"><button type="button" class="storybtn" id="storyBtn" data-v="verhaal" data-t="v_verhaal" aria-pressed="false"></button>
+    <div class="views"><button type="button" class="storybtn" id="storyBtn" data-v="verhaal" data-t="v_verhaal" aria-pressed="false"></button><button type="button" class="swbtn" id="swBtn" data-t="sw_btn" data-t-title="sw_btn_t"></button>
     <div class="tabs" id="tabs"><nav role="tablist" aria-orientation="horizontal" data-t-aria="tabs">
       <button type="button" role="tab" data-v="familie" data-t="v_familie"></button>
       <button type="button" role="tab" data-v="stamlijn" data-t="v_stamlijn"></button>
@@ -1637,6 +1714,124 @@ function drawFamilie(){
   return wrap;
 }
 
+/* ===== SWIPE (experimental Swipe Stories: full-screen cards that play by themselves, built from the Story view) ===== */
+Object.assign(I18N.nl,{sw_btn:"Swipe",sw_btn_t:"Het verhaal als kaarten die vanzelf doorlopen (experiment)",sw_close:"Sluiten",sw_pause:"Pauze",sw_play:"Verder",sw_next:"Volgende",sw_prev:"Vorige",
+ sw_hint:"Tik rechts: verder · tik links: terug · vasthouden: pauze · omhoog vegen: een generatie verder terug",
+ sw_family:"Gezin",sw_era:"Meegemaakt",sw_death:"Afscheid",sw_photo:"Een foto uit die tijd",sw_birth:"Geboren"});
+Object.assign(I18N.en,{sw_btn:"Swipe",sw_btn_t:"The story as cards that play by themselves (experiment)",sw_close:"Close",sw_pause:"Pause",sw_play:"Play",sw_next:"Next",sw_prev:"Previous",
+ sw_hint:"Tap right: next · tap left: back · hold: pause · swipe up: one generation further back",
+ sw_family:"Family",sw_era:"Lived through",sw_death:"Farewell",sw_photo:"A photo from that time",sw_birth:"Born"});
+let SW=null;
+const SW_KIND={vh_begin:"b",vh_born_dp:"b",vh_born_d:"b",vh_born_p:"b",vh_born_none:"b",vh_age:"b",vh_ageX:"b",vh_living:"b",
+  vh_kidsN:"f",vh_kids1:"f",vh_kidsSolo:"f",vh_other:"f",vh_moveLand:"f",vh_movePlace:"f",
+  vh_died:"d",vh_diedP:"d",vh_sameYear:"d",vh_posthum:"d",vh_odd:"d",vh_died_unknown:"d",vh_dtb:"n"};
+/* vhTemplate's sentences, each tagged with the text key that made it (b = birth, f = family, d = death, e = era, n = note) */
+function swSentences(i,child,flags){const rec=[],orig=_t;let tpl;
+  _t=(k,v)=>{const s=orig(k,v);rec.push([k,s]);return s};try{tpl=vhTemplate(i,child,flags)}finally{_t=orig}
+  const kind=s=>{let best=null;for(const [k,o] of rec)if(o&&s.startsWith(o)&&(!best||o.length>best[1].length))best=[k,o];
+    const k=best?best[0]:"";return SW_KIND[k]||(/^vh_(war|era)/.test(k)?"e":"f")};
+  const out={b:[],f:[],d:[],e:[],n:[]};tpl.paras.flat().forEach(s=>out[kind(s)].push(s));tpl.note.forEach(s=>out.n.push(s));return out}
+/* (this wraps _t for one call instead of changing vhTemplate, so the Story view stays exactly as it is) */
+/* the trail: the chosen path plus the richest continuation */
+function swPlan(path){const np=path.slice(),seen=new Set(np);let cur=np[np.length-1],n=0;
+  while(n++<60){const q=vhBest(cur);if(q<0||seen.has(q))break;np.push(q);seen.add(q);cur=q}return np}
+function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
+  const path=SW.path,root=path[0],rfn=vhFn(P[root]),flags={dtb:false},seen=new Set();seen.assign=vhAssignImages(path);
+  SW.gens=path.map((i,k)=>{const p=P[i],child=k?path[k-1]:null,code=vhCode(path,k),fn=vhFn(p),cards=[];
+    const lc=k===0?"#b48a3c":(LINE_COL[code.length>=2?code.slice(0,2):(code==="v"?"vv":"mv")]||"#b48a3c");
+    const rel=k===0?_t("vh_step0"):_t("vh_stepN",{k,rel:vhCap(vhRelWord(k,p.x)),root:rfn});
+    const S=swSentences(i,child,flags),T=a=>a.map(s=>`<p>${slEsc(s)}</p>`).join("");
+    const imgs=(typeof mediaList==="function"&&!p.living)?mediaList(p).filter(mediaIsImg):[];
+    /* certainty / adoption as a small label */
+    let chips="";if(child!=null){const st=vhStatus(child,i),c=certOf(child,i),key=st==="zeker"?"zeker":st==="waarschijnlijk"?"waarschijnlijk":st==="mogelijk"?"mogelijk":st==="fout"?"fout":"open";
+      if(c&&c[3]&&!/^(biologisch|biological)$/i.test(c[3]))chips+=`<span class="sw-chip" style="--cc:#b48a3c">♥ ${_t("vh_adopt")}</span>`;
+      chips+=`<span class="sw-chip" style="--cc:${CERT[st]||CERT["niet gecheckt"]}">${key==="zeker"?"✓ ":key==="fout"?"⚠ ":""}${_t("vh_c_"+key)}</span>`}
+    const add=(kind,html,o)=>cards.push(Object.assign({kind,html,k},o||{}));
+    add("intro",`<div class="sw-k">${slEsc(rel)}${k&&adoptSet(root).has(i)?" · "+_t("ks_fam_adopt"):""}</div><div class="sw-big">${p.by||""}</div><h2>${slEsc(p.n)}</h2><div class="sw-yy">${slEsc(yrs(p))}</div>${chips?`<div class="sw-chips">${chips}</div>`:""}<div class="sw-t">${T(S.b)}</div>`,{bg:imgs[0]&&imgs[0].bestand,len:S.b.join(" ").length});
+    if(vhHas(p)){const ps=vhParas(lab(p.verhaal)).split("</p>").filter(x=>x.trim()).map(x=>x+"</p>");
+      ps.forEach((x,j)=>add("story",`<div class="sw-k">✦ ${slEsc(_t("vh_title",{name:fn}))}</div><div class="sw-t">${x}</div>${j===ps.length-1?`<div class="sw-note">${vhSources(p)}</div>`:""}`,{len:x.length}));
+      (p.verhaal_beelden||[]).filter(b=>b&&b.bestand).forEach(b=>add("img",`<figure class="sw-fig"><img src="${slEsc(b.bestand)}" alt=""></figure><div class="sw-cap"><b>${slEsc(lab(b.titel)||"")}</b>${[b.maker,b.datering].filter(Boolean).map(slEsc).join(" · ")}</div>`,{img:1}))}
+    else if(S.f.length)add("family",`<div class="sw-k">${_t("sw_family")}</div><div class="sw-big">${p.ch.length>1?p.ch.length:""}</div><div class="sw-t">${T(S.f)}</div>`,{len:S.f.join(" ").length});
+    /* zeitgeist: reuse the Story view's own block and cut it into cards */
+    const tg=document.createElement("div");tg.innerHTML=vhTijdgeest(i,seen);let head="";
+    for(const el of tg.querySelectorAll(".vh-tg>*")){
+      if(el.classList.contains("vh-k"))head=el.textContent;
+      else if(el.tagName==="P"){const last=cards[cards.length-1];if(last&&last.kind==="life"&&last.head===head){last.html+=el.outerHTML;last.len+=el.textContent.length}
+        else add("life",`<div class="sw-k">${slEsc(head)}</div><div class="sw-t">${el.outerHTML}`,{head,len:el.textContent.length})}
+      else if(el.tagName==="FIGURE"){const im=el.querySelector("img"),cap=el.querySelector("figcaption");
+        add("img",`<div class="sw-k">${_t("sw_photo")}</div><figure class="sw-fig"><img src="${slEsc(im.getAttribute("src"))}" alt="${slEsc(im.alt)}"></figure><div class="sw-cap">${cap?cap.innerHTML.replace("</b> · ","</b>"):""}</div>`,{img:1})}
+      else if(el.tagName==="UL")add("events",`<div class="sw-k">${slEsc(head)}</div><ul class="sw-ev">${el.innerHTML}</ul>`,{len:el.textContent.length})}
+    cards.forEach(c=>{if(c.kind==="life")c.html+="</div>"});
+    if(S.e.length){const t=S.e.join(" "),big=t.includes(_t("e_ww2"))?"1940–45":t.includes(_t("e_ww1"))?"1914–18":"";
+      add("era",`<div class="sw-k">${_t("sw_era")}</div><div class="sw-big">${big}</div><div class="sw-t">${T(S.e)}</div>`,{len:t.length})}
+    /* remarkable relatives (a brother or sister with an own story) */
+    vhSibs(i).filter(j=>vhHas(P[j])).forEach(j=>{const q=P[j],rl=_t(q.x==="M"?"vh_sib_M":q.x==="F"?"vh_sib_F":"vh_sib_X",vhPro(p)),first=vhParas(lab(q.verhaal)).split("</p>")[0]+"</p>";
+      add("sib",`<div class="sw-k">✦ ${_t("vh_special")}</div><h2>${slEsc(q.n)}</h2><div class="sw-yy">${slEsc(rl)} · ${slEsc(yrs(q))}</div><div class="sw-t">${first}</div>`,{len:first.length})});
+    if(S.d.length||S.n.length)add("death",`<div class="sw-k">${S.d.length?_t("sw_death"):""}</div><div class="sw-big">${S.d.length&&p.dy?p.dy:""}</div><div class="sw-t">${T(S.d)}</div>${S.n.map(n=>`<div class="sw-note">${slEsc(n)}</div>`).join("")}`,{len:S.d.join(" ").length});
+    /* the fork: father or mother; the richest trail plays on by itself */
+    const par=parentsOf(i);
+    if(par.length===2){const nxt=path[k+1];
+      add("fork",`<p class="sw-t">${_t("vh_q")}</p><div class="sw-opts">${par.map(q=>{const qq=P[q],pl=vhPlace(qq.bplac);
+        return `<button type="button" class="sw-opt${q===nxt?" rec":""}" data-go="${q}">${q===vhBest(i)?`<span class="st">★ ${_t("vh_rec")}</span>`:""}<small>${slEsc(_t("vh_parent",Object.assign({rel:p.f===q?_t("father"):_t("mother")},vhPro(p))))}</small><b>${slEsc(qq.n)}</b><span>${slEsc(yrs(qq))}${pl?" · "+slEsc(pl):""}</span></button>`}).join("")}</div>`,{len:120})}
+    else if(!par.length)add("end",`<div class="sw-k">${_t("vh_end_t")}</div><p class="sw-t">${_t("vh_end",{fn:slEsc(fn)})}</p><div class="sw-btns"><button type="button" class="sw-btn" data-a="restart">↺ ${_t("vh_restart")}</button><button type="button" class="sw-btn" data-a="close">${_t("sw_close")}</button></div>`,{stay:1});
+    return {i,lc,fn,cards}})}
+function swDur(c){if(c.stay)return 0;if(c.img)return 7000;return Math.max(5000,Math.min(15000,3200+48*(c.len||60)))}
+function swOpen(root){
+  if(!$("sw")){const d=document.createElement("div");d.id="sw";d.className="sw";d.hidden=true;d.setAttribute("role","dialog");d.setAttribute("aria-modal","true");
+    d.innerHTML=`<button type="button" class="sw-nav l" data-nav="-1">‹</button><div class="sw-phone"><div class="sw-cards"></div><div class="sw-top"><div class="sw-bars"></div><div class="sw-head"><div class="sw-av"></div><div class="sw-who"><b></b><span></span></div><button type="button" class="sw-pp"></button><button type="button" class="sw-x">✕</button></div><div class="sw-route"></div></div><div class="sw-hint"></div></div><button type="button" class="sw-nav r" data-nav="1">›</button>`;
+    document.body.appendChild(d);swWire(d)}
+  const r=root!=null?root:state.root;
+  SW={path:swPlan([r]),g:0,c:0,t:0,paused:false,hold:false,last:0,hint:true};swBuild();
+  const el=$("sw");el.hidden=false;document.documentElement.style.overflow="hidden";
+  swShow("none");el.querySelector(".sw-x").focus();SW.raf=requestAnimationFrame(swTick)}
+function swClose(){const el=$("sw");if(!el)return;el.hidden=true;document.documentElement.style.overflow="";if(SW)cancelAnimationFrame(SW.raf);SW=null;const b=$("swBtn");if(b)b.focus()}
+function swCard(){return SW.gens[SW.g].cards[SW.c]}
+function swShow(dir){const el=$("sw"),G=SW.gens[SW.g],c=G.cards[SW.c],box=el.querySelector(".sw-cards");
+  SW.t=0;SW.dur=swDur(c);
+  const n=document.createElement("div");n.className="sw-card in "+dir;n.dataset.kind=c.kind;n.style.setProperty("--lc",G.lc);n.style.setProperty("--dur",(SW.dur||8000)+"ms");
+  n.innerHTML=(c.bg?`<div class="sw-pbg" style="background-image:url('${slEsc(c.bg)}')"></div>`:"")+`<div class="sw-body">${c.html}</div>`;
+  [...box.children].forEach(o=>{o.className="sw-card out "+dir;const kill=()=>o.remove();o.addEventListener("animationend",kill,{once:true});
+    if(dir==="none"||getComputedStyle(o).animationName==="none"||getComputedStyle(o).display==="none")kill()});
+  box.appendChild(n);n.addEventListener("animationend",e=>{if(e.target===n)n.classList.remove("in",dir)},{once:false});
+  /* header */
+  el.querySelector(".sw-bars").innerHTML=G.cards.map(()=>"<i><b></b></i>").join("");
+  const p=P[G.i];el.querySelector(".sw-av").textContent=p.by||"•";el.querySelector(".sw-av").style.background=G.lc;
+  el.querySelector(".sw-who b").textContent=p.n;el.querySelector(".sw-who span").textContent=SW.g===0?_t("vh_step0"):vhCap(vhRelWord(SW.g,p.x));
+  el.querySelector(".sw-route").innerHTML=SW.gens.map((g,k)=>`<span class="${k===SW.g?"on":""}">${slEsc(g.fn)}</span>`).join("<span>›</span>");
+  el.querySelector(".sw-hint").textContent=SW.hint?_t("sw_hint"):"";
+  el.querySelector(".sw-x").title=_t("sw_close");swPP();swBars()}
+function swBars(){const el=$("sw");if(!el||!SW)return;el.querySelectorAll(".sw-bars b").forEach((b,j)=>b.style.width=(j<SW.c?100:j>SW.c?0:SW.dur?Math.min(100,SW.t/SW.dur*100):100)+"%")}
+function swPP(){const el=$("sw"),b=el.querySelector(".sw-pp");b.textContent=SW.paused?"▶":"❚❚";b.title=_t(SW.paused?"sw_play":"sw_pause");el.classList.toggle("paused",SW.paused||SW.hold)}
+function swTick(now){if(!SW)return;const dt=SW.last?Math.min(100,now-SW.last):0;SW.last=now;
+  if(!SW.paused&&!SW.hold&&SW.dur&&!document.hidden){SW.t+=dt;if(SW.t>=SW.dur){swStep(1);}}
+  swBars();SW.raf=requestAnimationFrame(swTick)}
+function swStep(d){const G=SW.gens[SW.g];SW.hint=false;
+  if(d>0){if(SW.c<G.cards.length-1){SW.c++;swShow("next")}else swGen(1)}
+  else{if(SW.c>0){SW.c--;swShow("prev")}else if(SW.g>0){SW.g--;SW.c=0;swShow("down")}else{SW.t=0}}}
+function swGen(d){SW.hint=false;if(d>0){if(SW.g<SW.gens.length-1){SW.g++;SW.c=0;swShow("up")}else{const L=SW.gens[SW.g];if(SW.c!==L.cards.length-1){SW.c=L.cards.length-1;swShow("next")}}}
+  else if(SW.g>0){SW.g--;SW.c=0;swShow("down")}}
+function swChoose(q){const k=SW.g;SW.path=swPlan(SW.path.slice(0,k+1).concat(q));swBuild();SW.g=k+1;SW.c=0;swShow("up")}
+function swWire(el){let x0=0,y0=0,t0=0,ht=0,down=false;
+  el.addEventListener("pointerdown",e=>{if(!SW||e.target.closest("a,button"))return;down=true;x0=e.clientX;y0=e.clientY;t0=performance.now();
+    ht=setTimeout(()=>{if(SW){SW.hold=true;swPP()}},220)});
+  const end=e=>{if(!down||!SW)return;down=false;clearTimeout(ht);const dx=e.clientX-x0,dy=e.clientY-y0,held=SW.hold;SW.hold=false;swPP();
+    if(Math.abs(dy)>50&&Math.abs(dy)>Math.abs(dx)){swGen(dy<0?1:-1);return}
+    if(Math.abs(dx)>50){swGen(dx<0?1:-1);return}
+    if(held||performance.now()-t0>400)return;
+    const r=el.querySelector(".sw-phone").getBoundingClientRect();swStep(e.clientX-r.left<r.width/3?-1:1)};
+  el.addEventListener("pointerup",end);el.addEventListener("pointercancel",()=>{down=false;clearTimeout(ht);if(SW){SW.hold=false;swPP()}});
+  el.addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!SW)return;
+    if(b.classList.contains("sw-x")||b.dataset.a==="close")swClose();
+    else if(b.classList.contains("sw-pp")){SW.paused=!SW.paused;swPP()}
+    else if(b.dataset.nav)swStep(+b.dataset.nav);
+    else if(b.dataset.go!=null)swChoose(+b.dataset.go);
+    else if(b.dataset.a==="restart"){SW.path=swPlan([SW.path[0]]);swBuild();SW.g=0;SW.c=0;swShow("down")}});
+  addEventListener("keydown",e=>{if(!SW||el.hidden)return;
+    const k=e.key;if(k==="Escape")swClose();else if(k==="ArrowRight")swStep(1);else if(k==="ArrowLeft")swStep(-1);
+    else if(k==="ArrowUp")swGen(1);else if(k==="ArrowDown")swGen(-1);else if(k===" "){SW.paused=!SW.paused;swPP()}else return;e.preventDefault()})}
+/* language switch: rebuild the cards in place */
+function swRelang(){if(!SW)return;const g=SW.g,c=SW.c;swBuild();SW.g=Math.min(g,SW.gens.length-1);SW.c=Math.min(c,SW.gens[SW.g].cards.length-1);swShow("none")}
+
 /* ================= DATA (formaat v2; oude v1-bestanden worden omgezet) ================= */
 let META={starts:[],perView:{},regios:{},plaatsen:{},titel:""};
 function normStatus(x){if(!x)return x;const s=String(x).toLowerCase().trim();
@@ -1752,7 +1947,7 @@ function setLang(l,save){if(l!=="en"&&l!=="nl")return;if(save){try{localStorage.
   if(l===LANG){langMark();return}
   LANG=l;document.documentElement.lang=l;langTitle();applyTexts();
   const g=document.getElementById("gens");if(g)g.setAttribute("aria-label",_t("gens"));
-  langMark();if(P&&P.length)render()}
+  langMark();if(P&&P.length)render();swRelang()}
 function langInit(){let l=null;try{l=new URLSearchParams(location.search).get("lang")}catch(e){}
   if(l!=="en"&&l!=="nl"){try{l=localStorage.getItem("stamboomLang")}catch(e){l=null}}
   if((l==="en"||l==="nl")&&l!==LANG){LANG=l;document.documentElement.lang=l;langTitle()}
@@ -1767,6 +1962,7 @@ fetch("data.json").then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.
   initGenSlider();
   $("color").onchange=e=>{state.color=e.target.value;render()};
   document.querySelectorAll("#tabs button,#storyBtn").forEach(b=>b.onclick=()=>{state.view=b.dataset.v;render()});
+  $("swBtn").onclick=()=>swOpen(state.root);
   addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(VIEWS.includes(h)&&h!==state.view){state.view=h;render()}});
   render();
 }).catch(e=>{$("stage").innerHTML=`<div id="loading">${_t("loadError",{msg:slEsc(e.message)})}</div>`;console.error(e)});

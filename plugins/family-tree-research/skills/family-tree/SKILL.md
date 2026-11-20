@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.7.10"
+  version: "0.8.0"
 ---
 
 # Family-tree research, hand in hand

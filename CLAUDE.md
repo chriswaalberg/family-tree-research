@@ -51,7 +51,7 @@ python3 -I $S/scripts/gedcom_tool.py check $S/examples/example.ged /tmp/check-nl
 python3 -I $S/scripts/standalone_viewer.py $S/viewer/index.html /tmp/ex.json /tmp/ex.html --media $S/examples
 ```
 
-Then open `/tmp/ex.html` (or screenshot it with Playwright, desktop + mobile) and click through all tabs: Family, Line, Story, Timeline, Fan, Cosmos. In the Story view, follow Femke → Thomas → Pieter: Pieter must show his own (example) story, a "Life in Den Helder" block with the 1955 photo, and the 1963 example event with a source link and an "Example links" line; Anna's template text must say she lived through the Second World War "roughly from age 15 to 20". In English, no Dutch words may appear (e.g. "bron"). Check the browser console for errors. Also test with `--lang nl`. If you touched `gedcom_tool.py new/add`, test them with both English and Dutch JSON keys (formats in references/onboarding.md and references/gedcom-tool.md).
+Then open `/tmp/ex.html` (or screenshot it with Playwright, desktop + mobile) and click through all tabs: Family, Line, Story, Timeline, Fan, Cosmos, and open ▶ Swipe (tap through Femke → Thomas → Pieter; the Den Helder photo card must show). In the Story view, follow Femke → Thomas → Pieter: Pieter must show his own (example) story, a "Life in Den Helder" block with the 1955 photo, and the 1963 example event with a source link and an "Example links" line; Anna's template text must say she lived through the Second World War "roughly from age 15 to 20". In English, no Dutch words may appear (e.g. "bron"). Check the browser console for errors. Also test with `--lang nl`. If you touched `gedcom_tool.py new/add`, test them with both English and Dutch JSON keys (formats in references/onboarding.md and references/gedcom-tool.md).
 
 If `examples/example-data.json` should change, regenerate it with the first command (output to `$S/examples/example-data.json`).
 
@@ -70,7 +70,11 @@ The viewer is one file (~1,700 lines, CSS + HTML + JS). Find your way by these m
   - `vhAssignImages(path)`: spreads zeitgeist images over the whole trail. Images with `kind:true` first go to someone who was under 16 at the time (max. 2), then one per person alive at the time, then two; plain views may go to someone born up to 25 years later only as a last resort; `gebeurtenis:true` images only to people alive then.
   - `vhTijdgeest`: renders "Life in …", the assigned images and "Around that time" (max 4 local + 1 national event; a national event in the same year as a local one is dropped; optional `links`).
   - `drawVerhaal`: the chapters, father/mother choice, route bar, "Remarkable relative" asides, certainty and adoption callouts.
-- Menu: Story is a separate gold button (`#storyBtn`, CSS under `/* story-knop`) before the tab group `#tabs`; `render()` sets its `aria-pressed`.
+- `/* ===== SWIPE` (experimental Swipe Stories, button `#swBtn` next to `#storyBtn`; CSS under `/* ===== SWIPE` too): full-screen cards that play by themselves, overlay `#sw`.
+  - `swSentences`: vhTemplate's sentences sorted by kind (birth, family, death, era) by wrapping `_t` for one call, so the Story view's code stays untouched. New template keys go into `SW_KIND`.
+  - `swBuild`: cards per ancestor (intro with certainty/adoption chip, own story per paragraph or family, the `vhTijdgeest` block cut into life/photo/events cards, lived-through, remarkable relatives, farewell, fork or end). `swPlan` = chosen path + richest continuation.
+  - `swShow`/`swTick`/`swStep`/`swGen`/`swWire`: player (timer per card, tap left/right, hold = pause, swipe up/down = generation, arrow keys/space/Esc). Starts at `state.root`; `setLang` calls `swRelang`.
+- Menu: Story is a separate gold button (`#storyBtn`, CSS under `/* story-knop`) before the tab group `#tabs`; `render()` sets its `aria-pressed`. `#swBtn` follows it (icon only below 560 px).
 - `/* ===== DATA` → `function prepareData` (also sets the language: `LANG=(d.taal||d.lang)==="nl"?"nl":"en"`), `const VIEWS`, and the `fetch("data.json")` line that `standalone_viewer.py` looks for.
 
 ## Releasing a new version

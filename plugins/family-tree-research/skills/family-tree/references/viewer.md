@@ -1,6 +1,6 @@
 # Building and updating the viewer
 
-The viewer (`viewer/index.html`) contains nothing about a specific family: everything comes from `data.json`. Views: **Family** (vertical tree with side branches), **Line** (couple by couple upwards), **Story** (step by step back in time, choosing father or mother each time), **Timeline** (ancestors by birth year), **Fan** and **Cosmos**. Search, details per person with source and certainty, English/Dutch, works on phones. Full data format: `viewer/DATA-FORMAT.md`.
+The viewer (`viewer/index.html`) contains nothing about a specific family: everything comes from `data.json`. Views: **Family** (vertical tree with side branches), **Line** (couple by couple upwards), **Story** (step by step back in time, choosing father or mother each time; the **▶ Swipe** button next to it plays the same story as full-screen cards, experimental), **Timeline** (ancestors by birth year), **Fan** and **Cosmos**. Search, details per person with source and certainty, English/Dutch, works on phones. Full data format: `viewer/DATA-FORMAT.md`.
 
 ## 1. Building data.json
 
@@ -68,6 +68,7 @@ python3 -I scripts/standalone_viewer.py viewer/index.html data/data.json family-
 - Click a person for details: dates, places, source, how certain the relation is, and photos and documents if there are any.
 - Lines: solid = certain, dashed = probable/possible, dotted = not checked yet, red = wrong, double gold = raised as their own child.
 - Story: start at the start person and choose father or mother each time; the gold star marks the richest trail. When it gets uncertain, the story says so.
+- ▶ Swipe (experimental, nice for children): the same story as full-screen cards that play by themselves. Tap right/left for next/back, hold to pause, swipe up for the next generation. It starts at the current start person.
 - At the top you switch views; with search you jump to someone and can make them the start person. The EN/NL switch changes the language (handy when sharing with family abroad).
 
 ## 4. Checking
