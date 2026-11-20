@@ -1,0 +1,77 @@
+0 HEAD
+1 SOUR Example
+1 GEDC
+2 VERS 5.5.1
+1 CHAR UTF-8
+0 @I1@ INDI
+1 NAME Lotte Maria /de Vries/
+1 SEX F
+1 BIRT
+2 DATE 12 MAR 2015
+2 PLAC Utrecht, Utrecht, Nederland
+1 FAMC @F1@
+0 @I2@ INDI
+1 NAME Thomas /de Vries/
+1 SEX M
+1 BIRT
+2 DATE 4 JUN 1984
+2 PLAC Amersfoort, Utrecht, Nederland
+1 FAMC @F2@
+1 FAMS @F1@
+0 @I3@ INDI
+1 NAME Sanne /Peeters/
+1 SEX F
+1 BIRT
+2 DATE 22 SEP 1986
+2 PLAC Antwerpen, Antwerpen, België
+1 FAMC @F3@
+1 FAMS @F1@
+0 @I4@ INDI
+1 NAME Pieter Johannes /de Vries/
+1 SEX M
+1 BIRT
+2 DATE 3 JAN 1948
+2 PLAC Den Helder, Noord-Holland, Nederland
+1 DEAT
+2 DATE 17 AUG 2019
+2 PLAC Amersfoort, Utrecht, Nederland
+1 FAMS @F2@
+0 @I5@ INDI
+1 NAME Anna /Lindqvist/
+1 SEX F
+1 BIRT
+2 DATE ABT 1925
+2 PLAC Göteborg, Västra Götaland, Sverige
+1 DEAT
+2 DATE 2 FEB 2011
+2 PLAC Amersfoort, Utrecht, Nederland
+1 FAMS @F2@
+0 @I6@ INDI
+1 NAME Jozef /Peeters/
+1 SEX M
+1 BIRT
+2 DATE 1950
+2 PLAC Leuven, Vlaams-Brabant, België
+1 DEAT
+2 DATE 2020
+1 FAMS @F3@
+0 @I7@ INDI
+1 NAME Maria /Janssens/
+1 SEX F
+1 BIRT
+2 DATE 1953
+2 PLAC Mechelen, Antwerpen, België
+1 FAMS @F3@
+0 @F1@ FAM
+1 HUSB @I2@
+1 WIFE @I3@
+1 CHIL @I1@
+0 @F2@ FAM
+1 HUSB @I4@
+1 WIFE @I5@
+1 CHIL @I2@
+0 @F3@ FAM
+1 HUSB @I6@
+1 WIFE @I7@
+1 CHIL @I3@
+0 TRLR

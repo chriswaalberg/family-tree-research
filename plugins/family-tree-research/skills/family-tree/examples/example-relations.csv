@@ -1,0 +1,6 @@
+child_id,parent_id,status,source,note
+@I1@,@I2@,certain,"Birth certificate Utrecht 2015",
+@I1@,@I3@,certain,"Birth certificate Utrecht 2015",
+@I2@,@I4@,probable,,"Family story only"
+@I2@,@I5@,possible,,"Name matches, date not yet"
+@I3@,@I6@,unknown,,

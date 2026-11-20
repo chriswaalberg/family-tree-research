@@ -1,0 +1,25 @@
+{
+  "name": "chriswaalberg",
+  "owner": {
+    "name": "Chris Waalberg"
+  },
+  "metadata": {
+    "description": "Claude plugins by Chris Waalberg."
+  },
+  "plugins": [
+    {
+      "name": "family-tree-research",
+      "source": "./plugins/family-tree-research",
+      "description": "Guided family-tree research in English or Dutch: start with a GEDCOM or with yourself, your parents and grandparents. Claude searches open archives with a source for every link and builds an interactive family-tree viewer with stories.",
+      "author": {
+        "name": "Chris Waalberg"
+      },
+      "keywords": [
+        "genealogy",
+        "family tree",
+        "gedcom",
+        "stamboom"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "family-tree-research",
+  "version": "0.7.1",
+  "description": "Guided family-tree research in English or Dutch: start with a GEDCOM file or with yourself, your parents and grandparents. Claude searches open archives with a source for every link, tracks how certain each relation is, and builds an interactive family-tree viewer with stories.",
+  "author": {
+    "name": "Chris Waalberg"
+  },
+  "homepage": "https://github.com/chriswaalberg/family-tree-research",
+  "repository": "https://github.com/chriswaalberg/family-tree-research",
+  "keywords": [
+    "genealogy",
+    "family tree",
+    "gedcom",
+    "ancestors",
+    "stamboom",
+    "genealogie"
+  ],
+  "license": "MIT"
+}

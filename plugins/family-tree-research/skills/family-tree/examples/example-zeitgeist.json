@@ -1,0 +1,66 @@
+{
+ "_uitleg": "Fictional example zeitgeist for testing. Events marked (example) are invented; the national events are real.",
+ "plaatsen": [
+  {
+   "id": "denhelder",
+   "naam": "Den Helder",
+   "match": [
+    "den helder"
+   ],
+   "leven": [
+    {
+     "van": 1900,
+     "tot": 2000,
+     "titel": {
+      "en": "Life in Den Helder (example)",
+      "nl": "Het leven in Den Helder (voorbeeld)"
+     },
+     "tekst": {
+      "en": "Den Helder was a navy town: sailors, dockyard workers and their families everywhere, and the sound of ship horns over the roofs. (Example text.)",
+      "nl": "Den Helder was een marinestad: overal matrozen, werfarbeiders en hun gezinnen, en scheepshoorns boven de daken. (Voorbeeldtekst.)"
+     }
+    }
+   ],
+   "gebeurtenissen": [
+    {
+     "jaar": 1963,
+     "tekst": {
+      "en": "(Example) A hard winter: the harbour freezes over and children skate between the moored ships.",
+      "nl": "(Voorbeeld) Een strenge winter: de haven vriest dicht en kinderen schaatsen tussen de afgemeerde schepen."
+     },
+     "bron": [
+      "Example source",
+      "https://example.org/"
+     ],
+     "links_label": {
+      "en": "Example links:",
+      "nl": "Voorbeeldlinks:"
+     },
+     "links": [
+      [
+       "Example page",
+       "https://example.org/"
+      ]
+     ]
+    }
+   ],
+   "beelden": []
+  }
+ ],
+ "algemeen": {
+  "naam": "Netherlands",
+  "gebeurtenissen": [
+   {
+    "jaar": 1953,
+    "tekst": {
+     "en": "The North Sea flood: dikes break in Zeeland and South Holland; 1,836 people die.",
+     "nl": "De Watersnoodramp: dijken breken in Zeeland en Zuid-Holland; 1836 mensen komen om."
+    },
+    "bron": [
+     "Watersnood van 1953 (Wikipedia)",
+     "https://nl.wikipedia.org/wiki/Watersnood_van_1953"
+    ]
+   }
+  ]
+ }
+}
