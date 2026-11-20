@@ -1164,8 +1164,24 @@ function vhTemplate(i,child,flags){const p=P[i],fn=vhFn(p),pr=vhPro(p),T=(k,v)=>
 function vhCode(path,k){let s="";for(let j=1;j<=k;j++)s+=P[path[j-1]].f===path[j]?"v":"m";return s}
 function vhState(){if(!state.vh||state.vh.root!==state.root)state.vh={root:state.root,path:[state.root]};return state.vh}
 function vhGo(path,focus){state.vh.path=path;vhRedraw(focus)}
-function vhRedraw(focus){const st=$("stage");st.innerHTML="";st.appendChild(drawVerhaal());
-  if(focus!=null)requestAnimationFrame(()=>{const e=document.querySelector(`.vh-ch[data-k="${focus}"]`);if(e){const top=e.getBoundingClientRect().top+scrollY-70;scrollTo({top,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})}})}
+/* scroll naar een hoofdstuk, net onder de (sticky) routebalk; maxTop = grens zodat de pagina daarna niet hoeft te springen */
+function vhPageTop(e){let y=0;while(e){y+=e.offsetTop;e=e.offsetParent}return y} /* zonder transforms (de infade-animatie schuift 14px) */
+function vhScrollTo(e,maxTop){const r=document.querySelector(".vh-route"),off=(r?r.offsetHeight:0)+24;
+  let top=vhPageTop(e)-off;if(maxTop!=null)top=Math.min(top,maxTop);
+  scrollTo({top:Math.max(0,top),behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"instant":"smooth"})}
+/* opnieuw tekenen zonder sprong: de stage houdt zijn oude hoogte vast tot het scrollen klaar is (anders klemt de browser de scroll als het pad korter wordt) */
+function vhRedraw(focus){const st=$("stage"),hold=st.offsetHeight;st.style.minHeight=hold+"px";st.innerHTML="";const w=drawVerhaal();st.appendChild(w);
+  let done=false;const release=()=>{if(done)return;done=true;st.style.minHeight=""};
+  if(focus==null){release();return}
+  (async()=>{const e=st.querySelector(`.vh-ch[data-k="${focus}"]`);if(!e){release();return}
+    const imgs=[...st.querySelectorAll(".vh-ch img")].filter(i=>!i.complete&&+i.closest(".vh-ch").dataset.k<=focus);
+    if(imgs.length)await Promise.race([Promise.all(imgs.map(i=>i.decode().catch(()=>{}))),new Promise(r=>setTimeout(r,400))]);
+    const cs=getComputedStyle(st),natural=w.offsetHeight+parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom)+parseFloat(cs.borderTopWidth)+parseFloat(cs.borderBottomWidth);
+    const extra=Math.max(0,st.offsetHeight-natural),maxTop=document.documentElement.scrollHeight-extra-innerHeight;
+    vhScrollTo(e,maxTop);
+    /* pas loslaten als de positie binnen de nieuwe hoogte valt; anders klemt de browser alsnog en breekt de scroll af */
+    const tryRelease=()=>{if(scrollY<=maxTop+1){removeEventListener("scroll",tryRelease);release()}};
+    addEventListener("scroll",tryRelease,{passive:true});setTimeout(tryRelease,400)})()}
 
 /* tijdgeest: data.json → "tijdgeest": {plaatsen:[{id,naam,match,leven,gebeurtenissen,beelden}], algemeen:{gebeurtenissen}} */
 function vhTG(){return (typeof D!=="undefined"&&D&&D.tijdgeest)||null}
@@ -1269,7 +1285,7 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     if(b.dataset.go!=null){vhGo(path.concat(+b.dataset.go),path.length)}
     else if(b.dataset.alt){const [k,alt]=b.dataset.alt.split(":").map(Number);vhGo(path.slice(0,k+1).concat(alt),k+1)}
     else if(b.dataset.sib!=null){const [j,a]=b.dataset.sib.split(":").map(Number);slSheet(j,null,"",a)}
-    else if(b.dataset.k!=null&&b.classList.contains("vh-rc")){const e2=w.querySelector(`.vh-ch[data-k="${b.dataset.k}"]`);if(e2)scrollTo({top:e2.getBoundingClientRect().top+scrollY-70,behavior:"smooth"})}
+    else if(b.dataset.k!=null&&b.classList.contains("vh-rc")){const e2=w.querySelector(`.vh-ch[data-k="${b.dataset.k}"]`);if(e2)vhScrollTo(e2)}
     else if(b.dataset.a==="restart"){vhGo([path[0]],0)}
     else if(b.dataset.a==="auto"){const np=path.slice(),seen=new Set(np);let cur=np[np.length-1],n=0;
       while(n++<60){const q=vhBest(cur);if(q<0||seen.has(q))break;np.push(q);seen.add(q);cur=q}
