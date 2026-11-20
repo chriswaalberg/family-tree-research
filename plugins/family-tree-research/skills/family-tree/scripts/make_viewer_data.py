@@ -227,6 +227,21 @@ def kopieer_media(pad, doel, gebruikt, max_px):
     return naam
 
 # ---------------------------------------------------------------- main
+# kind of image ("soort"): the viewer shows "A drawing from that time" etc.; English names are stored in Dutch
+IMG_KIND = {"photo": "foto", "drawing": "tekening", "print": "prent", "painting": "schilderij",
+            "map": "kaart", "coin": "munt", "poster": "affiche"}
+
+
+def img_kinds(images):
+    for b in images if isinstance(images, list) else []:
+        if isinstance(b, dict):
+            k = b.get("soort") or b.get("type")  # never "kind": that is the children flag
+            if isinstance(k, str) and k.strip():
+                b["soort"] = IMG_KIND.get(k.strip().lower(), k.strip().lower())
+                if b.get("type") == k: del b["type"]
+    return images
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("gedcom")
@@ -272,6 +287,8 @@ def main():
                 p[k] = v
         if year_of(bdate): p["by"] = year_of(bdate)
         if year_of(ddate): p["dy"] = year_of(ddate)
+        jobs = [c["v"].strip() for c in subs(r, "OCCU") if c["v"].strip()]  # occupations, literally, in GEDCOM order
+        if jobs: p["beroep"] = jobs
         p["_dead"] = bool(sub(r, "DEAT") or sub(r, "BURI") or sub(r, "CREM"))
         p["f"] = p["m"] = -1
         p["ch"], p["sp"] = [], []
@@ -411,7 +428,7 @@ def main():
         if not dead and y is not None and y >= cutoff:
             p["levend"] = True; n_lev += 1
             if a.levenden_verbergen:
-                for k in ("bdate", "bplac", "ddate", "dplac", "by", "dy", "r", "media"):
+                for k in ("bdate", "bplac", "ddate", "dplac", "by", "dy", "r", "media", "beroep"):
                     p.pop(k, None)
 
     # ---- start people
@@ -457,7 +474,7 @@ def main():
                 src = val.get("bronnen") or val.get("sources")
                 img = val.get("beelden") or val.get("images")
                 if src: people[i]["verhaal_bronnen"] = src
-                if img: people[i]["verhaal_beelden"] = img
+                if img: people[i]["verhaal_beelden"] = img_kinds(img)
             else:
                 people[i]["verhaal"] = val
             n_vh += 1
@@ -481,6 +498,8 @@ def main():
         with open(a.tijdgeest, encoding="utf-8") as fh:
             out["tijdgeest"] = json.load(fh)
         tg = out["tijdgeest"]
+        for pl in tg.get("plaatsen", []):
+            if pl.get("beelden"): pl["beelden"] = img_kinds(pl["beelden"])
         print(f"Zeitgeist: {len(tg.get('plaatsen', []))} place(s), "
               f"{sum(len(x.get('beelden', [])) for x in tg.get('plaatsen', []))} images")
     out["personen"] = people

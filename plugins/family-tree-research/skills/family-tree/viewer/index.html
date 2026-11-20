@@ -419,6 +419,7 @@ main{padding-top:6px}
 .vh-tg>.vh-k{margin:12px 0 2px}
 .vh-tg p{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-size:15.5px;line-height:1.62;margin:.45em 0;color:#2f241c}
 .vh-fig{margin:12px 0 6px}
+.vh-fk{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:#9c7633;margin:0 0 6px}
 .vh-fimg{border:0;padding:0;display:block;width:100%;background:#ece2cf;border-radius:8px;cursor:zoom-in;overflow:hidden}
 .vh-fimg img{display:block;width:100%;max-height:380px;object-fit:contain}
 .vh-fig figcaption{font-size:12.5px;line-height:1.5;color:#6b5a48;margin-top:6px}
@@ -744,9 +745,12 @@ function landCol(p){const c=landOf(p);if(!c)return NONE;if(COUNTRY[c])return COU
 
 /* ---------- tooltip ---------- */
 const tip=$("tip");
+/* beroep(en) in de persoonsdetails */
+function jobLine(p){return Array.isArray(p.beroep)&&p.beroep.length?`<div class="ln"><span class="mut">${_t("occ")}:</span> ${slEsc(p.beroep.join(_t("vh_jobLater")))}</div>`:""}
 function showTip(e,i,extra){const p=P[i];let h=`<b>${p.n}</b><br>`;
   if(p.bdate||p.bplac)h+=`<span class="mut">° </span>${p.bdate||""}${p.bplac?" · "+p.bplac:""}<br>`;
   if(p.ddate||p.dplac)h+=`<span class="mut">† </span>${p.ddate||""}${p.dplac?" · "+p.dplac:""}<br>`;
+  if(Array.isArray(p.beroep)&&p.beroep.length)h+=`<span class="mut">${_t("occ")}: </span>${slEsc(p.beroep.join(_t("vh_jobLater")))}<br>`;
   if(extra)h+=extra;
   h+=`<span class="mut">${_t("tipClick")}</span>`;
   tip.innerHTML=h;tip.style.opacity=1;moveTip(e)}
@@ -1102,7 +1106,7 @@ function slSheet(i,child,code,base,act){
   const line=(sym,d,pl)=>d||pl?`<div class="ln">${sym} ${[d,pl].filter(Boolean).map(slEsc).join(" · ")}</div>`:"";
   dlg.innerHTML=`<div class="sheet"><div class="grab" aria-hidden="true"></div>
     <header><p class="rel">${rel}${code?_t("genKw",{g:code.length,k:num}):""}</p><h2 id="slsheet-t">${slEsc(p.n)}</h2></header>
-    <section>${line("°",p.bdate,p.bplac)}${line("†",p.ddate,p.dplac)}
+    <section>${line("°",p.bdate,p.bplac)}${line("†",p.ddate,p.dplac)}${jobLine(p)}
     ${c?`<div class="ct"><b style="color:${CERT[c[0]]||"#7a7068"}">${slEsc(certLabel(c[0]))}</b>${_t("relWith",{name:slEsc(short(P[child]))})}${c[3]&&!/^(biologisch|biological)$/i.test(c[3])?`<br><b style="color:#9c7633">♥ ${_t("vh_adopt")}</b>`:""}${c[1]?`<br>${_t("source")}${slLink(c[1])}`:""}${c[2]?`<br>${slLink(c[2])}`:""}</div>`:hasChild?`<div class="ct">${_t("notAssessedRel",{name:slEsc(short(P[child]))})}</div>`:""}</section>
     <footer>${act?`<button type="button" class="btn" data-a="act">${act.label}</button>`:""}${i!==base?`<button type="button" class="btn" data-variant="outline" data-a="root">${_t("makeRoot")}</button>`:""}<button type="button" class="btn" data-variant="ghost" data-a="x">${_t("close")}</button></footer></div>`;
   const go=fn=>{dlg.close();setTimeout(fn,60)};
@@ -1120,7 +1124,7 @@ Object.assign(I18N.nl,{v_verhaal:"Verhaal",
  vh_begin:"Dit verhaal begint bij {fn}.",
  vh_born_dp:"{Fn} werd {date} geboren in {place}.",vh_born_d:"{Fn} werd {date} geboren.",vh_born_p:"{Fn} werd geboren in {place}.",vh_born_none:"Wanneer en waar {fn} geboren is, weten we nog niet.",
  vh_age:"Toen {child} in {y} geboren werd, was {hij} ongeveer {n} jaar.",vh_ageX:"Toen {child} in {y} geboren werd, was {hij} {n} jaar.",vh_young:" Dat is erg jong; misschien klopt een van de jaartallen niet.",vh_old:" Dat is opvallend oud; misschien klopt een van de jaartallen niet.",
- vh_kidsN:"Met {partner} kreeg {hij} {nw} kinderen die we kennen: {list}.",vh_kids1:"{Child} is het enige kind van {fn} en {partner} dat we kennen.",vh_kidsSolo:"{Hij} kreeg {nw} kinderen die we kennen: {list}.",vh_kidsN_living:"Met {partner} kreeg {hij} {nw} kinderen: {list}.",vh_kids1_living:"{Child} is het enige kind van {fn} en {partner}.",vh_kidsSolo_living:"{Hij} kreeg {nw} kinderen: {list}.",vh_other1:"Met {partner} kreeg {hij} ook een kind: {list}.",vh_otherN:"Met {partner} kreeg {hij} ook {nw} kinderen: {list}.",vh_kidsMore:" en nog {n} anderen",vh_kidsMore1:" en nog één ander",vh_sibs1:"{Fn} {heeft} {groups}, {list}.",vh_sibsN:"{Fn} {heeft} {groups}: {list}.",vh_half1:"Daarnaast {heeft} {fn} {groups}, {list}.",vh_halfN:"Daarnaast {heeft} {fn} {groups}: {list}.",vh_has:"heeft",vh_had:"had",sib_M1:"een broer",sib_MN:"{nw} broers",sib_F1:"een zus",sib_FN:"{nw} zussen",sib_X1:"een broer of zus",sib_XN:"{nw} broers of zussen",half_M1:"een halfbroer",half_MN:"{nw} halfbroers",half_F1:"een halfzus",half_FN:"{nw} halfzussen",half_X1:"een halfbroer of -zus",half_XN:"{nw} halfbroers of -zussen",num:"nul|een|twee|drie|vier|vijf|zes|zeven|acht|negen|tien|elf|twaalf",
+ vh_kidsN:"Met {partner} kreeg {hij} {nw} kinderen die we kennen: {list}.",vh_kids1:"{Child} is het enige kind van {fn} en {partner} dat we kennen.",vh_kidsSolo:"{Hij} kreeg {nw} kinderen die we kennen: {list}.",vh_kidsN_living:"Met {partner} kreeg {hij} {nw} kinderen: {list}.",vh_kids1_living:"{Child} is het enige kind van {fn} en {partner}.",vh_kidsSolo_living:"{Hij} kreeg {nw} kinderen: {list}.",vh_other1:"Met {partner} kreeg {hij} ook een kind: {list}.",vh_otherN:"Met {partner} kreeg {hij} ook {nw} kinderen: {list}.",vh_kidsMore:" en nog {n} anderen",vh_kidsMore1:" en nog één ander",vh_job:"{Hij} was {jobs}.",vh_jobLater:", later ",occ:"Beroep",vh_sibs1:"{Fn} {heeft} {groups}, {list}.",vh_sibsN:"{Fn} {heeft} {groups}: {list}.",vh_half1:"Daarnaast {heeft} {fn} {groups}, {list}.",vh_halfN:"Daarnaast {heeft} {fn} {groups}: {list}.",vh_has:"heeft",vh_had:"had",sib_M1:"een broer",sib_MN:"{nw} broers",sib_F1:"een zus",sib_FN:"{nw} zussen",sib_X1:"een broer of zus",sib_XN:"{nw} broers of zussen",half_M1:"een halfbroer",half_MN:"{nw} halfbroers",half_F1:"een halfzus",half_FN:"{nw} halfzussen",half_X1:"een halfbroer of -zus",half_XN:"{nw} halfbroers of -zussen",num:"nul|een|twee|drie|vier|vijf|zes|zeven|acht|negen|tien|elf|twaalf",
  vh_died:"{Hij} overleed {date}{place}{age}.",vh_diedP:"{Hij} overleed{place}{age}.",vh_inPlace:" in {place}",vh_samePlace:" in {place}, waar {hij} ook geboren was",vh_ageN:", {n} jaar oud",vh_ageC:", ongeveer {n} jaar oud",
  vh_sameYear:"Dat was hetzelfde jaar waarin {child} werd geboren.",vh_posthum:"{Child} werd dus pas na zijn dood geboren.",vh_odd:"Volgens de stamboom overleed {fn} al vóór de geboorte van {child}. Hier klopt waarschijnlijk iets niet.",vh_died_unknown:"Wanneer {hij} overleed, weten we nog niet.",vh_living:"{Fn} leeft nog, dus meer vertellen we hier niet.",
  vh_moveLand:"{Hij} werd geboren in {l1}, {child} in {l2}. Tussen die twee levens ligt dus een grote verhuizing.",vh_movePlace:"{Hij} kwam uit {p1}; {child} werd geboren in {p2}.",
@@ -1145,7 +1149,7 @@ Object.assign(I18N.en,{v_verhaal:"Story",
  vh_begin:"This story begins with {fn}.",
  vh_born_dp:"{Fn} was born {date} in {place}.",vh_born_d:"{Fn} was born {date}.",vh_born_p:"{Fn} was born in {place}.",vh_born_none:"We don't yet know when or where {fn} was born.",
  vh_age:"When {child} was born in {y}, {hij} was about {n}.",vh_ageX:"When {child} was born in {y}, {hij} was {n}.",vh_young:" That is very young; perhaps one of the years is wrong.",vh_old:" That is remarkably old; perhaps one of the years is wrong.",
- vh_kidsN:"With {partner}, {hij} had {nw} children that we know of: {list}.",vh_kids1:"{Child} is the only child of {fn} and {partner} that we know of.",vh_kidsSolo:"{Hij} had {nw} children that we know of: {list}.",vh_kidsN_living:"With {partner}, {hij} had {nw} children: {list}.",vh_kids1_living:"{Child} is the only child of {fn} and {partner}.",vh_kidsSolo_living:"{Hij} had {nw} children: {list}.",vh_other1:"With {partner}, {hij} also had a child: {list}.",vh_otherN:"With {partner}, {hij} also had {nw} children: {list}.",vh_kidsMore:" and {n} others",vh_kidsMore1:" and one other",vh_sibs1:"{Fn} {heeft} {groups}, {list}.",vh_sibsN:"{Fn} {heeft} {groups}: {list}.",vh_half1:"{Fn} also {heeft} {groups}, {list}.",vh_halfN:"{Fn} also {heeft} {groups}: {list}.",vh_has:"has",vh_had:"had",sib_M1:"a brother",sib_MN:"{nw} brothers",sib_F1:"a sister",sib_FN:"{nw} sisters",sib_X1:"a sibling",sib_XN:"{nw} siblings",half_M1:"a half-brother",half_MN:"{nw} half-brothers",half_F1:"a half-sister",half_FN:"{nw} half-sisters",half_X1:"a half-sibling",half_XN:"{nw} half-siblings",num:"zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve",
+ vh_kidsN:"With {partner}, {hij} had {nw} children that we know of: {list}.",vh_kids1:"{Child} is the only child of {fn} and {partner} that we know of.",vh_kidsSolo:"{Hij} had {nw} children that we know of: {list}.",vh_kidsN_living:"With {partner}, {hij} had {nw} children: {list}.",vh_kids1_living:"{Child} is the only child of {fn} and {partner}.",vh_kidsSolo_living:"{Hij} had {nw} children: {list}.",vh_other1:"With {partner}, {hij} also had a child: {list}.",vh_otherN:"With {partner}, {hij} also had {nw} children: {list}.",vh_kidsMore:" and {n} others",vh_kidsMore1:" and one other",vh_job:"{Hij} worked as {jobs}.",vh_jobLater:", later ",occ:"Occupation",vh_sibs1:"{Fn} {heeft} {groups}, {list}.",vh_sibsN:"{Fn} {heeft} {groups}: {list}.",vh_half1:"{Fn} also {heeft} {groups}, {list}.",vh_halfN:"{Fn} also {heeft} {groups}: {list}.",vh_has:"has",vh_had:"had",sib_M1:"a brother",sib_MN:"{nw} brothers",sib_F1:"a sister",sib_FN:"{nw} sisters",sib_X1:"a sibling",sib_XN:"{nw} siblings",half_M1:"a half-brother",half_MN:"{nw} half-brothers",half_F1:"a half-sister",half_FN:"{nw} half-sisters",half_X1:"a half-sibling",half_XN:"{nw} half-siblings",num:"zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve",
  vh_died:"{Hij} died {date}{place}{age}.",vh_diedP:"{Hij} died{place}{age}.",vh_inPlace:" in {place}",vh_samePlace:" in {place}, where {hij} was also born",vh_ageN:", aged {n}",vh_ageC:", aged about {n}",
  vh_sameYear:"That was the same year {child} was born.",vh_posthum:"So {child} was born after his death.",vh_odd:"According to the tree, {fn} died before {child} was born. Something is probably wrong here.",vh_died_unknown:"We don't yet know when {hij} died.",vh_living:"{Fn} is still alive, so we say no more here.",
  vh_moveLand:"{Hij} was born in {l1}, {child} in {l2}. Somewhere between those two lives lies a big move.",vh_movePlace:"{Hij} came from {p1}; {child} was born in {p2}.",
@@ -1246,6 +1250,8 @@ function vhTemplate(i,child,flags){const p=P[i],fn=vhFn(p),pr=vhPro(p),T=(k,v)=>
   if(child==null)out.push(T("vh_begin"));
   const bd=vhDate(p.bdate),bp=vhPlace(p.bplac);
   out.push(bd&&bp?T("vh_born_dp",{date:bd.t,place:bp}):bd?T("vh_born_d",{date:bd.t}):bp?T("vh_born_p",{place:bp}):T("vh_born_none"));
+  /* beroep(en) letterlijk uit de GEDCOM (OCCU), in volgorde: "Hij was timmerman, later bewaker." */
+  if(Array.isArray(p.beroep)&&p.beroep.length)out.push(T("vh_job",{jobs:p.beroep.join(_t("vh_jobLater"))}));
   if(child==null)out.push(...vhSibSentences(i,T));
   if(child!=null){const c=P[child],cfn=vhFn(c);
     const ag=p.by&&c.by&&c.by>=p.by?vhAge(p.bdate,c.bdate,p.by,c.by):null;if(ag&&ag.n>0){const n=ag.n;let s=T(ag.exact?"vh_ageX":"vh_age",{child:cfn,y:c.by,n});if(n<16)s+=_t("vh_young");else if(n>(p.x==="F"?50:70))s+=_t("vh_old");out.push(s)}
@@ -1309,6 +1315,8 @@ function vhRedraw(focus){const st=$("stage"),hold=st.offsetHeight;st.style.minHe
     addEventListener("scroll",tryRelease,{passive:true});setTimeout(tryRelease,400)})()}
 
 /* tijdgeest: data.json → "tijdgeest": {plaatsen:[{id,naam,match,leven,gebeurtenissen,beelden}], algemeen:{gebeurtenissen}} */
+/* label boven een tijdgeest-beeld, naar soort (foto, tekening, prent, schilderij, kaart, munt, affiche; Engelse namen mogen ook) */
+function vhKind(b){const m={photo:"foto",drawing:"tekening",print:"prent",painting:"schilderij",map:"kaart",coin:"munt",poster:"affiche"},s=String((b&&b.soort)||"").trim().toLowerCase(),k=m[s]||s;return _t(I18N.en["tg_k_"+k]!=null?"tg_k_"+k:"tg_k_x")}
 function vhTG(){return (typeof D!=="undefined"&&D&&D.tijdgeest)||null}
 function vhSpan(p){const s=p.by;if(!s)return null;const e=p.dy||(p.levend?new Date().getFullYear():s+60);return [s,Math.max(s,e)]}
 function vhPlacesOf(p){const T=vhTG();if(!T)return [];const t=normPlace((p.bplac||"")+" | "+(p.dplac||""));
@@ -1331,7 +1339,7 @@ function vhTijdgeest(i,seen){const T=vhTG();if(!T)return"";const p=P[i];if(p.liv
   for(const pl of pls)for(const L of pl.leven||[]){const key="L:"+pl.id+":"+L.van;
     if(mid>=L.van&&mid<L.tot&&!seen.has(key)){seen.add(key);html+=`<div class="vh-k">${slEsc(lab(L.titel)||_t("vh_tg_life",{plaats:lab(pl.naam)}))}</div>${vhParas(lab(L.tekst))}`}}
   for(const best of (seen.assign&&seen.assign.get(i))||[]){seen.add("B:"+best.bestand);const t=lab(best.titel);
-    html+=`<figure class="vh-fig"><button type="button" class="vh-fimg" data-tgimg="${slEsc(best.bestand)}" data-tgt="${slEsc(t)}" title="${slEsc(t)}"><img loading="lazy" src="${slEsc(best.bestand)}" alt="${slEsc(t)}"></button><figcaption><b>${slEsc(t)}</b>${best.maker?" · "+slEsc(best.maker):""}${best.datering?" · "+slEsc(best.datering):""}${best.bron?` · <a href="${slEsc(best.bron[1])}" target="_blank" rel="noopener">${slEsc(best.bron[0])}</a>`:""}${best.bijschrift?`<span>${slEsc(lab(best.bijschrift))}</span>`:""}</figcaption></figure>`}
+    html+=`<figure class="vh-fig"><div class="vh-fk">${slEsc(vhKind(best))}</div><button type="button" class="vh-fimg" data-tgimg="${slEsc(best.bestand)}" data-tgt="${slEsc(t)}" title="${slEsc(t)}"><img loading="lazy" src="${slEsc(best.bestand)}" alt="${slEsc(t)}"></button><figcaption><b>${slEsc(t)}</b>${best.maker?" · "+slEsc(best.maker):""}${best.datering?" · "+slEsc(best.datering):""}${best.bron?` · <a href="${slEsc(best.bron[1])}" target="_blank" rel="noopener">${slEsc(best.bron[0])}</a>`:""}${best.bijschrift?`<span>${slEsc(lab(best.bijschrift))}</span>`:""}</figcaption></figure>`}
   const evs=[];const add=(ev,lok)=>{const a=ev.van||ev.jaar,b=ev.tot||ev.jaar,key="E:"+(lok||"alg")+":"+ev.jaar+":"+lab(ev.tekst).slice(0,24);
     if(seen.has(key)||b<s+6||a>e)return;evs.push({ev,key,lok})};
   for(const pl of pls)for(const ev of pl.gebeurtenissen||[])add(ev,pl.id);
@@ -1600,7 +1608,7 @@ function famSheet(i,info){
   if(i!==r)btns.push(`<button type="button" class="btn" data-variant="outline" data-a="root">${_t("makeRoot")}</button>`);
   btns.push(`<button type="button" class="btn" data-variant="ghost" data-a="x">${_t("close")}</button>`);
   dlg.innerHTML=`<div class="sheet"><div class="grab" aria-hidden="true"></div><header><p class="rel">${rel}</p><h2 id="slsheet-t">${slEsc(p.n)}</h2></header>
-    <section>${line("°",p.bdate,p.bplac)}${line("†",p.ddate,p.dplac)}${hasPar?`<div class="ct">${crow(_t("Father"),p.f,cf)}${crow(_t("Mother"),p.m,cm)}</div>`:""}</section><footer>${btns.join("")}</footer></div>`;
+    <section>${line("°",p.bdate,p.bplac)}${line("†",p.ddate,p.dplac)}${jobLine(p)}${hasPar?`<div class="ct">${crow(_t("Father"),p.f,cf)}${crow(_t("Mother"),p.m,cm)}</div>`:""}</section><footer>${btns.join("")}</footer></div>`;
   const go=fn=>{dlg.close();setTimeout(fn,60)};
   dlg.querySelector('[data-a="x"]').onclick=()=>dlg.close();
   const b=a=>dlg.querySelector(`[data-a="${a}"]`);
@@ -1766,20 +1774,20 @@ function drawFamilie(){
 /* ===== SWIPE (experimental Swipe Stories: full-screen cards that play by themselves, built from the Story view) ===== */
 Object.assign(I18N.nl,{sw_btn:"Kaarten",sw_btn_t:"Het verhaal als kaarten die vanzelf doorlopen",sw_close:"Sluiten",sw_pause:"Pauze",sw_play:"Verder",sw_next:"Volgende",sw_prev:"Vorige",
  sw_hint:"Tik rechts: verder · tik links: terug · vasthouden: pauze · omhoog vegen: een generatie verder terug",
- sw_family:"Gezin",sw_era:"Meegemaakt",sw_doc:"Bekijk document",sw_view:"Bekijk beeld",sw_nextp:"hierna: {name}",sw_route:"Afgelegde route",sw_death:"Afscheid",sw_photo:"Een foto uit die tijd",sw_birth:"Geboren"});
+ sw_family:"Gezin",sw_era:"Meegemaakt",sw_doc:"Bekijk document",sw_view:"Bekijk beeld",sw_nextp:"hierna: {name}",sw_route:"Afgelegde route",sw_death:"Afscheid",tg_k_foto:"Een foto uit die tijd",tg_k_tekening:"Een tekening uit die tijd",tg_k_prent:"Een prent uit die tijd",tg_k_schilderij:"Een schilderij uit die tijd",tg_k_kaart:"Een kaart uit die tijd",tg_k_munt:"Een munt uit die tijd",tg_k_affiche:"Een affiche uit die tijd",tg_k_x:"Een beeld uit die tijd",sw_birth:"Geboren"});
 Object.assign(I18N.en,{sw_btn:"Cards",sw_btn_t:"The story as cards that play by themselves",sw_close:"Close",sw_pause:"Pause",sw_play:"Play",sw_next:"Next",sw_prev:"Previous",
  sw_hint:"Tap right: next · tap left: back · hold: pause · swipe up: one generation further back",
- sw_family:"Family",sw_era:"Lived through",sw_doc:"View document",sw_view:"View image",sw_nextp:"next: {name}",sw_route:"Route so far",sw_death:"Farewell",sw_photo:"A photo from that time",sw_birth:"Born"});
+ sw_family:"Family",sw_era:"Lived through",sw_doc:"View document",sw_view:"View image",sw_nextp:"next: {name}",sw_route:"Route so far",sw_death:"Farewell",tg_k_foto:"A photo from that time",tg_k_tekening:"A drawing from that time",tg_k_prent:"A print from that time",tg_k_schilderij:"A painting from that time",tg_k_kaart:"A map from that time",tg_k_munt:"A coin from that time",tg_k_affiche:"A poster from that time",tg_k_x:"An image from that time",sw_birth:"Born"});
 let SW=null;
 const SW_KIND={vh_begin:"b",vh_born_dp:"b",vh_born_d:"b",vh_born_p:"b",vh_born_none:"b",vh_age:"b",vh_ageX:"b",vh_living:"b",
-  vh_kidsN:"f",vh_kids1:"f",vh_kidsSolo:"f",vh_kidsN_living:"f",vh_kids1_living:"f",vh_kidsSolo_living:"f",vh_other1:"f",vh_otherN:"f",vh_sibs1:"b",vh_sibsN:"b",vh_half1:"b",vh_halfN:"b",vh_moveLand:"f",vh_movePlace:"f",
+  vh_job:"b",vh_kidsN:"k",vh_kids1:"k",vh_kidsSolo:"k",vh_kidsN_living:"k",vh_kids1_living:"k",vh_kidsSolo_living:"k",vh_other1:"f",vh_otherN:"f",vh_sibs1:"b",vh_sibsN:"b",vh_half1:"b",vh_halfN:"b",vh_moveLand:"f",vh_movePlace:"k",
   vh_died:"d",vh_diedP:"d",vh_sameYear:"d",vh_posthum:"d",vh_odd:"d",vh_died_unknown:"d",vh_dtb:"n"};
 /* vhTemplate's sentences, each tagged with the text key that made it (b = birth, f = family, d = death, e = era, n = note) */
 function swSentences(i,child,flags){const rec=[],orig=_t;let tpl;
   _t=(k,v)=>{const s=orig(k,v);rec.push([k,s]);return s};try{tpl=vhTemplate(i,child,flags)}finally{_t=orig}
   const kind=s=>{let best=null;for(const [k,o] of rec)if(o&&s.startsWith(o)&&(!best||o.length>best[1].length))best=[k,o];
     const k=best?best[0]:"";return SW_KIND[k]||(/^vh_(war|era)/.test(k)?"e":"f")};
-  const out={b:[],f:[],d:[],e:[],n:[]};tpl.paras.flat().forEach(s=>out[kind(s)].push(s));tpl.note.forEach(s=>out.n.push(s));return out}
+  const out={b:[],k:[],f:[],d:[],e:[],n:[]};tpl.paras.flat().forEach(s=>out[kind(s)].push(s));tpl.note.forEach(s=>out.n.push(s));return out}
 /* (this wraps _t for one call instead of changing vhTemplate, so the Story view stays exactly as it is) */
 /* the trail: the chosen path plus the richest continuation */
 function swPlan(path){const np=path.slice(),seen=new Set(np);let cur=np[np.length-1],n=0;
@@ -1800,11 +1808,12 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
       if(c&&c[3]&&!/^(biologisch|biological)$/i.test(c[3]))chips+=`<span class="sw-chip" style="--cc:#b48a3c">♥ ${_t("vh_adopt")}</span>`;
       chips+=`<span class="sw-chip" style="--cc:${CERT[st]||CERT["niet gecheckt"]}">${key==="zeker"?"✓ ":key==="fout"?"⚠ ":""}${_t("vh_c_"+key)}</span>`}
     const add=(kind,html,o)=>cards.push(Object.assign({kind,html,k},o||{}));
-    add("intro",`${por}<div class="sw-k">${slEsc(rel)}${k&&adoptSet(root).has(i)?" · "+_t("ks_fam_adopt"):""}</div><div class="sw-big">${por?"":p.by||""}</div><h2>${slEsc(p.n)}</h2><div class="sw-yy">${slEsc(yrs(p))}</div>${chips?`<div class="sw-chips">${chips}</div>`:""}<div class="sw-t">${T(S.b)}</div>${docb}`,{por,docs,len:S.b.join(" ").length});
+    add("intro",`${por}<div class="sw-k">${slEsc(rel)}${k&&adoptSet(root).has(i)?" · "+_t("ks_fam_adopt"):""}</div><div class="sw-big">${por?"":p.by||""}</div><h2>${slEsc(p.n)}</h2><div class="sw-yy">${slEsc(yrs(p))}</div>${chips?`<div class="sw-chips">${chips}</div>`:""}<div class="sw-t">${T(S.b.concat(S.f.length?[]:S.k))}</div>${docb}`,{por,docs,len:S.b.concat(S.f.length?[]:S.k).join(" ").length});
     if(vhHas(p)){const ps=vhParas(lab(p.verhaal)).split("</p>").filter(x=>x.trim()).map(x=>x+"</p>");
       ps.forEach((x,j)=>add("story",`<div class="sw-k">✦ ${slEsc(_t("vh_title",{name:fn}))}</div><div class="sw-t">${x}</div>${j===ps.length-1?`<div class="sw-note">${vhSources(p)}</div>`:""}`,{len:x.length}));
       (p.verhaal_beelden||[]).filter(b=>b&&b.bestand).forEach(b=>add("img",`<figure class="sw-fig"><img src="${slEsc(b.bestand)}" alt=""></figure><div class="sw-cap"><b>${slEsc(lab(b.titel)||"")}</b>${[b.maker,b.datering].filter(Boolean).map(slEsc).join(" · ")}</div>`,{img:1}))}
-    else if(S.f.length)add("family",`<div class="sw-k">${_t("sw_family")}</div><div class="sw-big">${p.ch.length>1?p.ch.length:""}</div><div class="sw-t">${T(S.f)}</div>`,{len:S.f.join(" ").length});
+    /* a separate family card only when there is more than the children (another partner, a move to another country); otherwise the children (and a move within the country) are on the intro card */
+    else if(S.f.length)add("family",`<div class="sw-k">${_t("sw_family")}</div><div class="sw-big">${p.ch.length>1?p.ch.length:""}</div><div class="sw-t">${T(S.k.concat(S.f))}</div>`,{len:S.k.concat(S.f).join(" ").length});
     /* zeitgeist: reuse the Story view's own block and cut it into cards */
     const tg=document.createElement("div");tg.innerHTML=vhTijdgeest(i,seen);let head="";
     for(const el of tg.querySelectorAll(".vh-tg>*")){
@@ -1812,7 +1821,7 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
       else if(el.tagName==="P"){const last=cards[cards.length-1];if(last&&last.kind==="life"&&last.head===head){last.html+=el.outerHTML;last.len+=el.textContent.length}
         else add("life",`<div class="sw-k">${slEsc(head)}</div><div class="sw-t">${el.outerHTML}`,{head,len:el.textContent.length})}
       else if(el.tagName==="FIGURE"){const im=el.querySelector("img"),cap=el.querySelector("figcaption");
-        add("img",`<div class="sw-k">${_t("sw_photo")}</div><figure class="sw-fig"><img src="${slEsc(im.getAttribute("src"))}" alt="${slEsc(im.alt)}"></figure><div class="sw-cap">${cap?cap.innerHTML.replace("</b> · ","</b>"):""}</div>`,{img:1})}
+        add("img",`<div class="sw-k">${slEsc((el.querySelector(".vh-fk")||{}).textContent||_t("tg_k_x"))}</div><figure class="sw-fig"><img src="${slEsc(im.getAttribute("src"))}" alt="${slEsc(im.alt)}"></figure><div class="sw-cap">${cap?cap.innerHTML.replace("</b> · ","</b>"):""}</div>`,{img:1})}
       else if(el.tagName==="UL")add("events",`<div class="sw-k">${slEsc(head)}</div><ul class="sw-ev">${el.innerHTML}</ul>`,{len:el.textContent.length})}
     cards.forEach(c=>{if(c.kind==="life")c.html+="</div>"});
     if(S.e.length){const t=S.e.join(" "),big=t.includes(_t("e_ww2"))?"1940–45":t.includes(_t("e_ww1"))?"1914–18":"";
@@ -1942,7 +1951,7 @@ function prepareData(d){
   const perView=Object.assign({},d.startpersoon_per_weergave||{});if(!v2&&d.eva!=null&&perView.stamlijn==null)perView.stamlijn=d.eva;
   const regios=d.regios||(v2?{}:LEGACY_REG),pl={};for(const k in (d.plaatsen||{}))pl[normPlace(k)]=d.plaatsen[k];
   const showLiving=d.levenden_tonen!==false;
-  people.forEach(p=>{if(p.levend&&!showLiving){p.living=true;for(const k of ["bdate","bplac","ddate","dplac","by","dy","r","media"])delete p[k]}});
+  people.forEach(p=>{if(p.levend&&!showLiving){p.living=true;for(const k of ["bdate","bplac","ddate","dplac","by","dy","r","media","beroep"])delete p[k]}});
   starts.forEach(s=>{if(!s.label)s.label=firstName(people[s.persoon])});
   const fam=d.familienaam||(!v2&&starts.length?people[starts[0].persoon].s:"");
   const ttl=d.titel||(fam?_t("titleFam",{name:fam}):_t("title"));

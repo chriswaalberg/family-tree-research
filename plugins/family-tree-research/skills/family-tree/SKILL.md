@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.2"
+  version: "0.9.3"
 ---
 
 # Family-tree research, hand in hand
@@ -97,6 +97,7 @@ For each place where many ancestors lived, build a zeitgeist (`zeitgeist/zeitgei
 - Start with the place with the most ancestors. Search local history sites, monument registers, museum collections and lists of disasters; give a source for every event and invent nothing.
 - Images: only freely usable work (public domain or CC0), with artist, date and source. The Rijksmuseum has an open search API (`data.rijksmuseum.nl/search/collection?description=<place>&imageAvailable=true`, objects via `id.rijksmuseum.nl/<id>`, images via IIIF); for other countries use national museum/library open-data collections and Wikimedia Commons. If the API is blocked, don't conclude the museum is closed: try its website (rijksmuseum.nl) in the browser, where search, object pages and images often still work (see "A blocked API is not a blocked site" in `references/sources.md`). If saving doesn't work, record title, artist and link per image so it can be done later.
 - **Check every image before you use it.** Rijksmuseum objects (Linked Art JSON) say `publicdomain/mark` (free) or `rightsstatements.org/vocab/InC` (copyright; often no image online at all). On Wikimedia Commons, read the licence via the API (`prop=imageinfo&iiprop=extmetadata`). Public domain and CC0 are fine; CC BY / CC BY-SA too, with photographer and licence in `maker`. Don't link to pages where the image can't actually be seen.
+- **Say what kind of image it is**: set `"soort"` to `foto`, `tekening`, `prent`, `schilderij`, `kaart`, `munt` or `affiche` (check the museum record, not the caption). The viewer then says "A drawing from that time" instead of calling everything a photo.
 - **Place images by time and age.** Mark images of a specific event with `"gebeurtenis": true` and images about children with `"kind": true` (see DATA-FORMAT.md). Then a famine photo of children lands with the ancestor who was a child then.
 - 20th century: national museums often have little that is free. Look for photographers who died more than 70 years ago (in the Netherlands e.g. Emmy Andriesse, d. 1953), government photo archives released as CC0 (Dutch National Archives / Anefo) and CC BY-SA collections on Wikimedia Commons (e.g. IISG).
 - Small drawings on a large mount: crop with IIIF (`…/pct:x,y,w,h/1800,/0/default.jpg`) instead of screenshotting the whole sheet.

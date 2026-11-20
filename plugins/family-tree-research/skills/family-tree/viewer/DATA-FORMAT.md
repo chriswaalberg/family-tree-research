@@ -46,6 +46,7 @@ Without a region code the viewer also recognises the country from the last part 
 | `levend` | yes/no | no | Living person. Informational only; with `"levenden_tonen": false` the viewer shows the name with "Living", without dates and places. |
 | `c` | object | no | Certainty of the relation to the parents: `{"f": [status, source, note], "m": [...]}`. An optional fourth element gives the kind of relation: `"aangenomen"` (raised as their own child), `"adoptie"` (adoption) or `"pleeg"` (foster); default is biological. The viewer then shows e.g. "raised as their own child" and the Story view explains that this parent was not the biological parent. |
 | `id` | text | no | Original GEDCOM id (e.g. `I12`), informational only. |
+| `beroep` | list of text | no | Occupations, literally from the GEDCOM (`1 OCCU`), in GEDCOM order: `["timmerman", "bewaker"]`. Shown in the person's details and in the Story text: "He worked as timmerman, later bewaker." / "Hij was timmerman, later bewaker." Left out for living people with `--hide-living`. |
 | `media` | list | no | Photos and documents, see below. |
 | `verhaal`, `verhaal_bronnen`, `verhaal_beelden` | | no | Own story, see "Stories" below. |
 
@@ -147,7 +148,7 @@ For most people the viewer writes a text from the data (birth, age at the child'
 |---|---|---|
 | `verhaal` | text or `{"en": …, "nl": …}` | Replaces the template text. Blank line = new paragraph; `**bold**`, `*italic*` and `[text](https://…)` work. |
 | `verhaal_bronnen` | list | Sources: `[["title", "https://…"], …]`, shown under the story. |
-| `verhaal_beelden` | list | Old images with the story: `[{"bestand": "media/verhalen/x.jpg", "titel": …, "maker": …, "datering": …, "bijschrift": …, "bron": ["title", "https://…"]}]` (`maker` = artist, `datering` = dating, `bijschrift` = caption, `bron` = source). |
+| `verhaal_beelden` | list | Old images with the story: `[{"bestand": "media/verhalen/x.jpg", "titel": …, "maker": …, "datering": …, "bijschrift": …, "bron": ["title", "https://…"]}]` (`maker` = artist, `datering` = dating, `bijschrift` = caption, `bron` = source). Optional `soort` as with zeitgeist images (`foto`, `tekening`, …). |
 
 A sibling with their own story appears as "Remarkable relative" with the ancestor on the trail.
 
@@ -177,7 +178,7 @@ Optional top-level field. Per place it paints a picture of how people lived ther
                        {"jaar": 1775, "van": 1771, "tot": 1780, "tekst": "In the 1770s …"}],
     "beelden": [{"bestand": "media/tijdgeest/katwijk-1660.jpg", "van": 1620, "tot": 1720, "jaar": 1660,
                  "titel": "Beach at Katwijk", "maker": "…", "datering": "c. 1650-1670",
-                 "bijschrift": "…", "bron": ["Rijksmuseum", "https://id.rijksmuseum.nl/…"]}]
+                 "bijschrift": "…", "bron": ["Rijksmuseum", "https://id.rijksmuseum.nl/…"], "soort": "schilderij"}]
   }],
   "algemeen": {"naam": "Netherlands", "gebeurtenissen": [{"jaar": 1811, "tekst": "…", "bron": ["…", "https://…"]}]}
 }}
@@ -186,6 +187,7 @@ Optional top-level field. Per place it paints a picture of how people lived ther
 Field names: `plaatsen` = places, `naam` = name, `van`/`tot` = from/to year, `jaar` = year, `titel` = title, `tekst` = text, `bron` = source, `algemeen` = general.
 
 - Images are spread over the whole trail: each image goes to the person who was alive then and whose mid-life is closest to its year (first one per person, then at most two). Only if nobody on the trail was alive then may a general view of the place go to someone born up to 25 years later. Set `"gebeurtenis": true` on an image of a specific event (a sea battle, a stranded whale); it only appears for people alive at the time. Also set `"kind": true` on an image about children (children in a famine, at school): it only goes to someone on the trail who was younger than 16 at the time (at most two per person). If nobody on the trail was a child then, the image is not shown on that trail.
+- `soort` on an image (kind): `foto`, `tekening`, `prent`, `schilderij`, `kaart`, `munt` or `affiche` (English also works in the input: photo, drawing, print, painting, map, coin, poster; `make_viewer_data.py` stores the Dutch value). The Story view and Cards show it above the image: "A drawing from that time" / "Een tekening uit die tijd"; without `soort`: "An image from that time". Not to be confused with `kind`, the flag for images about children.
 - `match`: text fragments that must occur in the birth or death place (without capitals and accents).
 - Lifespan: birth year to death year; without a death year the viewer assumes 60 years.
 - Texts can also be `{"en": …, "nl": …}`. Publish images as `media/tijdgeest/<name>` next to index.html. Only use images that are free to use (public domain or CC0), and credit artist and source.
