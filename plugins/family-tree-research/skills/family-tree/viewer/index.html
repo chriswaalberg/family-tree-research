@@ -697,7 +697,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.5",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.6",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1127,7 +1127,7 @@ Object.assign(I18N.nl,{v_verhaal:"Verhaal",
  vh_step0:"Hier begint het",vh_stepN:"Stap {k} · {rel} van {root}",
  vh_begin:"Dit verhaal begint bij {fn}.",
  vh_born_dp:"{Fn} werd {date} geboren in {place}.",vh_born_d:"{Fn} werd {date} geboren.",vh_born_p:"{Fn} werd geboren in {place}.",vh_born_none:"Wanneer en waar {fn} geboren is, weten we nog niet.",
- vh_age:"Toen {child} in {y} geboren werd, was {hij} ongeveer {n} jaar.",vh_ageX:"Toen {child} in {y} geboren werd, was {hij} {n} jaar.",vh_young:" Dat is erg jong; misschien klopt een van de jaartallen niet.",vh_old:" Dat is opvallend oud; misschien klopt een van de jaartallen niet.",
+ vh_age:"Toen {child} in {y} geboren werd, was {hij} ongeveer {n} jaar.",vh_ageX:"Toen {child} in {y} geboren werd, was {hij} {n} jaar.",vh_ageIn:", toen {hij} {n} was",vh_ageInC:", toen {hij} ongeveer {n} was",vh_young:" Dat is erg jong; misschien klopt een van de jaartallen niet.",vh_old:" Dat is opvallend oud; misschien klopt een van de jaartallen niet.",
  vh_kidsN:"Met {partner} kreeg {hij} {nw} kinderen die we kennen: {list}.",vh_kids1:"{Child} is het enige kind van {fn} en {partner} dat we kennen.",vh_kidsSolo:"{Hij} kreeg {nw} kinderen die we kennen: {list}.",vh_kidsN_living:"Met {partner} kreeg {hij} {nw} kinderen: {list}.",vh_kids1_living:"{Child} is het enige kind van {fn} en {partner}.",vh_kidsSolo_living:"{Hij} kreeg {nw} kinderen: {list}.",vh_other1:"Met {partner} kreeg {hij} ook een kind: {list}.",vh_otherN:"Met {partner} kreeg {hij} ook {nw} kinderen: {list}.",vh_kidsMore:" en nog {n} anderen",vh_kidsMore1:" en nog één ander",vh_job:"{Hij} was {jobs}.",vh_jobLater:", later ",occ:"Beroep",vh_sibs1:"{Fn} {heeft} {groups}, {list}.",vh_sibsN:"{Fn} {heeft} {groups}: {list}.",vh_half1:"Daarnaast {heeft} {fn} {groups}, {list}.",vh_halfN:"Daarnaast {heeft} {fn} {groups}: {list}.",vh_has:"heeft",vh_had:"had",sib_M1:"een broer",sib_MN:"{nw} broers",sib_F1:"een zus",sib_FN:"{nw} zussen",sib_X1:"een broer of zus",sib_XN:"{nw} broers of zussen",half_M1:"een halfbroer",half_MN:"{nw} halfbroers",half_F1:"een halfzus",half_FN:"{nw} halfzussen",half_X1:"een halfbroer of -zus",half_XN:"{nw} halfbroers of -zussen",num:"nul|een|twee|drie|vier|vijf|zes|zeven|acht|negen|tien|elf|twaalf",
  vh_died:"{Hij} overleed {date}{place}{age}.",vh_diedP:"{Hij} overleed{place}{age}.",vh_inPlace:" in {place}",vh_samePlace:" in {place}, waar {hij} ook geboren was",vh_ageN:", {n} jaar oud",vh_ageC:", ongeveer {n} jaar oud",
  vh_sameYear:"Dat was hetzelfde jaar waarin {child} werd geboren.",vh_posthum:"{Child} werd dus pas na zijn dood geboren.",vh_odd:"Volgens de stamboom overleed {fn} al vóór de geboorte van {child}. Hier klopt waarschijnlijk iets niet.",vh_died_unknown:"Wanneer {hij} overleed, weten we nog niet.",vh_living:"{Fn} leeft nog, dus meer vertellen we hier niet.",
@@ -1152,7 +1152,7 @@ Object.assign(I18N.en,{v_verhaal:"Story",
  vh_step0:"Where it begins",vh_stepN:"Step {k} · {rel} of {root}",
  vh_begin:"This story begins with {fn}.",
  vh_born_dp:"{Fn} was born {date} in {place}.",vh_born_d:"{Fn} was born {date}.",vh_born_p:"{Fn} was born in {place}.",vh_born_none:"We don't yet know when or where {fn} was born.",
- vh_age:"When {child} was born in {y}, {hij} was about {n}.",vh_ageX:"When {child} was born in {y}, {hij} was {n}.",vh_young:" That is very young; perhaps one of the years is wrong.",vh_old:" That is remarkably old; perhaps one of the years is wrong.",
+ vh_age:"When {child} was born in {y}, {hij} was about {n}.",vh_ageX:"When {child} was born in {y}, {hij} was {n}.",vh_ageIn:", when {hij} was {n}",vh_ageInC:", when {hij} was about {n}",vh_young:" That is very young; perhaps one of the years is wrong.",vh_old:" That is remarkably old; perhaps one of the years is wrong.",
  vh_kidsN:"With {partner}, {hij} had {nw} children that we know of: {list}.",vh_kids1:"{Child} is the only child of {fn} and {partner} that we know of.",vh_kidsSolo:"{Hij} had {nw} children that we know of: {list}.",vh_kidsN_living:"With {partner}, {hij} had {nw} children: {list}.",vh_kids1_living:"{Child} is the only child of {fn} and {partner}.",vh_kidsSolo_living:"{Hij} had {nw} children: {list}.",vh_other1:"With {partner}, {hij} also had a child: {list}.",vh_otherN:"With {partner}, {hij} also had {nw} children: {list}.",vh_kidsMore:" and {n} others",vh_kidsMore1:" and one other",vh_job:"{Hij} worked as {jobs}.",vh_jobLater:", later ",occ:"Occupation",vh_sibs1:"{Fn} {heeft} {groups}, {list}.",vh_sibsN:"{Fn} {heeft} {groups}: {list}.",vh_half1:"{Fn} also {heeft} {groups}, {list}.",vh_halfN:"{Fn} also {heeft} {groups}: {list}.",vh_has:"has",vh_had:"had",sib_M1:"a brother",sib_MN:"{nw} brothers",sib_F1:"a sister",sib_FN:"{nw} sisters",sib_X1:"a sibling",sib_XN:"{nw} siblings",half_M1:"a half-brother",half_MN:"{nw} half-brothers",half_F1:"a half-sister",half_FN:"{nw} half-sisters",half_X1:"a half-sibling",half_XN:"{nw} half-siblings",num:"zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve",
  vh_died:"{Hij} died {date}{place}{age}.",vh_diedP:"{Hij} died{place}{age}.",vh_inPlace:" in {place}",vh_samePlace:" in {place}, where {hij} was also born",vh_ageN:", aged {n}",vh_ageC:", aged about {n}",
  vh_sameYear:"That was the same year {child} was born.",vh_posthum:"So {child} was born after his death.",vh_odd:"According to the tree, {fn} died before {child} was born. Something is probably wrong here.",vh_died_unknown:"We don't yet know when {hij} died.",vh_living:"{Fn} is still alive, so we say no more here.",
@@ -1236,8 +1236,11 @@ function vhList(a){return a.length<2?a.join(""):a.slice(0,-1).join(", ")+_t("lis
 function vhNum(n){const w=_t("num").split("|");return n>=0&&n<w.length?w[n]:String(n)}
 /* mensen in volgorde van geboorte, als "Femke (2015)"; zonder jaartal als dat onbekend is; meer dan 8: de eerste 8 en "en nog {n} anderen" */
 function vhByBirth(a){const y=k=>{const d=vhYMD(P[k].bdate);return d?d.y*1e4+d.m*100+d.d:(P[k].by?P[k].by*1e4:9e8)};return a.slice().sort((x,z)=>y(x)-y(z))}
-function vhNames(a){const s=vhByBirth(a),nm=k=>vhFn(P[k])+(P[k].by?` (${P[k].by})`:""),top=s.slice(0,8).map(nm);
-  if(s.length>8)return top.join(", ")+_t(s.length===9?"vh_kidsMore1":"vh_kidsMore",{n:vhNum(s.length-8)});return vhList(top)}
+function vhNames(a,note){const s=vhByBirth(a),top=s.slice(0,8),more=s.length>8;
+  const it=top.map((k,j)=>vhFn(P[k])+(P[k].by?` (${P[k].by})`:"")+(note&&note.k===k?note.txt+(j<top.length-1||more?",":""):""));
+  /* joining: after an item that ends with a comma (the folded-in age) no second comma */
+  let s2="";it.forEach((x,j)=>{if(j){const sep=more||j<it.length-1?", ":_t("listAnd");s2+=it[j-1].endsWith(",")?sep.replace(/^, /," ").replace(/^ (?=\S)/," "):sep}s2+=x});
+  return more?s2+_t(s.length===9?"vh_kidsMore1":"vh_kidsMore",{n:vhNum(s.length-8)}):s2}
 /* broers en zussen van de startpersoon: eerst de volle, dan de halve, gegroepeerd naar broer/zus */
 function vhSibSentences(i,T){const p=P[i],all=vhSibs(i),full=[],half=[],out=[];
   all.forEach(j=>{const q=P[j];(p.f>=0&&p.m>=0&&q.f===p.f&&q.m===p.m?full:half).push(j)});
@@ -1258,13 +1261,19 @@ function vhTemplate(i,child,flags){const p=P[i],fn=vhFn(p),pr=vhPro(p),T=(k,v)=>
   if(Array.isArray(p.beroep)&&p.beroep.length)out.push(T("vh_job",{jobs:p.beroep.join(_t("vh_jobLater"))}));
   if(child==null)out.push(...vhSibSentences(i,T));
   if(child!=null){const c=P[child],cfn=vhFn(c);
-    const ag=p.by&&c.by&&c.by>=p.by?vhAge(p.bdate,c.bdate,p.by,c.by):null;if(ag&&ag.n>0){const n=ag.n;let s=T(ag.exact?"vh_ageX":"vh_age",{child:cfn,y:c.by,n});if(n<16)s+=_t("vh_young");else if(n>(p.x==="F"?50:70))s+=_t("vh_old");out.push(s)}
     const partner=c.f===i?c.m:c.f;
     /* living people: the children are known, so no "that we know of" */
     const lv=p.levend||p.living?"_living":"";
     const kids=p.ch.filter(k=>partner>=0?(P[k].f===partner||P[k].m===partner):true);
-    if(partner>=0){const pfn=NORM(vhFn(P[partner])).slice(0,4).replace(/ae/,"aa")===NORM(cfn).slice(0,4).replace(/ae/,"aa")?short(P[partner]):vhFn(P[partner]);if(kids.length>1)out.push(T("vh_kidsN"+lv,{partner:pfn,n:kids.length,nw:vhNum(kids.length),list:vhNames(kids)}));else out.push(_t("vh_kids1"+lv,{Child:cfn,fn,partner:pfn}))}
-    else if(kids.length>1)out.push(T("vh_kidsSolo"+lv,{n:kids.length,nw:vhNum(kids.length),list:vhNames(kids)}));
+    /* age at the child's birth. With a list of several children it goes into that list, behind the child we came in through
+       ("Femke (2015), toen hij 30 was, en Daan (2017)"), so the child isn't named twice; otherwise a sentence of its own */
+    const ag=p.by&&c.by&&c.by>=p.by?vhAge(p.bdate,c.bdate,p.by,c.by):null,agN=ag&&ag.n>0?ag.n:0;
+    const warn=!agN?"":agN<16?_t("vh_young"):agN>(p.x==="F"?50:70)?_t("vh_old"):"";
+    const fold=agN&&kids.length>1&&vhByBirth(kids).slice(0,8).includes(child);
+    const note=fold?{k:child,txt:T(ag.exact?"vh_ageIn":"vh_ageInC",{n:agN})}:null;
+    if(agN&&!fold)out.push(T(ag.exact?"vh_ageX":"vh_age",{child:cfn,y:c.by,n:agN})+warn);
+    if(partner>=0){const pfn=NORM(vhFn(P[partner])).slice(0,4).replace(/ae/,"aa")===NORM(cfn).slice(0,4).replace(/ae/,"aa")?short(P[partner]):vhFn(P[partner]);if(kids.length>1)out.push(T("vh_kidsN"+lv,{partner:pfn,n:kids.length,nw:vhNum(kids.length),list:vhNames(kids,note)})+(fold?warn:""));else out.push(_t("vh_kids1"+lv,{Child:cfn,fn,partner:pfn}))}
+    else if(kids.length>1)out.push(T("vh_kidsSolo"+lv,{n:kids.length,nw:vhNum(kids.length),list:vhNames(kids,note)})+(fold?warn:""));
     const others=[...new Set(p.ch.map(k=>P[k].f===i?P[k].m:P[k].f).filter(q=>q>=0&&q!==partner))];
     others.forEach(q=>{const ks=p.ch.filter(k=>P[k].f===q||P[k].m===q);out.push(T(ks.length===1?"vh_other1":"vh_otherN",{partner:vhFn(P[q]),nw:vhNum(ks.length),list:vhNames(ks)}))});
     const l1=landOf(p),l2=landOf(c);
