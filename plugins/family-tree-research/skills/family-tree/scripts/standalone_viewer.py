@@ -6,8 +6,9 @@ Handy for emailing the family tree as a file, or when artifact publishing isn't 
   python3 standalone_viewer.py viewer/index.html data/data.json family-tree.html
   python3 standalone_viewer.py viewer/index.html data/data.json family-tree.html --media viewer
 
-With --media DIR, photos and documents with a path like "media/x.jpg" are read from DIR and baked into
-the file (data: URL), so they also show in the standalone file. Mind the file size.
+With --media DIR, files with a path like "media/x.jpg" are read from DIR and baked into the file
+(data: URL), so they also show in the standalone file: photos and documents of people, images with
+own stories (verhaal_beelden) and zeitgeist images (tijdgeest). Mind the file size.
 """
 import argparse, base64, json, mimetypes, os, sys
 
@@ -24,15 +25,28 @@ def main():
         sys.exit("Could not find where index.html loads data.json.")
     n_in = n_mis = 0
     if a.media:
-        for p in data.get("personen", []):
-            for m in p.get("media", []) or []:
-                if isinstance(m, dict) and m.get("bestand", "").startswith("media/"):
-                    pad = os.path.join(a.media, m["bestand"])
+        cache = {}
+        def embed(lst):
+            """Replace "media/..." paths in a list of items (dicts with "bestand", or plain strings)."""
+            nonlocal n_in, n_mis
+            for k, m in enumerate(lst or []):
+                rel = m.get("bestand", "") if isinstance(m, dict) else m if isinstance(m, str) else ""
+                if not rel.startswith("media/"):
+                    continue
+                pad = os.path.join(a.media, rel)
+                if pad not in cache:
                     if not os.path.isfile(pad):
                         n_mis += 1; continue
                     mime = mimetypes.guess_type(pad)[0] or "application/octet-stream"
-                    m["bestand"] = f"data:{mime};base64," + base64.b64encode(open(pad, "rb").read()).decode()
-                    n_in += 1
+                    cache[pad] = f"data:{mime};base64," + base64.b64encode(open(pad, "rb").read()).decode()
+                if isinstance(m, dict): m["bestand"] = cache[pad]
+                else: lst[k] = cache[pad]
+                n_in += 1
+        for p in data.get("personen", []):
+            embed(p.get("media"))
+            embed(p.get("verhaal_beelden"))
+        for pl in (data.get("tijdgeest") or {}).get("plaatsen", []):
+            embed(pl.get("beelden"))
     blob = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     html = html.replace(ZOEK, "Promise.resolve(window.__STAMBOOM__)", 1)
     html = html.replace("<head>", "<head>\n<script>window.__STAMBOOM__=" + blob + ";</script>", 1)

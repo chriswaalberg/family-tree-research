@@ -58,7 +58,7 @@ The template text (written by the viewer for people without an own story) also g
 ```
 python3 -I scripts/standalone_viewer.py viewer/index.html data/data.json family-tree.html --media viewer
 ```
-(`--media viewer` bakes the photos into the file; leave it out if the file gets too big.)
+(`--media viewer` bakes all images into the file: photos of people, images with stories and zeitgeist images. Leave it out if the file gets too big; then put the `media/` folder next to the HTML file.)
 → SendUserFile → `create_artifact` (later `update_artifact`).
 
 **No artifacts at all**: hand over `family-tree.html` as a download (SendUserFile) and put it in the connected folder. The file works offline in any browser (only the fonts come from Google Fonts) and can be emailed.
