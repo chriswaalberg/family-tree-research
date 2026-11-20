@@ -242,6 +242,8 @@ def img_kinds(images):
                 if b.get("type") == k: del b["type"]
             if "paragraph" in b and "alinea" not in b:  # story images: after which paragraph (1-based)
                 b["alinea"] = b.pop("paragraph")
+            if "card" in b and "kaart" not in b:  # ... and after which card of the card version (1-based)
+                b["kaart"] = b.pop("card")
             for k in ("standing_since", "built"):  # a building that already stood then: year it was built
                 if k in b and "stond_er_al" not in b:
                     b["stond_er_al"] = b.pop(k)
@@ -386,6 +388,57 @@ def story_image_warnings(p, images):
             if not ok: out.append(f"{name}: \"alinea\": {al} does not exist (the story has {n_par} paragraph(s))")
     for w in out:
         print(f"  warning, story image of {p['n']}: {w}", file=sys.stderr)
+    return len(out)
+
+
+CARD_MAX = 250       # characters per card (aim for ~200)
+PARA_LONG = 350      # a story paragraph this long, without a card version: suggest one
+FIRST_CARD_TIME = re.compile(
+    r"\b(1[5-9]\d\d|20\d\d)\b"                                              # a year
+    r"|\b\d{1,3}\s*(jaar|years?)\b|\b\d{1,2}-?jarige?\b|\b\w+jarige\b"           # "16 jaar", "16-jarige", "zestienjarige"
+    r"|\bop (zijn|haar|z'n) \w+(de|ste|e)\b|\btoen (hij|zij|ze) \w+( jaar)?( oud)? was\b"
+    r"|\bat (the age of )?\d{1,2}\b|\baged \w+\b|\bwhen (he|she) was (?!born)\w+\b", re.I)
+
+
+def split_paras(t):
+    return [x.strip() for x in re.split(r"\n\s*\n", t) if x.strip()] if isinstance(t, str) else []
+
+
+def story_card_warnings(p):
+    """The card version of a story ("verhaal_kaarten"): short cards, a hook first, the same number in every language,
+    every image on an existing card. Without a card version: a hint when a paragraph is long. Only warnings."""
+    out, cards, text = [], p.get("verhaal_kaarten"), p.get("verhaal")
+    if cards:
+        per = {k: split_paras(v) for k, v in (cards.items() if isinstance(cards, dict) else [("", cards)])}
+        if len({len(v) for v in per.values()}) > 1:
+            out.append("cards: not the same number in each language (" + ", ".join(f"{k} {len(v)}" for k, v in per.items()) + ")")
+        for lang, cs in per.items():
+            tag = f" ({lang})" if lang else ""
+            for j, c in enumerate(cs, 1):
+                if len(c) > CARD_MAX: out.append(f"card {j}{tag} has {len(c)} characters (max. {CARD_MAX}, aim for ~200)")
+            m = FIRST_CARD_TIME.search(cs[0]) if cs else None
+            if m:
+                ys = [int(y) for y in re.findall(r"\b(1[5-9]\d\d|20\d\d)\b", cs[0])]
+                moves = any(y != p.get("by") for y in ys) or not ys
+                out.append(f"card 1{tag} has a year or age (\"{m.group(0)}\"); make it a hook without one"
+                           + (": the viewer places cards by year, so the whole series moves to that moment" if moves else ""))
+        n = max((len(v) for v in per.values()), default=0)
+        for b in p.get("verhaal_beelden") or []:
+            if not isinstance(b, dict): continue
+            name = b.get("bestand") or "?"
+            k = b.get("kaart")
+            if k is None: out.append(f"image {name}: no \"kaart\" (after which card does it belong?)")
+            else:
+                try: ok = 1 <= int(k) <= n
+                except (TypeError, ValueError): ok = False
+                if not ok: out.append(f"image {name}: \"kaart\": {k} does not exist (the story has {n} card(s))")
+    else:
+        texts = text.values() if isinstance(text, dict) else [text]
+        longest = max((len(x) for t in texts for x in split_paras(t)), default=0)
+        if longest > PARA_LONG:
+            out.append(f"no card version (\"kaarten\") and a paragraph of {longest} characters; consider writing cards")
+    for w in out:
+        print(f"  warning, story of {p['n']}: {w}", file=sys.stderr)
     return len(out)
 
 
@@ -651,6 +704,8 @@ def main():
                 people[i]["verhaal"] = val.get("tekst", val.get("text"))
                 src = val.get("bronnen") or val.get("sources")
                 img = val.get("beelden") or val.get("images")
+                crd = val.get("kaarten") or val.get("cards")  # short version for Cards (blank line = new card)
+                if crd: people[i]["verhaal_kaarten"] = crd
                 if src: people[i]["verhaal_bronnen"] = src
                 if img: people[i]["verhaal_beelden"] = img_kinds(img)
             else:
@@ -665,7 +720,10 @@ def main():
                 if hit: b["scan"] = hit
                 else: print(f"  warning, story image of {p['n']}: \"scan\": {sc} is not one of this person's photos/documents (OBJE)", file=sys.stderr)
         n_warn = sum(story_image_warnings(p, p["verhaal_beelden"]) for p in people if p.get("verhaal_beelden"))
-        print(f"Stories: {n_vh} read" + (f", {n_warn} warning(s) about story images (see above)" if n_warn else ""))
+        n_cw = sum(story_card_warnings(p) for p in people if p.get("verhaal"))
+        n_kv = sum(1 for p in people if p.get("verhaal_kaarten"))
+        print(f"Stories: {n_vh} read, {n_kv} with cards" + (f", {n_warn} warning(s) about story images" if n_warn else "")
+              + (f", {n_cw} warning(s) about cards" if n_cw else "") + (" (see above)" if n_warn or n_cw else ""))
 
     for p in people: p.pop("_media_orig", None)
     fam = a.familienaam or surn0[starts[0]["persoon"]] or ""

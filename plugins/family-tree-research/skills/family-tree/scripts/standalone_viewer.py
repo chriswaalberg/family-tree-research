@@ -10,7 +10,7 @@ With --media DIR, files with a path like "media/x.jpg" are read from DIR and bak
 (data: URL), so they also show in the standalone file: photos and documents of people, images with
 own stories (verhaal_beelden) and zeitgeist images (tijdgeest). Mind the file size.
 """
-import argparse, base64, json, mimetypes, os, sys
+import argparse, base64, json, mimetypes, os, re, sys
 
 ZOEK = 'fetch("data.json").then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json()})'
 
@@ -49,7 +49,10 @@ def main():
             embed(pl.get("beelden"))
     blob = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     html = html.replace(ZOEK, "Promise.resolve(window.__STAMBOOM__)", 1)
-    html = html.replace("<head>", "<head>\n<script>window.__STAMBOOM__=" + blob + ";</script>", 1)
+    # the data goes after <meta charset>: a browser only looks for the charset in the first 1024 bytes
+    tag = "<script>window.__STAMBOOM__=" + blob + ";</script>"
+    m = re.search(r"<meta[^>]*charset[^>]*>", html, re.I)
+    html = html[:m.end()] + "\n" + tag + html[m.end():] if m else html.replace("<head>", "<head>\n<meta charset=\"utf-8\">\n" + tag, 1)
     open(a.uit, "w", encoding="utf-8").write(html)
     extra = f", {n_in} media embedded" + (f", {n_mis} not found" if n_mis else "") if a.media else ""
     print(f"{a.uit}: {len(data.get('personen', []))} people{extra}, {len(html)//1024} kB")

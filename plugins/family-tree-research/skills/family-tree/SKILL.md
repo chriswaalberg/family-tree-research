@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.16"
+  version: "0.9.17"
 ---
 
 # Family-tree research, hand in hand
@@ -84,7 +84,16 @@ The viewer has a **Story** view: from the start person step by step back in time
 - **Look for stories yourself.** After every research round, scan the tree for remarkable lives: a place of death in a camp or at sea, war, emigration, the Dutch East India Company or the army, a famous event, an unusual occupation, a sibling with a history of their own. Suggest them actively; don't wait for the user to ask.
 - **Ask about family legends** ("we descend from French nobility", "grandpa sailed the seven seas"). Test them against the tree and the archives and tell honestly what holds up, what doesn't, and what's still open.
 - Only write a story with sources (listed under the story), name what's uncertain, and invent nothing. Siblings with a story appear automatically as "Remarkable relative" with the ancestor.
-- **Short paragraphs: one card each.** In the Cards view every paragraph of an own story becomes one full-screen card on a phone. A paragraph without a year may give an age instead ("At sixteen he went to sea"); the viewer turns it into a year. Keep each paragraph to **at most ~60 words (about 350 characters, 2–3 sentences)** and one subject (childhood, work, a move, an event). Rather six short paragraphs than three long ones. The viewer splits a paragraph that is too long, but that cuts it mid-sentence with "…".
+- **Two layers: `text` to read, `cards` to swipe.** The Story view shows `text`; it may be rich, with paragraphs like in an article. The Cards view plays the story as full-screen cards on a phone, like Instagram Stories, and people drop off most after the first card. So give every story a short card version too, `cards` (blank line = new card). Rules for cards:
+  - **Card 1 is a hook**: the most striking fact, or a question, **without a year or age**. Not "X was born on … as the son of …": the intro card already says that. (The viewer places cards by year; a hook with "December 1943" pulls the whole series to 1943.)
+  - **One moment per card**, at most ~200 characters (2–3 short sentences).
+  - **Year or age at the front** of the card ("In 1953 …", "At sixteen …"); the viewer turns an age into a year.
+  - **End a card with a nudge** where you can: a turn or an open question ("Which ship, we don't know yet.").
+  - **Leave side matters out**: long lists of children, archive numbers. They stay in `text`.
+  - **Invent nothing**; the death sentence may be short.
+  - Every story image gets `card` (after which card). The same number of cards in every language.
+  - Example of a hook: "An Amsterdam boy who stepped off his ship in Australia and never went back on board. Then he boxed, he drifted, and he was in the papers. That's John."
+- **Every round: suggest cards for stories that don't have them yet.** Without `cards` the viewer uses the paragraphs of `text` as cards, and a long paragraph gets cut mid-sentence with "…". `make_viewer_data.py` names those stories ("consider writing cards").
 - **Give the surname line its stories too.** Not only remarkable lives: also write a story for every generation of the user's own name line (and other main lines) for which the research already holds records. Ordinary lives become vivid from what the records say: occupations, ages, addresses, signatures, witnesses, a child born before the wedding, a remarriage to a sister-in-law. Read the research reports and work logs first; most of the material is already there.
 - **Ask what the family knows.** Occupations, a family shop, where they lived, nicknames, what grandma used to tell. One detail ("he was a milkman, they had a dairy shop") brings a story to life and is in no archive. Record it as a source: "<name> (own knowledge, <date>)".
 - **Never address the reader as a descendant.** No "your line", "your surname", "to you": you don't know who reads it, and from another start person it's wrong. Write "this family tree", "the line", "this branch", "the generations after him". Interface text ("whose story do you follow?") is fine.
@@ -111,14 +120,14 @@ Images make the stories and the zeitgeist come alive, so searching for them is a
 - Big events (a siege, a flood, a famine, a war): an image with `"gebeurtenis": true`, so it only appears with people alive then. Images about children get `"kind": true`: a famine photo of children then lands with the ancestor who was a child at the time (see `viewer/DATA-FORMAT.md`).
 
 **Story images: same place, same time**
-Every story image belongs to one concrete moment in the story, and fits it in **place** (the same town, or the occupation or event from that paragraph) **and time** (rule of thumb: within ~15 years of that moment). A wider gap only for buildings that still stood the same way then: the caption says so ("the church looked like this when he was baptised there in 1802") and the image gets `"stond_er_al": <year built>` (e.g. `1653`), which turns the dating warning off. The same goes for a later drawing of something that already existed then, like a coat of arms (`"stond_er_al": <year it existed>`). Every story image gets `alinea`: the paragraph it belongs to. If you can't point to a paragraph, the image doesn't belong in the story (perhaps in the zeitgeist of the place). `make_viewer_data.py` warns when a dating falls outside birth − 10 to death + 10 or when `alinea` is missing or doesn't exist.
+Every story image belongs to one concrete moment in the story, and fits it in **place** (the same town, or the occupation or event from that paragraph) **and time** (rule of thumb: within ~15 years of that moment). A wider gap only for buildings that still stood the same way then: the caption says so ("the church looked like this when he was baptised there in 1802") and the image gets `"stond_er_al": <year built>` (e.g. `1653`), which turns the dating warning off. The same goes for a later drawing of something that already existed then, like a coat of arms (`"stond_er_al": <year it existed>`). Every story image gets `alinea`: the paragraph it belongs to (and `card`, the card it belongs to, when the story has cards). If you can't point to a paragraph, the image doesn't belong in the story (perhaps in the zeitgeist of the place). `make_viewer_data.py` warns when a dating falls outside birth − 10 to death + 10 or when `alinea` is missing or doesn't exist.
 
 **Every round**
 1. First count which stories and places have 0–1 images, and fill those first. (Count in `data/stories.json` and `zeitgeist/zeitgeist.json`: the `beelden`/`images` lists per story and per place.)
 2. Make search terms per story and place: occupation, place, event, year (e.g. "smid", "Katwijk strand", "watersnood 1861", "Den Helder 1955"), in the language of the country.
 3. Search in the order of "Images" in `references/sources.md`: Rijksmuseum, Wikimedia Commons, Dutch National Archives (Anefo, Van de Poll), regional image banks; abroad national museums and libraries, and Commons.
 4. In the final report of the round, give per story and per place the number of images.
-5. Close the round with a check, card by card (Story view or Cards): does every image fit the text just before it, in place **and** time? If not, move it (`alinea`) or drop it. Fix every warning from `make_viewer_data.py`.
+5. Close the round with a check, card by card (Story view or Cards): does every image fit the text just before it, in place **and** time? If not, move it (`alinea`, `card`) or drop it. Fix every warning from `make_viewer_data.py`.
 
 **Check before you use**
 - Only public domain or CC0, or CC BY / CC BY-SA with the maker's name and the licence in `maker`. Read the licence in the object record itself (museum record, Commons `extmetadata`), never assume it.
