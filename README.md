@@ -5,9 +5,11 @@ A plugin for Claude (Cowork) that guides you step by step through your family hi
 ## Install (with automatic updates)
 
 1. Open the Claude app → **Customize** → **Plugins**.
-2. Choose **Add marketplace** and enter: `chriswaalberg/family-tree-research`
+2. Click **Add** (top right) → **Add marketplace** and enter: `chriswaalberg/family-tree-research`
 3. Install **family-tree-research**.
-4. Turn on **Sync automatically** for the marketplace. New versions then arrive by themselves.
+4. Turn on automatic updates: **Add** (top right) → **Manage marketplaces** → **···** next to family-tree-research → **Sync automatically**. If the app asks you to connect GitHub, that's fine. Afterwards, check that the switch is still on.
+
+**Not getting the latest version?** Same menu, choose **Check for updates**. The "Synced commit" there should match the latest commit on GitHub.
 
 ## Get started
 
