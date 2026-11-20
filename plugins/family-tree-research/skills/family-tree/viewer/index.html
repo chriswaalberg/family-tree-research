@@ -1259,7 +1259,23 @@ function vhImgSlots(paras,imgs){const n=paras.length,slot=imgs.map(()=>-1),low=p
   return slot}
 /* one timeline per person: the year of each paragraph of an own story = the first year in it; the first paragraph without one = birth;
    others without one evenly between their neighbours (death after the last). A story that looks back keeps its own order. */
-function vhParaYears(paras,p){const k=paras.map(x=>{const m=String(x).match(/\b(1[5-9]\d\d|20\d\d)\b/);return m?+m[1]:null});
+/* an age in a paragraph without a year: "op zijn zestiende", "op haar 16e", "toen hij 16 was", "als zestienjarige";
+   "at sixteen", "at 16", "aged 16", "when she was 16" (number words up to thirty in both languages) */
+const VH_NUMW=(()=>{const m={},nl="een twee drie vier vijf zes zeven acht negen tien elf twaalf dertien veertien vijftien zestien zeventien achttien negentien twintig".split(" "),
+  en="one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty".split(" "),
+  enO="first second third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth fifteenth sixteenth seventeenth eighteenth nineteenth twentieth".split(" ");
+  const nlO=n=>n===1?"eerste":n===3?"derde":n===8?"achtste":n>=20?null:nl[n-1]+"de";
+  nl.forEach((w,j)=>{m[w]=j+1;if(nlO(j+1))m[nlO(j+1)]=j+1});m.een=1;en.forEach((w,j)=>m[w]=j+1);enO.forEach((w,j)=>m[w]=j+1);
+  m.twintigste=20;m.dertig=30;m.dertigste=30;m.thirty=30;m.thirtieth=30;
+  for(let u=1;u<=9;u++){m[nl[u-1]+"entwintig"]=20+u;m[nl[u-1]+"entwintigste"]=20+u; /* tweeëntwintig: NORM drops the accent */
+    m["twenty-"+en[u-1]]=20+u;m["twenty "+en[u-1]]=20+u;m["twenty-"+enO[u-1]]=20+u}
+  return m})();
+function vhAgeInText(x){const t=NORM(x),N="([a-z]+(?:[- ][a-z]+)?|\\d{1,2})";const num1=w=>{w=String(w).trim();if(/^\d+$/.test(w))return +w;return VH_NUMW[w]!=null?VH_NUMW[w]:VH_NUMW[w.replace(/(de|ste|e)$/,"")]},
+    num=w=>{const n=num1(w);return n!=null?n:num1(String(w).split(/[- ]/)[0])};
+  const pats=[new RegExp("\\bop (?:zijn|haar|z'n) "+N+"(?:de|ste|e)?\\b"),new RegExp("\\btoen (?:hij|zij|ze) "+N+"(?: jaar)?(?: oud)? was\\b"),new RegExp("\\bals "+N+"-?jarige\\b"),
+    new RegExp("\\bat (?:the age of )?"+N+"\\b"),new RegExp("\\baged "+N+"\\b"),new RegExp("\\bwhen (?:he|she) was "+N+"\\b")];
+  for(const re of pats){const m=t.match(re);if(!m)continue;const n=num(m[1]);if(n>=1&&n<=30)return n}return null}
+function vhParaYears(paras,p){const k=paras.map(x=>{const m=String(x).match(/\b(1[5-9]\d\d|20\d\d)\b/);if(m)return +m[1];const a=p.by?vhAgeInText(x):null;return a!=null?p.by+a:null});
   const s=p.by||null,e=p.dy||(p.by?p.by+60:null);
   if(k.length&&k[0]==null&&s!=null)k[0]=s; /* a first paragraph without a year is almost always about childhood: at birth */
   for(let a=0;a<k.length;a++){if(k[a]!=null)continue;let b=a;while(b<k.length&&k[b]==null)b++;
@@ -1396,10 +1412,16 @@ function vhTG(){return (typeof D!=="undefined"&&D&&D.tijdgeest)||null}
 function vhSpan(p){const s=p.by;if(!s)return null;const e=p.dy||(p.levend?new Date().getFullYear():s+60);return [s,Math.max(s,e)]}
 /* zeitgeist places where this person lived, with the years they provably lived there ("woon": own events, marriages, children's births).
    iv = [[from,to],…]. Old data.json without "woon": birth or death place, whole life. */
+/* Years abroad ("weg": [[from,to,land],…], to = null: until the end) are cut out of every home period (woon entries without a 4th element, the land). */
 function vhPlacesOf(p){const T=vhTG();if(!T)return [];const sp=vhSpan(p);
   const hit=(pl,t)=>{const n=normPlace(t);return (pl.match||[lab(pl.naam)]).some(m=>m&&n.includes(normPlace(m)))};
-  return (T.plaatsen||[]).map(pl=>{const iv=Array.isArray(p.woon)?p.woon.filter(w=>hit(pl,w[0])).map(w=>[w[1],w[2]]):(sp&&hit(pl,(p.bplac||"")+" | "+(p.dplac||""))?[sp]:[]);
+  return (T.plaatsen||[]).map(pl=>{const iv=Array.isArray(p.woon)?p.woon.filter(w=>hit(pl,w[0])).flatMap(w=>w[3]?[[w[1],w[2]]]:vhCutWeg(p,[[w[1],w[2]]])):(sp&&hit(pl,(p.bplac||"")+" | "+(p.dplac||""))?vhCutWeg(p,[sp]):[]);
     return iv.length?{pl,iv}:null}).filter(Boolean)}
+function vhWeg(p){return Array.isArray(p.weg)?p.weg:[]}
+function vhAbroad(p,y){return vhWeg(p).some(([a,b])=>y>=a&&(b==null||y<b))}
+function vhCutWeg(p,iv){let out=iv;for(const [a,b] of vhWeg(p)){const e=b==null?Infinity:b;out=out.flatMap(([x,y])=>y<a||x>=e?[[x,y]]:[...(x<a?[[x,a-1]]:[]),...(y>=e?[[e,y]]:[])])}return out}
+/* the country someone lived in in year y: abroad according to "weg", else landOf */
+function landAt(p,y){const w=vhWeg(p).find(([a,b])=>y>=a&&(b==null||y<b));return w?w[2]:landOf(p)}
 function vhInIv(iv,a,b){return iv.some(([x,y])=>a<=y&&b>=x)}
 /* beelden over het hele pad verdelen: elk beeld bij de persoon die het best past (bij voorkeur iemand die toen leefde), max. één per persoon; beelden met kind:true bij voorkeur bij iemand die toen nog een kind was (jonger dan 16) */
 function vhAssignImages(path){const cand=[];
@@ -1422,7 +1444,8 @@ function vhTijdgeest(i,seen){const T=vhTG();if(!T)return"";const p=P[i];if(p.liv
   const evs=[];const add=(ev,lok,iv)=>{const a=ev.van||ev.jaar,b=ev.tot||ev.jaar,key="E:"+(lok||"alg")+":"+ev.jaar+":"+lab(ev.tekst).slice(0,24);
     if(seen.has(key)||b<s+6||a>e||(iv&&!vhInIv(iv,a,b)))return;evs.push({ev,key,lok})};
   for(const {pl,iv} of pls)for(const ev of pl.gebeurtenissen||[])add(ev,pl.id,iv);
-  const land=landOf(p);if(T.algemeen&&(land==="NL"||(!land&&pls.length)))for(const ev of T.algemeen.gebeurtenissen||[])add(ev,null);
+  /* national events: not in the years someone lived abroad */
+  const land=landOf(p);if(T.algemeen&&(land==="NL"||(!land&&pls.length)))for(const ev of T.algemeen.gebeurtenissen||[])if(!vhAbroad(p,ev.jaar||ev.van))add(ev,null);
   evs.sort((x,y)=>x.ev.jaar-y.ev.jaar);
   const lok=evs.filter(x=>x.lok).slice(0,4),pick=lok.concat(evs.filter(x=>!x.lok&&!lok.some(l=>l.ev.jaar===x.ev.jaar)).slice(0,1)).sort((x,y)=>x.ev.jaar-y.ev.jaar);
   if(pick.length){pick.forEach(x=>seen.add(x.key));
@@ -2013,7 +2036,8 @@ function swTick(now){if(!SW)return;const dt=SW.last?Math.min(100,now-SW.last):0;
   swBars();SW.raf=requestAnimationFrame(swTick)}
 function swStep(d){const G=SW.gens[SW.g];SW.hint=false;
   if(d>0){if(SW.c<G.cards.length-1){SW.c++;swShow("next")}else swGen(1)}
-  else{if(SW.c>0){SW.c--;swShow("prev")}else if(SW.g>0){SW.g--;SW.c=0;swShow("down")}else{SW.t=0}}}
+  /* back from the first card: the last card of the person before (the mirror of going forward); swiping down still jumps to their first card */
+  else{if(SW.c>0){SW.c--;swShow("prev")}else if(SW.g>0){SW.g--;SW.c=SW.gens[SW.g].cards.length-1;swShow("prev")}else{SW.t=0}}}
 function swGen(d){SW.hint=false;if(d>0){if(SW.g<SW.gens.length-1){SW.g++;SW.c=0;swShow("up")}else{const L=SW.gens[SW.g];if(SW.c!==L.cards.length-1){SW.c=L.cards.length-1;swShow("next")}}}
   else if(SW.g>0){SW.g--;SW.c=0;swShow("down")}}
 function swChoose(q){const k=SW.g;SW.path=swPlan(SW.path.slice(0,k+1).concat(q));swBuild();SW.g=k+1;SW.c=0;swShow("up")}

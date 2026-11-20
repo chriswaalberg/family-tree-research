@@ -290,6 +290,70 @@ def residence_spans(points, by, dy):
     return out
 
 
+# ---------------------------------------------------------------- abroad ("weg")
+# countries people often emigrated to; only used to recognise a stay abroad (COUNTRIES above also count)
+ABROAD_COUNTRIES = {
+    "AU": ["australie", "australia", "australien"], "CA": ["canada"], "NZ": ["nieuw-zeeland", "new zealand"],
+    "ZA": ["zuid-afrika", "south africa"], "SR": ["suriname"], "CW": ["curacao", "nederlandse antillen", "netherlands antilles"],
+    "AR": ["argentinie", "argentina"], "BR": ["brazilie", "brazil"], "CL": ["chili", "chile"],
+}
+EMIG_TYPE = re.compile(r"emigr|landverhuiz", re.I)
+
+
+def country_key(plac):
+    """Country code of a place (or its last part when unknown); None for a place without a recognisable country ("Amsterdam")."""
+    parts = [x.strip() for x in norm(plac).split(",") if x.strip()]
+    if not parts: return None
+    for code, (names, *_r) in COUNTRIES.items():
+        if parts[-1] in names: return code
+    for code, names in ABROAD_COUNTRIES.items():
+        if parts[-1] in names: return code
+    return parts[-1].upper() if len(parts) > 1 else None
+
+
+def first_year(date):
+    """Earliest possible year: AFT 1952 -> 1952, BET 1950 AND 1955 -> 1950, ABT/BEF -> the year given."""
+    ys = [int(y) for y in re.findall(r"(?<!\d)(\d{3,4})(?!\d)", date or "")]
+    return min(ys) if ys else None
+
+
+def abroad_spans(r, p, people, fams, home):
+    """[[from, to, land], ...]: from = the earliest year of an EMIG, IMMI abroad, EVEN of type emigration or RESI abroad;
+    to = the first later dated fact in the home country (RESI, OCCU or another event with a place, marriage, child, IMMI back,
+    death); none: the year of death (null when unknown)."""
+    if not home: return []
+    abroad = lambda pl: (lambda k: k is not None and k != home)(country_key(pl))
+    starts, homef = [], []
+    for e in r["c"]:
+        d = (sub(e, "DATE") or {}).get("v", "")
+        pl = (sub(e, "PLAC") or {}).get("v", "").strip()
+        typ = (sub(e, "TYPE") or {}).get("v", "")
+        y = first_year(d)
+        if not y: continue
+        if e["t"] == "EMIG" or (e["t"] == "EVEN" and EMIG_TYPE.search(typ)) or (e["t"] in ("IMMI", "RESI") and pl and abroad(pl)):
+            starts.append((y, country_key(pl) if pl and abroad(pl) else None))
+        elif pl and not abroad(pl) and e["t"] not in ("BIRT", "CHR", "BAPM", "BURI", "CREM"):
+            homef.append(year_of(d))
+    for c in subs(r, "FAMS"):
+        fam = fams.get(c["v"])
+        for e in (subs(fam, "MARR") + subs(fam, "RESI")) if fam else []:
+            y = year_of((sub(e, "DATE") or {}).get("v", "")); pl = (sub(e, "PLAC") or {}).get("v", "")
+            if y and pl and not abroad(pl): homef.append(y)
+    for j in p["ch"]:
+        q = people[j]
+        if q.get("by") and q.get("bplac") and not abroad(q["bplac"]): homef.append(q["by"])
+    if p.get("dy") and p.get("dplac") and not abroad(p["dplac"]): homef.append(p["dy"])
+    homef = sorted(y for y in homef if y)
+    out = []
+    for y, land in sorted(starts, key=lambda t: t[0]):
+        if out and (out[-1][1] is None or y < out[-1][1]):
+            if land and out[-1][2] == "?": out[-1][2] = land
+            continue
+        tot = next((h for h in homef if h > y), p.get("dy"))
+        out.append([y, tot, land or next((l for yy, l in starts if l and yy >= y), "?")])
+    return out
+
+
 def story_image_warnings(p, images):
     """Story images should fit a moment in the story: a dating within (birth - 10) to (death + 10)
     and an existing paragraph ("alinea"). Only warnings; the data is written anyway."""
@@ -416,6 +480,19 @@ def main():
             q = people[j]
             if q.get("by") and q.get("bplac"): pts.append((q["by"], q["bplac"]))
         w = residence_spans(pts, p.get("by"), p.get("dy"))
+        # abroad: periods in another country, and that country as a 4th element on "woon" periods abroad
+        # home country: the country with the most dated facts (ties: the birth country), so an immigrant's new country is home
+        cnt = {}
+        for y, pl in pts:
+            k = country_key(pl)
+            if k: cnt[k] = cnt.get(k, 0) + 1
+        bk = country_key(p.get("bplac"))
+        home = max(cnt, key=lambda k: (cnt[k], k == bk)) if cnt else bk
+        weg = abroad_spans(r, p, people, fams, home)
+        if weg: p["weg"] = weg
+        for x in w:
+            k = country_key(x[0])
+            if home and k and k != home: x.append(k)
         if w: p["woon"] = w
 
     # ---- media: copy local files (only with --media-dir)
@@ -526,7 +603,7 @@ def main():
         if not dead and y is not None and y >= cutoff:
             p["levend"] = True; n_lev += 1
             if a.levenden_verbergen:
-                for k in ("bdate", "bplac", "ddate", "dplac", "by", "dy", "r", "media", "beroep", "woon"):
+                for k in ("bdate", "bplac", "ddate", "dplac", "by", "dy", "r", "media", "beroep", "woon", "weg"):
                     p.pop(k, None)
 
     # ---- start people
