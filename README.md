@@ -6,7 +6,7 @@ I've been researching my own family tree with Claude, including the Swedish orig
 
 Start with what you know (yourself, your parents, your grandparents) or with a GEDCOM export from Ancestry or MyHeritage. Claude searches public archives, notes for each ancestor how sure it is, and builds an interactive family tree. It works in **English and Dutch**. My favourite part is the Story view: you walk back through the generations and read how each of them lived.
 
-![The Story view: a grandfather's chapter with his story, how sure it is, life in his town and a 1955 photo. Example family that comes with the plugin.](docs/screenshots/story.png)
+![Three views side by side. Story: a grandfather's chapter with his story, how sure it is, life in his town and a 1955 photo. Swipe: the same story as full-screen cards, here the 1955 photo. Fan: all ancestors over 8 generations. Fictional example families that come with the plugin.](docs/screenshots/views.png)
 
 Not every archive lets Claude in. When one doesn't, Claude tells you exactly what to look up and asks for a screenshot.
 
