@@ -1997,7 +1997,8 @@ function render(){
 /* startpersoon kiezen: de startpersonen uit de data, de huidige, of iemand zoeken */
 let SEARCH_ROOT=false,SEARCH_OPEN=null;
 function rootPick(){let d=$("rootDlg");if(!d){d=document.createElement("dialog");d.id="rootDlg";d.className="rootdlg";document.body.appendChild(d);d.addEventListener("click",e=>{if(e.target===d)d.close()})}
-  const ids=[...new Set([state.root].concat(META.starts.map(s=>s.persoon)))].filter(i=>P[i]);
+  /* vaste volgorde van de startpersonen (zoals in de data); de huidige persoon alleen extra bovenaan als die geen startpersoon is */
+  const st=META.starts.map(s=>s.persoon).filter(i=>P[i]),ids=[...new Set((st.includes(state.root)?[]:[state.root]).concat(st))];
   d.innerHTML=`<h2>${_t("rp_title")}</h2><p>${_t("rp_sub")}</p><div class="rp-list">${ids.map(i=>`<button type="button" data-p="${i}" class="${i===state.root?"on":""}"><b>${slEsc(P[i].n)}</b><span>${slEsc(yrs(P[i]))}</span></button>`).join("")}</div><button type="button" class="rp-search">⌕ ${_t("rp_other")}</button>`;
   d.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{d.close();setRootHard(+b.dataset.p)});
   d.querySelector(".rp-search").onclick=()=>{d.close();SEARCH_ROOT=true;if(SEARCH_OPEN)SEARCH_OPEN()};
