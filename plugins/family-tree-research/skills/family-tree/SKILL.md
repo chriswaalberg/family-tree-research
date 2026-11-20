@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.8"
+  version: "0.9.9"
 ---
 
 # Family-tree research, hand in hand
@@ -84,6 +84,7 @@ The viewer has a **Story** view: from the start person step by step back in time
 - **Look for stories yourself.** After every research round, scan the tree for remarkable lives: a place of death in a camp or at sea, war, emigration, the Dutch East India Company or the army, a famous event, an unusual occupation, a sibling with a history of their own. Suggest them actively; don't wait for the user to ask.
 - **Ask about family legends** ("we descend from French nobility", "grandpa sailed the seven seas"). Test them against the tree and the archives and tell honestly what holds up, what doesn't, and what's still open.
 - Only write a story with sources (listed under the story), name what's uncertain, and invent nothing. Siblings with a story appear automatically as "Remarkable relative" with the ancestor.
+- **Short paragraphs: one card each.** In the Cards view every paragraph of an own story becomes one full-screen card on a phone. Keep each paragraph to **at most ~60 words (about 350 characters, 2–3 sentences)** and one subject (childhood, work, a move, an event). Rather six short paragraphs than three long ones. The viewer splits a paragraph that is too long, but that cuts it mid-sentence with "…".
 - **Give the surname line its stories too.** Not only remarkable lives: also write a story for every generation of the user's own name line (and other main lines) for which the research already holds records. Ordinary lives become vivid from what the records say: occupations, ages, addresses, signatures, witnesses, a child born before the wedding, a remarriage to a sister-in-law. Read the research reports and work logs first; most of the material is already there.
 - **Ask what the family knows.** Occupations, a family shop, where they lived, nicknames, what grandma used to tell. One detail ("he was a milkman, they had a dairy shop") brings a story to life and is in no archive. Record it as a source: "<name> (own knowledge, <date>)".
 - **Never address the reader as a descendant.** No "your line", "your surname", "to you": you don't know who reads it, and from another start person it's wrong. Write "this family tree", "the line", "this branch", "the generations after him". Interface text ("whose story do you follow?") is fine.

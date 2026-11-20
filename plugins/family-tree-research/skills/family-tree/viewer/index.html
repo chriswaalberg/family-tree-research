@@ -536,6 +536,7 @@ main{padding-top:6px}
 /* fitting a card (swFit): f1 smaller photo next to the title, f2 smaller title, f3 smaller text (min. 17px); fscroll = last resort, scroll inside the card */
 .sw .sw-card.f1 .sw-por{float:right;width:min(30cqw,120px);margin:0 0 10px 12px;border-radius:10px;border-width:2px}
 .sw .sw-card.f1 .sw-fig img{max-height:34dvh}
+.sw .sw-card.f1 .sw-docs{flex-wrap:nowrap;gap:6px}.sw .sw-card.f1 .sw-doc{padding:3px}.sw .sw-card.f1 .sw-doc span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .sw .sw-card.f2 h2{font-size:clamp(24px,7cqw,32px)}
 .sw .sw-card.f2 .sw-yy{margin-bottom:8px}.sw .sw-card.f2 .sw-chips{margin-bottom:8px}
 .sw .sw-card.f3 .sw-t p,.sw .sw-card.f3 p.sw-t{font-size:17px;line-height:1.34}.sw .sw-card.f3 .sw-ev li{font-size:15.5px}.sw .sw-card.f3 .sw-cap span{font-size:14px}
@@ -707,7 +708,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.8",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.9",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1921,6 +1922,11 @@ function swFit(n){if(!SW||!n||!n.isConnected||n.classList.contains("out"))return
   /* scrolling: the scroll area starts below the header, so text never slides under the name and the bars */
   if(scroll&&!img){b.style.paddingTop="12px";b.style.marginTop=topH+"px";b.style.maxHeight=`calc(100% - ${topH}px)`}
   if(scroll!==!!SW.needScroll){SW.needScroll=scroll;swPP()}}
+/* move the last word (or a whole link/bold element) of paragraph "from" to the start of "to", keeping the spaces as they were */
+function swMoveWord(from,to){const nd=from.lastChild;if(!nd)return;
+  if(nd.nodeType===3){const s=nd.textContent,cut=s.replace(/\s+$/,"").lastIndexOf(" ");
+    if(cut>0){to.insertBefore(document.createTextNode(s.slice(cut)),to.firstChild);nd.textContent=s.slice(0,cut)}else to.insertBefore(nd,to.firstChild)}
+  else to.insertBefore(nd,to.firstChild)}
 /* move the last paragraphs (or sentences, or events) to a new card right after this one, with its own bar */
 function swSplit(n,b,c,G,over){const box=b.querySelector(".sw-t,.sw-ev");if(!box)return;
   let units=[...box.children];
@@ -1928,6 +1934,16 @@ function swSplit(n,b,c,G,over){const box=b.querySelector(".sw-t,.sw-ev");if(!box
     const parts=units[0].innerHTML.replace(/([.!?])\s+(?=[A-Z0-9"‘“(À-Ý])/g,"$1\u0001").split("\u0001"); /* no lookbehind: older Safari can't parse it */
     if(parts.length>1){units[0].outerHTML=parts.map(x=>`<p>${x}</p>`).join("");units=[...box.children]}}
   const moved=[];while(over()&&units.length>1){const u=units.pop();moved.unshift(u.outerHTML);u.remove()}
+  /* still too long with one paragraph left: cut that paragraph itself, word by word (links and bold stay whole), with "…" on both sides */
+  const last=units[units.length-1];
+  if(over()&&last&&last.tagName==="P"){const rest=document.createElement("p");
+    while(over()&&last.childNodes.length)swMoveWord(last,rest);
+    if(rest.childNodes.length&&last.childNodes.length){let dots=last.appendChild(document.createTextNode(" …"));
+      /* the "…" may push it one line too far: move one more word each time */
+      for(let n=0;over()&&n<40&&last.childNodes.length>1;n++){dots.remove();swMoveWord(last,rest);dots=last.appendChild(document.createTextNode(" …"))}
+      const f=rest.firstChild;if(f&&f.nodeType===3)f.textContent=f.textContent.replace(/^\s+/,"");rest.insertBefore(document.createTextNode("… "),rest.firstChild);
+      moved.unshift(rest.outerHTML)}
+    else if(rest.childNodes.length){while(rest.firstChild)last.appendChild(rest.firstChild)}}
   if(!moved.length)return;
   const k=b.querySelector(".sw-k"),list=box.classList.contains("sw-ev");
   const html=(k?k.outerHTML:"")+(list?`<ul class="sw-ev">${moved.join("")}</ul>`:`<div class="sw-t">${moved.join("")}</div>`);
