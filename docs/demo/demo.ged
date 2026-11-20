@@ -1,0 +1,1725 @@
+0 HEAD
+1 SOUR Fictional demo family (docs/demo/make_demo.py)
+1 GEDC
+2 VERS 5.5.1
+1 CHAR UTF-8
+0 @I1@ INDI
+1 NAME Femke Johanna /de Vries/
+1 SEX F
+1 BIRT
+2 DATE 12 MAR 2015
+2 PLAC Utrecht, Utrecht, Nederland
+1 FAMC @F1@
+0 @I2@ INDI
+1 NAME Thomas /de Vries/
+1 SEX M
+1 BIRT
+2 DATE 4 JUN 1984
+2 PLAC Amersfoort, Utrecht, Nederland
+1 FAMC @F2@
+1 FAMS @F1@
+0 @I3@ INDI
+1 NAME Sanne /Peeters/
+1 SEX F
+1 BIRT
+2 DATE 22 SEP 1986
+2 PLAC Antwerpen, Antwerpen, België
+1 FAMC @F3@
+1 FAMS @F1@
+0 @I4@ INDI
+1 NAME Pieter Johannes /de Vries/
+1 SEX M
+1 FAMC @F100@
+1 BIRT
+2 DATE 3 JAN 1948
+2 PLAC Den Helder, Noord-Holland, Nederland
+1 DEAT
+2 DATE 17 AUG 2019
+2 PLAC Amersfoort, Utrecht, Nederland
+1 FAMS @F2@
+0 @I5@ INDI
+1 NAME Anna /Lindqvist/
+1 SEX F
+1 FAMC @F122@
+1 BIRT
+2 DATE ABT 1925
+2 PLAC Göteborg, Västra Götaland, Sverige
+1 DEAT
+2 DATE 2 FEB 2011
+2 PLAC Amersfoort, Utrecht, Nederland
+1 FAMS @F2@
+0 @I6@ INDI
+1 NAME Jozef /Peeters/
+1 SEX M
+1 FAMC @F150@
+1 BIRT
+2 DATE 1950
+2 PLAC Leuven, Vlaams-Brabant, België
+1 DEAT
+2 DATE 2020
+1 FAMS @F3@
+0 @I7@ INDI
+1 NAME Maria /Janssens/
+1 SEX F
+1 FAMC @F175@
+1 BIRT
+2 DATE 1953
+2 PLAC Mechelen, Antwerpen, België
+1 FAMS @F3@
+0 @F1@ FAM
+1 HUSB @I2@
+1 WIFE @I3@
+1 CHIL @I1@
+0 @F2@ FAM
+1 HUSB @I4@
+1 WIFE @I5@
+1 CHIL @I2@
+0 @F3@ FAM
+1 HUSB @I6@
+1 WIFE @I7@
+1 CHIL @I3@
+0 @I100@ INDI
+1 NAME Teunis Cornelis /de Vries/
+1 SEX M
+1 BIRT
+2 DATE 15 JUL 1922
+2 PLAC Medemblik, Noord-Holland, Nederland
+1 DEAT
+2 DATE 24 MAY 1973
+2 PLAC Medemblik, Noord-Holland, Nederland
+1 FAMC @F101@
+1 FAMS @F100@
+0 @I101@ INDI
+1 NAME Jacoba /Koster/
+1 SEX F
+1 BIRT
+2 DATE ABT 1922
+2 PLAC Enkhuizen, Noord-Holland, Nederland
+1 DEAT
+2 DATE 13 FEB 1998
+2 PLAC Purmerend, Noord-Holland, Nederland
+1 FAMC @F109@
+1 FAMS @F100@
+0 @I102@ INDI
+1 NAME Willem /de Vries/
+1 SEX M
+1 BIRT
+2 DATE 7 MAY 1891
+2 PLAC Medemblik, Noord-Holland, Nederland
+1 DEAT
+2 DATE 5 APR 1963
+2 PLAC Den Burg, Texel, Noord-Holland, Nederland
+1 FAMC @F102@
+1 FAMS @F101@
+0 @I103@ INDI
+1 NAME Dirkje Jannetje /Hoekstra/
+1 SEX F
+1 BIRT
+2 DATE 5 MAR 1891
+2 PLAC Purmerend, Noord-Holland, Nederland
+1 DEAT
+2 DATE 11 JUL 1949
+2 PLAC Purmerend, Noord-Holland, Nederland
+1 FAMC @F105@
+1 FAMS @F101@
+0 @I104@ INDI
+1 NAME Hendrik /de Vries/
+1 SEX M
+1 BIRT
+2 DATE 1862
+2 PLAC Alkmaar, Noord-Holland, Nederland
+1 DEAT
+2 DATE ABT 1909
+2 PLAC Alkmaar, Noord-Holland, Nederland
+1 FAMC @F103@
+1 FAMS @F102@
+0 @I105@ INDI
+1 NAME Geertruida Jacoba /Boon/
+1 SEX F
+1 BIRT
+2 DATE 24 FEB 1834
+2 PLAC Alkmaar, Noord-Holland, Nederland
+1 DEAT
+2 DATE 1891
+2 PLAC Alkmaar, Noord-Holland, Nederland
+1 FAMC @F104@
+1 FAMS @F103@
+0 @I106@ INDI
+1 NAME Maria /van der Meer/
+1 SEX F
+1 BIRT
+2 DATE 23 JAN 1802
+2 PLAC Medemblik, Noord-Holland, Nederland
+1 DEAT
+2 DATE 8 APR 1871
+2 PLAC Medemblik, Noord-Holland, Nederland
+1 FAMS @F104@
+0 @I107@ INDI
+1 NAME Adriaan /Hoekstra/
+1 SEX M
+1 BIRT
+2 DATE 16 JAN 1857
+2 PLAC Schagen, Noord-Holland, Nederland
+1 DEAT
+2 DATE 7 APR 1934
+2 PLAC Schagen, Noord-Holland, Nederland
+1 FAMC @F103@
+1 FAMS @F105@
+0 @I108@ INDI
+1 NAME Maria /Bos/
+1 SEX F
+1 BIRT
+2 DATE 1867
+2 PLAC Purmerend, Noord-Holland, Nederland
+1 DEAT
+2 DATE 24 FEB 1933
+2 PLAC Purmerend, Noord-Holland, Nederland
+1 FAMC @F106@
+1 FAMS @F105@
+0 @I109@ INDI
+1 NAME Cornelia /Mulder/
+1 SEX F
+1 BIRT
+2 DATE 28 JUL 1839
+2 PLAC Purmerend, Noord-Holland, Nederland
+1 DEAT
+2 DATE 24 FEB 1927
+2 PLAC Purmerend, Noord-Holland, Nederland
+1 FAMC @F107@
+1 FAMS @F106@
+0 @I110@ INDI
+1 NAME Jacob /Mulder/
+1 SEX M
+1 BIRT
+2 DATE 1812
+2 PLAC Alkmaar, Noord-Holland, Nederland
+1 DEAT
+2 DATE 12 SEP 1884
+2 PLAC Purmerend, Noord-Holland, Nederland
+1 FAMC @F108@
+1 FAMS @F107@
+0 @I111@ INDI
+1 NAME Cornelia Maria /Veenstra/
+1 SEX F
+1 BIRT
+2 DATE 1 AUG 1784
+2 PLAC Schagen, Noord-Holland, Nederland
+1 DEAT
+2 DATE 1871
+2 PLAC Schagen, Noord-Holland, Nederland
+1 FAMS @F108@
+0 @I112@ INDI
+1 NAME Dirk Jan /Koster/
+1 SEX M
+1 BIRT
+2 DATE 1886
+2 PLAC Purmerend, Noord-Holland, Nederland
+1 DEAT
+2 DATE 4 JAN 1949
+2 PLAC Purmerend, Noord-Holland, Nederland
+1 FAMC @F110@
+1 FAMS @F109@
+0 @I113@ INDI
+1 NAME Maria /Veenstra/
+1 SEX F
+1 BIRT
+2 DATE 1898
+2 PLAC Schagen, Noord-Holland, Nederland
+1 DEAT
+2 DATE 22 FEB 1975
+2 PLAC Schagen, Noord-Holland, Nederland
+1 FAMC @F118@
+1 FAMS @F109@
+0 @I114@ INDI
+1 NAME Klaas Gijsbert /Koster/
+1 SEX M
+1 BIRT
+2 DATE 22 JAN 1855
+2 PLAC Enkhuizen, Noord-Holland, Nederland
+1 DEAT
+2 DATE 13 MAY 1921
+2 PLAC Enkhuizen, Noord-Holland, Nederland
+1 FAMC @F111@
+1 FAMS @F110@
+0 @I115@ INDI
+1 NAME Grietje /Blom/
+1 SEX F
+1 BIRT
+2 DATE 1 NOV 1860
+2 PLAC Enkhuizen, Noord-Holland, Nederland
+1 DEAT
+2 DATE ABT 1926
+2 PLAC Den Burg, Texel, Noord-Holland, Nederland
+1 FAMC @F113@
+1 FAMS @F110@
+0 @I116@ INDI
+1 NAME Jacob /Koster/
+1 SEX M
+1 BIRT
+2 DATE 17 APR 1828
+2 PLAC Schagen, Noord-Holland, Nederland
+1 DEAT
+2 DATE 12 DEC 1885
+2 PLAC Purmerend, Noord-Holland, Nederland
+1 FAMS @F111@
+0 @I117@ INDI
+1 NAME Antje Antje /Hendriks/
+1 SEX F
+1 BIRT
+2 DATE ABT 1831
+2 PLAC Alkmaar, Noord-Holland, Nederland
+1 DEAT
+2 DATE 1896
+2 PLAC Den Burg, Texel, Noord-Holland, Nederland
+1 FAMC @F112@
+1 FAMS @F111@
+0 @I118@ INDI
+1 NAME Jacoba /Bos/
+1 SEX F
+1 BIRT
+2 DATE 1810
+2 PLAC Schagen, Noord-Holland, Nederland
+1 DEAT
+2 DATE 1858
+2 PLAC Schagen, Noord-Holland, Nederland
+1 FAMS @F112@
+0 @I119@ INDI
+1 NAME Friedrich Heinrich /Blom/
+1 SEX M
+1 BIRT
+2 DATE 7 FEB 1831
+2 PLAC Bentheim, Niedersachsen, Deutschland
+1 DEAT
+2 DATE 23 AUG 1897
+2 PLAC Bentheim, Niedersachsen, Deutschland
+1 FAMC @F114@
+1 FAMS @F113@
+0 @I120@ INDI
+1 NAME Dirkje /Hoekstra/
+1 SEX F
+1 BIRT
+2 DATE ABT 1830
+2 PLAC Den Helder, Noord-Holland, Nederland
+1 DEAT
+2 DATE 26 NOV 1898
+2 PLAC Den Helder, Noord-Holland, Nederland
+1 FAMC @F116@
+1 FAMS @F113@
+0 @I121@ INDI
+1 NAME Wilhelm /Blom/
+1 SEX M
+1 BIRT
+2 DATE 18 DEC 1806
+2 PLAC Lingen, Niedersachsen, Deutschland
+1 DEAT
+2 DATE 28 JUN 1861
+2 PLAC Bentheim, Niedersachsen, Deutschland
+1 FAMS @F114@
+0 @I122@ INDI
+1 NAME Catharina Elisabeth /Wessels/
+1 SEX F
+1 BIRT
+2 DATE 8 FEB 1799
+2 PLAC Lingen, Niedersachsen, Deutschland
+1 DEAT
+2 DATE 11 NOV 1846
+2 PLAC Lingen, Niedersachsen, Deutschland
+1 FAMC @F115@
+1 FAMS @F114@
+0 @I123@ INDI
+1 NAME Hermann Wilhelm /Wessels/
+1 SEX M
+1 BIRT
+2 DATE 23 MAY 1769
+2 PLAC Lingen, Niedersachsen, Deutschland
+1 DEAT
+2 DATE 28 JUL 1825
+2 PLAC Lingen, Niedersachsen, Deutschland
+1 FAMS @F115@
+0 @I124@ INDI
+1 NAME Hendrika Jannetje /Koster/
+1 SEX F
+1 BIRT
+2 DATE 7 JUN 1805
+2 PLAC Enkhuizen, Noord-Holland, Nederland
+1 DEAT
+2 DATE 7 OCT 1871
+2 PLAC Enkhuizen, Noord-Holland, Nederland
+1 FAMC @F117@
+1 FAMS @F116@
+0 @I125@ INDI
+1 NAME Jan /Koster/
+1 SEX M
+1 BIRT
+2 DATE ABT 1778
+2 PLAC Alkmaar, Noord-Holland, Nederland
+1 DEAT
+2 DATE 19 NOV 1832
+2 PLAC Alkmaar, Noord-Holland, Nederland
+1 FAMS @F117@
+0 @I126@ INDI
+1 NAME Gerrit Hendrik /Veenstra/
+1 SEX M
+1 BIRT
+2 DATE ABT 1861
+2 PLAC Medemblik, Noord-Holland, Nederland
+1 DEAT
+2 DATE 1927
+2 PLAC Den Burg, Texel, Noord-Holland, Nederland
+1 FAMC @F119@
+1 FAMS @F118@
+0 @I127@ INDI
+1 NAME Dirkje /Boon/
+1 SEX F
+1 BIRT
+2 DATE 1869
+2 PLAC Schagen, Noord-Holland, Nederland
+1 DEAT
+2 DATE 8 FEB 1930
+2 PLAC Medemblik, Noord-Holland, Nederland
+1 FAMC @F103@
+1 FAMS @F118@
+0 @I128@ INDI
+1 NAME Jacob /Veenstra/
+1 SEX M
+1 BIRT
+2 DATE 5 SEP 1824
+2 PLAC Den Helder, Noord-Holland, Nederland
+1 DEAT
+2 DATE ABT 1870
+2 PLAC Schagen, Noord-Holland, Nederland
+1 FAMC @F120@
+1 FAMS @F119@
+0 @I129@ INDI
+1 NAME Adriaan /Veenstra/
+1 SEX M
+1 BIRT
+2 DATE 11 JUL 1786
+2 PLAC Den Helder, Noord-Holland, Nederland
+1 DEAT
+2 DATE 4 MAR 1866
+2 PLAC Den Helder, Noord-Holland, Nederland
+1 FAMS @F120@
+0 @I130@ INDI
+1 NAME Johanna /Visser/
+1 SEX F
+1 BIRT
+2 DATE 10 APR 1800
+2 PLAC Purmerend, Noord-Holland, Nederland
+1 DEAT
+2 DATE 21 JUN 1872
+2 PLAC Purmerend, Noord-Holland, Nederland
+1 FAMC @F121@
+1 FAMS @F120@
+0 @I131@ INDI
+1 NAME Pieter /Visser/
+1 SEX M
+1 BIRT
+2 DATE ABT 1762
+2 PLAC Medemblik, Noord-Holland, Nederland
+1 DEAT
+2 DATE 2 DEC 1843
+2 PLAC Medemblik, Noord-Holland, Nederland
+1 FAMS @F121@
+0 @I132@ INDI
+1 NAME Per /Nilsson/
+1 SEX M
+1 BIRT
+2 DATE ABT 1893
+2 PLAC Göteborg, Västra Götaland, Sverige
+1 DEAT
+2 DATE 1943
+2 PLAC Uddevalla, Västra Götaland, Sverige
+1 FAMC @F123@
+1 FAMS @F122@
+0 @I133@ INDI
+1 NAME Ingrid /Svendotter/
+1 SEX F
+1 BIRT
+2 DATE ABT 1894
+2 PLAC Kungälv, Västra Götaland, Sverige
+1 DEAT
+2 DATE 18 JAN 1966
+2 PLAC Kungälv, Västra Götaland, Sverige
+1 FAMC @F140@
+1 FAMS @F122@
+0 @I134@ INDI
+1 NAME Nils Anders /Larsson/
+1 SEX M
+1 BIRT
+2 DATE 13 DEC 1858
+2 PLAC Borås, Västra Götaland, Sverige
+1 DEAT
+2 DATE 1926
+2 PLAC Borås, Västra Götaland, Sverige
+1 FAMC @F124@
+1 FAMS @F123@
+0 @I135@ INDI
+1 NAME Anna Greta /Larsdotter/
+1 SEX F
+1 BIRT
+2 DATE ABT 1859
+2 PLAC Göteborg, Västra Götaland, Sverige
+1 DEAT
+2 DATE 1928
+2 PLAC Göteborg, Västra Götaland, Sverige
+1 FAMC @F133@
+1 FAMS @F123@
+0 @I136@ INDI
+1 NAME Lars /Nilsson/
+1 SEX M
+1 BIRT
+2 DATE 22 SEP 1824
+2 PLAC Kungälv, Västra Götaland, Sverige
+1 DEAT
+2 DATE 23 APR 1898
+2 PLAC Kungälv, Västra Götaland, Sverige
+1 FAMC @F125@
+1 FAMS @F124@
+0 @I137@ INDI
+1 NAME Brita /Svendotter/
+1 SEX F
+1 BIRT
+2 DATE 5 MAR 1827
+2 PLAC Kungälv, Västra Götaland, Sverige
+1 DEAT
+2 DATE 14 APR 1906
+2 PLAC Kungälv, Västra Götaland, Sverige
+1 FAMC @F131@
+1 FAMS @F124@
+0 @I138@ INDI
+1 NAME Nils Lars /Andersson/
+1 SEX M
+1 BIRT
+2 DATE ABT 1791
+2 PLAC Borås, Västra Götaland, Sverige
+1 DEAT
+2 DATE ABT 1862
+2 PLAC Borås, Västra Götaland, Sverige
+1 FAMC @F126@
+1 FAMS @F125@
+0 @I139@ INDI
+1 NAME Brita Anna /Erikdotter/
+1 SEX F
+1 BIRT
+2 DATE 22 JUL 1792
+2 PLAC Alingsås, Västra Götaland, Sverige
+1 DEAT
+2 DATE 18 FEB 1854
+2 PLAC Kungälv, Västra Götaland, Sverige
+1 FAMC @F128@
+1 FAMS @F125@
+0 @I140@ INDI
+1 NAME Karin /Gustafdotter/
+1 SEX F
+1 BIRT
+2 DATE 28 SEP 1767
+2 PLAC Uddevalla, Västra Götaland, Sverige
+1 DEAT
+2 DATE 6 AUG 1849
+2 PLAC Kungälv, Västra Götaland, Sverige
+1 FAMC @F127@
+1 FAMS @F126@
+0 @I141@ INDI
+1 NAME Gustaf Gustaf /Persson/
+1 SEX M
+1 BIRT
+2 DATE 11 SEP 1740
+2 PLAC Borås, Västra Götaland, Sverige
+1 DEAT
+2 DATE ABT 1791
+2 PLAC Borås, Västra Götaland, Sverige
+1 FAMS @F127@
+0 @I142@ INDI
+1 NAME Erik Olof /Olofson/
+1 SEX M
+1 BIRT
+2 DATE 16 FEB 1766
+2 PLAC Borås, Västra Götaland, Sverige
+1 DEAT
+2 DATE 19 AUG 1854
+2 PLAC Borås, Västra Götaland, Sverige
+1 FAMC @F129@
+1 FAMS @F128@
+0 @I143@ INDI
+1 NAME Maria Elin /Olsson/
+1 SEX F
+1 BIRT
+2 DATE 1765
+2 PLAC Uddevalla, Västra Götaland, Sverige
+1 DEAT
+2 DATE ABT 1832
+2 PLAC Göteborg, Västra Götaland, Sverige
+1 FAMC @F130@
+1 FAMS @F128@
+0 @I144@ INDI
+1 NAME Olof /Gustafsson/
+1 SEX M
+1 BIRT
+2 DATE 11 AUG 1738
+2 PLAC Uddevalla, Västra Götaland, Sverige
+1 DEAT
+2 DATE 24 OCT 1805
+2 PLAC Uddevalla, Västra Götaland, Sverige
+1 FAMS @F129@
+0 @I145@ INDI
+1 NAME Brita Ingrid /Gustafsson/
+1 SEX F
+1 BIRT
+2 DATE 1739
+2 PLAC Uddevalla, Västra Götaland, Sverige
+1 DEAT
+2 DATE 2 MAR 1824
+2 PLAC Uddevalla, Västra Götaland, Sverige
+1 FAMS @F130@
+0 @I146@ INDI
+1 NAME Sven /Nilsson/
+1 SEX M
+1 BIRT
+2 DATE 20 AUG 1789
+2 PLAC Borås, Västra Götaland, Sverige
+1 DEAT
+2 DATE 4 DEC 1831
+2 PLAC Alingsås, Västra Götaland, Sverige
+1 FAMC @F132@
+1 FAMS @F131@
+0 @I147@ INDI
+1 NAME Nils Johan /Nilsson/
+1 SEX M
+1 BIRT
+2 DATE 1 MAY 1764
+2 PLAC Borås, Västra Götaland, Sverige
+1 DEAT
+2 DATE 27 MAY 1850
+2 PLAC Kungälv, Västra Götaland, Sverige
+1 FAMS @F132@
+0 @I148@ INDI
+1 NAME Anna /Svensson/
+1 SEX F
+1 BIRT
+2 DATE 12 MAY 1756
+2 PLAC Kungälv, Västra Götaland, Sverige
+1 DEAT
+2 DATE 12 MAY 1815
+2 PLAC Borås, Västra Götaland, Sverige
+1 FAMS @F132@
+0 @I149@ INDI
+1 NAME Lars /Johanson/
+1 SEX M
+1 BIRT
+2 DATE 26 OCT 1833
+2 PLAC Göteborg, Västra Götaland, Sverige
+1 DEAT
+2 DATE 25 DEC 1886
+2 PLAC Göteborg, Västra Götaland, Sverige
+1 FAMC @F134@
+1 FAMS @F133@
+0 @I150@ INDI
+1 NAME Sara /Gustafdotter/
+1 SEX F
+1 BIRT
+2 DATE ABT 1837
+2 PLAC Uddevalla, Västra Götaland, Sverige
+1 DEAT
+2 DATE ABT 1921
+2 PLAC Uddevalla, Västra Götaland, Sverige
+1 FAMC @F136@
+1 FAMS @F133@
+0 @I151@ INDI
+1 NAME Johan /Larsson/
+1 SEX M
+1 BIRT
+2 DATE ABT 1798
+2 PLAC Alingsås, Västra Götaland, Sverige
+1 DEAT
+2 DATE 19 DEC 1852
+2 PLAC Göteborg, Västra Götaland, Sverige
+1 FAMC @F135@
+1 FAMS @F134@
+0 @I152@ INDI
+1 NAME Brita /Andersson/
+1 SEX F
+1 BIRT
+2 DATE 7 FEB 1776
+2 PLAC Alingsås, Västra Götaland, Sverige
+1 DEAT
+2 DATE 5 AUG 1823
+2 PLAC Alingsås, Västra Götaland, Sverige
+1 FAMS @F135@
+0 @I153@ INDI
+1 NAME Gustaf /Gustafson/
+1 SEX M
+1 BIRT
+2 DATE 24 SEP 1808
+2 PLAC Alingsås, Västra Götaland, Sverige
+1 DEAT
+2 DATE 1876
+2 PLAC Alingsås, Västra Götaland, Sverige
+1 FAMC @F137@
+1 FAMS @F136@
+0 @I154@ INDI
+1 NAME Gustaf /Svenson/
+1 SEX M
+1 BIRT
+2 DATE 18 SEP 1782
+2 PLAC Borås, Västra Götaland, Sverige
+1 DEAT
+2 DATE 1840
+2 PLAC Borås, Västra Götaland, Sverige
+1 FAMC @F138@
+1 FAMS @F137@
+0 @I155@ INDI
+1 NAME Sara /Eriksson/
+1 SEX F
+1 BIRT
+2 DATE ABT 1778
+2 PLAC Uddevalla, Västra Götaland, Sverige
+1 DEAT
+2 DATE 2 OCT 1863
+2 PLAC Uddevalla, Västra Götaland, Sverige
+1 FAMC @F139@
+1 FAMS @F137@
+0 @I156@ INDI
+1 NAME Sven Nils /Larsson/
+1 SEX M
+1 BIRT
+2 DATE 13 DEC 1755
+2 PLAC Borås, Västra Götaland, Sverige
+1 DEAT
+2 DATE 8 OCT 1832
+2 PLAC Borås, Västra Götaland, Sverige
+1 FAMS @F138@
+0 @I157@ INDI
+1 NAME Sara /Andersson/
+1 SEX F
+1 BIRT
+2 DATE 12 DEC 1745
+2 PLAC Göteborg, Västra Götaland, Sverige
+1 DEAT
+2 DATE 18 SEP 1809
+2 PLAC Göteborg, Västra Götaland, Sverige
+1 FAMS @F139@
+0 @I158@ INDI
+1 NAME Sven /Larsson/
+1 SEX M
+1 BIRT
+2 DATE 18 JUN 1859
+2 PLAC Kungälv, Västra Götaland, Sverige
+1 DEAT
+2 DATE 2 OCT 1940
+2 PLAC Kungälv, Västra Götaland, Sverige
+1 FAMC @F141@
+1 FAMS @F140@
+0 @I159@ INDI
+1 NAME Kajsa /Karldotter/
+1 SEX F
+1 BIRT
+2 DATE 22 MAR 1872
+2 PLAC Alingsås, Västra Götaland, Sverige
+1 DEAT
+2 DATE ABT 1935
+2 PLAC Alingsås, Västra Götaland, Sverige
+1 FAMC @F144@
+1 FAMS @F140@
+0 @I160@ INDI
+1 NAME Elin /Eriksson/
+1 SEX F
+1 BIRT
+2 DATE 1826
+2 PLAC Kungälv, Västra Götaland, Sverige
+1 DEAT
+2 DATE 17 JAN 1885
+2 PLAC Borås, Västra Götaland, Sverige
+1 FAMC @F142@
+1 FAMS @F141@
+0 @I161@ INDI
+1 NAME Sara /Andersdotter/
+1 SEX F
+1 BIRT
+2 DATE ABT 1806
+2 PLAC Borås, Västra Götaland, Sverige
+1 DEAT
+2 DATE ABT 1893
+2 PLAC Borås, Västra Götaland, Sverige
+1 FAMC @F143@
+1 FAMS @F142@
+0 @I162@ INDI
+1 NAME Anders Karl /Andersson/
+1 SEX M
+1 BIRT
+2 DATE 17 AUG 1774
+2 PLAC Uddevalla, Västra Götaland, Sverige
+1 DEAT
+2 DATE ABT 1834
+2 PLAC Uddevalla, Västra Götaland, Sverige
+1 FAMS @F143@
+0 @I163@ INDI
+1 NAME Ingrid /Nilsson/
+1 SEX F
+1 BIRT
+2 DATE 1776
+2 PLAC Borås, Västra Götaland, Sverige
+1 DEAT
+2 DATE 1838
+2 PLAC Borås, Västra Götaland, Sverige
+1 FAMS @F143@
+0 @I164@ INDI
+1 NAME Karl /Nilsson/
+1 SEX M
+1 BIRT
+2 DATE 23 APR 1846
+2 PLAC Göteborg, Västra Götaland, Sverige
+1 DEAT
+2 DATE 24 APR 1912
+2 PLAC Kungälv, Västra Götaland, Sverige
+1 FAMC @F145@
+1 FAMS @F144@
+0 @I165@ INDI
+1 NAME Sara /Andersson/
+1 SEX F
+1 BIRT
+2 DATE 3 NOV 1842
+2 PLAC Göteborg, Västra Götaland, Sverige
+1 DEAT
+2 DATE 26 JUN 1927
+2 PLAC Göteborg, Västra Götaland, Sverige
+1 FAMC @F147@
+1 FAMS @F144@
+0 @I166@ INDI
+1 NAME Ingrid Brita /Karlsson/
+1 SEX F
+1 BIRT
+2 DATE 1818
+2 PLAC Borås, Västra Götaland, Sverige
+1 DEAT
+2 DATE 21 DEC 1891
+2 PLAC Borås, Västra Götaland, Sverige
+1 FAMC @F146@
+1 FAMS @F145@
+0 @I167@ INDI
+1 NAME Brita Sara /Persson/
+1 SEX F
+1 BIRT
+2 DATE ABT 1791
+2 PLAC Borås, Västra Götaland, Sverige
+1 DEAT
+2 DATE 18 SEP 1837
+2 PLAC Borås, Västra Götaland, Sverige
+1 FAMS @F146@
+0 @I168@ INDI
+1 NAME Anna /Andersson/
+1 SEX F
+1 BIRT
+2 DATE 9 MAY 1818
+2 PLAC Borås, Västra Götaland, Sverige
+1 DEAT
+2 DATE 27 JAN 1877
+2 PLAC Borås, Västra Götaland, Sverige
+1 FAMC @F148@
+1 FAMS @F147@
+0 @I169@ INDI
+1 NAME Kristina /Gustafdotter/
+1 SEX F
+1 BIRT
+2 DATE ABT 1795
+2 PLAC Alingsås, Västra Götaland, Sverige
+1 DEAT
+2 DATE 1837
+2 PLAC Alingsås, Västra Götaland, Sverige
+1 FAMC @F149@
+1 FAMS @F148@
+0 @I170@ INDI
+1 NAME Gustaf /Eriksson/
+1 SEX M
+1 BIRT
+2 DATE 22 APR 1759
+2 PLAC Borås, Västra Götaland, Sverige
+1 DEAT
+2 DATE ABT 1834
+2 PLAC Alingsås, Västra Götaland, Sverige
+1 FAMS @F149@
+0 @I171@ INDI
+1 NAME Franciscus /Peeters/
+1 SEX M
+1 BIRT
+2 DATE 19 AUG 1920
+2 PLAC Aarschot, Vlaams-Brabant, België
+1 DEAT
+2 DATE 13 JUN 1974
+2 PLAC Aarschot, Vlaams-Brabant, België
+1 FAMC @F151@
+1 FAMS @F150@
+0 @I172@ INDI
+1 NAME Isabella /Maes/
+1 SEX F
+1 BIRT
+2 DATE 1 MAR 1919
+2 PLAC Herentals, Antwerpen, België
+1 DEAT
+2 DATE 2004
+2 PLAC Herentals, Antwerpen, België
+1 FAMC @F158@
+1 FAMS @F150@
+0 @I173@ INDI
+1 NAME Petrus Jan /Peeters/
+1 SEX M
+1 BIRT
+2 DATE ABT 1887
+2 PLAC Herentals, Antwerpen, België
+1 DEAT
+2 DATE 28 MAR 1940
+2 PLAC Herentals, Antwerpen, België
+1 FAMC @F152@
+1 FAMS @F151@
+0 @I174@ INDI
+1 NAME Theresia /Wouters/
+1 SEX F
+1 BIRT
+2 DATE 26 AUG 1891
+2 PLAC Mechelen, Antwerpen, België
+1 DEAT
+2 DATE 7 FEB 1970
+2 PLAC Mechelen, Antwerpen, België
+1 FAMC @F156@
+1 FAMS @F151@
+0 @I175@ INDI
+1 NAME Adrianus /Peeters/
+1 SEX M
+1 BIRT
+2 DATE 1857
+2 PLAC Mechelen, Antwerpen, België
+1 DEAT
+2 DATE 3 FEB 1902
+2 PLAC Mechelen, Antwerpen, België
+1 FAMS @F152@
+0 @I176@ INDI
+1 NAME Francisca /Aerts/
+1 SEX F
+1 BIRT
+2 DATE 1867
+2 PLAC Aarschot, Vlaams-Brabant, België
+1 DEAT
+2 DATE 5 FEB 1925
+2 PLAC Aarschot, Vlaams-Brabant, België
+1 FAMC @F153@
+1 FAMS @F152@
+0 @I177@ INDI
+1 NAME Joannes /Aerts/
+1 SEX M
+1 BIRT
+2 DATE 25 JUN 1832
+2 PLAC Mechelen, Antwerpen, België
+1 DEAT
+2 DATE ABT 1874
+2 PLAC Mechelen, Antwerpen, België
+1 FAMC @F154@
+1 FAMS @F153@
+0 @I178@ INDI
+1 NAME Francisca /Dubois/
+1 SEX F
+1 BIRT
+2 DATE 9 OCT 1840
+2 PLAC Leuven, Vlaams-Brabant, België
+1 DEAT
+2 DATE 12 MAR 1883
+2 PLAC Leuven, Vlaams-Brabant, België
+1 FAMS @F153@
+0 @I179@ INDI
+1 NAME Anna Theresia /Michiels/
+1 SEX F
+1 BIRT
+2 DATE 17 FEB 1798
+2 PLAC Leuven, Vlaams-Brabant, België
+1 DEAT
+2 DATE 12 SEP 1863
+2 PLAC Diest, Vlaams-Brabant, België
+1 FAMC @F155@
+1 FAMS @F154@
+0 @I180@ INDI
+1 NAME Henricus /Michiels/
+1 SEX M
+1 BIRT
+2 DATE 1763
+2 PLAC Tienen, Vlaams-Brabant, België
+1 DEAT
+2 DATE 1851
+2 PLAC Tienen, Vlaams-Brabant, België
+1 FAMS @F155@
+0 @I181@ INDI
+1 NAME Jan Guilielmus /Wouters/
+1 SEX M
+1 BIRT
+2 DATE 17 DEC 1859
+2 PLAC Leuven, Vlaams-Brabant, België
+1 DEAT
+2 DATE 19 JAN 1930
+2 PLAC Leuven, Vlaams-Brabant, België
+1 FAMC @F157@
+1 FAMS @F156@
+0 @I182@ INDI
+1 NAME Anna Isabella /Van den Broeck/
+1 SEX F
+1 BIRT
+2 DATE 9 JAN 1836
+2 PLAC Aarschot, Vlaams-Brabant, België
+1 DEAT
+2 DATE 17 AUG 1903
+2 PLAC Herentals, Antwerpen, België
+1 FAMS @F157@
+0 @I183@ INDI
+1 NAME Carolus Franciscus /Maes/
+1 SEX M
+1 BIRT
+2 DATE 26 JUN 1889
+2 PLAC Aarschot, Vlaams-Brabant, België
+1 DEAT
+2 DATE 7 SEP 1962
+2 PLAC Aarschot, Vlaams-Brabant, België
+1 FAMC @F159@
+1 FAMS @F158@
+0 @I184@ INDI
+1 NAME Catharina Anna /Aerts/
+1 SEX F
+1 BIRT
+2 DATE 16 APR 1898
+2 PLAC Herentals, Antwerpen, België
+1 DEAT
+2 DATE 7 OCT 1981
+2 PLAC Herentals, Antwerpen, België
+1 FAMC @F165@
+1 FAMS @F158@
+0 @I185@ INDI
+1 NAME Josephus /Maes/
+1 SEX M
+1 BIRT
+2 DATE 14 JUN 1853
+2 PLAC Tienen, Vlaams-Brabant, België
+1 DEAT
+2 DATE 21 APR 1915
+2 PLAC Tienen, Vlaams-Brabant, België
+1 FAMC @F160@
+1 FAMS @F159@
+0 @I186@ INDI
+1 NAME Francisca Barbara /Verlinden/
+1 SEX F
+1 BIRT
+2 DATE 8 SEP 1862
+2 PLAC Leuven, Vlaams-Brabant, België
+1 DEAT
+2 DATE 1904
+2 PLAC Leuven, Vlaams-Brabant, België
+1 FAMC @F164@
+1 FAMS @F159@
+0 @I187@ INDI
+1 NAME Henricus Ludovicus /Maes/
+1 SEX M
+1 BIRT
+2 DATE 13 JUL 1823
+2 PLAC Tienen, Vlaams-Brabant, België
+1 DEAT
+2 DATE 2 JUN 1868
+2 PLAC Tienen, Vlaams-Brabant, België
+1 FAMC @F161@
+1 FAMS @F160@
+0 @I188@ INDI
+1 NAME Maria /Aerts/
+1 SEX F
+1 BIRT
+2 DATE 14 MAY 1823
+2 PLAC Herentals, Antwerpen, België
+1 DEAT
+2 DATE ABT 1877
+2 PLAC Herentals, Antwerpen, België
+1 FAMC @F162@
+1 FAMS @F160@
+0 @I189@ INDI
+1 NAME Elisabeth /Pauwels/
+1 SEX F
+1 BIRT
+2 DATE 18 AUG 1801
+2 PLAC Lier, Antwerpen, België
+1 DEAT
+2 DATE 12 FEB 1886
+2 PLAC Lier, Antwerpen, België
+1 FAMS @F161@
+0 @I190@ INDI
+1 NAME Franciscus /Aerts/
+1 SEX M
+1 BIRT
+2 DATE 2 AUG 1799
+2 PLAC Mechelen, Antwerpen, België
+1 DEAT
+2 DATE 1880
+2 PLAC Mechelen, Antwerpen, België
+1 FAMS @F162@
+0 @I191@ INDI
+1 NAME Theresia /Goossens/
+1 SEX F
+1 BIRT
+2 DATE 4 MAR 1803
+2 PLAC Mechelen, Antwerpen, België
+1 DEAT
+2 DATE 26 JUL 1879
+2 PLAC Mechelen, Antwerpen, België
+1 FAMC @F163@
+1 FAMS @F162@
+0 @I192@ INDI
+1 NAME Franciscus /Goossens/
+1 SEX M
+1 BIRT
+2 DATE ABT 1777
+2 PLAC Herentals, Antwerpen, België
+1 DEAT
+2 DATE 14 AUG 1825
+2 PLAC Herentals, Antwerpen, België
+1 FAMS @F163@
+0 @I193@ INDI
+1 NAME Carolus /Verlinden/
+1 SEX M
+1 BIRT
+2 DATE 26 JUL 1829
+2 PLAC Diest, Vlaams-Brabant, België
+1 DEAT
+2 DATE 19 AUG 1901
+2 PLAC Diest, Vlaams-Brabant, België
+1 FAMS @F164@
+0 @I194@ INDI
+1 NAME Ludovicus /Aerts/
+1 SEX M
+1 BIRT
+2 DATE 2 JUN 1870
+2 PLAC Tienen, Vlaams-Brabant, België
+1 DEAT
+2 DATE 8 MAY 1932
+2 PLAC Tienen, Vlaams-Brabant, België
+1 FAMC @F166@
+1 FAMS @F165@
+0 @I195@ INDI
+1 NAME Rosalia Rosalia /Verlinden/
+1 SEX F
+1 BIRT
+2 DATE 14 FEB 1867
+2 PLAC Mechelen, Antwerpen, België
+1 DEAT
+2 DATE 1931
+2 PLAC Mechelen, Antwerpen, België
+1 FAMC @F169@
+1 FAMS @F165@
+0 @I196@ INDI
+1 NAME Barbara /Pauwels/
+1 SEX F
+1 BIRT
+2 DATE 11 FEB 1843
+2 PLAC Lier, Antwerpen, België
+1 DEAT
+2 DATE 1896
+2 PLAC Lier, Antwerpen, België
+1 FAMC @F167@
+1 FAMS @F166@
+0 @I197@ INDI
+1 NAME Joannes Henricus /Pauwels/
+1 SEX M
+1 BIRT
+2 DATE 1818
+2 PLAC Tienen, Vlaams-Brabant, België
+1 DEAT
+2 DATE 26 JUL 1898
+2 PLAC Tienen, Vlaams-Brabant, België
+1 FAMC @F168@
+1 FAMS @F167@
+0 @I198@ INDI
+1 NAME Maria Joanna /Wouters/
+1 SEX F
+1 BIRT
+2 DATE 14 FEB 1818
+2 PLAC Herentals, Antwerpen, België
+1 DEAT
+2 DATE 14 NOV 1862
+2 PLAC Herentals, Antwerpen, België
+1 FAMS @F167@
+0 @I199@ INDI
+1 NAME Anna /Claes/
+1 SEX F
+1 BIRT
+2 DATE 14 NOV 1785
+2 PLAC Aarschot, Vlaams-Brabant, België
+1 DEAT
+2 DATE 9 MAR 1829
+2 PLAC Aarschot, Vlaams-Brabant, België
+1 FAMS @F168@
+0 @I200@ INDI
+1 NAME Josephus Franciscus /Verlinden/
+1 SEX M
+1 BIRT
+2 DATE 1 JAN 1834
+2 PLAC Leuven, Vlaams-Brabant, België
+1 DEAT
+2 DATE 28 OCT 1889
+2 PLAC Leuven, Vlaams-Brabant, België
+1 FAMC @F170@
+1 FAMS @F169@
+0 @I201@ INDI
+1 NAME Anna /Goossens/
+1 SEX F
+1 BIRT
+2 DATE 19 APR 1836
+2 PLAC Diest, Vlaams-Brabant, België
+1 DEAT
+2 DATE 21 JUN 1884
+2 PLAC Diest, Vlaams-Brabant, België
+1 FAMC @F172@
+1 FAMS @F169@
+0 @I202@ INDI
+1 NAME Joannes /Verlinden/
+1 SEX M
+1 BIRT
+2 DATE 8 JUL 1806
+2 PLAC Leuven, Vlaams-Brabant, België
+1 DEAT
+2 DATE 23 DEC 1854
+2 PLAC Leuven, Vlaams-Brabant, België
+1 FAMC @F171@
+1 FAMS @F170@
+0 @I203@ INDI
+1 NAME Anna Francisca /Pauwels/
+1 SEX F
+1 BIRT
+2 DATE 1 DEC 1814
+2 PLAC Tienen, Vlaams-Brabant, België
+1 DEAT
+2 DATE 4 OCT 1860
+2 PLAC Tienen, Vlaams-Brabant, België
+1 FAMS @F170@
+0 @I204@ INDI
+1 NAME Joanna /Pauwels/
+1 SEX F
+1 BIRT
+2 DATE 17 DEC 1773
+2 PLAC Mechelen, Antwerpen, België
+1 DEAT
+2 DATE 3 DEC 1841
+2 PLAC Mechelen, Antwerpen, België
+1 FAMS @F171@
+0 @I205@ INDI
+1 NAME Ludovicus /Goossens/
+1 SEX M
+1 BIRT
+2 DATE 1 JUN 1808
+2 PLAC Herentals, Antwerpen, België
+1 DEAT
+2 DATE 13 APR 1862
+2 PLAC Mechelen, Antwerpen, België
+1 FAMC @F173@
+1 FAMS @F172@
+0 @I206@ INDI
+1 NAME Rosalia /Michiels/
+1 SEX F
+1 BIRT
+2 DATE 22 FEB 1816
+2 PLAC Diest, Vlaams-Brabant, België
+1 DEAT
+2 DATE 10 MAR 1870
+2 PLAC Mechelen, Antwerpen, België
+1 FAMC @F174@
+1 FAMS @F172@
+0 @I207@ INDI
+1 NAME Joannes Petrus /Goossens/
+1 SEX M
+1 BIRT
+2 DATE 1784
+2 PLAC Lier, Antwerpen, België
+1 DEAT
+2 DATE 27 NOV 1835
+2 PLAC Lier, Antwerpen, België
+1 FAMS @F173@
+0 @I208@ INDI
+1 NAME Anna /Claes/
+1 SEX F
+1 BIRT
+2 DATE 1 JAN 1783
+2 PLAC Mechelen, Antwerpen, België
+1 DEAT
+2 DATE 14 OCT 1855
+2 PLAC Mechelen, Antwerpen, België
+1 FAMS @F174@
+0 @I209@ INDI
+1 NAME Henricus /Janssens/
+1 SEX M
+1 BIRT
+2 DATE 17 OCT 1927
+2 PLAC Lier, Antwerpen, België
+1 DEAT
+2 DATE 1970
+2 PLAC Aarschot, Vlaams-Brabant, België
+1 FAMC @F176@
+1 FAMS @F175@
+0 @I210@ INDI
+1 NAME Isabella Barbara /Vermeiren/
+1 SEX F
+1 BIRT
+2 DATE 20 AUG 1929
+2 PLAC Diest, Vlaams-Brabant, België
+1 DEAT
+2 DATE 9 MAR 1995
+2 PLAC Diest, Vlaams-Brabant, België
+1 FAMC @F183@
+1 FAMS @F175@
+0 @I211@ INDI
+1 NAME Josephus /Janssens/
+1 SEX M
+1 BIRT
+2 DATE 11 APR 1902
+2 PLAC Lier, Antwerpen, België
+1 DEAT
+2 DATE ABT 1984
+2 PLAC Lier, Antwerpen, België
+1 FAMC @F177@
+1 FAMS @F176@
+0 @I212@ INDI
+1 NAME Franciscus /Janssens/
+1 SEX M
+1 BIRT
+2 DATE 27 APR 1873
+2 PLAC Lier, Antwerpen, België
+1 DEAT
+2 DATE 15 MAY 1955
+2 PLAC Lier, Antwerpen, België
+1 FAMC @F178@
+1 FAMS @F177@
+0 @I213@ INDI
+1 NAME Barbara /Dubois/
+1 SEX F
+1 BIRT
+2 DATE 27 JAN 1881
+2 PLAC Diest, Vlaams-Brabant, België
+1 DEAT
+2 DATE 1966
+2 PLAC Diest, Vlaams-Brabant, België
+1 FAMC @F181@
+1 FAMS @F177@
+0 @I214@ INDI
+1 NAME Anna /Verlinden/
+1 SEX F
+1 BIRT
+2 DATE 14 AUG 1845
+2 PLAC Leuven, Vlaams-Brabant, België
+1 DEAT
+2 DATE 19 APR 1927
+2 PLAC Leuven, Vlaams-Brabant, België
+1 FAMC @F179@
+1 FAMS @F178@
+0 @I215@ INDI
+1 NAME Josephus Josephus /Verlinden/
+1 SEX M
+1 BIRT
+2 DATE 14 JUL 1808
+2 PLAC Herentals, Antwerpen, België
+1 DEAT
+2 DATE 15 DEC 1878
+2 PLAC Herentals, Antwerpen, België
+1 FAMC @F180@
+1 FAMS @F179@
+0 @I216@ INDI
+1 NAME Anna Rosalia /Jacobs/
+1 SEX F
+1 BIRT
+2 DATE 23 DEC 1817
+2 PLAC Tienen, Vlaams-Brabant, België
+1 DEAT
+2 DATE 27 NOV 1875
+2 PLAC Tienen, Vlaams-Brabant, België
+1 FAMS @F179@
+0 @I217@ INDI
+1 NAME Adrianus Joannes /Verlinden/
+1 SEX M
+1 BIRT
+2 DATE ABT 1771
+2 PLAC Aarschot, Vlaams-Brabant, België
+1 DEAT
+2 DATE 12 FEB 1825
+2 PLAC Tienen, Vlaams-Brabant, België
+1 FAMS @F180@
+0 @I218@ INDI
+1 NAME Franciscus /Dubois/
+1 SEX M
+1 BIRT
+2 DATE 1857
+2 PLAC Diest, Vlaams-Brabant, België
+1 DEAT
+2 DATE 1944
+2 PLAC Diest, Vlaams-Brabant, België
+1 FAMC @F182@
+1 FAMS @F181@
+0 @I219@ INDI
+1 NAME Francisca /Lambrechts/
+1 SEX F
+1 BIRT
+2 DATE 27 NOV 1858
+2 PLAC Herentals, Antwerpen, België
+1 DEAT
+2 DATE 1939
+2 PLAC Herentals, Antwerpen, België
+1 FAMS @F181@
+0 @I220@ INDI
+1 NAME Carolus Joannes /Dubois/
+1 SEX M
+1 BIRT
+2 DATE 1821
+2 PLAC Diest, Vlaams-Brabant, België
+1 DEAT
+2 DATE 1868
+2 PLAC Aarschot, Vlaams-Brabant, België
+1 FAMS @F182@
+0 @I221@ INDI
+1 NAME Francisca /Wouters/
+1 SEX F
+1 BIRT
+2 DATE 25 JAN 1834
+2 PLAC Lier, Antwerpen, België
+1 DEAT
+2 DATE 27 JUL 1880
+2 PLAC Lier, Antwerpen, België
+1 FAMS @F182@
+0 @I222@ INDI
+1 NAME Joannes /Vermeiren/
+1 SEX M
+1 BIRT
+2 DATE ABT 1905
+2 PLAC Tienen, Vlaams-Brabant, België
+1 DEAT
+2 DATE 14 MAR 1970
+2 PLAC Lier, Antwerpen, België
+1 FAMC @F184@
+1 FAMS @F183@
+0 @I223@ INDI
+1 NAME Catharina /Goossens/
+1 SEX F
+1 BIRT
+2 DATE ABT 1895
+2 PLAC Herentals, Antwerpen, België
+1 DEAT
+2 DATE 22 APR 1976
+2 PLAC Herentals, Antwerpen, België
+1 FAMS @F183@
+0 @I224@ INDI
+1 NAME Rosalia /Van den Broeck/
+1 SEX F
+1 BIRT
+2 DATE 15 JUL 1877
+2 PLAC Herentals, Antwerpen, België
+1 DEAT
+2 DATE 3 APR 1946
+2 PLAC Herentals, Antwerpen, België
+1 FAMC @F185@
+1 FAMS @F184@
+0 @I225@ INDI
+1 NAME Theresia /Vermeiren/
+1 SEX F
+1 BIRT
+2 DATE 24 SEP 1856
+2 PLAC Herentals, Antwerpen, België
+1 DEAT
+2 DATE 14 OCT 1941
+2 PLAC Herentals, Antwerpen, België
+1 FAMS @F185@
+0 @F100@ FAM
+1 HUSB @I100@
+1 WIFE @I101@
+1 CHIL @I4@
+0 @F101@ FAM
+1 HUSB @I102@
+1 WIFE @I103@
+1 CHIL @I100@
+0 @F102@ FAM
+1 HUSB @I104@
+1 CHIL @I102@
+0 @F103@ FAM
+1 WIFE @I105@
+1 CHIL @I104@
+1 CHIL @I107@
+1 CHIL @I127@
+0 @F104@ FAM
+1 WIFE @I106@
+1 CHIL @I105@
+0 @F105@ FAM
+1 HUSB @I107@
+1 WIFE @I108@
+1 CHIL @I103@
+0 @F106@ FAM
+1 WIFE @I109@
+1 CHIL @I108@
+0 @F107@ FAM
+1 HUSB @I110@
+1 CHIL @I109@
+0 @F108@ FAM
+1 WIFE @I111@
+1 CHIL @I110@
+0 @F109@ FAM
+1 HUSB @I112@
+1 WIFE @I113@
+1 CHIL @I101@
+0 @F110@ FAM
+1 HUSB @I114@
+1 WIFE @I115@
+1 CHIL @I112@
+0 @F111@ FAM
+1 HUSB @I116@
+1 WIFE @I117@
+1 CHIL @I114@
+0 @F112@ FAM
+1 WIFE @I118@
+1 CHIL @I117@
+0 @F113@ FAM
+1 HUSB @I119@
+1 WIFE @I120@
+1 CHIL @I115@
+0 @F114@ FAM
+1 HUSB @I121@
+1 WIFE @I122@
+1 CHIL @I119@
+0 @F115@ FAM
+1 HUSB @I123@
+1 CHIL @I122@
+0 @F116@ FAM
+1 WIFE @I124@
+1 CHIL @I120@
+0 @F117@ FAM
+1 HUSB @I125@
+1 CHIL @I124@
+0 @F118@ FAM
+1 HUSB @I126@
+1 WIFE @I127@
+1 CHIL @I113@
+0 @F119@ FAM
+1 HUSB @I128@
+1 CHIL @I126@
+0 @F120@ FAM
+1 HUSB @I129@
+1 WIFE @I130@
+1 CHIL @I128@
+0 @F121@ FAM
+1 HUSB @I131@
+1 CHIL @I130@
+0 @F122@ FAM
+1 HUSB @I132@
+1 WIFE @I133@
+1 CHIL @I5@
+0 @F123@ FAM
+1 HUSB @I134@
+1 WIFE @I135@
+1 CHIL @I132@
+0 @F124@ FAM
+1 HUSB @I136@
+1 WIFE @I137@
+1 CHIL @I134@
+0 @F125@ FAM
+1 HUSB @I138@
+1 WIFE @I139@
+1 CHIL @I136@
+0 @F126@ FAM
+1 WIFE @I140@
+1 CHIL @I138@
+0 @F127@ FAM
+1 HUSB @I141@
+1 CHIL @I140@
+0 @F128@ FAM
+1 HUSB @I142@
+1 WIFE @I143@
+1 CHIL @I139@
+0 @F129@ FAM
+1 HUSB @I144@
+1 CHIL @I142@
+0 @F130@ FAM
+1 WIFE @I145@
+1 CHIL @I143@
+0 @F131@ FAM
+1 HUSB @I146@
+1 CHIL @I137@
+0 @F132@ FAM
+1 HUSB @I147@
+1 WIFE @I148@
+1 CHIL @I146@
+0 @F133@ FAM
+1 HUSB @I149@
+1 WIFE @I150@
+1 CHIL @I135@
+0 @F134@ FAM
+1 HUSB @I151@
+1 CHIL @I149@
+0 @F135@ FAM
+1 WIFE @I152@
+1 CHIL @I151@
+0 @F136@ FAM
+1 HUSB @I153@
+1 CHIL @I150@
+0 @F137@ FAM
+1 HUSB @I154@
+1 WIFE @I155@
+1 CHIL @I153@
+0 @F138@ FAM
+1 HUSB @I156@
+1 CHIL @I154@
+0 @F139@ FAM
+1 WIFE @I157@
+1 CHIL @I155@
+0 @F140@ FAM
+1 HUSB @I158@
+1 WIFE @I159@
+1 CHIL @I133@
+0 @F141@ FAM
+1 WIFE @I160@
+1 CHIL @I158@
+0 @F142@ FAM
+1 WIFE @I161@
+1 CHIL @I160@
+0 @F143@ FAM
+1 HUSB @I162@
+1 WIFE @I163@
+1 CHIL @I161@
+0 @F144@ FAM
+1 HUSB @I164@
+1 WIFE @I165@
+1 CHIL @I159@
+0 @F145@ FAM
+1 WIFE @I166@
+1 CHIL @I164@
+0 @F146@ FAM
+1 WIFE @I167@
+1 CHIL @I166@
+0 @F147@ FAM
+1 WIFE @I168@
+1 CHIL @I165@
+0 @F148@ FAM
+1 WIFE @I169@
+1 CHIL @I168@
+0 @F149@ FAM
+1 HUSB @I170@
+1 CHIL @I169@
+0 @F150@ FAM
+1 HUSB @I171@
+1 WIFE @I172@
+1 CHIL @I6@
+0 @F151@ FAM
+1 HUSB @I173@
+1 WIFE @I174@
+1 CHIL @I171@
+0 @F152@ FAM
+1 HUSB @I175@
+1 WIFE @I176@
+1 CHIL @I173@
+0 @F153@ FAM
+1 HUSB @I177@
+1 WIFE @I178@
+1 CHIL @I176@
+0 @F154@ FAM
+1 WIFE @I179@
+1 CHIL @I177@
+0 @F155@ FAM
+1 HUSB @I180@
+1 CHIL @I179@
+0 @F156@ FAM
+1 HUSB @I181@
+1 CHIL @I174@
+0 @F157@ FAM
+1 WIFE @I182@
+1 CHIL @I181@
+0 @F158@ FAM
+1 HUSB @I183@
+1 WIFE @I184@
+1 CHIL @I172@
+0 @F159@ FAM
+1 HUSB @I185@
+1 WIFE @I186@
+1 CHIL @I183@
+0 @F160@ FAM
+1 HUSB @I187@
+1 WIFE @I188@
+1 CHIL @I185@
+0 @F161@ FAM
+1 WIFE @I189@
+1 CHIL @I187@
+0 @F162@ FAM
+1 HUSB @I190@
+1 WIFE @I191@
+1 CHIL @I188@
+0 @F163@ FAM
+1 HUSB @I192@
+1 CHIL @I191@
+0 @F164@ FAM
+1 HUSB @I193@
+1 CHIL @I186@
+0 @F165@ FAM
+1 HUSB @I194@
+1 WIFE @I195@
+1 CHIL @I184@
+0 @F166@ FAM
+1 WIFE @I196@
+1 CHIL @I194@
+0 @F167@ FAM
+1 HUSB @I197@
+1 WIFE @I198@
+1 CHIL @I196@
+0 @F168@ FAM
+1 WIFE @I199@
+1 CHIL @I197@
+0 @F169@ FAM
+1 HUSB @I200@
+1 WIFE @I201@
+1 CHIL @I195@
+0 @F170@ FAM
+1 HUSB @I202@
+1 WIFE @I203@
+1 CHIL @I200@
+0 @F171@ FAM
+1 WIFE @I204@
+1 CHIL @I202@
+0 @F172@ FAM
+1 HUSB @I205@
+1 WIFE @I206@
+1 CHIL @I201@
+0 @F173@ FAM
+1 HUSB @I207@
+1 CHIL @I205@
+0 @F174@ FAM
+1 WIFE @I208@
+1 CHIL @I206@
+0 @F175@ FAM
+1 HUSB @I209@
+1 WIFE @I210@
+1 CHIL @I7@
+0 @F176@ FAM
+1 HUSB @I211@
+1 CHIL @I209@
+0 @F177@ FAM
+1 HUSB @I212@
+1 WIFE @I213@
+1 CHIL @I211@
+0 @F178@ FAM
+1 WIFE @I214@
+1 CHIL @I212@
+0 @F179@ FAM
+1 HUSB @I215@
+1 WIFE @I216@
+1 CHIL @I214@
+0 @F180@ FAM
+1 HUSB @I217@
+1 CHIL @I215@
+0 @F181@ FAM
+1 HUSB @I218@
+1 WIFE @I219@
+1 CHIL @I213@
+0 @F182@ FAM
+1 HUSB @I220@
+1 WIFE @I221@
+1 CHIL @I218@
+0 @F183@ FAM
+1 HUSB @I222@
+1 WIFE @I223@
+1 CHIL @I210@
+0 @F184@ FAM
+1 WIFE @I224@
+1 CHIL @I222@
+0 @F185@ FAM
+1 WIFE @I225@
+1 CHIL @I224@
+0 TRLR

@@ -20,6 +20,8 @@ plugins/family-tree-research/
     examples/                        7-person example family + regions-basic.json, example-stories.json and
                                      example-zeitgeist.json (fictional, to test the Story view) and one real CC0 photo in
                                      examples/media/tijdgeest/ (Den Helder, 1955, Anefo)
+docs/screenshots/                    screenshots for the README (example family only, never real data)
+docs/demo/make_demo.py, demo.ged     larger fictional demo family (133 people) for the fan screenshot
 README.md, LICENSE (MIT)
 ```
 
