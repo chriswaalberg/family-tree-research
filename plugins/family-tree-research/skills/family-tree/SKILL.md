@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.7.1"
+  version: "0.7.2"
 ---
 
 # Family-tree research, hand in hand
@@ -31,6 +31,8 @@ Guide someone who is probably neither a genealogist nor technical. Goal: from a 
 - "I don't know" is always a fine answer. A rough year or just a place is gold. Say so explicitly.
 - Celebrate finds: a new generation, a record found, a surprising place. It should stay fun.
 - Use the task list (TaskCreate/TaskUpdate) so the user can see where you are.
+- **Don't ask what they want to end up with.** The result is always the interactive viewer. Don't offer a choice between a document, a GEDCOM file or a visual tree.
+- **Always keep a GEDCOM, silently.** As soon as there are a few names and no GEDCOM yet, make `source/tree.ged` with `gedcom_tool.py new` and keep it up to date; it's the working file behind the viewer. Don't ask about it. Only bring up GEDCOM export (e.g. to import into Ancestry) when the user asks for it; then point to the file in `source/`.
 
 ## First: where are we?
 

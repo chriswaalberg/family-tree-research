@@ -65,11 +65,11 @@ AskUserQuestion, two questions:
 - "What are you most curious about?" → As far back as possible in all lines / one surname (the paternal line) / a particular country or family story / Just start, we'll see.
 - "How would you like me to work?" → Search on your own and only report what you found / Show me after every generation / Look at every find together first.
 
-Write the answers in the progress file under "Agreements".
+Write the answers in the progress file under "Agreements". Don't add a question about the end result (document, GEDCOM or tree): it's always the viewer, with a GEDCOM kept in `source/` behind it.
 
 ## Step 5 – First tree and viewer
 
-1. No GEDCOM? Make one: `python3 -I scripts/gedcom_tool.py new data/intake.json source/tree.ged` (see gedcom-tool.md).
+1. No GEDCOM? Make one without asking (it's the working file behind the viewer): `python3 -I scripts/gedcom_tool.py new data/intake.json source/tree.ged` (see gedcom-tool.md).
 2. Build the viewer data and publish (see `viewer.md`), with `--lang` in the user's language.
 3. Share the link: "Here's your family tree. Still small, but it's going to grow." Explain in two sentences how to click and search.
 
