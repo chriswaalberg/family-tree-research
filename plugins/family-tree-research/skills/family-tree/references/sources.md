@@ -1,6 +1,17 @@
 # Sources: where to look for what?
 
-Try yourself first (WebFetch/WebSearch, or the browser if available). If a site doesn't work (blocked, login, paywall), don't try to get in through workarounds. Ask the user specifically for a screenshot (see research.md). Note in the progress file which sites work and which don't, so you don't retry every session.
+## How to reach the archives
+
+You usually have more than one way onto the internet. If one route doesn't work, **don't stop: try the next one yourself**, without waiting for the user to suggest it. A route can fail because a tool is missing or switched off (for example the Chrome extension disabled by the user's organisation, or no browser at all), not because the archive refuses you. Try them in this order:
+
+1. **Fetch/search tools** (WebFetch, WebSearch, or whatever fetch tool you have). They don't need Chrome. Good for record pages, the Open Archives API and Wikipedia.
+2. **A shell, if you have one** (Cowork's sandbox, Claude Code's terminal): call public APIs directly, e.g. `curl -s "https://api.openarchieven.nl/1.1/records/search.json?name=..."` or Python `urllib`. Its network can be different from the fetch tools', so a site that failed in one may work in the other.
+3. **A browser**: the Chrome extension (Claude in Chrome), or a browser built into the app if there is one. Needed for sites that only work with JavaScript, and for viewing scans.
+4. **The user**: tell them exactly what to look up (archive, place, period, name) and ask for a screenshot or photo (see research.md).
+
+Tell the user in one short sentence which route you're switching to ("Chrome isn't available here, so I'll fetch the archive directly"). In the progress file, note per site which route works (e.g. "Open Archives: API via fetch works; Chrome blocked by organisation"), so a next session starts with the route that works.
+
+Using another tool is fine. Getting around a site's own barrier is not: if a site asks for a **login, a payment or a captcha**, or clearly refuses automated access, don't try to get in another way. Ask the user.
 
 ## Netherlands
 
