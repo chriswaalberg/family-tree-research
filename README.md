@@ -19,7 +19,7 @@ Continuing later? New task, same folder, and say: **"Continue my family tree."**
 
 More about what the plugin does: [plugins/family-tree-research/README.md](plugins/family-tree-research/README.md)
 
-## Claude Code
+## Or if you prefer Claude Code
 
 ```
 /plugin marketplace add chriswaalberg/family-tree-research
