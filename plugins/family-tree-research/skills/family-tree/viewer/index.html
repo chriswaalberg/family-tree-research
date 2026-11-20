@@ -1089,7 +1089,7 @@ Object.assign(I18N.nl,{v_verhaal:"Verhaal",
  vh_begin:"Dit verhaal begint bij {fn}.",
  vh_born_dp:"{Fn} werd {date} geboren in {place}.",vh_born_d:"{Fn} werd {date} geboren.",vh_born_p:"{Fn} werd geboren in {place}.",vh_born_none:"Wanneer en waar {fn} geboren is, weten we nog niet.",
  vh_age:"Toen {child} in {y} geboren werd, was {hij} ongeveer {n} jaar.",vh_ageX:"Toen {child} in {y} geboren werd, was {hij} {n} jaar.",vh_young:" Dat is erg jong; misschien klopt een van de jaartallen niet.",vh_old:" Dat is opvallend oud; misschien klopt een van de jaartallen niet.",
- vh_kidsN:"Met {partner} kreeg {hij} {n} kinderen die we kennen.",vh_kids1:"{Child} is het enige kind van {fn} en {partner} dat we kennen.",vh_kidsSolo:"{Hij} kreeg {n} kinderen die we kennen.",vh_other:"{Hij} had ook kinderen met {names}.",
+ vh_kidsN:"Met {partner} kreeg {hij} {n} kinderen die we kennen.",vh_kids1:"{Child} is het enige kind van {fn} en {partner} dat we kennen.",vh_kidsSolo:"{Hij} kreeg {n} kinderen die we kennen.",vh_kidsN_living:"Met {partner} kreeg {hij} {n} kinderen.",vh_kids1_living:"{Child} is het enige kind van {fn} en {partner}.",vh_kidsSolo_living:"{Hij} kreeg {n} kinderen.",vh_other:"{Hij} had ook kinderen met {names}.",
  vh_died:"{Hij} overleed {date}{place}{age}.",vh_diedP:"{Hij} overleed{place}{age}.",vh_inPlace:" in {place}",vh_samePlace:" in {place}, waar {hij} ook geboren was",vh_ageN:", {n} jaar oud",vh_ageC:", ongeveer {n} jaar oud",
  vh_sameYear:"Dat was hetzelfde jaar waarin {child} werd geboren.",vh_posthum:"{Child} werd dus pas na zijn dood geboren.",vh_odd:"Volgens de stamboom overleed {fn} al vóór de geboorte van {child}. Hier klopt waarschijnlijk iets niet.",vh_died_unknown:"Wanneer {hij} overleed, weten we nog niet.",vh_living:"{Fn} leeft nog, dus meer vertellen we hier niet.",
  vh_moveLand:"{Hij} werd geboren in {l1}, {child} in {l2}. Tussen die twee levens ligt dus een grote verhuizing.",vh_movePlace:"{Hij} kwam uit {p1}; {child} werd geboren in {p2}.",
@@ -1114,7 +1114,7 @@ Object.assign(I18N.en,{v_verhaal:"Story",
  vh_begin:"This story begins with {fn}.",
  vh_born_dp:"{Fn} was born {date} in {place}.",vh_born_d:"{Fn} was born {date}.",vh_born_p:"{Fn} was born in {place}.",vh_born_none:"We don't yet know when or where {fn} was born.",
  vh_age:"When {child} was born in {y}, {hij} was about {n}.",vh_ageX:"When {child} was born in {y}, {hij} was {n}.",vh_young:" That is very young; perhaps one of the years is wrong.",vh_old:" That is remarkably old; perhaps one of the years is wrong.",
- vh_kidsN:"With {partner}, {hij} had {n} children that we know of.",vh_kids1:"{Child} is the only child of {fn} and {partner} that we know of.",vh_kidsSolo:"{Hij} had {n} children that we know of.",vh_other:"{Hij} also had children with {names}.",
+ vh_kidsN:"With {partner}, {hij} had {n} children that we know of.",vh_kids1:"{Child} is the only child of {fn} and {partner} that we know of.",vh_kidsSolo:"{Hij} had {n} children that we know of.",vh_kidsN_living:"With {partner}, {hij} had {n} children.",vh_kids1_living:"{Child} is the only child of {fn} and {partner}.",vh_kidsSolo_living:"{Hij} had {n} children.",vh_other:"{Hij} also had children with {names}.",
  vh_died:"{Hij} died {date}{place}{age}.",vh_diedP:"{Hij} died{place}{age}.",vh_inPlace:" in {place}",vh_samePlace:" in {place}, where {hij} was also born",vh_ageN:", aged {n}",vh_ageC:", aged about {n}",
  vh_sameYear:"That was the same year {child} was born.",vh_posthum:"So {child} was born after his death.",vh_odd:"According to the tree, {fn} died before {child} was born. Something is probably wrong here.",vh_died_unknown:"We don't yet know when {hij} died.",vh_living:"{Fn} is still alive, so we say no more here.",
  vh_moveLand:"{Hij} was born in {l1}, {child} in {l2}. Somewhere between those two lives lies a big move.",vh_movePlace:"{Hij} came from {p1}; {child} was born in {p2}.",
@@ -1204,9 +1204,11 @@ function vhTemplate(i,child,flags){const p=P[i],fn=vhFn(p),pr=vhPro(p),T=(k,v)=>
   if(child!=null){const c=P[child],cfn=vhFn(c);
     const ag=p.by&&c.by&&c.by>=p.by?vhAge(p.bdate,c.bdate,p.by,c.by):null;if(ag&&ag.n>0){const n=ag.n;let s=T(ag.exact?"vh_ageX":"vh_age",{child:cfn,y:c.by,n});if(n<16)s+=_t("vh_young");else if(n>(p.x==="F"?50:70))s+=_t("vh_old");out.push(s)}
     const partner=c.f===i?c.m:c.f;
+    /* living people: the children are known, so no "that we know of" */
+    const lv=p.levend||p.living?"_living":"";
     const kids=p.ch.filter(k=>partner>=0?(P[k].f===partner||P[k].m===partner):true);
-    if(partner>=0){const pfn=NORM(vhFn(P[partner])).slice(0,4).replace(/ae/,"aa")===NORM(cfn).slice(0,4).replace(/ae/,"aa")?short(P[partner]):vhFn(P[partner]);if(kids.length>1)out.push(T("vh_kidsN",{partner:pfn,n:kids.length}));else out.push(_t("vh_kids1",{Child:cfn,fn,partner:pfn}))}
-    else if(kids.length>1)out.push(T("vh_kidsSolo",{n:kids.length}));
+    if(partner>=0){const pfn=NORM(vhFn(P[partner])).slice(0,4).replace(/ae/,"aa")===NORM(cfn).slice(0,4).replace(/ae/,"aa")?short(P[partner]):vhFn(P[partner]);if(kids.length>1)out.push(T("vh_kidsN"+lv,{partner:pfn,n:kids.length}));else out.push(_t("vh_kids1"+lv,{Child:cfn,fn,partner:pfn}))}
+    else if(kids.length>1)out.push(T("vh_kidsSolo"+lv,{n:kids.length}));
     const others=[...new Set(p.ch.map(k=>P[k].f===i?P[k].m:P[k].f).filter(q=>q>=0&&q!==partner))];
     if(others.length)out.push(T("vh_other",{names:vhList(others.map(q=>vhFn(P[q])))}));
     const l1=landOf(p),l2=landOf(c);
@@ -1272,10 +1274,11 @@ function vhAssignImages(path){const cand=[];
       const alive=y>=s&&y<=e;if(!alive&&(b.gebeurtenis||y<s-25||y>e))continue;
       cand.push({i,b,kid:!!(b.kind&&alive&&y-s<16),score:(alive?0:1000+(s-y))+Math.abs(y-mid)})}});
   cand.sort((a,b)=>a.score-b.score);const used=new Set(),m=new Map(),put=(c)=>{if(!m.has(c.i))m.set(c.i,[]);m.get(c.i).push(c.b);used.add(c.b.bestand)};
+  /* kind:true-beelden alleen bij iemand die toen een kind was; is er niemand, dan niet op dit pad */
   /* eerst bij wie toen leefde (eerst één per persoon, dan hooguit twee), daarna pas gewone gezichten bij iemand die net later geboren is (alleen als die nog niets heeft) */
   for(const c of cand)if(c.kid&&!used.has(c.b.bestand)&&(m.get(c.i)||[]).length<2)put(c);
-  for(const lim of [1,2])for(const c of cand)if(c.score<1000&&!used.has(c.b.bestand)&&(m.get(c.i)||[]).length<lim)put(c);
-  for(const c of cand)if(c.score>=1000&&!used.has(c.b.bestand)&&!m.has(c.i))put(c);
+  for(const lim of [1,2])for(const c of cand)if(c.score<1000&&(!c.b.kind||c.kid)&&!used.has(c.b.bestand)&&(m.get(c.i)||[]).length<lim)put(c);
+  for(const c of cand)if(c.score>=1000&&!c.b.kind&&!used.has(c.b.bestand)&&!m.has(c.i))put(c);
   m.forEach(l=>l.sort((a,b)=>(a.jaar||0)-(b.jaar||0)));return m}
 function vhTijdgeest(i,seen){const T=vhTG();if(!T)return"";const p=P[i];if(p.living)return"";const sp=vhSpan(p);if(!sp)return"";
   const [s,e]=sp,mid=(s+e)/2,pls=vhPlacesOf(p);let html="";
@@ -1723,7 +1726,7 @@ Object.assign(I18N.en,{sw_btn:"Swipe",sw_btn_t:"The story as cards that play by 
  sw_family:"Family",sw_era:"Lived through",sw_death:"Farewell",sw_photo:"A photo from that time",sw_birth:"Born"});
 let SW=null;
 const SW_KIND={vh_begin:"b",vh_born_dp:"b",vh_born_d:"b",vh_born_p:"b",vh_born_none:"b",vh_age:"b",vh_ageX:"b",vh_living:"b",
-  vh_kidsN:"f",vh_kids1:"f",vh_kidsSolo:"f",vh_other:"f",vh_moveLand:"f",vh_movePlace:"f",
+  vh_kidsN:"f",vh_kids1:"f",vh_kidsSolo:"f",vh_kidsN_living:"f",vh_kids1_living:"f",vh_kidsSolo_living:"f",vh_other:"f",vh_moveLand:"f",vh_movePlace:"f",
   vh_died:"d",vh_diedP:"d",vh_sameYear:"d",vh_posthum:"d",vh_odd:"d",vh_died_unknown:"d",vh_dtb:"n"};
 /* vhTemplate's sentences, each tagged with the text key that made it (b = birth, f = family, d = death, e = era, n = note) */
 function swSentences(i,child,flags){const rec=[],orig=_t;let tpl;
