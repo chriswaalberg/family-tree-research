@@ -609,6 +609,21 @@ main{padding-top:6px}
 .sw .sw-card[data-kind=img] .sw-fig img{width:100%;height:100%;max-height:none;object-fit:cover}
 .sw .sw-card[data-kind=img]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:60%;background:linear-gradient(0deg,rgba(0,0,0,.92) 35%,rgba(0,0,0,0))}
 .sw .sw-card[data-kind=img] .sw-k,.sw .sw-card[data-kind=img] .sw-cap{position:relative;z-index:2}
+/* card budget page (#kaartbudget) */
+.swb{position:fixed;inset:0;z-index:300;overflow:auto;background:var(--bg,#faf6ee);color:var(--ink,#2a2118);padding:24px 16px 40px;font-family:Inter,system-ui,sans-serif}
+.swb[hidden]{display:none!important}
+.swb .swb-in{max-width:900px;margin:0 auto}
+.swb h2{font-family:Fraunces,Georgia,serif;margin:0 0 8px}.swb h3{margin:24px 0 8px;font-size:15px}
+.swb p{line-height:1.5;margin:0 0 8px}
+.swb .swb-x{float:right;padding:8px 14px;border-radius:99px;border:1.5px solid currentColor;background:none;color:inherit;font:inherit;font-weight:600;cursor:pointer}
+.swb .swb-t{overflow-x:auto}
+.swb table{border-collapse:collapse;width:100%;font-size:14px}
+.swb th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.06em;opacity:.7;padding:6px 8px;border-bottom:1px solid rgba(0,0,0,.15)}
+.swb td{padding:8px;border-bottom:1px solid rgba(0,0,0,.08);vertical-align:top}
+.swb td small{display:block;opacity:.7;font-size:12.5px;margin-top:2px}
+.swb td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.swb td.x{color:#b3402a}
+.swb tr.bad td:first-child{border-left:3px solid #b3402a}
 /* text on the image (swOverlay): photo full-screen, dark gradient from below, the text over it, a small credit line */
 .sw .sw-card[data-kind=ov]{background:#000;justify-content:flex-end}
 .sw .sw-card[data-kind=ov] .sw-body{position:static}
@@ -728,7 +743,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.21",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.22",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1905,10 +1920,18 @@ function drawFamilie(){
 /* ===== SWIPE (experimental Swipe Stories: full-screen cards that play by themselves, built from the Story view) ===== */
 Object.assign(I18N.nl,{sw_btn:"Kaarten",sw_btn_t:"Het verhaal als kaarten die vanzelf doorlopen",sw_close:"Sluiten",sw_pause:"Pauze",sw_play:"Verder",sw_next:"Volgende",sw_prev:"Vorige",
  sw_hint:"Tik rechts: verder · tik links: terug · vasthouden: pauze · omhoog vegen: een generatie verder terug",
- sw_family:"Gezin",sw_sibs:"Broers en zussen",sw_era:"Meegemaakt",sw_doc:"Bekijk document",sw_view:"Bekijk beeld",sw_nextp:"hierna: {name}",sw_route:"Afgelegde route",sw_death:"Afscheid",sw_scan:"Hele krant",tg_k_foto:"Een foto uit die tijd",tg_k_tekening:"Een tekening uit die tijd",tg_k_prent:"Een prent uit die tijd",tg_k_schilderij:"Een schilderij uit die tijd",tg_k_kaart:"Een kaart uit die tijd",tg_k_munt:"Een munt uit die tijd",tg_k_affiche:"Een affiche uit die tijd",tg_k_krant:"Uit de krant",tg_k_x:"Een beeld uit die tijd",sw_birth:"Geboren"});
+ sw_family:"Gezin",sw_sibs:"Broers en zussen",
+ bg_title:"Kaartbudget",bg_intro:"Hoeveel kaarten laat Kaarten zien als je bij deze persoon begint, en hoe lang is de langste reeks met alleen tekst? Doel: hooguit {max} kaarten en {run} tekstkaarten op rij. Kaarten met een beeld (ook tekst óp een beeld) breken een reeks.",
+ bg_who:"Persoon",bg_n:"Kaarten",bg_run:"Tekst op rij",bg_where:"Waar",bg_ok:"in orde",bg_close:"Sluiten",bg_card:"kaart {n}",
+ bg_many:"Te veel kaarten: voeg verhaalkaarten samen of laat er een paar weg.",bg_long:"Te lange reeks tekst: geef een kaart in deze reeks een beeld (\"kaart\" bij het beeld) of voeg kaarten samen.",
+ bg_own:"Met een eigen verhaal",bg_other:"Zonder eigen verhaal, maar boven het doel",bg_none:"Niemand.",sw_era:"Meegemaakt",sw_doc:"Bekijk document",sw_view:"Bekijk beeld",sw_nextp:"hierna: {name}",sw_route:"Afgelegde route",sw_death:"Afscheid",sw_scan:"Hele krant",tg_k_foto:"Een foto uit die tijd",tg_k_tekening:"Een tekening uit die tijd",tg_k_prent:"Een prent uit die tijd",tg_k_schilderij:"Een schilderij uit die tijd",tg_k_kaart:"Een kaart uit die tijd",tg_k_munt:"Een munt uit die tijd",tg_k_affiche:"Een affiche uit die tijd",tg_k_krant:"Uit de krant",tg_k_x:"Een beeld uit die tijd",sw_birth:"Geboren"});
 Object.assign(I18N.en,{sw_btn:"Cards",sw_btn_t:"The story as cards that play by themselves",sw_close:"Close",sw_pause:"Pause",sw_play:"Play",sw_next:"Next",sw_prev:"Previous",
  sw_hint:"Tap right: next · tap left: back · hold: pause · swipe up: one generation further back",
- sw_family:"Family",sw_sibs:"Brothers and sisters",sw_era:"Lived through",sw_doc:"View document",sw_view:"View image",sw_nextp:"next: {name}",sw_route:"Route so far",sw_death:"Farewell",sw_scan:"Whole page",tg_k_foto:"A photo from that time",tg_k_tekening:"A drawing from that time",tg_k_prent:"A print from that time",tg_k_schilderij:"A painting from that time",tg_k_kaart:"A map from that time",tg_k_munt:"A coin from that time",tg_k_affiche:"A poster from that time",tg_k_krant:"From the newspaper",tg_k_x:"An image from that time",sw_birth:"Born"});
+ sw_family:"Family",sw_sibs:"Brothers and sisters",
+ bg_title:"Card budget",bg_intro:"How many cards does Cards show when you start at this person, and how long is the longest run of text only? Aim: at most {max} cards and {run} text cards in a row. Cards with an image (also text on an image) break a run.",
+ bg_who:"Person",bg_n:"Cards",bg_run:"Text in a row",bg_where:"Where",bg_ok:"fine",bg_close:"Close",bg_card:"card {n}",
+ bg_many:"Too many cards: merge story cards or leave a few out.",bg_long:"Too much text in a row: give a card in this run an image (\"card\" on the image) or merge cards.",
+ bg_own:"With an own story",bg_other:"Without an own story, but over the aim",bg_none:"Nobody.",sw_era:"Lived through",sw_doc:"View document",sw_view:"View image",sw_nextp:"next: {name}",sw_route:"Route so far",sw_death:"Farewell",sw_scan:"Whole page",tg_k_foto:"A photo from that time",tg_k_tekening:"A drawing from that time",tg_k_prent:"A print from that time",tg_k_schilderij:"A painting from that time",tg_k_kaart:"A map from that time",tg_k_munt:"A coin from that time",tg_k_affiche:"A poster from that time",tg_k_krant:"From the newspaper",tg_k_x:"An image from that time",sw_birth:"Born"});
 let SW=null;
 const SW_KIND={vh_begin:"b",vh_born_dp:"b",vh_born_d:"b",vh_born_p:"b",vh_born_none:"b",vh_age:"b",vh_ageX:"b",vh_living:"b",
   vh_job:"b",vh_kidsN:"k",vh_kids1:"k",vh_kidsSolo:"k",vh_kidsN_living:"k",vh_kids1_living:"k",vh_kidsSolo_living:"k",vh_other1:"f",vh_otherN:"f",vh_sibs1:"b",vh_sibsN:"b",vh_half1:"b",vh_halfN:"b",vh_moveLand:"f",vh_movePlace:"k",
@@ -2034,6 +2057,21 @@ function swOverlay(cs){const ok=(c,from)=>c&&c.kind==="img"&&!c.paper&&!c.scan&&
     if(best){best.used=1;pair.set(c,best)}});
   return cs.filter(c=>!c.used).map(c=>{const im=pair.get(c);if(!im)return c;
     return Object.assign({},c,{kind:"ov",bg:im.ov.src,html:`<figure class="sw-fig"><img src="${slEsc(im.ov.src)}" alt=""></figure>${c.html}${im.ov.cred?`<div class="sw-ovc">${im.ov.cred}</div>`:""}`})})}
+/* card budget (#kaartbudget / #cardbudget): per person the real number of cards when Cards starts there, and the longest run of text cards */
+const SW_BUDGET_MAX=15,SW_BUDGET_RUN=3;
+function swBudgetOf(i){const keep=SW;let cs;try{SW={path:swPlan([i])};swBuild();cs=SW.gens[0].cards}finally{SW=keep}
+  cs=cs.filter(c=>c.kind!=="fork"&&c.kind!=="end");let run=[],best=[],sn=0;
+  const cardLab=c=>{if(c.kind==="story"){sn++;return _t("bg_card",{n:sn})}const d=document.createElement("div");d.innerHTML=c.html;const k=d.querySelector(".sw-k");return (k?k.textContent:c.kind).replace(/^✦\s*/,"").trim()||c.kind};
+  cs.forEach(c=>{const l=cardLab(c);if(c.kind==="img"||c.kind==="ov"){run=[]}else{run.push(l);if(run.length>best.length)best=run.slice()}});
+  return {n:cs.length,run:best.length,where:best}}
+function swBudgetShow(){let el=$("swb");if(!el){el=document.createElement("div");el.id="swb";el.className="swb";el.setAttribute("role","dialog");document.body.appendChild(el)}
+  const row=i=>{const b=swBudgetOf(i),many=b.n>SW_BUDGET_MAX,long=b.run>SW_BUDGET_RUN;
+    return {i,b,bad:many||long,html:`<tr class="${many||long?"bad":""}"><td>${slEsc(P[i].n)}<small>${slEsc(yrs(P[i]))}</small></td><td class="num${many?" x":""}">${b.n}</td><td class="num${long?" x":""}">${b.run}</td><td>${long?slEsc(b.where.join(" · ")):""}${many||long?`<small>${[many?_t("bg_many"):"",long?_t("bg_long"):""].filter(Boolean).join(" ")}</small>`:`<small>${_t("bg_ok")}</small>`}</td></tr>`}};
+  const own=P.map((p,i)=>i).filter(i=>vhHas(P[i])).map(row).sort((a,b)=>b.bad-a.bad||b.b.n-a.b.n);
+  const other=P.map((p,i)=>i).filter(i=>!vhHas(P[i])&&!P[i].living).map(i=>({i,b:swBudgetOf(i)})).filter(x=>x.b.n>SW_BUDGET_MAX).map(x=>row(x.i));
+  const tbl=rs=>rs.length?`<table><thead><tr><th>${_t("bg_who")}</th><th>${_t("bg_n")}</th><th>${_t("bg_run")}</th><th>${_t("bg_where")}</th></tr></thead><tbody>${rs.map(r=>r.html).join("")}</tbody></table>`:`<p>${_t("bg_none")}</p>`;
+  el.innerHTML=`<div class="swb-in"><button type="button" class="swb-x">${_t("bg_close")}</button><h2>${_t("bg_title")}</h2><p>${_t("bg_intro",{max:SW_BUDGET_MAX,run:SW_BUDGET_RUN})}</p><h3>${_t("bg_own")}</h3><div class="swb-t">${tbl(own)}</div><h3>${_t("bg_other")}</h3><div class="swb-t">${tbl(other)}</div></div>`;
+  el.hidden=false;if(!/^#(kaartbudget|cardbudget)$/.test(location.hash))history.replaceState(null,"","#"+(LANG==="nl"?"kaartbudget":"cardbudget"));el.querySelector(".swb-x").onclick=()=>{el.hidden=true;history.replaceState(null,"","#"+state.view)}}
 function swDur(c){if(c.stay)return 0;if(c.img)return c.paper?12000:7000;return Math.max(5000,Math.min(15000,3200+48*(c.len||60)))+(c.kind==="ov"?1500:0)}
 function swOpen(root){
   if(!$("sw")){const d=document.createElement("div");d.id="sw";d.className="sw";d.hidden=true;d.setAttribute("role","dialog");d.setAttribute("aria-modal","true");
@@ -2301,7 +2339,7 @@ function langInit(){let l=null;try{l=new URLSearchParams(location.search).get("l
 document.querySelector("#stage #loading")&&($("loading").textContent=_t("loading"));
 fetch("data.json").then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(d=>{D=d;P=prepareData(d);langInit();
   if(!P.length){applyTexts();$("stage").innerHTML=`<div class="empty"><div class="et">${_t("emptyTitle")}</div><p>${_t("emptyPeople")}</p></div>`;return}
-  const h=location.hash.slice(1);if(VIEWS.includes(h))state.view=h;
+  const h=location.hash.slice(1),budget=/^(kaartbudget|cardbudget)$/.test(h);if(VIEWS.includes(h))state.view=h;
   state.root=META.perView[state.view]!=null&&P[META.perView[state.view]]?META.perView[state.view]:META.starts[0].persoon;
   applyTexts();initSearch();
   $("back").onclick=()=>{if(state.hist.length){state.root=state.hist.pop();render()}};
@@ -2310,8 +2348,8 @@ fetch("data.json").then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.
   document.querySelectorAll("#tabs button,#storyBtn").forEach(b=>b.onclick=()=>{state.view=b.dataset.v;render()});
   $("swBtn").onclick=()=>swOpen(state.root);
   $("treeBtn").onclick=()=>{state.view=state.lastTree||"familie";render()};
-  addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(VIEWS.includes(h)&&h!==state.view){state.view=h;render()}});
-  render();
+  addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(/^(kaartbudget|cardbudget)$/.test(h)){swBudgetShow();return}if(VIEWS.includes(h)&&h!==state.view){state.view=h;render()}});
+  render();if(budget)swBudgetShow();
 }).catch(e=>{$("stage").innerHTML=`<div id="loading">${_t("loadError",{msg:slEsc(e.message)})}</div>`;console.error(e)});
 </script>
 </body>

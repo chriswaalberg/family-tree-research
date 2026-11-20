@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.21"
+  version: "0.9.22"
 ---
 
 # Family-tree research, hand in hand
@@ -93,6 +93,7 @@ The viewer has a **Story** view: from the start person step by step back in time
   - **Invent nothing**; the death sentence may be short.
   - Every story image gets `card` (after which card). The same number of cards in every language.
   - Example of a hook: "An Amsterdam boy who stepped off his ship in Australia and never went back on board. Then he boxed, he drifted, and he was in the papers. That's John."
+- **Card budget: at most ~15 cards per person and at most 3 text cards in a row** (counted from that person, with intro, zeitgeist, wars and farewell). Cards with an image, also text on an image, break a run. So: about 5–8 story cards, and an image (`card`) on every third card or so. `make_viewer_data.py` warns when a story alone makes more than 12 cards; the exact count per person, with the run of text and where it is, is in the viewer at the address ending in `#kaartbudget` (or `#cardbudget`). Check it after every round and fix what it marks.
 - **Every round: suggest cards for stories that don't have them yet.** Without `cards` the viewer uses the paragraphs of `text` as cards, and a long paragraph gets cut mid-sentence with "…". `make_viewer_data.py` names those stories ("consider writing cards").
 - **Give the surname line its stories too.** Not only remarkable lives: also write a story for every generation of the user's own name line (and other main lines) for which the research already holds records. Ordinary lives become vivid from what the records say: occupations, ages, addresses, signatures, witnesses, a child born before the wedding, a remarriage to a sister-in-law. Read the research reports and work logs first; most of the material is already there.
 - **Ask what the family knows.** Occupations, a family shop, where they lived, nicknames, what grandma used to tell. One detail ("he was a milkman, they had a dairy shop") brings a story to life and is in no archive. Record it as a source: "<name> (own knowledge, <date>)".

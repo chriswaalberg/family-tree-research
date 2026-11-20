@@ -437,9 +437,46 @@ def story_card_warnings(p):
         longest = max((len(x) for t in texts for x in split_paras(t)), default=0)
         if longest > PARA_LONG:
             out.append(f"no card version (\"kaarten\") and a paragraph of {longest} characters; consider writing cards")
+    out += story_budget_warnings(p)
     for w in out:
         print(f"  warning, story of {p['n']}: {w}", file=sys.stderr)
     return len(out)
+
+
+BUDGET_OWN = 12      # own cards (intro, story, separate images, farewell); zeitgeist and wars add ~2-5, aim for ~15 in all
+PAPER = re.compile(r"^(krant|scan|document|kaart)$", re.I)
+
+
+def story_budget_warnings(p):
+    """Estimate the person's own cards in the Cards view, the way the viewer builds them: intro, one card per story card
+    (or paragraph), the first ordinary image after a card goes under its text (text on the image), other images and
+    clippings/scans/documents/maps are cards of their own, farewell. Zeitgeist and war cards come on top and depend on the
+    trail, and so do runs of text cards: for exact numbers open the viewer with #kaartbudget (#cardbudget)."""
+    cards, text = p.get("verhaal_kaarten"), p.get("verhaal")
+    src = cards or text
+    first = next(iter(src.values()), "") if isinstance(src, dict) else src
+    paras = split_paras(first)
+    if not paras: return []
+    key = "kaart" if cards else "alinea"
+    imgs = {}
+    loose = 0
+    for b in p.get("verhaal_beelden") or []:
+        if not isinstance(b, dict) or not b.get("bestand"): continue
+        try: n = int(b.get(key) if b.get(key) is not None else b.get("alinea"))
+        except (TypeError, ValueError): loose += 1; continue
+        imgs.setdefault(min(max(n, 1), len(paras)), []).append(b)
+    seq = ["T"]  # intro
+    for n in range(1, len(paras) + 1):
+        bs = imgs.get(n, [])
+        ordinary = [b for b in bs if not PAPER.match(str(b.get("soort") or "")) and not b.get("scan")]
+        seq.append("I" if ordinary else "T")
+        seq += ["I"] * (len(bs) - (1 if ordinary else 0))
+    seq += ["I"] * loose + ["T"]  # farewell
+    out = []
+    if len(seq) > BUDGET_OWN:
+        out.append(f"about {len(seq)} own cards in Cards (intro, {len(paras)} story cards, {len(seq) - len(paras) - 2} separate image card(s), farewell); "
+                   f"with zeitgeist and wars that is more than ~15: merge or drop cards (aim: {BUDGET_OWN} or fewer)")
+    return out
 
 
 FRONT_YEAR = re.compile(r"(?:[\w.'’-]+\s+){0,3}?(1[5-9]\d\d|20\d\d)\b")  # a year at the front of a card dates it (same rule as the viewer)
@@ -757,6 +794,7 @@ def main():
         n_kv = sum(1 for p in people if p.get("verhaal_kaarten"))
         print(f"Stories: {n_vh} read, {n_kv} with cards" + (f", {n_warn} warning(s) about story images" if n_warn else "")
               + (f", {n_cw} warning(s) about cards" if n_cw else "") + (" (see above)" if n_warn or n_cw else ""))
+        if n_vh: print("  Card budget per person (exact, with zeitgeist): open the viewer with #kaartbudget (or #cardbudget) at the end of the address")
 
     for p in people: p.pop("_media_orig", None)
     fam = a.familienaam or surn0[starts[0]["persoon"]] or ""
