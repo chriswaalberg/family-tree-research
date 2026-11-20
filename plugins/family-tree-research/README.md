@@ -28,9 +28,9 @@ A plugin for Claude (Cowork) that takes you by the hand through your family hist
 
 ## What's inside
 
-- `skills/family-tree/SKILL.md` — the instructions Claude follows, with references for onboarding, GEDCOM export, research, sources per country, the scripts and the viewer.
-- `skills/family-tree/scripts/` — `gedcom_tool.py` (create, extend and check a GEDCOM; link media), `make_viewer_data.py` (GEDCOM → data.json), `standalone_viewer.py` (one standalone HTML file). Python 3.8+, standard library only.
-- `skills/family-tree/viewer/` — the viewer (`index.html`) and its data format (`DATA-FORMAT.md`).
-- `skills/family-tree/examples/` — a small example family.
+- `skills/family-tree/SKILL.md`: the instructions Claude follows, with references for onboarding, GEDCOM export, research, sources per country, the scripts and the viewer.
+- `skills/family-tree/scripts/`: `gedcom_tool.py` (create, extend and check a GEDCOM; link media), `make_viewer_data.py` (GEDCOM → data.json), `standalone_viewer.py` (one standalone HTML file). Python 3.8+, standard library only.
+- `skills/family-tree/viewer/`: the viewer (`index.html`) and its data format (`DATA-FORMAT.md`).
+- `skills/family-tree/examples/`: a small example family.
 
 Made by Chris Waalberg, with Claude.

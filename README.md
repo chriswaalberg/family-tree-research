@@ -1,6 +1,12 @@
 # Family Tree Research
 
-A plugin for Claude (Cowork) that guides you step by step through your family history, in **English or Dutch**. Start with a GEDCOM file or with yourself, your parents and your grandparents. Claude searches public archives, notes the source and how certain it is for every ancestor, and builds an interactive family-tree viewer you can read as a story.
+I've been researching my own family tree with Claude, including the Swedish origin of our family name. I started with an export of an old Ancestry project. Claude checked every connection and added a lot of new ancestors, every one of them with a source. I turned it into a plugin, so you can do the same.
+
+Start with what you know (yourself, your parents, your grandparents) or with a GEDCOM export from Ancestry or MyHeritage. Claude searches public archives, notes for each ancestor how sure it is, and builds an interactive family tree. It works in **English and Dutch**. My favourite part is the Story view: you walk back through the generations and read how each of them lived.
+
+![The Story view, with the example family that comes with the plugin](docs/screenshots/story.png)
+
+Not every archive lets Claude in. When one doesn't, Claude tells you exactly what to look up and asks for a screenshot.
 
 ## Install (with automatic updates)
 
@@ -28,6 +34,10 @@ More about what the plugin does: [plugins/family-tree-research/README.md](plugin
 /plugin install family-tree-research@chriswaalberg
 ```
 
+## Found something?
+
+A great-great-grandparent, or a bug? [Open an issue](https://github.com/chriswaalberg/family-tree-research/issues). I'd love to hear both.
+
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE).
