@@ -602,17 +602,17 @@ const LINE_COL={vv:"#2f5f8f",vm:"#3f7d52",mv:"#c4652b",mm:"#9e3d5f"};
 const LEGACY_REG={ZH:{naam:"Zuid-Holland",kleur:"#e07a2f"},NH:{naam:"Noord-Holland",kleur:"#3b6ea5"},UT:{naam:"Utrecht",kleur:"#b0486a"},GE:{naam:"Gelderland",kleur:"#5a9a6e"},ZE:{naam:"Zeeland",kleur:"#c9a227"},NL:{naam:"Overig Nederland",kleur:"#8d7f6e"},SE:{naam:"Zweden",kleur:"#1f9bb5"},US:{naam:"Verenigde Staten",kleur:"#7a5195"},FR:{naam:"Overig buitenland",kleur:"#9a8fb8"},DE:{naam:"Overig buitenland",kleur:"#9a8fb8"},XX:{naam:"Overig buitenland",kleur:"#9a8fb8"}}; /* alleen voor data zonder "regios" (formaat v1) */
 const CERT={"zeker":"#4c9a5f","waarschijnlijk":"#d9a429","mogelijk":"#e8873a","onbekend":"#bfb6a8","fout":"#c0392b","niet gecheckt":"#8fb3d9"};
 function certLabel(s){return {"zeker":_t("cert_zeker"),"waarschijnlijk":_t("cert_waarschijnlijk"),"mogelijk":_t("cert_mogelijk"),"onbekend":_t("cert_onbekend"),"fout":_t("cert_fout"),"niet gecheckt":_t("cert_niet")}[s]||s}
-/* landen: code → [naam, kleur, namen zoals ze in plaatsnamen voorkomen] */
+/* landen: code → [naam, kleur, namen zoals ze in plaatsnamen voorkomen, (optioneel) naam midden in een zin] */
 const COUNTRY={
-  NL:[{nl:"Nederland",en:"Netherlands"},"#c8692c",["nederland","netherlands","the netherlands","holland","niederlande"]],
+  NL:[{nl:"Nederland",en:"Netherlands"},"#c8692c",["nederland","netherlands","the netherlands","holland","niederlande"],{en:"the Netherlands"}],
   BE:[{nl:"België",en:"Belgium"},"#d2a032",["belgie","belgium","belgique","belgien"]],
   DE:[{nl:"Duitsland",en:"Germany"},"#4e7d55",["duitsland","germany","deutschland","allemagne","preussen","pruisen","prussia"]],
   SE:[{nl:"Zweden",en:"Sweden"},"#2c7896",["zweden","sweden","sverige","schweden"]],
   NO:[{nl:"Noorwegen",en:"Norway"},"#3d5d8f",["noorwegen","norway","norge"]],
   DK:[{nl:"Denemarken",en:"Denmark"},"#a3445f",["denemarken","denmark","danmark"]],
   FR:[{nl:"Frankrijk",en:"France"},"#6f4f8c",["frankrijk","france","frankreich"]],
-  GB:[{nl:"Verenigd Koninkrijk",en:"United Kingdom"},"#8a7fae",["engeland","england","united kingdom","uk","scotland","schotland","wales","great britain"]],
-  US:[{nl:"Verenigde Staten",en:"United States"},"#8a6d4f",["verenigde staten","united states","usa","united states of america"]],
+  GB:[{nl:"Verenigd Koninkrijk",en:"United Kingdom"},"#8a7fae",["engeland","england","united kingdom","uk","scotland","schotland","wales","great britain"],{nl:"het Verenigd Koninkrijk",en:"the United Kingdom"}],
+  US:[{nl:"Verenigde Staten",en:"United States"},"#8a6d4f",["verenigde staten","united states","usa","united states of america"],{nl:"de Verenigde Staten",en:"the United States"}],
   ID:[{nl:"Indonesië",en:"Indonesia"},"#c9708f",["indonesie","indonesia","nederlands-indie","dutch east indies","nederlandsch-indie"]]};
 const LEGACY_LAND={ZH:"NL",NH:"NL",UT:"NL",GE:"NL",ZE:"NL",XX:null};
 const XPAL=["#7d6b5a","#5f8a8b","#b5835a","#7a6a9a","#9a7b3c","#5d7f6a"];
@@ -629,6 +629,7 @@ function landOf(p){if(p._land!==undefined)return p._land;let c=null;
   if(!c)c=landFromPlace(p.bplac)||landFromPlace(p.dplac);
   return p._land=c||null}
 function landName(c){return COUNTRY[c]?lab(COUNTRY[c][0]):META.regios[c]?lab(META.regios[c].naam):c}
+function landNameIn(c){const x=COUNTRY[c]&&COUNTRY[c][3];return x&&x[LANG]?x[LANG]:landName(c)}
 function landCol(p){const c=landOf(p);if(!c)return NONE;if(COUNTRY[c])return COUNTRY[c][1];if(META.regios[c]&&META.regios[c].kleur)return META.regios[c].kleur;
   let h=0;for(const ch of c)h=(h*31+ch.charCodeAt(0))>>>0;return XPAL[h%XPAL.length]}
 
@@ -1132,7 +1133,7 @@ function vhTemplate(i,child,flags){const p=P[i],fn=vhFn(p),pr=vhPro(p),T=(k,v)=>
     const others=[...new Set(p.ch.map(k=>P[k].f===i?P[k].m:P[k].f).filter(q=>q>=0&&q!==partner))];
     if(others.length)out.push(T("vh_other",{names:vhList(others.map(q=>vhFn(P[q])))}));
     const l1=landOf(p),l2=landOf(c);
-    if(l1&&l2&&l1!==l2)out.push(T("vh_moveLand",{l1:landName(l1),l2:landName(l2),child:cfn}));
+    if(l1&&l2&&l1!==l2)out.push(T("vh_moveLand",{l1:landNameIn(l1),l2:landNameIn(l2),child:cfn}));
     else if(p.bplac&&c.bplac&&vhTown(p.bplac)!==vhTown(c.bplac))out.push(T("vh_movePlace",{p1:vhPlace(p.bplac),p2:vhPlace(c.bplac),child:cfn}))}
   /* overlijden */
   out=g2;
