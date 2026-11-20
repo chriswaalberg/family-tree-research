@@ -609,6 +609,12 @@ main{padding-top:6px}
 .sw .sw-card[data-kind=img] .sw-fig img{width:100%;height:100%;max-height:none;object-fit:cover}
 .sw .sw-card[data-kind=img]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:60%;background:linear-gradient(0deg,rgba(0,0,0,.92) 35%,rgba(0,0,0,0))}
 .sw .sw-card[data-kind=img] .sw-k,.sw .sw-card[data-kind=img] .sw-cap{position:relative;z-index:2}
+/* paper (clipping, scan, document, map): nothing cropped, on a calm paper colour, caption below */
+.sw .sw-card[data-kind=img][data-paper]{background:#1d140e;justify-content:center}
+.sw .sw-card[data-kind=img][data-paper]::after{display:none}
+.sw .sw-card[data-kind=img][data-paper] .sw-body{position:relative}
+.sw .sw-card[data-kind=img][data-paper] .sw-fig{position:static;inset:auto;background:#efe7d6;border-radius:10px;padding:10px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.sw .sw-card[data-kind=img][data-paper] .sw-fig img,.sw .sw-card[data-kind=img][data-paper].f1 .sw-fig img{width:100%;height:auto;max-height:none;object-fit:contain;mix-blend-mode:multiply}
 .sw .sw-big{display:block;position:absolute;right:-10px;bottom:30px;font:800 120px/1 Fraunces,Georgia,serif;opacity:.1;pointer-events:none}
 .sw .sw-k{color:#dcb56a}
 .sw .sw-t p,.sw p.sw-t{font-weight:500}
@@ -713,7 +719,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.15",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.16",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1446,7 +1452,7 @@ function vhTijdgeest(i,seen){const T=vhTG();if(!T)return"";const p=P[i];if(p.liv
   for(const {pl,iv} of pls)for(const [a,b] of iv)for(const L of pl.leven||[]){const key="L:"+pl.id+":"+L.van,m=(a+b)/2;
     if(m>=L.van&&m<L.tot&&!seen.has(key)){seen.add(key);html+=`<div class="vh-k" data-y="${Math.max(L.van,a)}">${slEsc(lab(L.titel)||_t("vh_tg_life",{plaats:lab(pl.naam)}))}</div>${vhParas(lab(L.tekst))}`}}
   for(const best of (seen.assign&&seen.assign.get(i))||[]){seen.add("B:"+best.bestand);const t=lab(best.titel);
-    html+=`<figure class="vh-fig" data-y="${best.jaar||Math.round(((best.van||0)+(best.tot||best.van||0))/2)||""}"><div class="vh-fk">${slEsc(vhKind(best))}</div><button type="button" class="vh-fimg" data-tgimg="${slEsc(best.bestand)}" data-tgt="${slEsc(t)}" title="${slEsc(t)}"><img loading="lazy" src="${slEsc(best.bestand)}" alt="${slEsc(t)}"></button><figcaption><b>${slEsc(t)}</b>${best.maker?" · "+slEsc(best.maker):""}${best.datering?" · "+slEsc(best.datering):""}${best.bron?` · <a href="${slEsc(best.bron[1])}" target="_blank" rel="noopener">${slEsc(best.bron[0])}</a>`:""}${best.bijschrift?`<span>${slEsc(lab(best.bijschrift))}</span>`:""}</figcaption></figure>`}
+    html+=`<figure class="vh-fig" data-y="${best.jaar||Math.round(((best.van||0)+(best.tot||best.van||0))/2)||""}"${best.soort?` data-soort="${slEsc(best.soort)}"`:""}><div class="vh-fk">${slEsc(vhKind(best))}</div><button type="button" class="vh-fimg" data-tgimg="${slEsc(best.bestand)}" data-tgt="${slEsc(t)}" title="${slEsc(t)}"><img loading="lazy" src="${slEsc(best.bestand)}" alt="${slEsc(t)}"></button><figcaption><b>${slEsc(t)}</b>${best.maker?" · "+slEsc(best.maker):""}${best.datering?" · "+slEsc(best.datering):""}${best.bron?` · <a href="${slEsc(best.bron[1])}" target="_blank" rel="noopener">${slEsc(best.bron[0])}</a>`:""}${best.bijschrift?`<span>${slEsc(lab(best.bijschrift))}</span>`:""}</figcaption></figure>`}
   const evs=[];const add=(ev,lok,iv)=>{const a=ev.van||ev.jaar,b=ev.tot||ev.jaar,key="E:"+(lok||"alg")+":"+ev.jaar+":"+lab(ev.tekst).slice(0,24);
     if(seen.has(key)||b<s+6||a>e||(iv&&!vhInIv(iv,a,b)))return;evs.push({ev,key,lok})};
   for(const {pl,iv} of pls)for(const ev of pl.gebeurtenissen||[])add(ev,pl.id,iv);
@@ -1911,6 +1917,8 @@ function swPlan(path){const np=path.slice(),seen=new Set(np);let cur=np[np.lengt
 /* does the own story already tell the death? a paragraph with the death year and a word for dying (both languages) */
 const SW_DIED=/\b(overle(ed|den)|stierf|gestorven|died|death|passed away)\b/i;
 function swToldDeath(p){if(!p.dy)return false;const y=new RegExp("\\b"+p.dy+"\\b");return vhParaList(lab(p.verhaal)).some(x=>y.test(x)&&SW_DIED.test(x))}
+/* newspaper clippings, scans, documents and maps: the whole image on paper, caption below, the card scrolls when it doesn't fit */
+const SW_PAPER=/^(krant|scan|document|kaart)$/i;
 function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
   const path=SW.path,root=path[0],rfn=vhFn(P[root]),flags={dtb:false},seen=new Set();seen.assign=vhAssignImages(path);
   SW.gens=path.map((i,k)=>{const p=P[i],child=k?path[k-1]:null,code=vhCode(path,k),fn=vhFn(p),cards=[];
@@ -1933,14 +1941,14 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     if(vhHas(p)){const paras=vhParaList(lab(p.verhaal)),imgs=(Array.isArray(p.verhaal_beelden)?p.verhaal_beelden:[]).filter(b=>b&&b.bestand),slot=vhImgSlots(paras,imgs),py=vhParaYears(paras,p);
       /* each paragraph a card, and the images that belong to it right after it */
       paras.forEach((x,j)=>{add("story",`<div class="sw-k">✦ ${slEsc(_t("vh_title",{name:fn}))}</div><div class="sw-t"><p>${vhMd(x)}</p></div>${j===paras.length-1?`<div class="sw-note">${vhSources(p)}</div>`:""}`,{len:x.length,y:py[j]});
-        imgs.forEach((b,k)=>{if(slot[k]!==j)return;add("img",`${b.soort?`<div class="sw-k">${slEsc(vhKind(b))}</div>`:""}<figure class="sw-fig"><img src="${slEsc(b.bestand)}" alt=""></figure><div class="sw-cap"><b>${slEsc(lab(b.titel)||"")}</b>${[b.maker,b.datering].filter(Boolean).map(slEsc).join(" · ")}${b.bijschrift?`<span>${slEsc(lab(b.bijschrift))}</span>`:""}${b.scan?`<button type="button" class="sw-scan" data-scan="1">⤢ ${_t("sw_scan")}</button>`:""}</div>`,{img:1,y:py[j],scan:b.scan?vhScanItems(b.bestand,b.scan,lab(b.titel)||""):null})})})}
+        imgs.forEach((b,k)=>{if(slot[k]!==j)return;add("img",`${b.soort?`<div class="sw-k">${slEsc(vhKind(b))}</div>`:""}<figure class="sw-fig"><img src="${slEsc(b.bestand)}" alt=""></figure><div class="sw-cap"><b>${slEsc(lab(b.titel)||"")}</b>${[b.maker,b.datering].filter(Boolean).map(slEsc).join(" · ")}${b.bijschrift?`<span>${slEsc(lab(b.bijschrift))}</span>`:""}${b.scan?`<button type="button" class="sw-scan" data-scan="1">⤢ ${_t("sw_scan")}</button>`:""}</div>`,{img:1,paper:SW_PAPER.test(b.soort||""),y:py[j],scan:b.scan?vhScanItems(b.bestand,b.scan,lab(b.titel)||""):null})})})}
     /* a separate family card only when there is more than the children (another partner, a move to another country); otherwise the children (and a move within the country) are on the intro card */
     else if(S.f.length)add("family",`<div class="sw-k">${_t("sw_family")}</div><div class="sw-big">${p.ch.length>1?p.ch.length:""}</div><div class="sw-t">${T(S.k.concat(S.f))}</div>`,{len:S.k.concat(S.f).join(" ").length,y:Math.min(...p.ch.map(c=>P[c].by||Infinity))});
     /* zeitgeist: the Story view's own block, cut into pieces with a year (one card per piece; neighbouring events are merged after sorting) */
     for(const x of vhTgPieces(vhTijdgeest(i,seen))){
       if(x.type==="life"){const d=document.createElement("div");d.innerHTML=x.html;add("life",`<div class="sw-k">${slEsc(x.head)}</div><div class="sw-t">${x.html}</div>`,{len:d.textContent.length,y:x.y})}
       else if(x.type==="img"){const im=x.el.querySelector("img"),cap=x.el.querySelector("figcaption");
-        add("img",`<div class="sw-k">${slEsc((x.el.querySelector(".vh-fk")||{}).textContent||_t("tg_k_x"))}</div><figure class="sw-fig"><img src="${slEsc(im.getAttribute("src"))}" alt="${slEsc(im.alt)}"></figure><div class="sw-cap">${cap?cap.innerHTML.replace("</b> · ","</b>"):""}</div>`,{img:1,y:x.y})}
+        add("img",`<div class="sw-k">${slEsc((x.el.querySelector(".vh-fk")||{}).textContent||_t("tg_k_x"))}</div><figure class="sw-fig"><img src="${slEsc(im.getAttribute("src"))}" alt="${slEsc(im.alt)}"></figure><div class="sw-cap">${cap?cap.innerHTML.replace("</b> · ","</b>"):""}</div>`,{img:1,paper:SW_PAPER.test(x.el.dataset.soort||""),y:x.y})}
       else{const d=document.createElement("div");d.innerHTML=x.html;add("events",`<div class="sw-k">${slEsc(x.head)}</div><ul class="sw-ev">${x.html}</ul>`,{len:d.textContent.length,y:x.y,li:x.html,head:x.head})}}
     /* "lived through": one card per war or era, each at its own year (WW1 at 1914, WW2 at 1940) */
     const ERA=[["e_80",1568,""],["e_leiden",1573,""],["e_fr",1795,""],["e_ww1",1914,"1914–18"],["e_ww2",1940,"1940–45"]];
@@ -1962,7 +1970,7 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     const head=cards.filter(c=>c.kind==="intro"),tail=cards.filter(c=>c.kind==="death"||c.kind==="fork"||c.kind==="end"),mid=vhSortByYear(cards.filter(c=>!head.includes(c)&&!tail.includes(c)));
     const merged=[];for(const c of mid){const l=merged[merged.length-1];if(c.kind==="events"&&l&&l.kind==="events"){l.li+=c.li;l.len+=c.len;l.html=`<div class="sw-k">${slEsc(l.head)}</div><ul class="sw-ev">${l.li}</ul>`}else merged.push(c)}
     return {i,lc,fn,cards:head.concat(merged,tail)}})}
-function swDur(c){if(c.stay)return 0;if(c.img)return 7000;return Math.max(5000,Math.min(15000,3200+48*(c.len||60)))}
+function swDur(c){if(c.stay)return 0;if(c.img)return c.paper?12000:7000;return Math.max(5000,Math.min(15000,3200+48*(c.len||60)))}
 function swOpen(root){
   if(!$("sw")){const d=document.createElement("div");d.id="sw";d.className="sw";d.hidden=true;d.setAttribute("role","dialog");d.setAttribute("aria-modal","true");
     d.innerHTML=`<button type="button" class="sw-nav l" data-nav="-1">‹</button><div class="sw-phone"><div class="sw-cards"></div><div class="sw-top"><div class="sw-bars"></div><div class="sw-head"><div class="sw-av"></div><div class="sw-who"><b></b><span></span></div><button type="button" class="sw-pp"></button><button type="button" class="sw-x">✕</button></div><div class="sw-route"></div></div><div class="sw-hint"></div></div><button type="button" class="sw-nav r" data-nav="1">›</button>`;
@@ -1975,7 +1983,7 @@ function swClose(){const el=$("sw");if(!el)return;el.hidden=true;document.docume
 function swCard(){return SW.gens[SW.g].cards[SW.c]}
 function swShow(dir){const el=$("sw"),G=SW.gens[SW.g],c=G.cards[SW.c],box=el.querySelector(".sw-cards");SW.shownAt=performance.now();
   SW.t=0;SW.dur=swDur(c);
-  const n=document.createElement("div");n.className="sw-card in "+dir;n.dataset.kind=c.kind;n.style.setProperty("--lc",G.lc);n.style.setProperty("--dur",(SW.dur||8000)+"ms");
+  const n=document.createElement("div");n.className="sw-card in "+dir;n.dataset.kind=c.kind;if(c.paper)n.dataset.paper="1";n.style.setProperty("--lc",G.lc);n.style.setProperty("--dur",(SW.dur||8000)+"ms");
   n.innerHTML=`<div class="sw-body">${c.html}</div>`;
   /* only swap the animation classes: the fit classes from swFit (f1-f3, fscroll) and its inline styles stay until the old card is gone */
   [...box.children].forEach(o=>{o.classList.remove("in","none","next","prev","up","down");o.classList.add("out",dir);const kill=()=>o.remove();o.addEventListener("animationend",kill,{once:true});
@@ -1996,7 +2004,7 @@ function swShow(dir){const el=$("sw"),G=SW.gens[SW.g],c=G.cards[SW.c],box=el.que
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>swFit(n))}
 /* does the card fit on the screen? If not, step by step: smaller photo, smaller title, smaller text, move text to an extra card, and only then scroll */
 function swFit(n){if(!SW||!n||!n.isConnected||n.classList.contains("out"))return;const el=$("sw"),G=SW.gens[SW.g],c=G.cards[SW.c],b=n.querySelector(".sw-body");if(!b)return;
-  const topH=el.querySelector(".sw-top").offsetHeight,img=c.kind==="img";
+  const topH=el.querySelector(".sw-top").offsetHeight,img=c.kind==="img"&&!c.paper;
   if(!img)b.style.paddingTop=(topH+12)+"px";
   b.style.marginTop="";b.style.maxHeight=img?`calc(100% - ${topH+8}px)`:"";
   const over=()=>b.scrollHeight>b.clientHeight+2;
