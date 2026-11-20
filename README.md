@@ -1,5 +1,7 @@
 # Family Tree Research
 
+[![Latest version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fchriswaalberg%2Ffamily-tree-research%2Fmain%2Fplugins%2Ffamily-tree-research%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=b48a3c)](https://github.com/chriswaalberg/family-tree-research/commits/main)
+
 I've been researching my own family tree with Claude, including the Swedish origin of our family name. I started with an export of an old Ancestry project. Claude checked every connection and added a lot of new ancestors, every one of them with a source. I turned it into a plugin, so you can do the same.
 
 Start with what you know (yourself, your parents, your grandparents) or with a GEDCOM export from Ancestry or MyHeritage. Claude searches public archives, notes for each ancestor how sure it is, and builds an interactive family tree. It works in **English and Dutch**. My favourite part is the Story view: you walk back through the generations and read how each of them lived.
@@ -15,7 +17,7 @@ Not every archive lets Claude in. When one doesn't, Claude tells you exactly wha
 3. Install **family-tree-research**.
 4. Turn on automatic updates: first select the **Plugins** tab, then click **Add** (top right) → **Manage marketplaces** → **···** next to family-tree-research → **Sync automatically**.
 
-**Not getting the latest version?** Customize → **Plugins** → **Add** → **Manage marketplaces** → **···** → **Check for updates**. The "Synced commit" there should match the latest commit on GitHub.
+**Not getting the latest version?** The badge at the top shows the newest one. Customize → **Plugins** → **Add** → **Manage marketplaces** → **···** → **Check for updates**. The "Synced commit" there should match the latest commit on GitHub.
 
 ## Get started
 
