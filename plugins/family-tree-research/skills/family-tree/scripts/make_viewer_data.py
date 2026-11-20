@@ -775,6 +775,10 @@ def main():
             for L in pl.get("leven") or []:
                 if isinstance(L, dict) and "cards" in L and "kaarten" not in L: L["kaarten"] = L.pop("cards")
                 n_tw += zeitgeist_card_warnings(pl, L)
+        for ev in [e for pl in tg.get("plaatsen", []) for e in pl.get("gebeurtenissen") or []] + list((tg.get("algemeen") or {}).get("gebeurtenissen") or []):
+            if isinstance(ev, dict) and "weight" in ev and "gewicht" not in ev: ev["gewicht"] = ev.pop("weight")  # importance in Cards
+            if isinstance(ev, dict) and "gewicht" in ev and not isinstance(ev["gewicht"], (int, float)):
+                print(f"  warning, zeitgeist event {ev.get('jaar', '?')}: \"gewicht\": {ev['gewicht']} is not a number", file=sys.stderr)
         n_tk = sum(1 for pl in tg.get("plaatsen", []) for L in pl.get("leven") or [] if isinstance(L, dict) and L.get("kaarten"))
         print(f"Zeitgeist: {len(tg.get('plaatsen', []))} place(s), "
               f"{sum(len(x.get('beelden', [])) for x in tg.get('plaatsen', []))} images, {n_tk} life block(s) with cards"

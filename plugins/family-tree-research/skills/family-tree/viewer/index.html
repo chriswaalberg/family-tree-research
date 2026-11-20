@@ -719,7 +719,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.18",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.19",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1461,7 +1461,7 @@ function vhTijdgeest(i,seen){const T=vhTG();if(!T)return"";const p=P[i];if(p.liv
   evs.sort((x,y)=>x.ev.jaar-y.ev.jaar);
   const lok=evs.filter(x=>x.lok).slice(0,4),pick=lok.concat(evs.filter(x=>!x.lok&&!lok.some(l=>l.ev.jaar===x.ev.jaar)).slice(0,1)).sort((x,y)=>x.ev.jaar-y.ev.jaar);
   if(pick.length){pick.forEach(x=>seen.add(x.key));
-    html+=`<div class="vh-k">${_t("vh_tg_events")}</div><ul class="vh-ev">${pick.map(({ev})=>`<li data-y="${ev.jaar||ev.van||""}"><b>${ev.van&&ev.tot&&ev.van!==ev.tot?ev.van+"–"+String(ev.tot).slice(-2):ev.jaar}</b><span>${slEsc(lab(ev.tekst))}${ev.bron?` <a href="${slEsc(ev.bron[1])}" target="_blank" rel="noopener" title="${slEsc(ev.bron[0])}">${_t("vh_src1")}</a>`:""}${ev.links&&ev.links.length?`<span class="vh-evl">${slEsc(lab(ev.links_label)||"")} ${ev.links.map(l=>`<a href="${slEsc(l[1])}" target="_blank" rel="noopener">${slEsc(lab(l[0]))}</a>`).join(" · ")}</span>`:""}</span></li>`).join("")}</ul>`}
+    html+=`<div class="vh-k">${_t("vh_tg_events")}</div><ul class="vh-ev">${pick.map(({ev,lok})=>`<li data-y="${ev.jaar||ev.van||""}"${lok?' data-lok="1"':""}${ev.gewicht!=null&&isFinite(+ev.gewicht)?` data-w="${+ev.gewicht}"`:""}><b>${ev.van&&ev.tot&&ev.van!==ev.tot?ev.van+"–"+String(ev.tot).slice(-2):ev.jaar}</b><span>${slEsc(lab(ev.tekst))}${ev.bron?` <a href="${slEsc(ev.bron[1])}" target="_blank" rel="noopener" title="${slEsc(ev.bron[0])}">${_t("vh_src1")}</a>`:""}${ev.links&&ev.links.length?`<span class="vh-evl">${slEsc(lab(ev.links_label)||"")} ${ev.links.map(l=>`<a href="${slEsc(l[1])}" target="_blank" rel="noopener">${slEsc(lab(l[0]))}</a>`).join(" · ")}</span>`:""}</span></li>`).join("")}</ul>`}
   return html?`<section class="vh-tg">${html}</section>`:""}
 function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
   const S=vhState(),path=S.path,root=P[path[0]],rfn=vhFn(root),flags={dtb:false},tgSeen=new Set();tgSeen.assign=vhAssignImages(path);
@@ -1927,6 +1927,12 @@ function swLifeCards(ref){if(!ref)return null;const T=vhTG(),pl=T&&(T.plaatsen||
 function swToldDeath(p){if(!p.dy)return false;const y=new RegExp("\\b"+p.dy+"\\b");return vhParaList(swCardText(p)).some(x=>y.test(x)&&SW_DIED.test(x))}
 /* newspaper clippings, scans, documents and maps: the whole image on paper, caption below, the card scrolls when it doesn't fit */
 const SW_PAPER=/^(krant|scan|document|kaart)$/i;
+/* "Around that time" in Cards: at most SW_EV_MAX events per person (the Story view keeps them all), the most important first:
+   "gewicht" (weight) from the data, then events in their own place, then war years; an event within SW_ERA_NEAR years of a "lived through" card joins that card */
+const SW_EV_MAX=3,SW_ERA_NEAR=5,SW_WARS=[[1568,1648],[1672,1672],[1795,1813],[1914,1918],[1940,1945]];
+function swPickEvents(evs){const sc=x=>{const li=document.createElement("ul");li.innerHTML=x.html;const d=(li.firstElementChild||{}).dataset||{};
+    return (d.w!=null?+d.w:0)*10+(d.lok?2:0)+(x.y!=null&&SW_WARS.some(([a,b])=>x.y>=a&&x.y<=b)?1:0)};
+  return evs.map((x,j)=>({x,j,s:sc(x)})).sort((a,b)=>b.s-a.s||a.j-b.j).slice(0,SW_EV_MAX).sort((a,b)=>a.j-b.j).map(o=>o.x)}
 function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
   const path=SW.path,root=path[0],rfn=vhFn(P[root]),flags={dtb:false},seen=new Set();seen.assign=vhAssignImages(path);
   SW.gens=path.map((i,k)=>{const p=P[i],child=k?path[k-1]:null,code=vhCode(path,k),fn=vhFn(p),cards=[];
@@ -1960,6 +1966,7 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     /* a separate family card only when there is more than the children (another partner, a move to another country); otherwise the children (and a move within the country) are on the intro card */
     else if(S.f.length)add("family",`<div class="sw-k">${_t("sw_family")}</div><div class="sw-big">${p.ch.length>1?p.ch.length:""}</div><div class="sw-t">${T(S.k.concat(S.f))}</div>`,{len:S.k.concat(S.f).join(" ").length,y:Math.min(...p.ch.map(c=>P[c].by||Infinity))});
     /* zeitgeist: the Story view's own block, cut into pieces with a year (one card per piece; neighbouring events are merged after sorting) */
+    const evq=[];
     for(const x of vhTgPieces(vhTijdgeest(i,seen))){
       if(x.type==="life"){const d=document.createElement("div");d.innerHTML=x.html;
         /* the block's short card version ("kaarten", blank line = new card) when there is one, else one card per paragraph; each with the block's heading */
@@ -1967,11 +1974,15 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
         els.forEach(el=>add("life",`<div class="sw-k">${slEsc(x.head)}</div><div class="sw-t">${el.outerHTML}</div>`,{len:el.textContent.length,y:x.y}))}
       else if(x.type==="img"){const im=x.el.querySelector("img"),cap=x.el.querySelector("figcaption");
         add("img",`<div class="sw-k">${slEsc((x.el.querySelector(".vh-fk")||{}).textContent||_t("tg_k_x"))}</div><figure class="sw-fig"><img src="${slEsc(im.getAttribute("src"))}" alt="${slEsc(im.alt)}"></figure><div class="sw-cap">${cap?cap.innerHTML.replace("</b> · ","</b>"):""}</div>`,{img:1,paper:SW_PAPER.test(x.el.dataset.soort||""),y:x.y})}
-      else{const d=document.createElement("div");d.innerHTML=x.html;add("events",`<div class="sw-k">${slEsc(x.head)}</div><ul class="sw-ev">${x.html}</ul>`,{len:d.textContent.length,y:x.y,li:x.html,head:x.head})}}
+      else evq.push(x)}
+    const evs=swPickEvents(evq),evLen=x=>{const d=document.createElement("div");d.innerHTML=x.html;return d.textContent.length};
     /* "lived through": one card per war or era, each at its own year (WW1 at 1914, WW2 at 1940) */
     const ERA=[["e_80",1568,""],["e_leiden",1573,""],["e_fr",1795,""],["e_ww1",1914,"1914–18"],["e_ww2",1940,"1940–45"]];
     S.e.forEach(s=>{const hit=ERA.filter(([k2])=>s.includes(_t(k2)));const y=hit.length?Math.max(Math.min(...hit.map(x=>x[1])),p.by||0):null,big=(hit.find(x=>x[2])||[])[2]||"";
-      add("era",`<div class="sw-k">${_t("sw_era")}</div><div class="sw-big">${big}</div><div class="sw-t"><p>${slEsc(s)}</p></div>`,{len:s.length,y})});
+      /* events from the same years join this card ("1940–45, from age 3 to 8" + the Hunger Winter of 1944) */
+      const near=y!=null?evs.filter(x=>!x.used&&x.y!=null&&Math.abs(x.y-y)<=SW_ERA_NEAR):[];near.forEach(x=>x.used=1);
+      add("era",`<div class="sw-k">${_t("sw_era")}</div><div class="sw-big">${big}</div><div class="sw-t"><p>${slEsc(s)}</p></div>${near.length?`<ul class="sw-ev">${near.map(x=>x.html).join("")}</ul>`:""}`,{len:s.length+near.reduce((n,x)=>n+evLen(x),0),y})});
+    evs.filter(x=>!x.used).forEach(x=>add("events",`<div class="sw-k">${slEsc(x.head)}</div><ul class="sw-ev">${x.html}</ul>`,{len:evLen(x),y:x.y,li:x.html,head:x.head}));
     /* remarkable relatives (a brother or sister with an own story) */
     vhSibs(i).filter(j=>vhHas(P[j])).forEach(j=>{const q=P[j],rl=_t(q.x==="M"?"vh_sib_M":q.x==="F"?"vh_sib_F":"vh_sib_X",vhPro(p)),first=`<p>${vhMd(vhParaList(swCardText(q))[0]||"")}</p>`; /* the hook of the card version when there is one */
       add("sib",`<div class="sw-k">✦ ${_t("vh_special")}</div><h2>${slEsc(q.n)}</h2><div class="sw-yy">${slEsc(rl)} · ${slEsc(yrs(q))}</div><div class="sw-t">${first}</div>`,{len:first.length,y:q.by||null})});
