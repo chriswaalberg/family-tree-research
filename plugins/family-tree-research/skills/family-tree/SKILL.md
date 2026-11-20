@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.13"
+  version: "0.9.14"
 ---
 
 # Family-tree research, hand in hand
@@ -106,7 +106,7 @@ Images make the stories and the zeitgeist come alive, so searching for them is a
 
 **Targets**
 - Per own story: **search for 2–4 images**. That is a search target, not a quota: no good image, then no image. Think of the occupation (a smith at work, a dairy shop), the town or street, an event from the story (a flood, a ship, a fire), the church or village, the ship or factory.
-- **Newspaper clippings are good story images** (Delpher, Trove, family papers): an announcement, a court report, a sports result. Crop to the heading and the relevant paragraph only, set `"soort": "krant"`, and say in the caption that it was shortened. Old newspapers are usually public domain; check the archive's terms.
+- **Newspaper clippings are good story images** (Delpher, Trove, family papers): an announcement, a court report, a sports result. Crop to the heading and the relevant paragraph only, set `"soort": "krant"`, and say in the caption that it was shortened. If the full scan hangs in the tree (an `OBJE` of that person), always point to it with `"scan": "<path as in the GEDCOM>"`: a tap on the clipping then opens the whole page, and the scan isn't shown twice. Old newspapers are usually public domain; check the archive's terms.
 - Per zeitgeist place: **at least 4–6 images**, spread over the centuries the family lived there: roughly one every 30–50 years.
 - Big events (a siege, a flood, a famine, a war): an image with `"gebeurtenis": true`, so it only appears with people alive then. Images about children get `"kind": true`: a famine photo of children then lands with the ancestor who was a child at the time (see `viewer/DATA-FORMAT.md`).
 

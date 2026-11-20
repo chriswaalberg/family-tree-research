@@ -496,6 +496,8 @@ def main():
         if w: p["woon"] = w
 
     # ---- media: copy local files (only with --media-dir)
+    for p in people:  # original GEDCOM path -> published path (for "scan" on story images)
+        p["_media_orig"] = {m["bestand"]: m["bestand"] for m in p.get("media", [])}
     n_media = sum(len(p.get("media", [])) for p in people)
     n_kop = n_mis = 0
     if a.media_map:
@@ -519,6 +521,7 @@ def main():
                     groot = os.path.getsize(os.path.join(a.media_map, gekopieerd[pad]))
                     if groot > 5_000_000:
                         print(f"  note: large file ({groot//1_000_000} MB): {b}")
+                p["_media_orig"][b] = "media/" + gekopieerd[pad]
                 m = dict(m, bestand="media/" + gekopieerd[pad]); n_kop += 1
                 houden.append(m)
             if houden: p["media"] = houden
@@ -653,9 +656,18 @@ def main():
             else:
                 people[i]["verhaal"] = val
             n_vh += 1
+        # "scan" on a story image: the full scan of a clipping, as in the GEDCOM OBJE -> the same published path as that media
+        for p in people:
+            for b in p.get("verhaal_beelden") or []:
+                if not isinstance(b, dict) or not b.get("scan"): continue
+                orig, sc = p.get("_media_orig", {}), str(b["scan"]).strip()
+                hit = orig.get(sc) or next((v for k, v in orig.items() if v == sc or os.path.basename(k) == os.path.basename(sc)), None)
+                if hit: b["scan"] = hit
+                else: print(f"  warning, story image of {p['n']}: \"scan\": {sc} is not one of this person's photos/documents (OBJE)", file=sys.stderr)
         n_warn = sum(story_image_warnings(p, p["verhaal_beelden"]) for p in people if p.get("verhaal_beelden"))
         print(f"Stories: {n_vh} read" + (f", {n_warn} warning(s) about story images (see above)" if n_warn else ""))
 
+    for p in people: p.pop("_media_orig", None)
     fam = a.familienaam or surn0[starts[0]["persoon"]] or ""
     out = {"versie": 2, "taal": a.taal}
     if a.titel: out["titel"] = a.titel

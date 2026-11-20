@@ -592,6 +592,7 @@ main{padding-top:6px}
 .sw .sw-por-btn:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:14px}
 .sw .sw-card img{-webkit-touch-callout:none;-webkit-user-drag:none;user-select:none}
 .sw .sw-por{display:block;width:min(44cqw,200px);aspect-ratio:4/5;object-fit:cover;border-radius:14px;margin:0 0 18px;box-shadow:0 10px 30px rgba(0,0,0,.45);border:3px solid rgba(255,255,255,.85)}
+.sw .sw-scan{all:unset;cursor:zoom-in;display:inline-block;margin-top:10px;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);font-size:13px;font-weight:600;pointer-events:auto}
 .sw .sw-docs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .sw .sw-doc{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border-radius:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);font-size:13px;font-weight:600}
 .sw .sw-doc img{width:34px;height:34px;object-fit:cover;border-radius:6px}
@@ -712,7 +713,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.13",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.14",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1126,7 +1127,7 @@ function slSheet(i,child,code,base,act){
   dlg.innerHTML=`<div class="sheet"><div class="grab" aria-hidden="true"></div>
     <header><p class="rel">${rel}${code?_t("genKw",{g:code.length,k:num}):""}</p><h2 id="slsheet-t">${slEsc(p.n)}</h2></header>
     <section>${line("°",p.bdate,p.bplac)}${line("†",p.ddate,p.dplac)}${jobLine(p)}
-    ${c?`<div class="ct"><b style="color:${CERT[c[0]]||"#7a7068"}">${slEsc(certLabel(c[0]))}</b>${_t("relWith",{name:slEsc(short(P[child]))})}${c[3]&&!/^(biologisch|biological)$/i.test(c[3])?`<br><b style="color:#9c7633">♥ ${_t("vh_adopt")}</b>`:""}${c[1]?`<br>${_t("source")}${slLink(c[1])}`:""}${c[2]?`<br>${slLink(c[2])}`:""}</div>`:hasChild?`<div class="ct">${_t("notAssessedRel",{name:slEsc(short(P[child]))})}</div>`:""}</section>
+    ${c?`<div class="ct"><b style="color:${CERT[c[0]]||"#7a7068"}">${slEsc(certLabel(c[0]))}</b>${_t("relWith",{name:slEsc(short(P[child]))})}${c[3]&&!/^(biologisch|biological)$/i.test(c[3])?`<br><b style="color:#9c7633">♥ ${slEsc(_t("vh_adopt_par",Object.assign({child:vhFn(P[child])},vhPro(p))))}</b>`:""}${c[1]?`<br>${_t("source")}${slLink(c[1])}`:""}${c[2]?`<br>${slLink(c[2])}`:""}</div>`:hasChild?`<div class="ct">${_t("notAssessedRel",{name:slEsc(short(P[child]))})}</div>`:""}</section>
     <footer>${act?`<button type="button" class="btn" data-a="act">${act.label}</button>`:""}${i!==base?`<button type="button" class="btn" data-variant="outline" data-a="root">${_t("makeRoot")}</button>`:""}<button type="button" class="btn" data-variant="ghost" data-a="x">${_t("close")}</button></footer></div>`;
   const go=fn=>{dlg.close();setTimeout(fn,60)};
   dlg.querySelector('[data-a="x"]').onclick=()=>dlg.close();
@@ -1159,7 +1160,7 @@ Object.assign(I18N.nl,{v_verhaal:"Verhaal",
  vh_only:"Alleen {zijn} {rel} is bekend, dus het verhaal gaat verder met {name}.",vh_next:"Lees verder",
  vh_end_t:"Einde van dit spoor",vh_end:"Verder terug dan {fn} is nog niemand gevonden. Hier ligt nog onderzoek.",vh_forks:"Of ga terug naar een afslag:",vh_altBtn:"{name}, {rel} van {of}",
  vh_took:"Je volgde {zijn} {rel}.",vh_alt:"Volg toch {zijn} {rel}, {name}",
- vh_special:"Bijzonder familielid",vh_tg_life:"Het leven in {plaats}",vh_tg_events:"In die tijd",vh_adopt_big:"{fn} was niet de biologische {rel} van {child}. {Hij} nam {child} aan als {zijn} eigen kind en was in alles {zijn} {papa}. Vanaf hier volgen we de familie waarin {child} opgroeide.",vh_adopt:"aangenomen als eigen kind",vh_papa_v:"papa",vh_papa_m:"mama",vh_sib_M:"{Zijn} broer",vh_sib_F:"{Zijn} zus",vh_sib_X:"{Zijn} broer of zus",vh_sources:"Bronnen",vh_details:"Alle gegevens"});
+ vh_special:"Bijzonder familielid",vh_tg_life:"Het leven in {plaats}",vh_tg_events:"In die tijd",vh_adopt_big:"{fn} was niet de biologische {rel} van {child}. {Hij} nam {child} aan als {zijn} eigen kind en was in alles {czijn} {papa}. Vanaf hier volgen we de familie waarin {child} opgroeide.",vh_adopt:"aangenomen als eigen kind",vh_adopt_par:"nam {child} aan als eigen kind",vh_papa_v:"papa",vh_papa_m:"mama",vh_sib_M:"{Zijn} broer",vh_sib_F:"{Zijn} zus",vh_sib_X:"{Zijn} broer of zus",vh_sources:"Bronnen",vh_details:"Alle gegevens"});
 Object.assign(I18N.en,{v_verhaal:"Story",
  vh_title:"The story of {name}",
  vh_intro:"Step by step back in time. At every person you choose whose story to follow: the father's or the mother's. The golden star marks the richest trail: furthest back, best supported and with the most stories.",
@@ -1184,7 +1185,7 @@ Object.assign(I18N.en,{v_verhaal:"Story",
  vh_only:"Only {zijn} {rel} is known, so the story continues with {name}.",vh_next:"Read on",
  vh_end_t:"End of this trail",vh_end:"No one has been found further back than {fn} yet. There's research left to do here.",vh_forks:"Or go back to a fork:",vh_altBtn:"{name}, {rel} of {of}",
  vh_took:"You followed {zijn} {rel}.",vh_alt:"Follow {zijn} {rel} instead, {name}",
- vh_special:"Remarkable relative",vh_tg_life:"Life in {plaats}",vh_tg_events:"Around that time",vh_adopt_big:"{fn} was not the biological {rel} of {child}. {Hij} took {child} as {zijn} own and was {zijn} {papa} in every way. From here on we follow the family {child} grew up in.",vh_adopt:"raised as own child",vh_papa_v:"dad",vh_papa_m:"mum",vh_sib_M:"{Zijn} brother",vh_sib_F:"{Zijn} sister",vh_sib_X:"{Zijn} sibling",vh_sources:"Sources",vh_details:"All details"});
+ vh_special:"Remarkable relative",vh_tg_life:"Life in {plaats}",vh_tg_events:"Around that time",vh_adopt_big:"{fn} was not the biological {rel} of {child}. {Hij} took {child} as {zijn} own and was {czijn} {papa} in every way. From here on we follow the family {child} grew up in.",vh_adopt:"raised as own child",vh_adopt_par:"raised {child} as {zijn} own",vh_papa_v:"dad",vh_papa_m:"mum",vh_sib_M:"{Zijn} brother",vh_sib_F:"{Zijn} sister",vh_sib_X:"{Zijn} sibling",vh_sources:"Sources",vh_details:"All details"});
 
 /* rijkste spoor: per stap telt wat er over die persoon bekend is (datums, plaatsen, eigen verhaal of een broer/zus met verhaal),
    gewogen naar hoe zeker de relatie is. Opgeteld over het hele spoor, dus verder terug telt mee. "fout" telt niet als aanbeveling. */
@@ -1242,7 +1243,12 @@ function vhPlace(pl){if(!pl)return"";const parts=String(pl).split(",").map(x=>x.
 function vhTown(pl){return normPlace(String(pl||"").split(",")[0])}
 function vhMd(s){return slEsc(s).replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>').replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>").replace(/\*([^*]+)\*/g,"<i>$1</i>")}
 function vhParas(s){return String(s).split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean).map(x=>`<p>${vhMd(x)}</p>`).join("")}
-function vhFig(b){const t=lab(b.titel)||"";return `<figure class="vh-fig">${b.soort?`<div class="vh-fk">${slEsc(vhKind(b))}</div>`:""}<button type="button" class="vh-fimg" data-tgimg="${slEsc(b.bestand)}" data-tgt="${slEsc(t)}" title="${slEsc(t)}"><img loading="lazy" src="${slEsc(b.bestand)}" alt="${slEsc(t)}"></button><figcaption><b>${slEsc(t)}</b>${b.maker?" · "+slEsc(b.maker):""}${b.datering?" · "+slEsc(b.datering):""}${b.bron?` · <a href="${slEsc(b.bron[1])}" target="_blank" rel="noopener">${slEsc(b.bron[0])}</a>`:""}${b.bijschrift?`<span>${slEsc(lab(b.bijschrift))}</span>`:""}</figcaption></figure>`}
+/* "scan" on a story image: the full scan of a clipping (one of the person's media). Those scans are not repeated as document buttons
+   in Story and Cards (the person sheet keeps them); a tap on the clipping opens clipping + scan */
+function vhScans(p){return new Set((Array.isArray(p.verhaal_beelden)?p.verhaal_beelden:[]).map(b=>b&&b.scan).filter(Boolean))}
+function vhScanItems(clip,scan,t){let m=null;for(const q of P){m=mediaList(q).find(x=>x.bestand===scan);if(m)break}
+  return [{bestand:clip,titel:t}].concat(scan?[m||{bestand:scan,titel:t}]:[])}
+function vhFig(b){const t=lab(b.titel)||"";return `<figure class="vh-fig">${b.soort?`<div class="vh-fk">${slEsc(vhKind(b))}</div>`:""}<button type="button" class="vh-fimg" data-tgimg="${slEsc(b.bestand)}" data-tgt="${slEsc(t)}"${b.scan?` data-scan="${slEsc(b.scan)}"`:""} title="${slEsc(t)}"><img loading="lazy" src="${slEsc(b.bestand)}" alt="${slEsc(t)}"></button><figcaption><b>${slEsc(t)}</b>${b.maker?" · "+slEsc(b.maker):""}${b.datering?" · "+slEsc(b.datering):""}${b.bron?` · <a href="${slEsc(b.bron[1])}" target="_blank" rel="noopener">${slEsc(b.bron[0])}</a>`:""}${b.bijschrift?`<span>${slEsc(lab(b.bijschrift))}</span>`:""}</figcaption></figure>`}
 function vhBeelden(p){const a=p.verhaal_beelden;return Array.isArray(a)?a.filter(b=>b&&b.bestand).map(vhFig).join(""):""}
 function vhParaList(s){return String(s).split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean)}
 /* story images next to the right paragraph: "alinea" (1-based) wins; otherwise the year from "datering" or a clear word (6+ letters) from title/caption
@@ -1470,7 +1476,7 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
       const rel=P[child].f===i?_t("father"):_t("mother");
       const extra=c?[c[1]?`${_t("source")}${slLink(c[1])}`:"",c[2]?slLink(c[2]):""].filter(Boolean).join("<br>"):"";
       const adopt=c&&c[3]&&!/^(biologisch|biological)$/i.test(c[3]);
-      if(adopt){const pp=Object.assign({fn:slEsc(vhFn(p)),rel,child:slEsc(vhFn(P[child])),papa:_t(P[child].f===i?"vh_papa_v":"vh_papa_m")},vhPro(p));
+      if(adopt){const pp=Object.assign({fn:slEsc(vhFn(p)),rel,child:slEsc(vhFn(P[child])),papa:_t(P[child].f===i?"vh_papa_v":"vh_papa_m"),czijn:vhPro(P[child]).zijn},vhPro(p)); /* czijn: the child's "his/her" ("was his mum") */
         cert=`<div class="vh-warn adopt" style="--cc:#b48a3c"><b>♥</b><div><p>${_t("vh_adopt_big",pp)}</p>${extra?`<div class="vh-cx">${extra}</div>`:""}</div></div>`}
       else if(key==="zeker")cert=`<div class="vh-cert ok"><span class="vh-chip" style="--cc:${CERT.zeker}">✓ ${_t("vh_c_zeker")}</span>${extra?`<div class="vh-cx">${extra}</div>`:""}</div>`;
       else if((rk<prevRank&&!(P[child].levend||P[child].living))||key==="fout")cert=`<div class="vh-warn" style="--cc:${CERT[st]||CERT["niet gecheckt"]}"><b>${key==="fout"?"⚠":"?"}</b><div><p>${_t("vh_c_"+key+"_big",{fn:slEsc(vhFn(p)),rel,child:slEsc(vhFn(P[child]))})}</p>${extra?`<div class="vh-cx">${extra}</div>`:""}</div></div>`;
@@ -1513,7 +1519,7 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
           <div class="vh-acts"><button type="button" class="btn" data-size="sm" data-variant="outline" data-a="restart">↺ ${_t("vh_restart")}</button></div></div>`}}
     else{const nxt=path[k+1],alt=par.find(q=>q!==nxt);
       fork=`<div class="vh-took">${_t("vh_took",Object.assign({rel:p.f===nxt?_t("father"):_t("mother")},vhPro(p)))}${alt!=null?` <button type="button" class="vh-link" data-alt="${k}:${alt}">${slEsc(_t("vh_alt",Object.assign({rel:p.f===alt?_t("father"):_t("mother"),name:vhFn(P[alt])},vhPro(p))))}</button>`:""}</div>`}
-    const imgs=(typeof mediaList==="function"&&!p.living)?mediaList(p).filter(mediaIsImg):[];
+    const scans=vhScans(p),imgs=(typeof mediaList==="function"&&!p.living)?mediaList(p).filter(m=>mediaIsImg(m)&&!scans.has(m.bestand)):[];
     const yr=p.by||(p.bdate?vhDate(p.bdate)?.bare?.match(/\d{3,4}/)?.[0]:"")||"?";
     const ch=document.createElement("section");ch.className="vh-ch"+(last&&k?" vh-new":"");ch.dataset.k=k;ch.style.setProperty("--lc",lc);
     ch.innerHTML=`<div class="vh-dot" aria-hidden="true">${p.living&&!p.by?"•":slEsc(String(yr))}</div>
@@ -1522,7 +1528,7 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
       ${facts?`<div class="vh-facts">${facts}</div>`:""}${imgs.length?`<div class="vh-media">${imgs.slice(0,4).map((m,j)=>`<button type="button" class="vh-mt" data-mj="${j}" title="${slEsc(mediaName(m))}"><img loading="lazy" src="${slEsc(m.bestand)}" alt=""></button>`).join("")}${imgs.length>4?`<button type="button" class="vh-mt more" data-mj="4">+${imgs.length-4}</button>`:""}</div>`:""}${cert}${body}${sib}${fork}</article>`;
     ch.querySelector(`.vh-nm[data-i]`).onclick=()=>slSheet(i,child,code,path[0]);
     ch.querySelectorAll(".vh-mt").forEach(b=>b.onclick=()=>mediaView(imgs,+b.dataset.mj));
-    ch.querySelectorAll(".vh-fimg").forEach(b=>b.onclick=()=>mediaView([{bestand:b.dataset.tgimg,titel:b.dataset.tgt}],0));
+    ch.querySelectorAll(".vh-fimg").forEach(b=>b.onclick=()=>mediaView(vhScanItems(b.dataset.tgimg,b.dataset.scan,b.dataset.tgt),0));
     w.appendChild(ch)});
   /* events */
   w.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
@@ -1884,10 +1890,10 @@ function drawFamilie(){
 /* ===== SWIPE (experimental Swipe Stories: full-screen cards that play by themselves, built from the Story view) ===== */
 Object.assign(I18N.nl,{sw_btn:"Kaarten",sw_btn_t:"Het verhaal als kaarten die vanzelf doorlopen",sw_close:"Sluiten",sw_pause:"Pauze",sw_play:"Verder",sw_next:"Volgende",sw_prev:"Vorige",
  sw_hint:"Tik rechts: verder · tik links: terug · vasthouden: pauze · omhoog vegen: een generatie verder terug",
- sw_family:"Gezin",sw_era:"Meegemaakt",sw_doc:"Bekijk document",sw_view:"Bekijk beeld",sw_nextp:"hierna: {name}",sw_route:"Afgelegde route",sw_death:"Afscheid",tg_k_foto:"Een foto uit die tijd",tg_k_tekening:"Een tekening uit die tijd",tg_k_prent:"Een prent uit die tijd",tg_k_schilderij:"Een schilderij uit die tijd",tg_k_kaart:"Een kaart uit die tijd",tg_k_munt:"Een munt uit die tijd",tg_k_affiche:"Een affiche uit die tijd",tg_k_krant:"Uit de krant",tg_k_x:"Een beeld uit die tijd",sw_birth:"Geboren"});
+ sw_family:"Gezin",sw_era:"Meegemaakt",sw_doc:"Bekijk document",sw_view:"Bekijk beeld",sw_nextp:"hierna: {name}",sw_route:"Afgelegde route",sw_death:"Afscheid",sw_scan:"Hele krant",tg_k_foto:"Een foto uit die tijd",tg_k_tekening:"Een tekening uit die tijd",tg_k_prent:"Een prent uit die tijd",tg_k_schilderij:"Een schilderij uit die tijd",tg_k_kaart:"Een kaart uit die tijd",tg_k_munt:"Een munt uit die tijd",tg_k_affiche:"Een affiche uit die tijd",tg_k_krant:"Uit de krant",tg_k_x:"Een beeld uit die tijd",sw_birth:"Geboren"});
 Object.assign(I18N.en,{sw_btn:"Cards",sw_btn_t:"The story as cards that play by themselves",sw_close:"Close",sw_pause:"Pause",sw_play:"Play",sw_next:"Next",sw_prev:"Previous",
  sw_hint:"Tap right: next · tap left: back · hold: pause · swipe up: one generation further back",
- sw_family:"Family",sw_era:"Lived through",sw_doc:"View document",sw_view:"View image",sw_nextp:"next: {name}",sw_route:"Route so far",sw_death:"Farewell",tg_k_foto:"A photo from that time",tg_k_tekening:"A drawing from that time",tg_k_prent:"A print from that time",tg_k_schilderij:"A painting from that time",tg_k_kaart:"A map from that time",tg_k_munt:"A coin from that time",tg_k_affiche:"A poster from that time",tg_k_krant:"From the newspaper",tg_k_x:"An image from that time",sw_birth:"Born"});
+ sw_family:"Family",sw_era:"Lived through",sw_doc:"View document",sw_view:"View image",sw_nextp:"next: {name}",sw_route:"Route so far",sw_death:"Farewell",sw_scan:"Whole page",tg_k_foto:"A photo from that time",tg_k_tekening:"A drawing from that time",tg_k_prent:"A print from that time",tg_k_schilderij:"A painting from that time",tg_k_kaart:"A map from that time",tg_k_munt:"A coin from that time",tg_k_affiche:"A poster from that time",tg_k_krant:"From the newspaper",tg_k_x:"An image from that time",sw_birth:"Born"});
 let SW=null;
 const SW_KIND={vh_begin:"b",vh_born_dp:"b",vh_born_d:"b",vh_born_p:"b",vh_born_none:"b",vh_age:"b",vh_ageX:"b",vh_living:"b",
   vh_job:"b",vh_kidsN:"k",vh_kids1:"k",vh_kidsSolo:"k",vh_kidsN_living:"k",vh_kids1_living:"k",vh_kidsSolo_living:"k",vh_other1:"f",vh_otherN:"f",vh_sibs1:"b",vh_sibsN:"b",vh_half1:"b",vh_halfN:"b",vh_moveLand:"f",vh_movePlace:"k",
@@ -1912,21 +1918,22 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     const rel=k===0?_t("vh_step0"):_t("vh_stepN",{k,rel:vhCap(vhRelWord(k,p.x)),root:rfn});
     const S=swSentences(i,child,flags),T=a=>a.map(s=>`<p>${slEsc(s)}</p>`).join("");
     /* media: only soort "foto" becomes a portrait on the intro card; scans, documents (and media without soort) are small buttons that open the media viewer */
-    const imgs=(typeof mediaList==="function"&&!p.living)?mediaList(p).filter(mediaIsImg):[],isFoto=m=>/^(foto|photo)$/i.test(m.soort||"");
+    const scans=vhScans(p),imgs=(typeof mediaList==="function"&&!p.living)?mediaList(p).filter(m=>mediaIsImg(m)&&!scans.has(m.bestand)):[],isFoto=m=>/^(foto|photo)$/i.test(m.soort||"");
     const foto=imgs.find(isFoto),docs=imgs.filter(m=>!isFoto(m));
     /* the portrait is a button: a tap opens it large (with the documents) and never moves to the next card */
     const por=foto?`<button type="button" class="sw-por-btn" data-por="1" title="${slEsc(mediaName(foto))}"><img class="sw-por" src="${slEsc(foto.bestand)}" alt="${slEsc(mediaName(foto))}"></button>`:"";
     const docb=docs.length?`<div class="sw-docs">${docs.slice(0,3).map((m,j)=>`<button type="button" class="sw-doc" data-doc="${j}" title="${slEsc(mediaName(m))}"><img src="${slEsc(m.bestand)}" alt=""><span>${_t(/^(scan|document)$/i.test(m.soort||"")?"sw_doc":"sw_view")}</span></button>`).join("")}</div>`:"";
     /* certainty / adoption as a small label */
     let chips="";if(child!=null){const st=vhStatus(child,i),c=certOf(child,i),key=st==="zeker"?"zeker":st==="waarschijnlijk"?"waarschijnlijk":st==="mogelijk"?"mogelijk":st==="fout"?"fout":"open";
-      if(c&&c[3]&&!/^(biologisch|biological)$/i.test(c[3]))chips+=`<span class="sw-chip" style="--cc:#b48a3c">♥ ${_t("vh_adopt")}</span>`;
+      /* on the parent's card: the parent raised the child (not "adopted" as if the parent was) */
+      if(c&&c[3]&&!/^(biologisch|biological)$/i.test(c[3]))chips+=`<span class="sw-chip" style="--cc:#b48a3c">♥ ${slEsc(_t("vh_adopt_par",Object.assign({child:vhFn(P[child])},vhPro(p))))}</span>`;
       chips+=`<span class="sw-chip" style="--cc:${CERT[st]||CERT["niet gecheckt"]}">${key==="zeker"?"✓ ":key==="fout"?"⚠ ":""}${_t("vh_c_"+key)}</span>`}
     const add=(kind,html,o)=>cards.push(Object.assign({kind,html,k},o||{}));
     add("intro",`${por}<div class="sw-k">${slEsc(rel)}${k&&adoptSet(root).has(i)?" · "+_t("ks_fam_adopt"):""}</div><div class="sw-big">${por?"":p.by||""}</div><h2>${slEsc(p.n)}</h2><div class="sw-yy">${slEsc(yrs(p))}</div>${chips?`<div class="sw-chips">${chips}</div>`:""}<div class="sw-t">${T(S.b.concat(S.f.length?[]:S.k))}</div>${docb}`,{por,foto,docs,len:S.b.concat(S.f.length?[]:S.k).join(" ").length});
     if(vhHas(p)){const paras=vhParaList(lab(p.verhaal)),imgs=(Array.isArray(p.verhaal_beelden)?p.verhaal_beelden:[]).filter(b=>b&&b.bestand),slot=vhImgSlots(paras,imgs),py=vhParaYears(paras,p);
       /* each paragraph a card, and the images that belong to it right after it */
       paras.forEach((x,j)=>{add("story",`<div class="sw-k">✦ ${slEsc(_t("vh_title",{name:fn}))}</div><div class="sw-t"><p>${vhMd(x)}</p></div>${j===paras.length-1?`<div class="sw-note">${vhSources(p)}</div>`:""}`,{len:x.length,y:py[j]});
-        imgs.forEach((b,k)=>{if(slot[k]!==j)return;add("img",`${b.soort?`<div class="sw-k">${slEsc(vhKind(b))}</div>`:""}<figure class="sw-fig"><img src="${slEsc(b.bestand)}" alt=""></figure><div class="sw-cap"><b>${slEsc(lab(b.titel)||"")}</b>${[b.maker,b.datering].filter(Boolean).map(slEsc).join(" · ")}${b.bijschrift?`<span>${slEsc(lab(b.bijschrift))}</span>`:""}</div>`,{img:1,y:py[j]})})})}
+        imgs.forEach((b,k)=>{if(slot[k]!==j)return;add("img",`${b.soort?`<div class="sw-k">${slEsc(vhKind(b))}</div>`:""}<figure class="sw-fig"><img src="${slEsc(b.bestand)}" alt=""></figure><div class="sw-cap"><b>${slEsc(lab(b.titel)||"")}</b>${[b.maker,b.datering].filter(Boolean).map(slEsc).join(" · ")}${b.bijschrift?`<span>${slEsc(lab(b.bijschrift))}</span>`:""}${b.scan?`<button type="button" class="sw-scan" data-scan="1">⤢ ${_t("sw_scan")}</button>`:""}</div>`,{img:1,y:py[j],scan:b.scan?vhScanItems(b.bestand,b.scan,lab(b.titel)||""):null})})})}
     /* a separate family card only when there is more than the children (another partner, a move to another country); otherwise the children (and a move within the country) are on the intro card */
     else if(S.f.length)add("family",`<div class="sw-k">${_t("sw_family")}</div><div class="sw-big">${p.ch.length>1?p.ch.length:""}</div><div class="sw-t">${T(S.k.concat(S.f))}</div>`,{len:S.k.concat(S.f).join(" ").length,y:Math.min(...p.ch.map(c=>P[c].by||Infinity))});
     /* zeitgeist: the Story view's own block, cut into pieces with a year (one card per piece; neighbouring events are merged after sorting) */
@@ -2041,6 +2048,9 @@ function swStep(d){const G=SW.gens[SW.g];SW.hint=false;
 function swGen(d){SW.hint=false;if(d>0){if(SW.g<SW.gens.length-1){SW.g++;SW.c=0;swShow("up")}else{const L=SW.gens[SW.g];if(SW.c!==L.cards.length-1){SW.c=L.cards.length-1;swShow("next")}}}
   else if(SW.g>0){SW.g--;SW.c=0;swShow("down")}}
 function swChoose(q){const k=SW.g;SW.path=swPlan(SW.path.slice(0,k+1).concat(q));swBuild();SW.g=k+1;SW.c=0;swShow("up")}
+/* open media from a card: pause, and restore the earlier pause state when the viewer closes */
+function swMedia(items,k){if(!items||!items.length)return;const was=SW.paused;SW.paused=true;swPP();mediaView(items,k||0);
+  const dlg=$("mediaDlg");if(dlg)dlg.addEventListener("close",()=>{if(SW){SW.paused=was;swPP()}},{once:true})}
 function swWire(el){let x0=0,y0=0,t0=0,ht=0,down=false;
   /* a tap that moves to the next card must not also press a button or link that appears in the same spot: ignore those for a moment */
   el.addEventListener("click",e=>{if(SW&&performance.now()-(SW.shownAt||0)<450&&e.target.closest(".sw-card a,.sw-card button,.sw-route button")){e.preventDefault();e.stopImmediatePropagation()}},true);
@@ -2052,7 +2062,10 @@ function swWire(el){let x0=0,y0=0,t0=0,ht=0,down=false;
     if(Math.abs(dy)>50&&Math.abs(dy)>Math.abs(dx)){swGen(dy<0?1:-1);return}
     if(Math.abs(dx)>50){swGen(dx<0?1:-1);return}
     if(dt>400)return;
-    const r=el.querySelector(".sw-phone").getBoundingClientRect();swStep(e.clientX-r.left<r.width/3?-1:1)};
+    const r=el.querySelector(".sw-phone").getBoundingClientRect(),fx=(e.clientX-r.left)/r.width;
+    /* a clipping with its full scan: a tap in the middle third of the image opens it; the sides still go back and on */
+    if(fx>=1/3&&fx<=2/3&&swCard().scan&&e.target.closest(".sw-fig")){swMedia(swCard().scan,0);return}
+    swStep(fx<1/3?-1:1)};
   el.addEventListener("pointerup",end);el.addEventListener("pointercancel",()=>{down=false;clearTimeout(ht);if(SW){SW.hold=false;swPP()}});
   el.addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!SW)return;
     if(b.classList.contains("sw-x")||b.dataset.a==="close")swClose();
@@ -2060,9 +2073,8 @@ function swWire(el){let x0=0,y0=0,t0=0,ht=0,down=false;
     else if(b.dataset.nav)swStep(+b.dataset.nav);
     else if(b.dataset.go!=null)swChoose(+b.dataset.go);
     else if(b.dataset.back!=null){SW.hint=false;SW.g=+b.dataset.back;SW.c=0;swShow("down")}
-    else if(b.dataset.doc!=null||b.dataset.por!=null){const c=swCard(),d=b.dataset.por!=null?[c.foto].concat(c.docs||[]).filter(Boolean):c.docs||[];if(!d.length)return;
-      const was=SW.paused;SW.paused=true;swPP();mediaView(d,b.dataset.por!=null?0:+b.dataset.doc);
-      const dlg=$("mediaDlg");if(dlg)dlg.addEventListener("close",()=>{if(SW){SW.paused=was;swPP()}},{once:true})}
+    else if(b.dataset.doc!=null||b.dataset.por!=null||b.dataset.scan!=null){const c=swCard(),d=b.dataset.scan!=null?c.scan||[]:b.dataset.por!=null?[c.foto].concat(c.docs||[]).filter(Boolean):c.docs||[];
+      swMedia(d,b.dataset.doc!=null?+b.dataset.doc:0)}
     else if(b.dataset.a==="restart"){SW.path=swPlan([SW.path[0]]);swBuild();SW.g=0;SW.c=0;swShow("down")}});
   let rz=0;addEventListener("resize",()=>{if(!SW||el.hidden||rz)return;rz=requestAnimationFrame(()=>{rz=0;swFit(el.querySelector(".sw-card:last-child"))})});
   /* scrolling inside a card pauses the timer for a moment */
