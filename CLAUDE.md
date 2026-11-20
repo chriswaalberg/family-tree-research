@@ -51,7 +51,7 @@ python3 -I $S/scripts/gedcom_tool.py check $S/examples/example.ged /tmp/check-nl
 python3 -I $S/scripts/standalone_viewer.py $S/viewer/index.html /tmp/ex.json /tmp/ex.html --media $S/examples
 ```
 
-Then open `/tmp/ex.html` (or screenshot it with Playwright, desktop + mobile) and click through all tabs: Family, Line, Story, Timeline, Fan, Cosmos, and open ▶ Cards (tap through Femke → Thomas → Pieter; the Den Helder photo card must show). Click the name in the title and pick Thomas: title, Story and Cards must follow. In the Story view, follow Femke → Thomas → Pieter: Pieter must show his own (example) story, a "Life in Den Helder" block with the 1955 photo, and the 1963 example event with a source link and an "Example links" line; Anna's template text must say she lived through the Second World War "roughly from age 15 to 20". In English, no Dutch words may appear (e.g. "bron"). Check the browser console for errors. Also test with `--lang nl`. If you touched `gedcom_tool.py new/add`, test them with both English and Dutch JSON keys (formats in references/onboarding.md and references/gedcom-tool.md).
+Then open `/tmp/ex.html` (or screenshot it with Playwright, desktop + mobile) and click through all tabs: Family, Line, Story, Timeline, Fan, Cosmos, and open ▶ Cards (tap through Femke → Thomas → Pieter; the Den Helder photo card must show). Click the name in the title and pick Thomas: title, Story and Cards must follow. The footer must say "Made with Family Tree Research v<version>" with the version from plugin.json. In the Story view, follow Femke → Thomas → Pieter: Pieter must show his own (example) story, a "Life in Den Helder" block with the 1955 photo, and the 1963 example event with a source link and an "Example links" line; Anna's template text must say she lived through the Second World War "roughly from age 15 to 20". In English, no Dutch words may appear (e.g. "bron"). Check the browser console for errors. Also test with `--lang nl`. If you touched `gedcom_tool.py new/add`, test them with both English and Dutch JSON keys (formats in references/onboarding.md and references/gedcom-tool.md).
 
 If `examples/example-data.json` should change, regenerate it with the first command (output to `$S/examples/example-data.json`).
 
@@ -81,7 +81,11 @@ The viewer is one file (~1,700 lines, CSS + HTML + JS). Find your way by these m
 
 ## Releasing a new version
 
-1. Bump the version in `plugins/family-tree-research/.claude-plugin/plugin.json` **and** in the `metadata.version` of `SKILL.md`.
+1. Bump the version in three places: `plugins/family-tree-research/.claude-plugin/plugin.json`, the `metadata.version` of `SKILL.md`, and `PLUGIN_VERSION` in `viewer/index.html` (shown in the viewer's footer, "Made with Family Tree Research v…"). Check that they match:
+   ```
+   V=$(python3 -c 'import json;print(json.load(open("plugins/family-tree-research/.claude-plugin/plugin.json"))["version"])')
+   grep -q "version: \"$V\"" plugins/family-tree-research/skills/family-tree/SKILL.md && grep -q "PLUGIN_VERSION=\"$V\"" plugins/family-tree-research/skills/family-tree/viewer/index.html && echo "versions match: $V"
+   ```
 2. Validate: `claude plugin validate .` (marketplace) and `claude plugin validate plugins/family-tree-research/.claude-plugin/plugin.json`.
 3. Commit and push to `main`. Users with "Sync automatically" on get it by themselves.
 4. Optional: rebuild the standalone package: `cd plugins/family-tree-research && zip -r -X ../../family-tree-research.plugin README.md .claude-plugin skills -x "*.DS_Store" "*__pycache__*"` (don't commit the .plugin file).

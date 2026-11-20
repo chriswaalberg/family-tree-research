@@ -324,6 +324,7 @@ body{min-height:100vh;background-color:var(--parch);
 main{padding-top:6px}
 .stage{background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 12px 34px rgba(70,45,20,.09)}
 .hint{color:#8a7865;font-style:italic}
+.made{text-align:center;font-size:12px;color:#9a8670;padding:28px 16px calc(24px + env(safe-area-inset-bottom,0px))}.made a{color:#8a5a1c;text-underline-offset:2px}
 /* kaarten */
 .fc,.slc{background:var(--paper);border-left-color:#e0d0b6;border-right-color:#e0d0b6;border-bottom-color:#e0d0b6;box-shadow:var(--shadow-card);border-radius:10px}
 .fc .g,.slc .g{font-family:Fraunces,Georgia,serif;font-size:13.5px;font-weight:600;letter-spacing:.005em}
@@ -629,6 +630,7 @@ main{padding-top:6px}
   <div class="stage" id="stage"><div id="loading">…</div></div>
   <p class="hint" id="hint"></p>
 </main>
+<footer class="made" id="made"></footer>
 <div class="tip" id="tip"></div>
 <dialog id="searchDlg" class="command-dialog" data-t-aria="search">
   <div class="command">
@@ -640,7 +642,7 @@ main{padding-top:6px}
 /* ================= TEKSTEN (NL / EN) ================= */
 const I18N={
 nl:{loading:"Stamboom laden…",loadError:"Kon de stamboom niet laden ({msg}).",title:"Stamboom",titleFam:"Stamboom {name}",titleOf:"Stamboom van {name}",
- v_familie:"Familie",v_stamlijn:"Stamlijn",v_tree:"Stamboom",modes:"Wat wil je zien?",rp_title:"Begin bij…",rp_sub:"Het verhaal, de kaarten en de stamboom beginnen allemaal bij deze persoon.",rp_other:"Iemand anders zoeken…",rp_btn:"Andere startpersoon kiezen",v_tijdlijn:"Tijdlijn",v_waaier:"Waaier",v_kosmos:"Kosmos",tabs:"Weergave",startPeople:"Startpersoon",
+ v_familie:"Familie",v_stamlijn:"Stamlijn",madeWith:"Gemaakt met {link} v{v}",v_tree:"Stamboom",modes:"Wat wil je zien?",rp_title:"Begin bij…",rp_sub:"Het verhaal, de kaarten en de stamboom beginnen allemaal bij deze persoon.",rp_other:"Iemand anders zoeken…",rp_btn:"Andere startpersoon kiezen",v_tijdlijn:"Tijdlijn",v_waaier:"Waaier",v_kosmos:"Kosmos",tabs:"Weergave",startPeople:"Startpersoon",
  search:"Zoek een persoon",searchPh:"Naam, jaartal of plaats",searchEmpty:"Typ een naam, jaartal of plaats",searchNone:"Niemand gevonden",searchAnc:"Voorouders van {name}",searchOthers:"Anderen",searchPeople:"Personen",genShort:"gen. {n}",
  back:"Terug",backTitle:"Vorige startpersoon",gens:"Generaties",color:"Kleur",
  c_lijn:"Grootouderlijn",c_land:"Land van geboorte",c_zek_v:"Zekerheid (verificatie)",c_zek_d:"Zekerheid (directe lijn)",
@@ -667,7 +669,7 @@ nl:{loading:"Stamboom laden…",loadError:"Kon de stamboom niet laden ({msg}).",
  zoomIn:"Inzoomen",zoomOut:"Uitzoomen",home:"Naar startpersoon",living:"Levend",
  notFound:"Nog niet gevonden",emptyTitle:"Nog niet gevonden",emptyBody:"Voor {name} zijn nog geen ouders gevonden. Zodra er ouders in de stamboom staan, verschijnt hier de {view}.",emptyPeople:"Deze stamboom bevat nog geen personen."},
 en:{loading:"Loading family tree…",loadError:"Could not load the family tree ({msg}).",title:"Family tree",titleFam:"{name} family tree",titleOf:"Family tree of {name}",
- v_familie:"Family",v_stamlijn:"Line",v_tree:"Family tree",modes:"What do you want to see?",rp_title:"Start with…",rp_sub:"The story, the cards and the family tree all start with this person.",rp_other:"Find someone else…",rp_btn:"Choose another start person",v_tijdlijn:"Timeline",v_waaier:"Fan",v_kosmos:"Cosmos",tabs:"View",startPeople:"Start person",
+ v_familie:"Family",v_stamlijn:"Line",madeWith:"Made with {link} v{v}",v_tree:"Family tree",modes:"What do you want to see?",rp_title:"Start with…",rp_sub:"The story, the cards and the family tree all start with this person.",rp_other:"Find someone else…",rp_btn:"Choose another start person",v_tijdlijn:"Timeline",v_waaier:"Fan",v_kosmos:"Cosmos",tabs:"View",startPeople:"Start person",
  search:"Find a person",searchPh:"Name, year or place",searchEmpty:"Type a name, year or place",searchNone:"No one found",searchAnc:"Ancestors of {name}",searchOthers:"Others",searchPeople:"People",genShort:"gen. {n}",
  back:"Back",backTitle:"Previous start person",gens:"Generations",color:"Colour",
  c_lijn:"Grandparent line",c_land:"Country of birth",c_zek_v:"Certainty (verification)",c_zek_d:"Certainty (direct line)",
@@ -694,6 +696,8 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  zoomIn:"Zoom in",zoomOut:"Zoom out",home:"Go to start person",living:"Living",
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
+/* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
+const PLUGIN_VERSION="0.9.5",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1957,7 +1961,8 @@ function prepareData(d){
   const ttl=d.titel||(fam?_t("titleFam",{name:fam}):_t("title"));
   META={starts,perView,regios,plaatsen:pl,titel:ttl.charAt(0).toUpperCase()+ttl.slice(1)};
   return people}
-function applyTexts(){
+function applyTexts(){$("made").innerHTML=_t("madeWith",{link:`<a href="${PLUGIN_URL}" target="_blank" rel="noopener">Family Tree Research</a>`,v:PLUGIN_VERSION});
+  
   document.querySelectorAll("[data-t]").forEach(e=>e.textContent=_t(e.dataset.t));
   document.querySelectorAll("[data-t-aria]").forEach(e=>e.setAttribute("aria-label",_t(e.dataset.tAria)));
   document.querySelectorAll("[data-t-title]").forEach(e=>e.title=_t(e.dataset.tTitle));
