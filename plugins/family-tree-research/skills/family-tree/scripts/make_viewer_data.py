@@ -242,7 +242,52 @@ def img_kinds(images):
                 if b.get("type") == k: del b["type"]
             if "paragraph" in b and "alinea" not in b:  # story images: after which paragraph (1-based)
                 b["alinea"] = b.pop("paragraph")
+            for k in ("standing_since", "built"):  # a building that already stood then: year it was built
+                if k in b and "stond_er_al" not in b:
+                    b["stond_er_al"] = b.pop(k)
     return images
+
+
+# ---------------------------------------------------------------- where someone lived, and when
+WOON_MARGIN = 5  # years a dated place counts before and after its record (never across a record from another place, never outside the life)
+WOON_TAGS = ("BIRT", "CHR", "BAPM", "RESI", "CENS", "OCCU", "EDUC", "EMIG", "IMMI", "NATU", "EVEN", "DEAT")
+
+
+def place_key(plac):
+    return norm((plac or "").split(",")[0])
+
+
+def dated_places(node, tags):
+    """(year, place) for every event with both a year and a place (RESI may use ADDR/CITY instead of PLAC)."""
+    out = []
+    for e in node["c"]:
+        if e["t"] not in tags: continue
+        y = year_of((sub(e, "DATE") or {}).get("v", ""))
+        pl = (sub(e, "PLAC") or {}).get("v", "").strip()
+        if not pl:
+            ad = sub(e, "ADDR")
+            pl = ((sub(ad, "CITY") or {}).get("v", "") if ad else "").strip()
+        if y and pl: out.append((y, pl))
+    return out
+
+
+def residence_spans(points, by, dy):
+    """Dated places -> [[place, from, to], ...]: consecutive records in one place form one period,
+    widened by WOON_MARGIN but never past the midpoint to a record elsewhere, never before birth or after death."""
+    pts = sorted(set(points))
+    runs = []
+    for y, pl in pts:
+        if runs and runs[-1][0] == place_key(pl): runs[-1][3] = y
+        else: runs.append([place_key(pl), pl, y, y])
+    out = []
+    for k, (key, pl, a, b) in enumerate(runs):
+        lo, hi = a - WOON_MARGIN, b + WOON_MARGIN
+        if k: lo = max(lo, (runs[k - 1][3] + a + 1) // 2)
+        if k + 1 < len(runs): hi = min(hi, (b + runs[k + 1][2]) // 2)
+        if by: lo = max(lo, by)
+        if dy: hi = min(hi, dy)
+        if hi >= lo: out.append([pl, lo, hi])
+    return out
 
 
 def story_image_warnings(p, images):
@@ -261,8 +306,13 @@ def story_image_warnings(p, images):
         if isinstance(name, dict): name = next(iter(name.values()), "?")
         d = b.get("datering") or b.get("dating") or b.get("date")
         ys = [int(y) for y in re.findall(r"(?<!\d)(\d{3,4})(?!\d)", str(d))] if d else []
-        if ys and lo is not None and hi is not None and (max(ys) < lo or min(ys) > hi):
-            out.append(f"{name}: dating {d} is outside {lo}-{hi} (birth - 10 to death + 10)")
+        built = b.get("stond_er_al")
+        if built is not None:  # a building that still stood the same way: the dating may be later, but it must have been built in their lifetime or before
+            by_ = year_of(str(built))
+            if by_ is None: out.append(f"{name}: \"stond_er_al\": {built} is not a year")
+            elif hi is not None and by_ > hi: out.append(f"{name}: \"stond_er_al\": {built} is after {hi} (death + 10)")
+        elif ys and lo is not None and hi is not None and (max(ys) < lo or min(ys) > hi):
+            out.append(f"{name}: dating {d} is outside {lo}-{hi} (birth - 10 to death + 10; for a building that already stood then, add \"stond_er_al\": <year built>)")
         al = b.get("alinea")
         if al is None:
             out.append(f"{name}: no \"alinea\" (which paragraph does it belong to?)")
@@ -352,6 +402,21 @@ def main():
                 j = idx.get(ch["v"])
                 if j is not None and j not in people[i]["ch"]:
                     people[i]["ch"].append(j)
+
+    # ---- where and when someone lived ("woon"): own events, marriages and the births of their children
+    for i, r in enumerate(indis):
+        p = people[i]
+        pts = dated_places(r, WOON_TAGS)
+        if p.get("by") and p.get("bplac"): pts.append((p["by"], p["bplac"]))
+        if p.get("dy") and p.get("dplac"): pts.append((p["dy"], p["dplac"]))
+        for c in subs(r, "FAMS"):
+            fam = fams.get(c["v"])
+            if fam: pts += dated_places(fam, ("MARR", "MARB", "MARL", "ENGA", "DIV", "RESI", "CENS", "EVEN"))
+        for j in p["ch"]:
+            q = people[j]
+            if q.get("by") and q.get("bplac"): pts.append((q["by"], q["bplac"]))
+        w = residence_spans(pts, p.get("by"), p.get("dy"))
+        if w: p["woon"] = w
 
     # ---- media: copy local files (only with --media-dir)
     n_media = sum(len(p.get("media", [])) for p in people)
@@ -461,7 +526,7 @@ def main():
         if not dead and y is not None and y >= cutoff:
             p["levend"] = True; n_lev += 1
             if a.levenden_verbergen:
-                for k in ("bdate", "bplac", "ddate", "dplac", "by", "dy", "r", "media", "beroep"):
+                for k in ("bdate", "bplac", "ddate", "dplac", "by", "dy", "r", "media", "beroep", "woon"):
                     p.pop(k, None)
 
     # ---- start people

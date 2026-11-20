@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.11"
+  version: "0.9.12"
 ---
 
 # Family-tree research, hand in hand
@@ -93,7 +93,7 @@ The viewer has a **Story** view: from the start person step by step back in time
 
 ## Zeitgeist: how did they live?
 
-For each place where many ancestors lived, build a zeitgeist (`zeitgeist/zeitgeist.json`, format in `viewer/DATA-FORMAT.md`, "Zeitgeist"): a few paragraphs about daily life per period, local events with year and source (storms, disasters, epidemics, war, buildings, notable incidents) and old prints, drawings or photos of the place. The viewer links it automatically to everyone who lived there at the time.
+For each place where many ancestors lived, build a zeitgeist (`zeitgeist/zeitgeist.json`, format in `viewer/DATA-FORMAT.md`, "Zeitgeist"): a few paragraphs about daily life per period, local events with year and source (storms, disasters, epidemics, war, buildings, notable incidents) and old prints, drawings or photos of the place. The viewer links it automatically to everyone who lived there at the time, only for the years they provably lived there: birth, baptism, `RESI` (residence), marriages and the births of their children in that place, never after death. So record moves as `RESI` with date and place (from population registers, for example) when you find them; without them someone born in Rotterdam who moved to Amsterdam as a child only gets Rotterdam for their first few years.
 
 - Start with the place with the most ancestors. Search local history sites, monument registers, museum collections and lists of disasters; give a source for every event and invent nothing.
 - Images: at least 4–6 per place, spread over the centuries the family lived there. How to find, check and process them: "Finding images (generously)" below.
@@ -111,7 +111,7 @@ Images make the stories and the zeitgeist come alive, so searching for them is a
 - Big events (a siege, a flood, a famine, a war): an image with `"gebeurtenis": true`, so it only appears with people alive then. Images about children get `"kind": true`: a famine photo of children then lands with the ancestor who was a child at the time (see `viewer/DATA-FORMAT.md`).
 
 **Story images: same place, same time**
-Every story image belongs to one concrete moment in the story, and fits it in **place** (the same town, or the occupation or event from that paragraph) **and time** (rule of thumb: within ~15 years of that moment). A wider gap only for buildings that still stood the same way then, and the caption says so ("the church looked like this when he was baptised there in 1802"). Every story image gets `alinea`: the paragraph it belongs to. If you can't point to a paragraph, the image doesn't belong in the story (perhaps in the zeitgeist of the place). `make_viewer_data.py` warns when a dating falls outside birth − 10 to death + 10 or when `alinea` is missing or doesn't exist.
+Every story image belongs to one concrete moment in the story, and fits it in **place** (the same town, or the occupation or event from that paragraph) **and time** (rule of thumb: within ~15 years of that moment). A wider gap only for buildings that still stood the same way then: the caption says so ("the church looked like this when he was baptised there in 1802") and the image gets `"stond_er_al": <year built>` (e.g. `1653`), which turns the dating warning off. Every story image gets `alinea`: the paragraph it belongs to. If you can't point to a paragraph, the image doesn't belong in the story (perhaps in the zeitgeist of the place). `make_viewer_data.py` warns when a dating falls outside birth − 10 to death + 10 or when `alinea` is missing or doesn't exist.
 
 **Every round**
 1. First count which stories and places have 0–1 images, and fill those first. (Count in `data/stories.json` and `zeitgeist/zeitgeist.json`: the `beelden`/`images` lists per story and per place.)

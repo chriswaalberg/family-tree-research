@@ -708,7 +708,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.11",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.12",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1386,30 +1386,34 @@ function vhRedraw(focus){const st=$("stage"),hold=st.offsetHeight;st.style.minHe
 function vhKind(b){const m={photo:"foto",drawing:"tekening",print:"prent",painting:"schilderij",map:"kaart",coin:"munt",poster:"affiche",newspaper:"krant",clipping:"krant",krantenknipsel:"krant"},s=String((b&&b.soort)||"").trim().toLowerCase(),k=m[s]||s;return _t(I18N.en["tg_k_"+k]!=null?"tg_k_"+k:"tg_k_x")}
 function vhTG(){return (typeof D!=="undefined"&&D&&D.tijdgeest)||null}
 function vhSpan(p){const s=p.by;if(!s)return null;const e=p.dy||(p.levend?new Date().getFullYear():s+60);return [s,Math.max(s,e)]}
-function vhPlacesOf(p){const T=vhTG();if(!T)return [];const t=normPlace((p.bplac||"")+" | "+(p.dplac||""));
-  return (T.plaatsen||[]).filter(pl=>(pl.match||[lab(pl.naam)]).some(m=>m&&t.includes(normPlace(m))))}
+/* zeitgeist places where this person lived, with the years they provably lived there ("woon": own events, marriages, children's births).
+   iv = [[from,to],…]. Old data.json without "woon": birth or death place, whole life. */
+function vhPlacesOf(p){const T=vhTG();if(!T)return [];const sp=vhSpan(p);
+  const hit=(pl,t)=>{const n=normPlace(t);return (pl.match||[lab(pl.naam)]).some(m=>m&&n.includes(normPlace(m)))};
+  return (T.plaatsen||[]).map(pl=>{const iv=Array.isArray(p.woon)?p.woon.filter(w=>hit(pl,w[0])).map(w=>[w[1],w[2]]):(sp&&hit(pl,(p.bplac||"")+" | "+(p.dplac||""))?[sp]:[]);
+    return iv.length?{pl,iv}:null}).filter(Boolean)}
+function vhInIv(iv,a,b){return iv.some(([x,y])=>a<=y&&b>=x)}
 /* beelden over het hele pad verdelen: elk beeld bij de persoon die het best past (bij voorkeur iemand die toen leefde), max. één per persoon; beelden met kind:true bij voorkeur bij iemand die toen nog een kind was (jonger dan 16) */
 function vhAssignImages(path){const cand=[];
   path.forEach(i=>{const p=P[i];if(p.living)return;const sp=vhSpan(p);if(!sp)return;const [s,e]=sp,mid=(s+e)/2;
-    for(const pl of vhPlacesOf(p))for(const b of pl.beelden||[]){const y=b.jaar||(b.van+b.tot)/2;if(e<b.van||s>b.tot)continue;
-      const alive=y>=s&&y<=e;if(!alive&&(b.gebeurtenis||y<s-25||y>e))continue;
-      cand.push({i,b,kid:!!(b.kind&&alive&&y-s<16),score:(alive?0:1000+(s-y))+Math.abs(y-mid)})}});
+    /* only when they provably lived in that place in the image's year (so never before birth or after death) */
+    for(const {pl,iv} of vhPlacesOf(p))for(const b of pl.beelden||[]){const y=Math.round(b.jaar||(b.van+b.tot)/2);if(!vhInIv(iv,y,y))continue;
+      cand.push({i,b,kid:!!(b.kind&&y-s<16),score:Math.abs(y-mid)})}});
   cand.sort((a,b)=>a.score-b.score);const used=new Set(),m=new Map(),put=(c)=>{if(!m.has(c.i))m.set(c.i,[]);m.get(c.i).push(c.b);used.add(c.b.bestand)};
   /* kind:true-beelden alleen bij iemand die toen een kind was; is er niemand, dan niet op dit pad */
-  /* eerst bij wie toen leefde (eerst één per persoon, dan hooguit twee), daarna pas gewone gezichten bij iemand die net later geboren is (alleen als die nog niets heeft) */
+  /* first one per person, then at most two */
   for(const c of cand)if(c.kid&&!used.has(c.b.bestand)&&(m.get(c.i)||[]).length<2)put(c);
-  for(const lim of [1,2])for(const c of cand)if(c.score<1000&&(!c.b.kind||c.kid)&&!used.has(c.b.bestand)&&(m.get(c.i)||[]).length<lim)put(c);
-  for(const c of cand)if(c.score>=1000&&!c.b.kind&&!used.has(c.b.bestand)&&!m.has(c.i))put(c);
+  for(const lim of [1,2])for(const c of cand)if((!c.b.kind||c.kid)&&!used.has(c.b.bestand)&&(m.get(c.i)||[]).length<lim)put(c);
   m.forEach(l=>l.sort((a,b)=>(a.jaar||0)-(b.jaar||0)));return m}
 function vhTijdgeest(i,seen){const T=vhTG();if(!T)return"";const p=P[i];if(p.living)return"";const sp=vhSpan(p);if(!sp)return"";
   const [s,e]=sp,mid=(s+e)/2,pls=vhPlacesOf(p);let html="";
-  for(const pl of pls)for(const L of pl.leven||[]){const key="L:"+pl.id+":"+L.van;
-    if(mid>=L.van&&mid<L.tot&&!seen.has(key)){seen.add(key);html+=`<div class="vh-k" data-y="${Math.max(L.van,s)}">${slEsc(lab(L.titel)||_t("vh_tg_life",{plaats:lab(pl.naam)}))}</div>${vhParas(lab(L.tekst))}`}}
+  for(const {pl,iv} of pls)for(const [a,b] of iv)for(const L of pl.leven||[]){const key="L:"+pl.id+":"+L.van,m=(a+b)/2;
+    if(m>=L.van&&m<L.tot&&!seen.has(key)){seen.add(key);html+=`<div class="vh-k" data-y="${Math.max(L.van,a)}">${slEsc(lab(L.titel)||_t("vh_tg_life",{plaats:lab(pl.naam)}))}</div>${vhParas(lab(L.tekst))}`}}
   for(const best of (seen.assign&&seen.assign.get(i))||[]){seen.add("B:"+best.bestand);const t=lab(best.titel);
     html+=`<figure class="vh-fig" data-y="${best.jaar||Math.round(((best.van||0)+(best.tot||best.van||0))/2)||""}"><div class="vh-fk">${slEsc(vhKind(best))}</div><button type="button" class="vh-fimg" data-tgimg="${slEsc(best.bestand)}" data-tgt="${slEsc(t)}" title="${slEsc(t)}"><img loading="lazy" src="${slEsc(best.bestand)}" alt="${slEsc(t)}"></button><figcaption><b>${slEsc(t)}</b>${best.maker?" · "+slEsc(best.maker):""}${best.datering?" · "+slEsc(best.datering):""}${best.bron?` · <a href="${slEsc(best.bron[1])}" target="_blank" rel="noopener">${slEsc(best.bron[0])}</a>`:""}${best.bijschrift?`<span>${slEsc(lab(best.bijschrift))}</span>`:""}</figcaption></figure>`}
-  const evs=[];const add=(ev,lok)=>{const a=ev.van||ev.jaar,b=ev.tot||ev.jaar,key="E:"+(lok||"alg")+":"+ev.jaar+":"+lab(ev.tekst).slice(0,24);
-    if(seen.has(key)||b<s+6||a>e)return;evs.push({ev,key,lok})};
-  for(const pl of pls)for(const ev of pl.gebeurtenissen||[])add(ev,pl.id);
+  const evs=[];const add=(ev,lok,iv)=>{const a=ev.van||ev.jaar,b=ev.tot||ev.jaar,key="E:"+(lok||"alg")+":"+ev.jaar+":"+lab(ev.tekst).slice(0,24);
+    if(seen.has(key)||b<s+6||a>e||(iv&&!vhInIv(iv,a,b)))return;evs.push({ev,key,lok})};
+  for(const {pl,iv} of pls)for(const ev of pl.gebeurtenissen||[])add(ev,pl.id,iv);
   const land=landOf(p);if(T.algemeen&&(land==="NL"||(!land&&pls.length)))for(const ev of T.algemeen.gebeurtenissen||[])add(ev,null);
   evs.sort((x,y)=>x.ev.jaar-y.ev.jaar);
   const lok=evs.filter(x=>x.lok).slice(0,4),pick=lok.concat(evs.filter(x=>!x.lok&&!lok.some(l=>l.ev.jaar===x.ev.jaar)).slice(0,1)).sort((x,y)=>x.ev.jaar-y.ev.jaar);
