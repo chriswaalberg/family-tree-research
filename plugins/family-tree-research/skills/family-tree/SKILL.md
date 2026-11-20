@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.7"
+  version: "0.9.8"
 ---
 
 # Family-tree research, hand in hand
@@ -105,6 +105,7 @@ Images make the stories and the zeitgeist come alive, so searching for them is a
 
 **Targets**
 - Per own story: **2–4 images**. Think of the occupation (a smith at work, a dairy shop), the town or street, an event from the story (a flood, a ship, a fire), the church or village, the ship or factory.
+- **Newspaper clippings are good story images** (Delpher, Trove, family papers): an announcement, a court report, a sports result. Crop to the heading and the relevant paragraph only, set `"soort": "krant"`, and say in the caption that it was shortened. Old newspapers are usually public domain; check the archive's terms.
 - Per zeitgeist place: **at least 4–6 images**, spread over the centuries the family lived there: roughly one every 30–50 years.
 - Big events (a siege, a flood, a famine, a war): an image with `"gebeurtenis": true`, so it only appears with people alive then. Images about children get `"kind": true`: a famine photo of children then lands with the ancestor who was a child at the time (see `viewer/DATA-FORMAT.md`).
 
@@ -125,7 +126,7 @@ Images make the stories and the zeitgeist come alive, so searching for them is a
 - Then make a contact sheet of all new images (one image with thumbnails) and **look at it yourself**: crooked crops, leftover borders, the wrong image, a near-duplicate.
 
 **Always fill in per image**
-`titel`, `maker`, `datering`, `soort` (`foto`, `tekening`, `prent`, `schilderij`, `kaart`, `munt` or `affiche`, from the museum record, not from the caption), `bron` (`[label, url]`) and a `bijschrift` (caption) in the user's language. The caption explains the link with the person or place, and says so when it is another place ("this is Dordrecht, not Zwijndrecht itself, but the market looked like this here too"). Zeitgeist images also get `van`/`tot`/`jaar`.
+`titel`, `maker`, `datering`, `soort` (`foto`, `tekening`, `prent`, `schilderij`, `kaart`, `munt`, `affiche` or `krant`, from the museum record, not from the caption), `bron` (`[label, url]`) and a `bijschrift` (caption) in the user's language. The caption explains the link with the person or place, and says so when it is another place ("this is Dordrecht, not Zwijndrecht itself, but the market looked like this here too"). Zeitgeist images also get `van`/`tot`/`jaar`. Story images can get `alinea` (the paragraph they belong to, 1-based) so the clipping about boxing sits next to the paragraph about boxing; without it the viewer guesses from the year and the words.
 
 ## Raised, adopted, foster
 

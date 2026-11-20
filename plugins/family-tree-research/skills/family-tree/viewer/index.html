@@ -707,7 +707,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.7",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.8",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1237,8 +1237,24 @@ function vhPlace(pl){if(!pl)return"";const parts=String(pl).split(",").map(x=>x.
 function vhTown(pl){return normPlace(String(pl||"").split(",")[0])}
 function vhMd(s){return slEsc(s).replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>').replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>").replace(/\*([^*]+)\*/g,"<i>$1</i>")}
 function vhParas(s){return String(s).split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean).map(x=>`<p>${vhMd(x)}</p>`).join("")}
-function vhFig(b){const t=lab(b.titel)||"";return `<figure class="vh-fig"><button type="button" class="vh-fimg" data-tgimg="${slEsc(b.bestand)}" data-tgt="${slEsc(t)}" title="${slEsc(t)}"><img loading="lazy" src="${slEsc(b.bestand)}" alt="${slEsc(t)}"></button><figcaption><b>${slEsc(t)}</b>${b.maker?" · "+slEsc(b.maker):""}${b.datering?" · "+slEsc(b.datering):""}${b.bron?` · <a href="${slEsc(b.bron[1])}" target="_blank" rel="noopener">${slEsc(b.bron[0])}</a>`:""}${b.bijschrift?`<span>${slEsc(lab(b.bijschrift))}</span>`:""}</figcaption></figure>`}
+function vhFig(b){const t=lab(b.titel)||"";return `<figure class="vh-fig">${b.soort?`<div class="vh-fk">${slEsc(vhKind(b))}</div>`:""}<button type="button" class="vh-fimg" data-tgimg="${slEsc(b.bestand)}" data-tgt="${slEsc(t)}" title="${slEsc(t)}"><img loading="lazy" src="${slEsc(b.bestand)}" alt="${slEsc(t)}"></button><figcaption><b>${slEsc(t)}</b>${b.maker?" · "+slEsc(b.maker):""}${b.datering?" · "+slEsc(b.datering):""}${b.bron?` · <a href="${slEsc(b.bron[1])}" target="_blank" rel="noopener">${slEsc(b.bron[0])}</a>`:""}${b.bijschrift?`<span>${slEsc(lab(b.bijschrift))}</span>`:""}</figcaption></figure>`}
 function vhBeelden(p){const a=p.verhaal_beelden;return Array.isArray(a)?a.filter(b=>b&&b.bestand).map(vhFig).join(""):""}
+function vhParaList(s){return String(s).split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean)}
+/* story images next to the right paragraph: "alinea" (1-based) wins; otherwise the year from "datering" or a clear word (6+ letters) from title/caption
+   that occurs in a paragraph; otherwise spread evenly. Returns per image the index of the paragraph it follows. */
+const VH_STOP=new Set(["tussen","werden","worden","zouden","hebben","because","before","during","through","example","voorbeeld","verzonnen","fictional","ingekort","shortened","familie","family","rijksmuseum","wikimedia","commons","gebruikt","picture","afbeelding"]);
+function vhImgSlots(paras,imgs){const n=paras.length,slot=imgs.map(()=>-1),low=paras.map(x=>NORM(x));if(!n)return slot;
+  imgs.forEach((b,j)=>{const a=parseInt(b.alinea,10);if(a>=1)slot[j]=Math.min(a,n)-1});
+  imgs.forEach((b,j)=>{if(slot[j]>=0)return;const y=String(b.datering||b.jaar||"").match(/\b(1[5-9]\d\d|20\d\d)\b/);
+    if(y){const k=low.findIndex(x=>x.includes(y[1]));if(k>=0){slot[j]=k;return}}
+    const words=[...new Set(NORM(lab(b.titel)+" "+lab(b.bijschrift)).split(/[^a-z0-9]+/).filter(w=>w.length>=6&&!VH_STOP.has(w)))];
+    let best=-1,bv=0;low.forEach((x,k)=>{const v=words.filter(w=>x.includes(w)).length;if(v>bv){bv=v;best=k}});if(best>=0)slot[j]=best});
+  const rest=imgs.map((b,j)=>j).filter(j=>slot[j]<0);
+  rest.forEach((j,r)=>{slot[j]=Math.max(0,Math.min(n-1,Math.round((r+1)*n/(rest.length+1))-1))});
+  return slot}
+/* an own story as html: paragraphs with their images in between */
+function vhStoryHtml(p){const paras=vhParaList(lab(p.verhaal)),imgs=(Array.isArray(p.verhaal_beelden)?p.verhaal_beelden:[]).filter(b=>b&&b.bestand),slot=vhImgSlots(paras,imgs);
+  return paras.map((x,k)=>`<p>${vhMd(x)}</p>`+imgs.filter((b,j)=>slot[j]===k).map(vhFig).join("")).join("")}
 function vhSources(p){const b=p.verhaal_bronnen;if(!Array.isArray(b)||!b.length)return"";
   return `<div class="vh-src"><span>${_t("vh_sources")}:</span> ${b.map(x=>Array.isArray(x)?(x[1]?`<a href="${slEsc(x[1])}" target="_blank" rel="noopener">${slEsc(x[0]||x[1])}</a>`:slEsc(x[0])):slEsc(x)).join(" · ")}</div>`}
 function vhList(a){return a.length<2?a.join(""):a.slice(0,-1).join(", ")+_t("listAnd")+a[a.length-1]}
@@ -1339,7 +1355,7 @@ function vhRedraw(focus){const st=$("stage"),hold=st.offsetHeight;st.style.minHe
 
 /* tijdgeest: data.json → "tijdgeest": {plaatsen:[{id,naam,match,leven,gebeurtenissen,beelden}], algemeen:{gebeurtenissen}} */
 /* label boven een tijdgeest-beeld, naar soort (foto, tekening, prent, schilderij, kaart, munt, affiche; Engelse namen mogen ook) */
-function vhKind(b){const m={photo:"foto",drawing:"tekening",print:"prent",painting:"schilderij",map:"kaart",coin:"munt",poster:"affiche"},s=String((b&&b.soort)||"").trim().toLowerCase(),k=m[s]||s;return _t(I18N.en["tg_k_"+k]!=null?"tg_k_"+k:"tg_k_x")}
+function vhKind(b){const m={photo:"foto",drawing:"tekening",print:"prent",painting:"schilderij",map:"kaart",coin:"munt",poster:"affiche",newspaper:"krant",clipping:"krant",krantenknipsel:"krant"},s=String((b&&b.soort)||"").trim().toLowerCase(),k=m[s]||s;return _t(I18N.en["tg_k_"+k]!=null?"tg_k_"+k:"tg_k_x")}
 function vhTG(){return (typeof D!=="undefined"&&D&&D.tijdgeest)||null}
 function vhSpan(p){const s=p.by;if(!s)return null;const e=p.dy||(p.levend?new Date().getFullYear():s+60);return [s,Math.max(s,e)]}
 function vhPlacesOf(p){const T=vhTG();if(!T)return [];const t=normPlace((p.bplac||"")+" | "+(p.dplac||""));
@@ -1400,11 +1416,11 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     const facts=[p.bdate||p.bplac?`° ${[p.bdate,p.bplac].filter(Boolean).map(slEsc).join(" · ")}`:"",p.ddate||p.dplac?`† ${[p.ddate,p.dplac].filter(Boolean).map(slEsc).join(" · ")}`:""].filter(Boolean).join("<br>");
     const own=vhHas(p);
     const tpl=vhTemplate(i,child,flags);
-    const txt=own?vhParas(lab(p.verhaal))+vhBeelden(p)+vhSources(p):tpl.paras.map(g=>`<p>${slEsc(g.join(" "))}</p>`).join("")+tpl.note.map(n=>`<p class="vh-note">${slEsc(n)}</p>`).join("");
+    const txt=own?vhStoryHtml(p)+vhSources(p):tpl.paras.map(g=>`<p>${slEsc(g.join(" "))}</p>`).join("")+tpl.note.map(n=>`<p class="vh-note">${slEsc(n)}</p>`).join("");
     /* broers/zussen met een eigen verhaal */
     const sib=vhSibs(i).filter(j=>vhHas(P[j])).map(j=>{const q=P[j],ppr=vhPro(p);
       const rl=_t(q.x==="M"?"vh_sib_M":q.x==="F"?"vh_sib_F":"vh_sib_X",ppr);
-      return `<aside class="vh-sib"><div class="vh-k">✦ ${_t("vh_special")}</div><h4><span>${slEsc(rl)}</span> <button type="button" class="vh-nm" data-sib="${j}:${i}">${slEsc(q.n)}</button> <small>${slEsc(yrs(q))}</small></h4>${vhParas(lab(q.verhaal))}${vhBeelden(q)}${vhSources(q)}</aside>`}).join("");
+      return `<aside class="vh-sib"><div class="vh-k">✦ ${_t("vh_special")}</div><h4><span>${slEsc(rl)}</span> <button type="button" class="vh-nm" data-sib="${j}:${i}">${slEsc(q.n)}</button> <small>${slEsc(yrs(q))}</small></h4>${vhStoryHtml(q)}${vhSources(q)}</aside>`}).join("");
     /* afslag */
     let fork="";
     const par=parentsOf(i),best=vhBest(i);
@@ -1797,10 +1813,10 @@ function drawFamilie(){
 /* ===== SWIPE (experimental Swipe Stories: full-screen cards that play by themselves, built from the Story view) ===== */
 Object.assign(I18N.nl,{sw_btn:"Kaarten",sw_btn_t:"Het verhaal als kaarten die vanzelf doorlopen",sw_close:"Sluiten",sw_pause:"Pauze",sw_play:"Verder",sw_next:"Volgende",sw_prev:"Vorige",
  sw_hint:"Tik rechts: verder · tik links: terug · vasthouden: pauze · omhoog vegen: een generatie verder terug",
- sw_family:"Gezin",sw_era:"Meegemaakt",sw_doc:"Bekijk document",sw_view:"Bekijk beeld",sw_nextp:"hierna: {name}",sw_route:"Afgelegde route",sw_death:"Afscheid",tg_k_foto:"Een foto uit die tijd",tg_k_tekening:"Een tekening uit die tijd",tg_k_prent:"Een prent uit die tijd",tg_k_schilderij:"Een schilderij uit die tijd",tg_k_kaart:"Een kaart uit die tijd",tg_k_munt:"Een munt uit die tijd",tg_k_affiche:"Een affiche uit die tijd",tg_k_x:"Een beeld uit die tijd",sw_birth:"Geboren"});
+ sw_family:"Gezin",sw_era:"Meegemaakt",sw_doc:"Bekijk document",sw_view:"Bekijk beeld",sw_nextp:"hierna: {name}",sw_route:"Afgelegde route",sw_death:"Afscheid",tg_k_foto:"Een foto uit die tijd",tg_k_tekening:"Een tekening uit die tijd",tg_k_prent:"Een prent uit die tijd",tg_k_schilderij:"Een schilderij uit die tijd",tg_k_kaart:"Een kaart uit die tijd",tg_k_munt:"Een munt uit die tijd",tg_k_affiche:"Een affiche uit die tijd",tg_k_krant:"Uit de krant",tg_k_x:"Een beeld uit die tijd",sw_birth:"Geboren"});
 Object.assign(I18N.en,{sw_btn:"Cards",sw_btn_t:"The story as cards that play by themselves",sw_close:"Close",sw_pause:"Pause",sw_play:"Play",sw_next:"Next",sw_prev:"Previous",
  sw_hint:"Tap right: next · tap left: back · hold: pause · swipe up: one generation further back",
- sw_family:"Family",sw_era:"Lived through",sw_doc:"View document",sw_view:"View image",sw_nextp:"next: {name}",sw_route:"Route so far",sw_death:"Farewell",tg_k_foto:"A photo from that time",tg_k_tekening:"A drawing from that time",tg_k_prent:"A print from that time",tg_k_schilderij:"A painting from that time",tg_k_kaart:"A map from that time",tg_k_munt:"A coin from that time",tg_k_affiche:"A poster from that time",tg_k_x:"An image from that time",sw_birth:"Born"});
+ sw_family:"Family",sw_era:"Lived through",sw_doc:"View document",sw_view:"View image",sw_nextp:"next: {name}",sw_route:"Route so far",sw_death:"Farewell",tg_k_foto:"A photo from that time",tg_k_tekening:"A drawing from that time",tg_k_prent:"A print from that time",tg_k_schilderij:"A painting from that time",tg_k_kaart:"A map from that time",tg_k_munt:"A coin from that time",tg_k_affiche:"A poster from that time",tg_k_krant:"From the newspaper",tg_k_x:"An image from that time",sw_birth:"Born"});
 let SW=null;
 const SW_KIND={vh_begin:"b",vh_born_dp:"b",vh_born_d:"b",vh_born_p:"b",vh_born_none:"b",vh_age:"b",vh_ageX:"b",vh_living:"b",
   vh_job:"b",vh_kidsN:"k",vh_kids1:"k",vh_kidsSolo:"k",vh_kidsN_living:"k",vh_kids1_living:"k",vh_kidsSolo_living:"k",vh_other1:"f",vh_otherN:"f",vh_sibs1:"b",vh_sibsN:"b",vh_half1:"b",vh_halfN:"b",vh_moveLand:"f",vh_movePlace:"k",
@@ -1832,9 +1848,10 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
       chips+=`<span class="sw-chip" style="--cc:${CERT[st]||CERT["niet gecheckt"]}">${key==="zeker"?"✓ ":key==="fout"?"⚠ ":""}${_t("vh_c_"+key)}</span>`}
     const add=(kind,html,o)=>cards.push(Object.assign({kind,html,k},o||{}));
     add("intro",`${por}<div class="sw-k">${slEsc(rel)}${k&&adoptSet(root).has(i)?" · "+_t("ks_fam_adopt"):""}</div><div class="sw-big">${por?"":p.by||""}</div><h2>${slEsc(p.n)}</h2><div class="sw-yy">${slEsc(yrs(p))}</div>${chips?`<div class="sw-chips">${chips}</div>`:""}<div class="sw-t">${T(S.b.concat(S.f.length?[]:S.k))}</div>${docb}`,{por,docs,len:S.b.concat(S.f.length?[]:S.k).join(" ").length});
-    if(vhHas(p)){const ps=vhParas(lab(p.verhaal)).split("</p>").filter(x=>x.trim()).map(x=>x+"</p>");
-      ps.forEach((x,j)=>add("story",`<div class="sw-k">✦ ${slEsc(_t("vh_title",{name:fn}))}</div><div class="sw-t">${x}</div>${j===ps.length-1?`<div class="sw-note">${vhSources(p)}</div>`:""}`,{len:x.length}));
-      (p.verhaal_beelden||[]).filter(b=>b&&b.bestand).forEach(b=>add("img",`<figure class="sw-fig"><img src="${slEsc(b.bestand)}" alt=""></figure><div class="sw-cap"><b>${slEsc(lab(b.titel)||"")}</b>${[b.maker,b.datering].filter(Boolean).map(slEsc).join(" · ")}</div>`,{img:1}))}
+    if(vhHas(p)){const paras=vhParaList(lab(p.verhaal)),imgs=(Array.isArray(p.verhaal_beelden)?p.verhaal_beelden:[]).filter(b=>b&&b.bestand),slot=vhImgSlots(paras,imgs);
+      /* each paragraph a card, and the images that belong to it right after it */
+      paras.forEach((x,j)=>{add("story",`<div class="sw-k">✦ ${slEsc(_t("vh_title",{name:fn}))}</div><div class="sw-t"><p>${vhMd(x)}</p></div>${j===paras.length-1?`<div class="sw-note">${vhSources(p)}</div>`:""}`,{len:x.length});
+        imgs.forEach((b,k)=>{if(slot[k]!==j)return;add("img",`${b.soort?`<div class="sw-k">${slEsc(vhKind(b))}</div>`:""}<figure class="sw-fig"><img src="${slEsc(b.bestand)}" alt=""></figure><div class="sw-cap"><b>${slEsc(lab(b.titel)||"")}</b>${[b.maker,b.datering].filter(Boolean).map(slEsc).join(" · ")}${b.bijschrift?`<span>${slEsc(lab(b.bijschrift))}</span>`:""}</div>`,{img:1})})})}
     /* a separate family card only when there is more than the children (another partner, a move to another country); otherwise the children (and a move within the country) are on the intro card */
     else if(S.f.length)add("family",`<div class="sw-k">${_t("sw_family")}</div><div class="sw-big">${p.ch.length>1?p.ch.length:""}</div><div class="sw-t">${T(S.k.concat(S.f))}</div>`,{len:S.k.concat(S.f).join(" ").length});
     /* zeitgeist: reuse the Story view's own block and cut it into cards */

@@ -229,7 +229,8 @@ def kopieer_media(pad, doel, gebruikt, max_px):
 # ---------------------------------------------------------------- main
 # kind of image ("soort"): the viewer shows "A drawing from that time" etc.; English names are stored in Dutch
 IMG_KIND = {"photo": "foto", "drawing": "tekening", "print": "prent", "painting": "schilderij",
-            "map": "kaart", "coin": "munt", "poster": "affiche"}
+            "map": "kaart", "coin": "munt", "poster": "affiche",
+            "newspaper": "krant", "clipping": "krant", "krantenknipsel": "krant"}
 
 
 def img_kinds(images):
@@ -239,6 +240,8 @@ def img_kinds(images):
             if isinstance(k, str) and k.strip():
                 b["soort"] = IMG_KIND.get(k.strip().lower(), k.strip().lower())
                 if b.get("type") == k: del b["type"]
+            if "paragraph" in b and "alinea" not in b:  # story images: after which paragraph (1-based)
+                b["alinea"] = b.pop("paragraph")
     return images
 
 

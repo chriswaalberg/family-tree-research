@@ -148,7 +148,7 @@ For most people the viewer writes a text from the data (birth, age at the child'
 |---|---|---|
 | `verhaal` | text or `{"en": …, "nl": …}` | Replaces the template text. Blank line = new paragraph; `**bold**`, `*italic*` and `[text](https://…)` work. |
 | `verhaal_bronnen` | list | Sources: `[["title", "https://…"], …]`, shown under the story. |
-| `verhaal_beelden` | list | Old images with the story: `[{"bestand": "media/verhalen/x.jpg", "titel": …, "maker": …, "datering": …, "bijschrift": …, "bron": ["title", "https://…"]}]` (`maker` = artist, `datering` = dating, `bijschrift` = caption, `bron` = source). Optional `soort` as with zeitgeist images (`foto`, `tekening`, …). |
+| `verhaal_beelden` | list | Old images with the story: `[{"bestand": "media/verhalen/x.jpg", "titel": …, "maker": …, "datering": …, "bijschrift": …, "bron": ["title", "https://…"]}]` (`maker` = artist, `datering` = dating, `bijschrift` = caption, `bron` = source). Optional `soort` as with zeitgeist images (`foto`, `tekening`, …, `krant` for a newspaper clipping). Optional `alinea` (paragraph, 1-based): the image comes right after that paragraph, in the Story view between it and the next one and in Cards as the card after it. Without `alinea` the viewer places it after the paragraph that mentions the year from `datering` or a clear word from the title or caption, and otherwise spreads the images evenly over the story. |
 
 A sibling with their own story appears as "Remarkable relative" with the ancestor on the trail.
 
@@ -169,7 +169,11 @@ With the script: `--stories stories.json`, keyed by GEDCOM id (`@I12@`) or full 
              {"bestand": "media/verhalen/storm-1775.jpg", "soort": "prent",
               "titel": "Storm on the Dutch coast", "maker": "…", "datering": "1775",
               "bijschrift": {"en": "A storm like the one in which his brother drowned. This is Scheveningen, not Katwijk itself.", "nl": "Een storm zoals die waarin zijn broer verdronk. Dit is Scheveningen, niet Katwijk zelf."},
-              "bron": ["Wikimedia Commons, public domain", "https://commons.wikimedia.org/wiki/File:…"]}]},
+              "bron": ["Wikimedia Commons, public domain", "https://commons.wikimedia.org/wiki/File:…"], "alinea": 3},
+             {"bestand": "media/verhalen/krant-1781-huwelijk.jpg", "soort": "krant", "alinea": 2,
+              "titel": "Marriage announcement", "maker": "Leydse Courant", "datering": "5 May 1781",
+              "bijschrift": {"en": "The announcement of his marriage (shortened: only the heading and his notice).", "nl": "De aankondiging van zijn huwelijk (ingekort: alleen de kop en zijn bericht)."},
+              "bron": ["Delpher", "https://www.delpher.nl/…"]}]},
  "Pieter de Vries": "Short text without sources."}
 ```
 
@@ -214,7 +218,7 @@ Optional top-level field. Per place it paints a picture of how people lived ther
 Field names: `plaatsen` = places, `naam` = name, `van`/`tot` = from/to year, `jaar` = year, `titel` = title, `tekst` = text, `bron` = source, `algemeen` = general.
 
 - Images are spread over the whole trail: each image goes to the person who was alive then and whose mid-life is closest to its year (first one per person, then at most two). Only if nobody on the trail was alive then may a general view of the place go to someone born up to 25 years later. Set `"gebeurtenis": true` on an image of a specific event (a sea battle, a stranded whale); it only appears for people alive at the time. Also set `"kind": true` on an image about children (children in a famine, at school): it only goes to someone on the trail who was younger than 16 at the time (at most two per person). If nobody on the trail was a child then, the image is not shown on that trail.
-- `soort` on an image (kind): `foto`, `tekening`, `prent`, `schilderij`, `kaart`, `munt` or `affiche` (English also works in the input: photo, drawing, print, painting, map, coin, poster; `make_viewer_data.py` stores the Dutch value). The Story view and Cards show it above the image: "A drawing from that time" / "Een tekening uit die tijd"; without `soort`: "An image from that time". Not to be confused with `kind`, the flag for images about children.
+- `soort` on an image (kind): `foto`, `tekening`, `prent`, `schilderij`, `kaart`, `munt`, `affiche` or `krant` (newspaper clipping) (English also works in the input: photo, drawing, print, painting, map, coin, poster, newspaper; `make_viewer_data.py` stores the Dutch value). The Story view and Cards show it above the image: "A drawing from that time" / "Een tekening uit die tijd", "From the newspaper" / "Uit de krant"; without `soort`: "An image from that time". Not to be confused with `kind`, the flag for images about children.
 - `match`: text fragments that must occur in the birth or death place (without capitals and accents).
 - Lifespan: birth year to death year; without a death year the viewer assumes 60 years.
 - Texts can also be `{"en": …, "nl": …}`. Publish images as `media/tijdgeest/<name>` next to index.html. Only use images that are free to use (public domain or CC0), and credit artist and source.
