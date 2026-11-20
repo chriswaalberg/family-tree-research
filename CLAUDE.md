@@ -18,7 +18,8 @@ plugins/family-tree-research/
     viewer/index.html                the viewer (single file, ~320 kB, minified-ish JS; English + Dutch via I18N table)
     viewer/DATA-FORMAT.md            data.json format (field names are Dutch, documented in English)
     examples/                        7-person example family + regions-basic.json, example-stories.json and
-                                     example-zeitgeist.json (fictional, to test the Story view; no images)
+                                     example-zeitgeist.json (fictional, to test the Story view) and one real CC0 photo in
+                                     examples/media/tijdgeest/ (Den Helder, 1955, Anefo)
 README.md, LICENSE (MIT)
 ```
 
@@ -42,13 +43,14 @@ S=plugins/family-tree-research/skills/family-tree
 python3 -I $S/scripts/make_viewer_data.py $S/examples/example.ged /tmp/ex.json \
   --csv $S/examples/example-relations.csv --regions $S/examples/regions-basic.json \
   --stories $S/examples/example-stories.json --zeitgeist $S/examples/example-zeitgeist.json \
-  --start @I1@:Lotte --start @I2@:Thomas
+  --start @I1@:Femke --start @I2@:Thomas
 python3 -I $S/scripts/gedcom_tool.py check $S/examples/example.ged /tmp/check.md --start @I1@
 python3 -I $S/scripts/gedcom_tool.py check $S/examples/example.ged /tmp/check-nl.md --start @I1@ --lang nl
 python3 -I $S/scripts/standalone_viewer.py $S/viewer/index.html /tmp/ex.json /tmp/ex.html
+cp -R $S/examples/media /tmp/media   # zeitgeist images are not embedded; they load from media/ next to the HTML
 ```
 
-Then open `/tmp/ex.html` (or screenshot it with Playwright, desktop + mobile) and click through all tabs: Family, Line, Story, Timeline, Fan, Cosmos. In the Story view, follow Lotte → Thomas → Pieter: Pieter must show his own (example) story, a "Life in Den Helder" block and the 1963 example event with a source link and an "Example links" line; Anna's template text must say she lived through the Second World War "roughly from age 15 to 20". In English, no Dutch words may appear (e.g. "bron"). Check the browser console for errors. Also test with `--lang nl`. If you touched `gedcom_tool.py new/add`, test them with both English and Dutch JSON keys (formats in references/onboarding.md and references/gedcom-tool.md).
+Then open `/tmp/ex.html` (or screenshot it with Playwright, desktop + mobile) and click through all tabs: Family, Line, Story, Timeline, Fan, Cosmos. In the Story view, follow Femke → Thomas → Pieter: Pieter must show his own (example) story, a "Life in Den Helder" block with the 1955 photo, and the 1963 example event with a source link and an "Example links" line; Anna's template text must say she lived through the Second World War "roughly from age 15 to 20". In English, no Dutch words may appear (e.g. "bron"). Check the browser console for errors. Also test with `--lang nl`. If you touched `gedcom_tool.py new/add`, test them with both English and Dutch JSON keys (formats in references/onboarding.md and references/gedcom-tool.md).
 
 If `examples/example-data.json` should change, regenerate it with the first command (output to `$S/examples/example-data.json`).
 

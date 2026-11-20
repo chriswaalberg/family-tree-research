@@ -4,7 +4,7 @@ The viewer (`index.html`) contains nothing about a specific family. Everything c
 
 ```
 python3 make_viewer_data.py tree.ged data.json                       # minimal
-python3 make_viewer_data.py tree.ged data.json --start @I1@:Lotte \
+python3 make_viewer_data.py tree.ged data.json --start @I1@:Femke \
         --csv relations.csv --regions regions.json --title "The De Vries family" --lang en
 ```
 
@@ -19,7 +19,7 @@ python3 make_viewer_data.py tree.ged data.json --start @I1@:Lotte \
 | `taal` | `"en"` or `"nl"` | no | Language the viewer opens in. Default `"en"`. (`lang` also works.) Readers can switch with the EN/NL switch in the header; their choice is remembered per browser (localStorage). `?lang=en` or `?lang=nl` in the URL overrides both. |
 | `titel` | text or `{"en": …, "nl": …}` | no | Page title (an object follows the language switch). Without it: "{family name} family tree" / "Stamboom {familienaam}", or just "Family tree". |
 | `familienaam` | text | no | Family name, used for the title when `titel` is missing. |
-| `startpersonen` | list | no | Each item: `{"persoon": 0, "label": "Lotte"}` (`label` optional, defaults to the first name). The first one is the start person when the viewer opens. Other start people are chosen via search or "Make start person". Without the list the viewer starts at person 0. |
+| `startpersonen` | list | no | Each item: `{"persoon": 0, "label": "Femke"}` (`label` optional, defaults to the first name). The first one is the start person when the viewer opens. Other start people are chosen via search or "Make start person". Without the list the viewer starts at person 0. |
 | `startpersoon_per_weergave` | object | no | A different start person for one view, e.g. `{"stamlijn": 2}`. Views: `familie` (Family), `stamlijn` (Line), `verhaal` (Story), `tijdlijn` (Timeline), `waaier` (Fan), `kosmos` (Cosmos). |
 | `levenden_tonen` | yes/no | no | Default (missing or `true`): the viewer shows everything. `false` hides dates and places of living people. |
 | `regios` | object | no | Region codes: `{code: {"naam": …, "kleur": "#hex"}}` (`naam` = name, `kleur` = colour). `naam` can be text or `{"en": …, "nl": …}`. Use a country or country-region code (`NL`, `NL-ZH`, `BE-VAN`, `SE-M`). The viewer colours by **country of birth**: it takes the part before the hyphen (`NL-ZH` → `NL`). For well-known countries (NL, BE, DE, SE, NO, DK, FR, GB, US, ID) the viewer has its own names and colours; for other codes it uses `naam` and `kleur` from this table. |
@@ -115,10 +115,10 @@ Someone counts as living if no death or burial is recorded and they were born le
   "versie": 2,
   "taal": "en",
   "familienaam": "de Vries",
-  "startpersonen": [{"persoon": 0, "label": "Lotte"}],
+  "startpersonen": [{"persoon": 0, "label": "Femke"}],
   "regios": {"NL": {"naam": {"en": "Netherlands", "nl": "Nederland"}, "kleur": "#e07a2f"}},
   "personen": [
-    {"n": "Lotte Maria de Vries", "g": "Lotte Maria", "s": "de Vries", "x": "F", "f": 1, "m": 2, "levend": true,
+    {"n": "Femke Johanna de Vries", "g": "Femke Johanna", "s": "de Vries", "x": "F", "f": 1, "m": 2, "levend": true,
      "c": {"f": ["zeker", "Birth certificate 2015", ""], "m": ["zeker", "Birth certificate 2015", ""]}},
     {"n": "Thomas de Vries", "g": "Thomas", "s": "de Vries", "x": "M", "f": 3, "m": 4, "sp": [2], "ch": [0], "levend": true},
     {"n": "Sanne", "g": "Sanne", "x": "F", "sp": [1], "ch": [0], "levend": true},
@@ -134,7 +134,7 @@ Someone counts as living if no death or burial is recorded and they were born le
 
 ```
 python3 make_viewer_data.py examples/example.ged examples/example-data.json \
-  --csv examples/example-relations.csv --regions examples/regions-basic.json --start @I1@:Lotte --start @I2@:Thomas
+  --csv examples/example-relations.csv --regions examples/regions-basic.json --start @I1@:Femke --start @I2@:Thomas
 ```
 
 ## Stories (`verhaal`, for the Story view)

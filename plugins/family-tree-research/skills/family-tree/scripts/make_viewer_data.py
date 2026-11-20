@@ -11,7 +11,7 @@ Only a GEDCOM is required. Optional:
 
 Examples:
   python3 make_viewer_data.py tree.ged data.json
-  python3 make_viewer_data.py tree.ged data.json --start @I12@:Lotte --start "Thomas de Vries" --lang nl
+  python3 make_viewer_data.py tree.ged data.json --start @I12@:Femke --start "Thomas de Vries" --lang nl
   python3 make_viewer_data.py tree.ged data.json --csv relations.csv --regions regions.json --title "The De Vries family"
 
 Without --start the script picks the person with the most known ancestors.

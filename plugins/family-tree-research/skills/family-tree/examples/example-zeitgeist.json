@@ -1,5 +1,5 @@
 {
- "_uitleg": "Fictional example zeitgeist for testing. Events marked (example) are invented; the national events are real.",
+ "_uitleg": "Fictional example zeitgeist for testing. Events marked (example) are invented; the national events and the 1955 photo are real (CC0).",
  "plaatsen": [
   {
    "id": "denhelder",
@@ -44,7 +44,28 @@
      ]
     }
    ],
-   "beelden": []
+   "beelden": [
+    {
+     "bestand": "media/tijdgeest/denhelder-1955.jpg",
+     "van": 1945,
+     "tot": 1975,
+     "jaar": 1955,
+     "titel": {
+      "en": "Waving at the destroyer Friesland",
+      "nl": "Zwaaien naar de onderzeebootjager Friesland"
+     },
+     "maker": "Wim van Rossem / Anefo",
+     "datering": "16 September 1955",
+     "bijschrift": {
+      "en": "Families on the quay in Den Helder watch the new destroyer Friesland leave for its trial run. (Real photo, used in the fictional example.)",
+      "nl": "Families op de kade in Den Helder kijken hoe de nieuwe onderzeebootjager Friesland vertrekt voor een proefvaart. (Echte foto, gebruikt in het verzonnen voorbeeld.)"
+     },
+     "bron": [
+      "Nationaal Archief / Anefo, CC0 (Wikimedia Commons)",
+      "https://commons.wikimedia.org/wiki/File:Proefvaart_onderzeebootjager_Friesland_Den_Helder,_Bestanddeelnr_907-3301.jpg"
+     ]
+    }
+   ]
   }
  ],
  "algemeen": {
