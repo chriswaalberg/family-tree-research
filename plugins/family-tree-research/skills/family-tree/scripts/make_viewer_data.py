@@ -245,6 +245,36 @@ def img_kinds(images):
     return images
 
 
+def story_image_warnings(p, images):
+    """Story images should fit a moment in the story: a dating within (birth - 10) to (death + 10)
+    and an existing paragraph ("alinea"). Only warnings; the data is written anyway."""
+    text = p.get("verhaal")
+    texts = text.values() if isinstance(text, dict) else [text]
+    n_par = max((len([x for x in re.split(r"\n\s*\n", t) if x.strip()]) for t in texts if isinstance(t, str)), default=0)
+    by, dy = p.get("by"), p.get("dy")
+    lo = by - 10 if by else None
+    hi = dy + 10 if dy else (datetime.date.today().year if p.get("levend") else (by + 110 if by else None))
+    out = []
+    for b in images if isinstance(images, list) else []:
+        if not isinstance(b, dict): continue
+        name = b.get("bestand") or b.get("file") or b.get("titel") or "?"
+        if isinstance(name, dict): name = next(iter(name.values()), "?")
+        d = b.get("datering") or b.get("dating") or b.get("date")
+        ys = [int(y) for y in re.findall(r"(?<!\d)(\d{3,4})(?!\d)", str(d))] if d else []
+        if ys and lo is not None and hi is not None and (max(ys) < lo or min(ys) > hi):
+            out.append(f"{name}: dating {d} is outside {lo}-{hi} (birth - 10 to death + 10)")
+        al = b.get("alinea")
+        if al is None:
+            out.append(f"{name}: no \"alinea\" (which paragraph does it belong to?)")
+        else:
+            try: ok = 1 <= int(al) <= n_par
+            except (TypeError, ValueError): ok = False
+            if not ok: out.append(f"{name}: \"alinea\": {al} does not exist (the story has {n_par} paragraph(s))")
+    for w in out:
+        print(f"  warning, story image of {p['n']}: {w}", file=sys.stderr)
+    return len(out)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("gedcom")
@@ -481,7 +511,8 @@ def main():
             else:
                 people[i]["verhaal"] = val
             n_vh += 1
-        print(f"Stories: {n_vh} read")
+        n_warn = sum(story_image_warnings(p, p["verhaal_beelden"]) for p in people if p.get("verhaal_beelden"))
+        print(f"Stories: {n_vh} read" + (f", {n_warn} warning(s) about story images (see above)" if n_warn else ""))
 
     fam = a.familienaam or surn0[starts[0]["persoon"]] or ""
     out = {"versie": 2, "taal": a.taal}

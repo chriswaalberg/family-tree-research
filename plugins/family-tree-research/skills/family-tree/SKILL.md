@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.10"
+  version: "0.9.11"
 ---
 
 # Family-tree research, hand in hand
@@ -88,7 +88,7 @@ The viewer has a **Story** view: from the start person step by step back in time
 - **Give the surname line its stories too.** Not only remarkable lives: also write a story for every generation of the user's own name line (and other main lines) for which the research already holds records. Ordinary lives become vivid from what the records say: occupations, ages, addresses, signatures, witnesses, a child born before the wedding, a remarriage to a sister-in-law. Read the research reports and work logs first; most of the material is already there.
 - **Ask what the family knows.** Occupations, a family shop, where they lived, nicknames, what grandma used to tell. One detail ("he was a milkman, they had a dairy shop") brings a story to life and is in no archive. Record it as a source: "<name> (own knowledge, <date>)".
 - **Never address the reader as a descendant.** No "your line", "your surname", "to you": you don't know who reads it, and from another start person it's wrong. Write "this family tree", "the line", "this branch", "the generations after him". Interface text ("whose story do you follow?") is fine.
-- Images with a story: aim for 2–4 per story (see "Finding images" below). Say so in the caption when it isn't the person themselves ("this is not <name> himself").
+- Images with a story: search for 2–4 per story, but only use an image that fits a concrete moment in the story, in place and time (see "Finding images" below). Say so in the caption when it isn't the person themselves ("this is not <name> himself").
 - Write stories in the user's language. See `references/viewer.md` ("Stories") for the format.
 
 ## Zeitgeist: how did they live?
@@ -105,16 +105,20 @@ For each place where many ancestors lived, build a zeitgeist (`zeitgeist/zeitgei
 Images make the stories and the zeitgeist come alive, so searching for them is a fixed step in every round, not an extra. Better a well-chosen print of the village church than an empty chapter.
 
 **Targets**
-- Per own story: **2–4 images**. Think of the occupation (a smith at work, a dairy shop), the town or street, an event from the story (a flood, a ship, a fire), the church or village, the ship or factory.
+- Per own story: **search for 2–4 images**. That is a search target, not a quota: no good image, then no image. Think of the occupation (a smith at work, a dairy shop), the town or street, an event from the story (a flood, a ship, a fire), the church or village, the ship or factory.
 - **Newspaper clippings are good story images** (Delpher, Trove, family papers): an announcement, a court report, a sports result. Crop to the heading and the relevant paragraph only, set `"soort": "krant"`, and say in the caption that it was shortened. Old newspapers are usually public domain; check the archive's terms.
 - Per zeitgeist place: **at least 4–6 images**, spread over the centuries the family lived there: roughly one every 30–50 years.
 - Big events (a siege, a flood, a famine, a war): an image with `"gebeurtenis": true`, so it only appears with people alive then. Images about children get `"kind": true`: a famine photo of children then lands with the ancestor who was a child at the time (see `viewer/DATA-FORMAT.md`).
+
+**Story images: same place, same time**
+Every story image belongs to one concrete moment in the story, and fits it in **place** (the same town, or the occupation or event from that paragraph) **and time** (rule of thumb: within ~15 years of that moment). A wider gap only for buildings that still stood the same way then, and the caption says so ("the church looked like this when he was baptised there in 1802"). Every story image gets `alinea`: the paragraph it belongs to. If you can't point to a paragraph, the image doesn't belong in the story (perhaps in the zeitgeist of the place). `make_viewer_data.py` warns when a dating falls outside birth − 10 to death + 10 or when `alinea` is missing or doesn't exist.
 
 **Every round**
 1. First count which stories and places have 0–1 images, and fill those first. (Count in `data/stories.json` and `zeitgeist/zeitgeist.json`: the `beelden`/`images` lists per story and per place.)
 2. Make search terms per story and place: occupation, place, event, year (e.g. "smid", "Katwijk strand", "watersnood 1861", "Den Helder 1955"), in the language of the country.
 3. Search in the order of "Images" in `references/sources.md`: Rijksmuseum, Wikimedia Commons, Dutch National Archives (Anefo, Van de Poll), regional image banks; abroad national museums and libraries, and Commons.
 4. In the final report of the round, give per story and per place the number of images.
+5. Close the round with a check, card by card (Story view or Cards): does every image fit the text just before it, in place **and** time? If not, move it (`alinea`) or drop it. Fix every warning from `make_viewer_data.py`.
 
 **Check before you use**
 - Only public domain or CC0, or CC BY / CC BY-SA with the maker's name and the licence in `maker`. Read the licence in the object record itself (museum record, Commons `extmetadata`), never assume it.
@@ -127,7 +131,7 @@ Images make the stories and the zeitgeist come alive, so searching for them is a
 - Then make a contact sheet of all new images (one image with thumbnails) and **look at it yourself**: crooked crops, leftover borders, the wrong image, a near-duplicate.
 
 **Always fill in per image**
-`titel`, `maker`, `datering`, `soort` (`foto`, `tekening`, `prent`, `schilderij`, `kaart`, `munt`, `affiche` or `krant`, from the museum record, not from the caption), `bron` (`[label, url]`) and a `bijschrift` (caption) in the user's language. The caption explains the link with the person or place, and says so when it is another place ("this is Dordrecht, not Zwijndrecht itself, but the market looked like this here too"). Zeitgeist images also get `van`/`tot`/`jaar`. Story images can get `alinea` (the paragraph they belong to, 1-based) so the clipping about boxing sits next to the paragraph about boxing; without it the viewer guesses from the year and the words.
+`titel`, `maker`, `datering`, `soort` (`foto`, `tekening`, `prent`, `schilderij`, `kaart`, `munt`, `affiche` or `krant`, from the museum record, not from the caption), `bron` (`[label, url]`) and a `bijschrift` (caption) in the user's language. The caption explains the link with the person or place, and says so when it is another place ("this is Dordrecht, not Zwijndrecht itself, but the market looked like this here too"). Zeitgeist images also get `van`/`tot`/`jaar`. Story images always get `alinea` (the paragraph they belong to, 1-based), so the clipping about boxing sits next to the paragraph about boxing.
 
 ## Raised, adopted, foster
 

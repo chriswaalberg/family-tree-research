@@ -708,7 +708,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.10",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.11",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1861,12 +1861,15 @@ const SW_KIND={vh_begin:"b",vh_born_dp:"b",vh_born_d:"b",vh_born_p:"b",vh_born_n
 function swSentences(i,child,flags){const rec=[],orig=_t;let tpl;
   _t=(k,v)=>{const s=orig(k,v);rec.push([k,s]);return s};try{tpl=vhTemplate(i,child,flags)}finally{_t=orig}
   const kind=s=>{let best=null;for(const [k,o] of rec)if(o&&s.startsWith(o)&&(!best||o.length>best[1].length))best=[k,o];
-    const k=best?best[0]:"";return SW_KIND[k]||(/^vh_(war|era)/.test(k)?"e":"f")};
-  const out={b:[],k:[],f:[],d:[],e:[],n:[]};tpl.paras.flat().forEach(s=>out[kind(s)].push(s));tpl.note.forEach(s=>out.n.push(s));return out}
+    const k=best?best[0]:"";kind.last=k;return SW_KIND[k]||(/^vh_(war|era)/.test(k)?"e":"f")};
+  const out={b:[],k:[],f:[],d:[],e:[],n:[],dk:[]};tpl.paras.flat().forEach(s=>{const k=kind(s);out[k].push(s);if(k==="d")out.dk.push(kind.last)});tpl.note.forEach(s=>out.n.push(s));return out}
 /* (this wraps _t for one call instead of changing vhTemplate, so the Story view stays exactly as it is) */
 /* the trail: the chosen path plus the richest continuation */
 function swPlan(path){const np=path.slice(),seen=new Set(np);let cur=np[np.length-1],n=0;
   while(n++<60){const q=vhBest(cur);if(q<0||seen.has(q))break;np.push(q);seen.add(q);cur=q}return np}
+/* does the own story already tell the death? a paragraph with the death year and a word for dying (both languages) */
+const SW_DIED=/\b(overle(ed|den)|stierf|gestorven|died|death|passed away)\b/i;
+function swToldDeath(p){if(!p.dy)return false;const y=new RegExp("\\b"+p.dy+"\\b");return vhParaList(lab(p.verhaal)).some(x=>y.test(x)&&SW_DIED.test(x))}
 function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
   const path=SW.path,root=path[0],rfn=vhFn(P[root]),flags={dtb:false},seen=new Set();seen.assign=vhAssignImages(path);
   SW.gens=path.map((i,k)=>{const p=P[i],child=k?path[k-1]:null,code=vhCode(path,k),fn=vhFn(p),cards=[];
@@ -1903,7 +1906,9 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     /* remarkable relatives (a brother or sister with an own story) */
     vhSibs(i).filter(j=>vhHas(P[j])).forEach(j=>{const q=P[j],rl=_t(q.x==="M"?"vh_sib_M":q.x==="F"?"vh_sib_F":"vh_sib_X",vhPro(p)),first=vhParas(lab(q.verhaal)).split("</p>")[0]+"</p>";
       add("sib",`<div class="sw-k">✦ ${_t("vh_special")}</div><h2>${slEsc(q.n)}</h2><div class="sw-yy">${slEsc(rl)} · ${slEsc(yrs(q))}</div><div class="sw-t">${first}</div>`,{len:first.length,y:q.by||null})});
-    if(S.d.length||S.n.length)add("death",`<div class="sw-k">${S.d.length?_t("sw_death"):""}</div><div class="sw-big">${S.d.length&&p.dy?p.dy:""}</div><div class="sw-t">${T(S.d)}</div>${S.n.map(n=>`<div class="sw-note">${slEsc(n)}</div>`).join("")}`,{len:S.d.join(" ").length});
+    /* an own story that already tells the death (death year + "died"/"overleed") keeps its sentence there; the farewell card then shows only the word and the year */
+    const dTold=vhHas(p)&&swToldDeath(p),dS=dTold?S.d.filter((s,j)=>!/^vh_died/.test(S.dk[j])):S.d,dShow=S.d.length;
+    if(dShow||S.n.length)add("death",`<div class="sw-k">${dShow?_t("sw_death"):""}</div><div class="sw-big">${dShow&&p.dy?p.dy:""}</div>${dS.length?`<div class="sw-t">${T(dS)}</div>`:""}${S.n.map(n=>`<div class="sw-note">${slEsc(n)}</div>`).join("")}`,{len:dS.join(" ").length});
     /* the fork: father or mother; the richest trail plays on by itself */
     const par=parentsOf(i);
     if(par.length===2){const nxt=path[k+1];

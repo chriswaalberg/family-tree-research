@@ -28,7 +28,7 @@ Key = GEDCOM id (`@I12@`) or full name. Value = text, `{"en": …, "nl": …}`, 
            "sources": [["Marriage banns Amsterdam 1776", "https://…"], ["Museum X", "https://…"]]}}
 ```
 
-- Optional `"images": [{"bestand": "media/verhalen/x.jpg", "titel", "maker", "datering", "bijschrift", "bron": [title, url]}]`: old prints or photos with the story, 2–4 per story (only freely usable work; publish them as `media/verhalen/<name>`; see "Finding images (generously)" in SKILL.md). Dutch keys (`tekst`, `bronnen`, `beelden`) also work; the image fields are explained in DATA-FORMAT.md.
+- Optional `"images": [{"bestand": "media/verhalen/x.jpg", "titel", "maker", "datering", "bijschrift", "bron": [title, url], "alinea": 2}]`: old prints or photos with the story, at most 2–4 per story and each tied to a paragraph (`alinea`) whose place and time it fits (only freely usable work; publish them as `media/verhalen/<name>`; see "Finding images (generously)" in SKILL.md). Dutch keys (`tekst`, `bronnen`, `beelden`) also work; the image fields are explained in DATA-FORMAT.md.
 - Blank line = new paragraph; `**bold**`, `*italic*` and `[text](https://…)` work. Each paragraph is one card in the Cards view: keep it to at most ~60 words (about 350 characters) and one subject.
 - Never address the reader as a descendant ("your line", "your surname"): write "this family tree", "the line". The template text already does this.
 - An own story replaces the template text for that person. So write it complete (who, where, when, what happened), in the user's language, warm and concrete, and stick to what the sources say. Put uncertainty in the text ("the strongest candidate is…, it's not certain yet").
