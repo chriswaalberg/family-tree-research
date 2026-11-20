@@ -185,7 +185,7 @@ With the script: `--stories stories.json`, keyed by GEDCOM id (`@I12@`) or full 
 
 Optional top-level field. Per place it paints a picture of how people lived there. In the Story view it appears for everyone who lived in that place, but only for the years they provably lived there (`woon`, see above; not just birth or death place, never after death), and not in years abroad (`weg`). Someone born in Rotterdam in 1859 who lived in Amsterdam from about 1865 gets no Rotterdam images or events from 1883.
 
-- **`leven`** (daily life): one or more paragraphs about daily life in a period. Shown with the first person on the trail whose time in that place (midpoint of the `woon` period) falls in that period, and not again after that. In Cards every paragraph is a card of its own (with the same heading), so keep them short.
+- **`leven`** (daily life): one or more paragraphs about daily life in a period. Shown with the first person on the trail whose time in that place (midpoint of the `woon` period) falls in that period, and not again after that. Optional `kaarten` (input also `cards`; text or `{"en": …, "nl": …}`, blank line = new card): the short version for Cards, each card with the block's heading; the Story view always shows `tekst`. Without `kaarten`, Cards makes one card per paragraph of `tekst`. Card 1 is a hook; then one picture of daily life per card, at most ~200 characters. `make_viewer_data.py` warns when a card has more than 250 characters, or when a block without `kaarten` has a paragraph over 350 characters.
 - **`beelden`** (images): old prints, drawings, paintings or photos. Per person the image closest in year to their life that hasn't been shown yet. Click = large.
 - **`gebeurtenissen`** (events): local events with year and source. Shown for people who lived there then and were at least 6 years old, each once per story, at most 4 local ones per person. A national event from the same year as a local one is left out (no double "1944").
   - Optional `"links": [["title", "https://…"], …]` with `"links_label": "…"`: links shown under the event, e.g. to images you may not copy (copyright). Only link to pages where the image can actually be seen.
@@ -195,7 +195,8 @@ Optional top-level field. Per place it paints a picture of how people lived ther
 {"tijdgeest": {
   "plaatsen": [{
     "id": "katwijk", "naam": "Katwijk", "match": ["katwijk"],
-    "leven": [{"van": 1625, "tot": 1800, "titel": "Life in Katwijk aan Zee", "tekst": "… (blank line = new paragraph)"}],
+    "leven": [{"van": 1625, "tot": 1800, "titel": "Life in Katwijk aan Zee", "tekst": "… (blank line = new paragraph)",
+               "kaarten": "A hook about daily life.\n\nOne picture per card, ~200 characters."}],
     "gebeurtenissen": [{"jaar": 1570, "tekst": "…", "bron": ["title", "https://…"]},
                        {"jaar": 1775, "van": 1771, "tot": 1780, "tekst": "In the 1770s …"}],
     "beelden": [

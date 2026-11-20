@@ -442,6 +442,31 @@ def story_card_warnings(p):
     return len(out)
 
 
+def zeitgeist_card_warnings(pl, L):
+    """A zeitgeist "leven" block: short cards (at most CARD_MAX characters), or a hint when a paragraph is long and there are no cards."""
+    if not isinstance(L, dict): return 0
+    name = pl.get("naam") or pl.get("id") or "?"
+    if isinstance(name, dict): name = next(iter(name.values()), "?")
+    title = L.get("titel") or f"{L.get('van', '?')}-{L.get('tot', '?')}"
+    if isinstance(title, dict): title = next(iter(title.values()), "?")
+    out, cards = [], L.get("kaarten")
+    if cards:
+        per = {k: split_paras(v) for k, v in (cards.items() if isinstance(cards, dict) else [("", cards)])}
+        if len({len(v) for v in per.values()}) > 1:
+            out.append("cards: not the same number in each language (" + ", ".join(f"{k} {len(v)}" for k, v in per.items()) + ")")
+        for lang, cs in per.items():
+            for j, c in enumerate(cs, 1):
+                if len(c) > CARD_MAX: out.append(f"card {j}{f' ({lang})' if lang else ''} has {len(c)} characters (max. {CARD_MAX}, aim for ~200)")
+    else:
+        t = L.get("tekst") or L.get("text")
+        longest = max((len(x) for v in (t.values() if isinstance(t, dict) else [t]) for x in split_paras(v)), default=0)
+        if longest > PARA_LONG:
+            out.append(f"no card version (\"kaarten\") and a paragraph of {longest} characters; consider writing cards")
+    for w in out:
+        print(f"  warning, zeitgeist {name}, \"{title}\": {w}", file=sys.stderr)
+    return len(out)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("gedcom")
@@ -744,10 +769,16 @@ def main():
         with open(a.tijdgeest, encoding="utf-8") as fh:
             out["tijdgeest"] = json.load(fh)
         tg = out["tijdgeest"]
+        n_tw = 0
         for pl in tg.get("plaatsen", []):
             if pl.get("beelden"): pl["beelden"] = img_kinds(pl["beelden"])
+            for L in pl.get("leven") or []:
+                if isinstance(L, dict) and "cards" in L and "kaarten" not in L: L["kaarten"] = L.pop("cards")
+                n_tw += zeitgeist_card_warnings(pl, L)
+        n_tk = sum(1 for pl in tg.get("plaatsen", []) for L in pl.get("leven") or [] if isinstance(L, dict) and L.get("kaarten"))
         print(f"Zeitgeist: {len(tg.get('plaatsen', []))} place(s), "
-              f"{sum(len(x.get('beelden', [])) for x in tg.get('plaatsen', []))} images")
+              f"{sum(len(x.get('beelden', [])) for x in tg.get('plaatsen', []))} images, {n_tk} life block(s) with cards"
+              + (f", {n_tw} warning(s) about cards (see above)" if n_tw else ""))
     out["personen"] = people
     with open(a.uit, "w", encoding="utf-8") as fh:
         json.dump(out, fh, ensure_ascii=False, separators=(",", ":"))

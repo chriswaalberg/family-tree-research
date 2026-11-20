@@ -39,7 +39,7 @@ Key = GEDCOM id (`@I12@`) or full name. Value = text, `{"en": …, "nl": …}`, 
 
 ## Zeitgeist (`zeitgeist/zeitgeist.json`)
 
-Per place: `leven` (daily life: paragraphs per period), `gebeurtenissen` (events: year, text, source) and `beelden` (images: file, from/to, year, title, artist, dating, caption, source); plus `algemeen.gebeurtenissen` for national events. Full format and rules in `viewer/DATA-FORMAT.md` (field names are Dutch, explained there). Put the images in `zeitgeist/media/tijdgeest/` and publish them as `media/tijdgeest/<name>`; size, cropping and the fields per image are in SKILL.md, "Finding images (generously)".
+Per place: `leven` (daily life: paragraphs per period in `tekst`, plus a short card version for Cards in `kaarten`), `gebeurtenissen` (events: year, text, source) and `beelden` (images: file, from/to, year, title, artist, dating, caption, source); plus `algemeen.gebeurtenissen` for national events. Full format and rules in `viewer/DATA-FORMAT.md` (field names are Dutch, explained there). Put the images in `zeitgeist/media/tijdgeest/` and publish them as `media/tijdgeest/<name>`; size, cropping and the fields per image are in SKILL.md, "Finding images (generously)".
 
 Writing rules: concrete and sensory (what did people see, do and fear), short, in the user's language, and only what the sources say. After a few chapters a reader should feel they know the village.
 

@@ -719,7 +719,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.17",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.18",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1296,10 +1296,10 @@ function vhParaYears(paras,p){const k=paras.map(x=>{const m=String(x).match(/\b(
   for(let j=1;j<k.length;j++)if(k[j]!=null&&k[j-1]!=null&&k[j]<k[j-1])k[j]=k[j-1];
   return k}
 /* the zeitgeist block cut into pieces with a year: "life" (heading + text), an image, an event */
-function vhTgPieces(html){const d=document.createElement("div");d.innerHTML=html;const out=[];let head="",hy=null,cur=null;
+function vhTgPieces(html){const d=document.createElement("div");d.innerHTML=html;const out=[];let head="",hy=null,ref=null,cur=null;
   for(const el of d.querySelectorAll(".vh-tg>*")){
-    if(el.classList.contains("vh-k")){head=el.textContent;hy=el.dataset.y?+el.dataset.y:null;cur=null}
-    else if(el.tagName==="P"){if(cur&&cur.type==="life")cur.html+=el.outerHTML;else{cur={type:"life",y:hy,head,html:el.outerHTML};out.push(cur)}}
+    if(el.classList.contains("vh-k")){head=el.textContent;hy=el.dataset.y?+el.dataset.y:null;ref=el.dataset.tgp!=null?[el.dataset.tgp,+el.dataset.tgl]:null;cur=null}
+    else if(el.tagName==="P"){if(cur&&cur.type==="life")cur.html+=el.outerHTML;else{cur={type:"life",y:hy,head,ref,html:el.outerHTML};out.push(cur)}}
     else if(el.tagName==="FIGURE"){cur=null;out.push({type:"img",y:el.dataset.y?+el.dataset.y:null,el,html:el.outerHTML})}
     else if(el.tagName==="UL"){cur=null;for(const li of el.children)out.push({type:"ev",y:li.dataset.y?+li.dataset.y:null,head,html:li.outerHTML})}}
   return out}
@@ -1449,8 +1449,8 @@ function vhAssignImages(path){const cand=[];
   m.forEach(l=>l.sort((a,b)=>(a.jaar||0)-(b.jaar||0)));return m}
 function vhTijdgeest(i,seen){const T=vhTG();if(!T)return"";const p=P[i];if(p.living)return"";const sp=vhSpan(p);if(!sp)return"";
   const [s,e]=sp,mid=(s+e)/2,pls=vhPlacesOf(p);let html="";
-  for(const {pl,iv} of pls)for(const [a,b] of iv)for(const L of pl.leven||[]){const key="L:"+pl.id+":"+L.van,m=(a+b)/2;
-    if(m>=L.van&&m<L.tot&&!seen.has(key)){seen.add(key);html+=`<div class="vh-k" data-y="${Math.max(L.van,a)}">${slEsc(lab(L.titel)||_t("vh_tg_life",{plaats:lab(pl.naam)}))}</div>${vhParas(lab(L.tekst))}`}}
+  for(const {pl,iv} of pls)for(const [a,b] of iv)for(const [li,L] of (pl.leven||[]).entries()){const key="L:"+pl.id+":"+L.van,m=(a+b)/2;
+    if(m>=L.van&&m<L.tot&&!seen.has(key)){seen.add(key);html+=`<div class="vh-k" data-y="${Math.max(L.van,a)}" data-tgp="${slEsc(pl.id)}" data-tgl="${li}">${slEsc(lab(L.titel)||_t("vh_tg_life",{plaats:lab(pl.naam)}))}</div>${vhParas(lab(L.tekst))}`}}
   for(const best of (seen.assign&&seen.assign.get(i))||[]){seen.add("B:"+best.bestand);const t=lab(best.titel);
     html+=`<figure class="vh-fig" data-y="${best.jaar||Math.round(((best.van||0)+(best.tot||best.van||0))/2)||""}"${best.soort?` data-soort="${slEsc(best.soort)}"`:""}><div class="vh-fk">${slEsc(vhKind(best))}</div><button type="button" class="vh-fimg" data-tgimg="${slEsc(best.bestand)}" data-tgt="${slEsc(t)}" title="${slEsc(t)}"><img loading="lazy" src="${slEsc(best.bestand)}" alt="${slEsc(t)}"></button><figcaption><b>${slEsc(t)}</b>${best.maker?" · "+slEsc(best.maker):""}${best.datering?" · "+slEsc(best.datering):""}${best.bron?` · <a href="${slEsc(best.bron[1])}" target="_blank" rel="noopener">${slEsc(best.bron[0])}</a>`:""}${best.bijschrift?`<span>${slEsc(lab(best.bijschrift))}</span>`:""}</figcaption></figure>`}
   const evs=[];const add=(ev,lok,iv)=>{const a=ev.van||ev.jaar,b=ev.tot||ev.jaar,key="E:"+(lok||"alg")+":"+ev.jaar+":"+lab(ev.tekst).slice(0,24);
@@ -1896,10 +1896,10 @@ function drawFamilie(){
 /* ===== SWIPE (experimental Swipe Stories: full-screen cards that play by themselves, built from the Story view) ===== */
 Object.assign(I18N.nl,{sw_btn:"Kaarten",sw_btn_t:"Het verhaal als kaarten die vanzelf doorlopen",sw_close:"Sluiten",sw_pause:"Pauze",sw_play:"Verder",sw_next:"Volgende",sw_prev:"Vorige",
  sw_hint:"Tik rechts: verder · tik links: terug · vasthouden: pauze · omhoog vegen: een generatie verder terug",
- sw_family:"Gezin",sw_era:"Meegemaakt",sw_doc:"Bekijk document",sw_view:"Bekijk beeld",sw_nextp:"hierna: {name}",sw_route:"Afgelegde route",sw_death:"Afscheid",sw_scan:"Hele krant",tg_k_foto:"Een foto uit die tijd",tg_k_tekening:"Een tekening uit die tijd",tg_k_prent:"Een prent uit die tijd",tg_k_schilderij:"Een schilderij uit die tijd",tg_k_kaart:"Een kaart uit die tijd",tg_k_munt:"Een munt uit die tijd",tg_k_affiche:"Een affiche uit die tijd",tg_k_krant:"Uit de krant",tg_k_x:"Een beeld uit die tijd",sw_birth:"Geboren"});
+ sw_family:"Gezin",sw_sibs:"Broers en zussen",sw_era:"Meegemaakt",sw_doc:"Bekijk document",sw_view:"Bekijk beeld",sw_nextp:"hierna: {name}",sw_route:"Afgelegde route",sw_death:"Afscheid",sw_scan:"Hele krant",tg_k_foto:"Een foto uit die tijd",tg_k_tekening:"Een tekening uit die tijd",tg_k_prent:"Een prent uit die tijd",tg_k_schilderij:"Een schilderij uit die tijd",tg_k_kaart:"Een kaart uit die tijd",tg_k_munt:"Een munt uit die tijd",tg_k_affiche:"Een affiche uit die tijd",tg_k_krant:"Uit de krant",tg_k_x:"Een beeld uit die tijd",sw_birth:"Geboren"});
 Object.assign(I18N.en,{sw_btn:"Cards",sw_btn_t:"The story as cards that play by themselves",sw_close:"Close",sw_pause:"Pause",sw_play:"Play",sw_next:"Next",sw_prev:"Previous",
  sw_hint:"Tap right: next · tap left: back · hold: pause · swipe up: one generation further back",
- sw_family:"Family",sw_era:"Lived through",sw_doc:"View document",sw_view:"View image",sw_nextp:"next: {name}",sw_route:"Route so far",sw_death:"Farewell",sw_scan:"Whole page",tg_k_foto:"A photo from that time",tg_k_tekening:"A drawing from that time",tg_k_prent:"A print from that time",tg_k_schilderij:"A painting from that time",tg_k_kaart:"A map from that time",tg_k_munt:"A coin from that time",tg_k_affiche:"A poster from that time",tg_k_krant:"From the newspaper",tg_k_x:"An image from that time",sw_birth:"Born"});
+ sw_family:"Family",sw_sibs:"Brothers and sisters",sw_era:"Lived through",sw_doc:"View document",sw_view:"View image",sw_nextp:"next: {name}",sw_route:"Route so far",sw_death:"Farewell",sw_scan:"Whole page",tg_k_foto:"A photo from that time",tg_k_tekening:"A drawing from that time",tg_k_prent:"A print from that time",tg_k_schilderij:"A painting from that time",tg_k_kaart:"A map from that time",tg_k_munt:"A coin from that time",tg_k_affiche:"A poster from that time",tg_k_krant:"From the newspaper",tg_k_x:"An image from that time",sw_birth:"Born"});
 let SW=null;
 const SW_KIND={vh_begin:"b",vh_born_dp:"b",vh_born_d:"b",vh_born_p:"b",vh_born_none:"b",vh_age:"b",vh_ageX:"b",vh_living:"b",
   vh_job:"b",vh_kidsN:"k",vh_kids1:"k",vh_kidsSolo:"k",vh_kidsN_living:"k",vh_kids1_living:"k",vh_kidsSolo_living:"k",vh_other1:"f",vh_otherN:"f",vh_sibs1:"b",vh_sibsN:"b",vh_half1:"b",vh_halfN:"b",vh_moveLand:"f",vh_movePlace:"k",
@@ -1909,7 +1909,7 @@ function swSentences(i,child,flags){const rec=[],orig=_t;let tpl;
   _t=(k,v)=>{const s=orig(k,v);rec.push([k,s]);return s};try{tpl=vhTemplate(i,child,flags)}finally{_t=orig}
   const kind=s=>{let best=null;for(const [k,o] of rec)if(o&&s.startsWith(o)&&(!best||o.length>best[1].length))best=[k,o];
     const k=best?best[0]:"";kind.last=k;return SW_KIND[k]||(/^vh_(war|era)/.test(k)?"e":"f")};
-  const out={b:[],k:[],f:[],d:[],e:[],n:[],dk:[]};tpl.paras.flat().forEach(s=>{const k=kind(s);out[k].push(s);if(k==="d")out.dk.push(kind.last)});tpl.note.forEach(s=>out.n.push(s));return out}
+  const out={b:[],k:[],f:[],d:[],e:[],n:[],dk:[],bk:[]};tpl.paras.flat().forEach(s=>{const k=kind(s);out[k].push(s);if(k==="d")out.dk.push(kind.last);if(k==="b")out.bk.push(kind.last)});tpl.note.forEach(s=>out.n.push(s));return out}
 /* (this wraps _t for one call instead of changing vhTemplate, so the Story view stays exactly as it is) */
 /* the trail: the chosen path plus the richest continuation */
 function swPlan(path){const np=path.slice(),seen=new Set(np);let cur=np[np.length-1],n=0;
@@ -1921,6 +1921,9 @@ function swCardText(p){const k=lab(p.verhaal_kaarten);return k&&k.trim()?k:lab(p
 /* story images in Cards: "kaart" (after which card) when the story has cards, else "alinea" */
 function swCardImgs(p){const a=(Array.isArray(p.verhaal_beelden)?p.verhaal_beelden:[]).filter(b=>b&&b.bestand),k=lab(p.verhaal_kaarten);
   return k&&k.trim()?a.map(b=>b.kaart!=null?Object.assign({},b,{alinea:b.kaart}):b):a}
+/* the card version of a zeitgeist "leven" block (place id + index, from vhTgPieces) */
+function swLifeCards(ref){if(!ref)return null;const T=vhTG(),pl=T&&(T.plaatsen||[]).find(q=>String(q.id)===ref[0]),L=pl&&(pl.leven||[])[ref[1]],k=L&&lab(L.kaarten||L.cards);
+  const a=k?vhParaList(k):[];return a.length?a:null}
 function swToldDeath(p){if(!p.dy)return false;const y=new RegExp("\\b"+p.dy+"\\b");return vhParaList(swCardText(p)).some(x=>y.test(x)&&SW_DIED.test(x))}
 /* newspaper clippings, scans, documents and maps: the whole image on paper, caption below, the card scrolls when it doesn't fit */
 const SW_PAPER=/^(krant|scan|document|kaart)$/i;
@@ -1942,7 +1945,14 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
       if(c&&c[3]&&!/^(biologisch|biological)$/i.test(c[3]))chips+=`<span class="sw-chip" style="--cc:#b48a3c">♥ ${slEsc(_t("vh_adopt_par",Object.assign({child:vhFn(P[child])},vhPro(p))))}</span>`;
       chips+=`<span class="sw-chip" style="--cc:${CERT[st]||CERT["niet gecheckt"]}">${key==="zeker"?"✓ ":key==="fout"?"⚠ ":""}${_t("vh_c_"+key)}</span>`}
     const add=(kind,html,o)=>cards.push(Object.assign({kind,html,k},o||{}));
-    add("intro",`${por}<div class="sw-k">${slEsc(rel)}${k&&adoptSet(root).has(i)?" · "+_t("ks_fam_adopt"):""}</div><div class="sw-big">${por?"":p.by||""}</div><h2>${slEsc(p.n)}</h2><div class="sw-yy">${slEsc(yrs(p))}</div>${chips?`<div class="sw-chips">${chips}</div>`:""}<div class="sw-t">${T(S.b.concat(S.f.length?[]:S.k))}</div>${docb}`,{por,foto,docs,len:S.b.concat(S.f.length?[]:S.k).join(" ").length});
+    /* a card holds ~200 characters: when the intro gets longer, the brothers and sisters get a card of their own, and then the children */
+    const SW_MAX=200,lenOf=a=>a.join(" ").length,isSib=j=>/^vh_(sibs|half)/.test(S.bk[j]||"");
+    let introS=S.b.concat(S.f.length?[]:S.k),sibS=[],kidS=[];
+    if(lenOf(introS)>SW_MAX){sibS=S.b.filter((s,j)=>isSib(j));introS=S.b.filter((s,j)=>!isSib(j)).concat(S.f.length?[]:S.k);
+      if(lenOf(introS)>SW_MAX&&!S.f.length&&S.k.length){kidS=S.k;introS=introS.slice(0,introS.length-S.k.length)}}
+    add("intro",`${por}<div class="sw-k">${slEsc(rel)}${k&&adoptSet(root).has(i)?" · "+_t("ks_fam_adopt"):""}</div><div class="sw-big">${por?"":p.by||""}</div><h2>${slEsc(p.n)}</h2><div class="sw-yy">${slEsc(yrs(p))}</div>${chips?`<div class="sw-chips">${chips}</div>`:""}<div class="sw-t">${T(introS)}</div>${docb}`,{por,foto,docs,len:lenOf(introS)});
+    if(sibS.length)add("sibs",`<div class="sw-k">${_t("sw_sibs")}</div><div class="sw-t">${T(sibS)}</div>`,{len:lenOf(sibS),y:p.by||null});
+    if(kidS.length)add("family",`<div class="sw-k">${_t("sw_family")}</div><div class="sw-big">${p.ch.length>1?p.ch.length:""}</div><div class="sw-t">${T(kidS)}</div>`,{len:lenOf(kidS),y:Math.min(...p.ch.map(c=>P[c].by||Infinity))});
     if(vhHas(p)){const paras=vhParaList(swCardText(p)),imgs=swCardImgs(p),slot=vhImgSlots(paras,imgs),py=vhParaYears(paras,p);
       /* each paragraph (or each card of the card version) a card, and the images that belong to it right after it */
       paras.forEach((x,j)=>{add("story",`<div class="sw-k">✦ ${slEsc(_t("vh_title",{name:fn}))}</div><div class="sw-t"><p>${vhMd(x)}</p></div>${j===paras.length-1?`<div class="sw-note">${vhSources(p)}</div>`:""}`,{len:x.length,y:py[j],hook:j===0&&swCardText(p)!==lab(p.verhaal)});
@@ -1952,8 +1962,9 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     /* zeitgeist: the Story view's own block, cut into pieces with a year (one card per piece; neighbouring events are merged after sorting) */
     for(const x of vhTgPieces(vhTijdgeest(i,seen))){
       if(x.type==="life"){const d=document.createElement("div");d.innerHTML=x.html;
-        /* one card per paragraph, each with the same heading (a whole "Life in …" block on one card was a wall of text) */
-        [...d.children].forEach(el=>add("life",`<div class="sw-k">${slEsc(x.head)}</div><div class="sw-t">${el.outerHTML}</div>`,{len:el.textContent.length,y:x.y}))}
+        /* the block's short card version ("kaarten", blank line = new card) when there is one, else one card per paragraph; each with the block's heading */
+        const kv=swLifeCards(x.ref),els=kv?kv.map(t=>{const e=document.createElement("p");e.innerHTML=vhMd(t);return e}):[...d.children];
+        els.forEach(el=>add("life",`<div class="sw-k">${slEsc(x.head)}</div><div class="sw-t">${el.outerHTML}</div>`,{len:el.textContent.length,y:x.y}))}
       else if(x.type==="img"){const im=x.el.querySelector("img"),cap=x.el.querySelector("figcaption");
         add("img",`<div class="sw-k">${slEsc((x.el.querySelector(".vh-fk")||{}).textContent||_t("tg_k_x"))}</div><figure class="sw-fig"><img src="${slEsc(im.getAttribute("src"))}" alt="${slEsc(im.alt)}"></figure><div class="sw-cap">${cap?cap.innerHTML.replace("</b> · ","</b>"):""}</div>`,{img:1,paper:SW_PAPER.test(x.el.dataset.soort||""),y:x.y})}
       else{const d=document.createElement("div");d.innerHTML=x.html;add("events",`<div class="sw-k">${slEsc(x.head)}</div><ul class="sw-ev">${x.html}</ul>`,{len:d.textContent.length,y:x.y,li:x.html,head:x.head})}}
@@ -1962,7 +1973,7 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     S.e.forEach(s=>{const hit=ERA.filter(([k2])=>s.includes(_t(k2)));const y=hit.length?Math.max(Math.min(...hit.map(x=>x[1])),p.by||0):null,big=(hit.find(x=>x[2])||[])[2]||"";
       add("era",`<div class="sw-k">${_t("sw_era")}</div><div class="sw-big">${big}</div><div class="sw-t"><p>${slEsc(s)}</p></div>`,{len:s.length,y})});
     /* remarkable relatives (a brother or sister with an own story) */
-    vhSibs(i).filter(j=>vhHas(P[j])).forEach(j=>{const q=P[j],rl=_t(q.x==="M"?"vh_sib_M":q.x==="F"?"vh_sib_F":"vh_sib_X",vhPro(p)),first=vhParas(lab(q.verhaal)).split("</p>")[0]+"</p>";
+    vhSibs(i).filter(j=>vhHas(P[j])).forEach(j=>{const q=P[j],rl=_t(q.x==="M"?"vh_sib_M":q.x==="F"?"vh_sib_F":"vh_sib_X",vhPro(p)),first=`<p>${vhMd(vhParaList(swCardText(q))[0]||"")}</p>`; /* the hook of the card version when there is one */
       add("sib",`<div class="sw-k">✦ ${_t("vh_special")}</div><h2>${slEsc(q.n)}</h2><div class="sw-yy">${slEsc(rl)} · ${slEsc(yrs(q))}</div><div class="sw-t">${first}</div>`,{len:first.length,y:q.by||null})});
     /* an own story that already tells the death (death year + "died"/"overleed") keeps its sentence there; the farewell card then shows only the word and the year */
     const dTold=vhHas(p)&&swToldDeath(p),dS=dTold?S.d.filter((s,j)=>!/^vh_died/.test(S.dk[j])):S.d,dShow=S.d.length;
@@ -1976,7 +1987,7 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     /* one timeline: intro first, death and the fork/end last, everything in between by year (stable; no year = stays after the card before it) */
     /* the first card of a card version is the hook: always right after the intro */
     const head=cards.filter(c=>c.kind==="intro"||c.hook),tail=cards.filter(c=>c.kind==="death"||c.kind==="fork"||c.kind==="end"),mid=vhSortByYear(cards.filter(c=>!head.includes(c)&&!tail.includes(c)));
-    const merged=[];for(const c of mid){const l=merged[merged.length-1];if(c.kind==="events"&&l&&l.kind==="events"){l.li+=c.li;l.len+=c.len;l.html=`<div class="sw-k">${slEsc(l.head)}</div><ul class="sw-ev">${l.li}</ul>`}else merged.push(c)}
+    const merged=[];for(const c of mid){const l=merged[merged.length-1];if(c.kind==="events"&&l&&l.kind==="events"&&l.len+c.len<=220){l.li+=c.li;l.len+=c.len;l.html=`<div class="sw-k">${slEsc(l.head)}</div><ul class="sw-ev">${l.li}</ul>`}else merged.push(c)}
     return {i,lc,fn,cards:head.concat(merged,tail)}})}
 function swDur(c){if(c.stay)return 0;if(c.img)return c.paper?12000:7000;return Math.max(5000,Math.min(15000,3200+48*(c.len||60)))}
 function swOpen(root){
