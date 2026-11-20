@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.19"
+  version: "0.9.20"
 ---
 
 # Family-tree research, hand in hand
@@ -104,7 +104,7 @@ The viewer has a **Story** view: from the start person step by step back in time
 
 For each place where many ancestors lived, build a zeitgeist (`zeitgeist/zeitgeist.json`, format in `viewer/DATA-FORMAT.md`, "Zeitgeist"): a few paragraphs about daily life per period, local events with year and source (storms, disasters, epidemics, war, buildings, notable incidents) and old prints, drawings or photos of the place. The viewer links it automatically to everyone who lived there at the time, only for the years they provably lived there: birth, baptism, `RESI` (residence), marriages and the births of their children in that place, never after death. So record moves as `RESI` with date and place (from population registers, for example) when you find them; without them someone born in Rotterdam who moved to Amsterdam as a child only gets Rotterdam for their first few years. Record a stay abroad too (`EVEN` with `TYPE Emigratie`/`Emigration`, `EMIG`, or a `RESI` abroad; an uncertain date like `AFT 1952` is fine): in those years the viewer shows nothing of the home country, so no flood of 1953 for a sailor who was in Australia.
 
-- **Two layers for daily life, as with stories.** `tekst` is for the Story view and may be rich. `kaarten` (blank line = new card) is the short version for Cards: 2–4 cards per block. Card 1 is a hook (the most striking thing about life there, no year); then **one picture of daily life per card**, at most ~200 characters, concrete: numbers, places, objects ("Drinking water from the canal, where the waste went too."). Without `kaarten` every paragraph of `tekst` becomes a card. `make_viewer_data.py` warns about cards over 250 characters and blocks without cards that have a paragraph over 350 characters; suggest cards for those every round.
+- **Two layers for daily life, as with stories.** `tekst` is for the Story view and may be rich. `kaarten` (blank line = new card) is the short version for Cards: 2–4 cards per block. Card 1 is a hook (the most striking thing about life there, no year); then **one picture of daily life per card**, at most ~200 characters, concrete: numbers, places, objects ("Drinking water from the canal, where the waste went too."). A card about one moment starts with its year ("In 1881 the first tram …", "After 1880 …"): Cards then only show it to people alive then (from 10 years before birth). A card about the whole period has no year at the front. Without `kaarten` every paragraph of `tekst` becomes a card. `make_viewer_data.py` warns about cards over 250 characters and blocks without cards that have a paragraph over 350 characters; suggest cards for those every round.
 - Cards show at most 3 events per person; give the events that matter most for the family `"gewicht": 1` or higher (a flood that hit their street, the war), and minor ones nothing.
 - Start with the place with the most ancestors. Search local history sites, monument registers, museum collections and lists of disasters; give a source for every event and invent nothing.
 - Images: at least 4–6 per place, spread over the centuries the family lived there. How to find, check and process them: "Finding images (generously)" below.

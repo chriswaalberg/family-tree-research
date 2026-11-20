@@ -719,7 +719,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.19",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.20",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1930,6 +1930,11 @@ const SW_PAPER=/^(krant|scan|document|kaart)$/i;
 /* "Around that time" in Cards: at most SW_EV_MAX events per person (the Story view keeps them all), the most important first:
    "gewicht" (weight) from the data, then events in their own place, then war years; an event within SW_ERA_NEAR years of a "lived through" card joins that card */
 const SW_EV_MAX=3,SW_ERA_NEAR=5,SW_WARS=[[1568,1648],[1672,1672],[1795,1813],[1914,1918],[1940,1945]];
+/* life cards in Cards: a year at the front of a card (at most three words before it: "In 1881", "Op 14 mei 1940", "In de jaren 1880") dates it; "na/vanaf/sinds/after/from/since" = from that year on,
+   "tot/voor/vóór/until/before" = up to that year; a card may start that long before birth */
+const SW_LIFE_BEFORE=10;
+function swFrontYear(t){const m=String(t).trim().match(/^(?:([\wÀ-ÿ.'’-]+)\s+)?(?:[\wÀ-ÿ.'’-]+\s+){0,2}(1[5-9]\d\d|20\d\d)\b/);if(!m)return null;
+  const w=NORM(m[1]||"");return {y:+m[2],dir:/^(na|vanaf|sinds|after|from|since)$/.test(w)?1:/^(tot|voor|until|before)$/.test(w)?-1:0}}
 function swPickEvents(evs){const sc=x=>{const li=document.createElement("ul");li.innerHTML=x.html;const d=(li.firstElementChild||{}).dataset||{};
     return (d.w!=null?+d.w:0)*10+(d.lok?2:0)+(x.y!=null&&SW_WARS.some(([a,b])=>x.y>=a&&x.y<=b)?1:0)};
   return evs.map((x,j)=>({x,j,s:sc(x)})).sort((a,b)=>b.s-a.s||a.j-b.j).slice(0,SW_EV_MAX).sort((a,b)=>a.j-b.j).map(o=>o.x)}
@@ -1971,7 +1976,12 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
       if(x.type==="life"){const d=document.createElement("div");d.innerHTML=x.html;
         /* the block's short card version ("kaarten", blank line = new card) when there is one, else one card per paragraph; each with the block's heading */
         const kv=swLifeCards(x.ref),els=kv?kv.map(t=>{const e=document.createElement("p");e.innerHTML=vhMd(t);return e}):[...d.children];
-        els.forEach(el=>add("life",`<div class="sw-k">${slEsc(x.head)}</div><div class="sw-t">${el.outerHTML}</div>`,{len:el.textContent.length,y:x.y}))}
+        /* only cards within the life: a card with a year at the front ("In 1881", "Na 1880", "Tot 1806") shows only when that fits
+           between birth − 10 and death; a card without one is about the whole period */
+        const sp=vhSpan(p);
+        els.forEach(el=>{const f=swFrontYear(el.textContent);
+          if(f&&sp){const lo=sp[0]-SW_LIFE_BEFORE,hi=sp[1];if(f.dir>0?hi<f.y:f.dir<0?lo>f.y:(f.y<lo||f.y>hi))return}
+          add("life",`<div class="sw-k">${slEsc(x.head)}</div><div class="sw-t">${el.outerHTML}</div>`,{len:el.textContent.length,y:f&&f.dir>=0?Math.max(f.y,x.y||0)||f.y:x.y})})}
       else if(x.type==="img"){const im=x.el.querySelector("img"),cap=x.el.querySelector("figcaption");
         add("img",`<div class="sw-k">${slEsc((x.el.querySelector(".vh-fk")||{}).textContent||_t("tg_k_x"))}</div><figure class="sw-fig"><img src="${slEsc(im.getAttribute("src"))}" alt="${slEsc(im.alt)}"></figure><div class="sw-cap">${cap?cap.innerHTML.replace("</b> · ","</b>"):""}</div>`,{img:1,paper:SW_PAPER.test(x.el.dataset.soort||""),y:x.y})}
       else evq.push(x)}

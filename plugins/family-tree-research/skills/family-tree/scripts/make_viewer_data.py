@@ -442,6 +442,9 @@ def story_card_warnings(p):
     return len(out)
 
 
+FRONT_YEAR = re.compile(r"(?:[\w.'’-]+\s+){0,3}?(1[5-9]\d\d|20\d\d)\b")  # a year at the front of a card dates it (same rule as the viewer)
+
+
 def zeitgeist_card_warnings(pl, L):
     """A zeitgeist "leven" block: short cards (at most CARD_MAX characters), or a hint when a paragraph is long and there are no cards."""
     if not isinstance(L, dict): return 0
@@ -457,6 +460,11 @@ def zeitgeist_card_warnings(pl, L):
         for lang, cs in per.items():
             for j, c in enumerate(cs, 1):
                 if len(c) > CARD_MAX: out.append(f"card {j}{f' ({lang})' if lang else ''} has {len(c)} characters (max. {CARD_MAX}, aim for ~200)")
+                m = FRONT_YEAR.match(c.strip())
+                van, tot = L.get("van"), L.get("tot")
+                if m and isinstance(van, int) and isinstance(tot, int) and not (van <= int(m.group(1)) <= tot):
+                    out.append(f"card {j}{f' ({lang})' if lang else ''} starts with {m.group(1)}, outside this block ({van}-{tot}); "
+                               "Cards only show it to people alive then")
     else:
         t = L.get("tekst") or L.get("text")
         longest = max((len(x) for v in (t.values() if isinstance(t, dict) else [t]) for x in split_paras(v)), default=0)
