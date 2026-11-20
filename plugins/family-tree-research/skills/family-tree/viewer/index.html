@@ -534,7 +534,8 @@ main{padding-top:6px}
 .sw .sw-card{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;overflow:hidden;backface-visibility:hidden;will-change:transform,opacity}
 .sw .sw-body{position:relative;padding:96px 24px calc(40px + env(safe-area-inset-bottom,0px));max-height:100%;overflow:hidden;box-sizing:border-box}
 /* fitting a card (swFit): f1 smaller photo next to the title, f2 smaller title, f3 smaller text (min. 17px); fscroll = last resort, scroll inside the card */
-.sw .sw-card.f1 .sw-por{float:right;width:min(30cqw,120px);margin:0 0 10px 12px;border-radius:10px;border-width:2px}
+.sw .sw-card.f1 .sw-por-btn{float:right;margin:0 0 10px 12px}
+.sw .sw-card.f1 .sw-por{width:min(30cqw,120px);margin:0;border-radius:10px;border-width:2px}
 .sw .sw-card.f1 .sw-fig img{max-height:34dvh}
 .sw .sw-card.f1 .sw-docs{flex-wrap:nowrap;gap:6px}.sw .sw-card.f1 .sw-doc{padding:3px}.sw .sw-card.f1 .sw-doc span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .sw .sw-card.f2 h2{font-size:clamp(24px,7cqw,32px)}
@@ -587,6 +588,9 @@ main{padding-top:6px}
 .sw .sw-route span{opacity:.6}.sw .sw-route span.on{opacity:1;font-weight:700}
 .sw .sw-route button{all:unset;cursor:pointer;pointer-events:auto;opacity:.75;text-decoration:underline;text-decoration-color:rgba(255,255,255,.35);text-underline-offset:2px}
 .sw .sw-route .sw-nx{margin-left:6px;opacity:.55;font-style:italic}
+.sw .sw-por-btn{all:unset;display:block;width:fit-content;cursor:zoom-in;-webkit-tap-highlight-color:transparent}
+.sw .sw-por-btn:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:14px}
+.sw .sw-card img{-webkit-touch-callout:none;-webkit-user-drag:none;user-select:none}
 .sw .sw-por{display:block;width:min(44cqw,200px);aspect-ratio:4/5;object-fit:cover;border-radius:14px;margin:0 0 18px;box-shadow:0 10px 30px rgba(0,0,0,.45);border:3px solid rgba(255,255,255,.85)}
 .sw .sw-docs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .sw .sw-doc{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border-radius:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);font-size:13px;font-weight:600}
@@ -1290,8 +1294,10 @@ function vhList(a){return a.length<2?a.join(""):a.slice(0,-1).join(", ")+_t("lis
 function vhNum(n){const w=_t("num").split("|");return n>=0&&n<w.length?w[n]:String(n)}
 /* mensen in volgorde van geboorte, als "Femke (2015)"; zonder jaartal als dat onbekend is; meer dan 8: de eerste 8 en "en nog {n} anderen" */
 function vhByBirth(a){const y=k=>{const d=vhYMD(P[k].bdate);return d?d.y*1e4+d.m*100+d.d:(P[k].by?P[k].by*1e4:9e8)};return a.slice().sort((x,z)=>y(x)-y(z))}
-function vhNames(a,note){const s=vhByBirth(a),top=s.slice(0,8),more=s.length>8;
-  const it=top.map((k,j)=>vhFn(P[k])+(P[k].by?` (${P[k].by})`:"")+(note&&note.k===k?note.txt+(j<top.length-1||more?",":""):""));
+/* ageOf (optional): k => ", toen hij 30 was" or ""; with more than 4 children only at the first and the last one named, so the sentence stays short */
+function vhNamesAged(a){const top=vhByBirth(a).slice(0,8);return top.length>4?[top[0],top[top.length-1]]:top}
+function vhNames(a,ageOf){const s=vhByBirth(a),top=s.slice(0,8),more=s.length>8,aged=ageOf?vhNamesAged(a):[];
+  const it=top.map((k,j)=>{const ag=aged.includes(k)?ageOf(k):"";return vhFn(P[k])+(P[k].by?` (${P[k].by})`:"")+(ag?ag+(j<top.length-1||more?",":""):"")});
   /* joining: after an item that ends with a comma (the folded-in age) no second comma */
   let s2="";it.forEach((x,j)=>{if(j){const sep=more||j<it.length-1?", ":_t("listAnd");s2+=it[j-1].endsWith(",")?sep.replace(/^, /," ").replace(/^ (?=\S)/," "):sep}s2+=x});
   return more?s2+_t(s.length===9?"vh_kidsMore1":"vh_kidsMore",{n:vhNum(s.length-8)}):s2}
@@ -1319,17 +1325,19 @@ function vhTemplate(i,child,flags){const p=P[i],fn=vhFn(p),pr=vhPro(p),T=(k,v)=>
     /* living people: the children are known, so no "that we know of" */
     const lv=p.levend||p.living?"_living":"";
     const kids=p.ch.filter(k=>partner>=0?(P[k].f===partner||P[k].m===partner):true);
-    /* age at the child's birth. With a list of several children it goes into that list, behind the child we came in through
-       ("Femke (2015), toen hij 30 was, en Daan (2017)"), so the child isn't named twice; otherwise a sentence of its own */
-    const ag=p.by&&c.by&&c.by>=p.by?vhAge(p.bdate,c.bdate,p.by,c.by):null,agN=ag&&ag.n>0?ag.n:0;
+    /* age at each child's birth, behind the child in the list ("Eva (2009), toen hij 30 was, en Cas (2011), toen hij 32 was"),
+       the same whichever child we came in through; exact dates: vh_ageIn, estimated: vh_ageInC */
+    const ageAt=k=>{const q=P[k];if(!p.by||!q.by||q.by<p.by)return null;const a=vhAge(p.bdate,q.bdate,p.by,q.by);return a&&a.n>0?a:null};
+    const ageOf=k=>{const a=ageAt(k);return a?T(a.exact?"vh_ageIn":"vh_ageInC",{n:a.n}):""};
+    const ag=ageAt(child),agN=ag?ag.n:0;
     const warn=!agN?"":agN<16?_t("vh_young"):agN>(p.x==="F"?50:70)?_t("vh_old"):"";
-    const fold=agN&&kids.length>1&&vhByBirth(kids).slice(0,8).includes(child);
-    const note=fold?{k:child,txt:T(ag.exact?"vh_ageIn":"vh_ageInC",{n:agN})}:null;
+    /* the child we came in through: its age is in the list when the list names it with an age; otherwise a sentence of its own. The very young/old warning stays with it */
+    const fold=agN&&kids.length>1&&vhNamesAged(kids).includes(child);
     if(agN&&!fold)out.push(T(ag.exact?"vh_ageX":"vh_age",{child:cfn,y:c.by,n:agN})+warn);
-    if(partner>=0){const pfn=NORM(vhFn(P[partner])).slice(0,4).replace(/ae/,"aa")===NORM(cfn).slice(0,4).replace(/ae/,"aa")?short(P[partner]):vhFn(P[partner]);if(kids.length>1)out.push(T("vh_kidsN"+lv,{partner:pfn,n:kids.length,nw:vhNum(kids.length),list:vhNames(kids,note)})+(fold?warn:""));else out.push(_t("vh_kids1"+lv,{Child:cfn,fn,partner:pfn}))}
-    else if(kids.length>1)out.push(T("vh_kidsSolo"+lv,{n:kids.length,nw:vhNum(kids.length),list:vhNames(kids,note)})+(fold?warn:""));
+    if(partner>=0){const pfn=NORM(vhFn(P[partner])).slice(0,4).replace(/ae/,"aa")===NORM(cfn).slice(0,4).replace(/ae/,"aa")?short(P[partner]):vhFn(P[partner]);if(kids.length>1)out.push(T("vh_kidsN"+lv,{partner:pfn,n:kids.length,nw:vhNum(kids.length),list:vhNames(kids,ageOf)})+(fold?warn:""));else out.push(_t("vh_kids1"+lv,{Child:cfn,fn,partner:pfn}))}
+    else if(kids.length>1)out.push(T("vh_kidsSolo"+lv,{n:kids.length,nw:vhNum(kids.length),list:vhNames(kids,ageOf)})+(fold?warn:""));
     const others=[...new Set(p.ch.map(k=>P[k].f===i?P[k].m:P[k].f).filter(q=>q>=0&&q!==partner))];
-    others.forEach(q=>{const ks=p.ch.filter(k=>P[k].f===q||P[k].m===q);out.push(T(ks.length===1?"vh_other1":"vh_otherN",{partner:vhFn(P[q]),nw:vhNum(ks.length),list:vhNames(ks)}))});
+    others.forEach(q=>{const ks=p.ch.filter(k=>P[k].f===q||P[k].m===q);out.push(T(ks.length===1?"vh_other1":"vh_otherN",{partner:vhFn(P[q]),nw:vhNum(ks.length),list:vhNames(ks,ageOf)}))});
     const l1=landOf(p),l2=landOf(c);
     if(l1&&l2&&l1!==l2)out.push(T("vh_moveLand",{l1:landNameIn(l1),l2:landNameIn(l2),child:cfn}));
     else if(p.bplac&&c.bplac&&vhTown(p.bplac)!==vhTown(c.bplac))out.push(T("vh_movePlace",{p1:vhPlace(p.bplac),p2:vhPlace(c.bplac),child:cfn}))}
@@ -1883,14 +1891,15 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     /* media: only soort "foto" becomes a portrait on the intro card; scans, documents (and media without soort) are small buttons that open the media viewer */
     const imgs=(typeof mediaList==="function"&&!p.living)?mediaList(p).filter(mediaIsImg):[],isFoto=m=>/^(foto|photo)$/i.test(m.soort||"");
     const foto=imgs.find(isFoto),docs=imgs.filter(m=>!isFoto(m));
-    const por=foto?`<img class="sw-por" src="${slEsc(foto.bestand)}" alt="${slEsc(mediaName(foto))}">`:"";
+    /* the portrait is a button: a tap opens it large (with the documents) and never moves to the next card */
+    const por=foto?`<button type="button" class="sw-por-btn" data-por="1" title="${slEsc(mediaName(foto))}"><img class="sw-por" src="${slEsc(foto.bestand)}" alt="${slEsc(mediaName(foto))}"></button>`:"";
     const docb=docs.length?`<div class="sw-docs">${docs.slice(0,3).map((m,j)=>`<button type="button" class="sw-doc" data-doc="${j}" title="${slEsc(mediaName(m))}"><img src="${slEsc(m.bestand)}" alt=""><span>${_t(/^(scan|document)$/i.test(m.soort||"")?"sw_doc":"sw_view")}</span></button>`).join("")}</div>`:"";
     /* certainty / adoption as a small label */
     let chips="";if(child!=null){const st=vhStatus(child,i),c=certOf(child,i),key=st==="zeker"?"zeker":st==="waarschijnlijk"?"waarschijnlijk":st==="mogelijk"?"mogelijk":st==="fout"?"fout":"open";
       if(c&&c[3]&&!/^(biologisch|biological)$/i.test(c[3]))chips+=`<span class="sw-chip" style="--cc:#b48a3c">♥ ${_t("vh_adopt")}</span>`;
       chips+=`<span class="sw-chip" style="--cc:${CERT[st]||CERT["niet gecheckt"]}">${key==="zeker"?"✓ ":key==="fout"?"⚠ ":""}${_t("vh_c_"+key)}</span>`}
     const add=(kind,html,o)=>cards.push(Object.assign({kind,html,k},o||{}));
-    add("intro",`${por}<div class="sw-k">${slEsc(rel)}${k&&adoptSet(root).has(i)?" · "+_t("ks_fam_adopt"):""}</div><div class="sw-big">${por?"":p.by||""}</div><h2>${slEsc(p.n)}</h2><div class="sw-yy">${slEsc(yrs(p))}</div>${chips?`<div class="sw-chips">${chips}</div>`:""}<div class="sw-t">${T(S.b.concat(S.f.length?[]:S.k))}</div>${docb}`,{por,docs,len:S.b.concat(S.f.length?[]:S.k).join(" ").length});
+    add("intro",`${por}<div class="sw-k">${slEsc(rel)}${k&&adoptSet(root).has(i)?" · "+_t("ks_fam_adopt"):""}</div><div class="sw-big">${por?"":p.by||""}</div><h2>${slEsc(p.n)}</h2><div class="sw-yy">${slEsc(yrs(p))}</div>${chips?`<div class="sw-chips">${chips}</div>`:""}<div class="sw-t">${T(S.b.concat(S.f.length?[]:S.k))}</div>${docb}`,{por,foto,docs,len:S.b.concat(S.f.length?[]:S.k).join(" ").length});
     if(vhHas(p)){const paras=vhParaList(lab(p.verhaal)),imgs=(Array.isArray(p.verhaal_beelden)?p.verhaal_beelden:[]).filter(b=>b&&b.bestand),slot=vhImgSlots(paras,imgs),py=vhParaYears(paras,p);
       /* each paragraph a card, and the images that belong to it right after it */
       paras.forEach((x,j)=>{add("story",`<div class="sw-k">✦ ${slEsc(_t("vh_title",{name:fn}))}</div><div class="sw-t"><p>${vhMd(x)}</p></div>${j===paras.length-1?`<div class="sw-note">${vhSources(p)}</div>`:""}`,{len:x.length,y:py[j]});
@@ -2027,7 +2036,8 @@ function swWire(el){let x0=0,y0=0,t0=0,ht=0,down=false;
     else if(b.dataset.nav)swStep(+b.dataset.nav);
     else if(b.dataset.go!=null)swChoose(+b.dataset.go);
     else if(b.dataset.back!=null){SW.hint=false;SW.g=+b.dataset.back;SW.c=0;swShow("down")}
-    else if(b.dataset.doc!=null){const d=swCard().docs||[];if(!d.length)return;const was=SW.paused;SW.paused=true;swPP();mediaView(d,+b.dataset.doc);
+    else if(b.dataset.doc!=null||b.dataset.por!=null){const c=swCard(),d=b.dataset.por!=null?[c.foto].concat(c.docs||[]).filter(Boolean):c.docs||[];if(!d.length)return;
+      const was=SW.paused;SW.paused=true;swPP();mediaView(d,b.dataset.por!=null?0:+b.dataset.doc);
       const dlg=$("mediaDlg");if(dlg)dlg.addEventListener("close",()=>{if(SW){SW.paused=was;swPP()}},{once:true})}
     else if(b.dataset.a==="restart"){SW.path=swPlan([SW.path[0]]);swBuild();SW.g=0;SW.c=0;swShow("down")}});
   let rz=0;addEventListener("resize",()=>{if(!SW||el.hidden||rz)return;rz=requestAnimationFrame(()=>{rz=0;swFit(el.querySelector(".sw-card:last-child"))})});
