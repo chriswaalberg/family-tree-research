@@ -74,5 +74,19 @@ Using another tool is fine. Getting around a site's own barrier is not: if a sit
 - Indonesia / Dutch East Indies: Open Archives and Delpher (East Indies newspapers); the CBG has an East Indies collection.
 - Suriname/Dutch Caribbean: Open Archives (`country_code=sr`), Nationaal Archief (slave registers, emancipation registers 1863).
 
+## Images
+
+Search in this order (see "Finding images (generously)" in SKILL.md for targets, checks and processing). Use search terms per story and place: occupation, place, event, year, in the language of the country.
+
+1. **Rijksmuseum** (Netherlands, also prints of other countries). Linked Art search API: `https://data.rijksmuseum.nl/search/collection?description=<term>&imageAvailable=true` (also `title=`, `creator=`, `type=`). Each hit is an object `https://id.rijksmuseum.nl/<id>`; fetch it with `Accept: application/ld+json` and read the licence there: `publicdomain/mark` or CC0 = free; `rightsstatements.org/vocab/InC` = copyright (skip, often there is no image online anyway). The image itself is on IIIF (`https://iiif.micr.io/<image-id>/full/1400,/0/default.jpg`); follow the object's link to its digital image to get the image id, which is not the object number.
+2. **Wikimedia Commons** (everything, all countries). Search files: `https://commons.wikimedia.org/w/api.php?action=query&list=search&srnamespace=6&srsearch=<term>&format=json&srlimit=50`. Then per file `action=query&titles=File:<name>&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=1400&format=json` for licence (`LicenseShortName`), maker (`Artist`) and date (`DateTimeOriginal`). Only PD/CC0, or CC BY(-SA) with the maker's name.
+3. **Dutch National Archives** (Nationaal Archief): the Anefo press photos (1945–1989) and the Van de Poll collection are CC0, many also on Commons ("Nationaal Archief", "Anefo", "Collectie Van de Poll").
+4. **Regional image banks** (beeldbanken), e.g. Noord-Hollands Archief, Haags Gemeentearchief, Stadsarchief Amsterdam, Erfgoed Leiden, Zeeuws Archief. The licence differs per image: read it per item.
+5. **Abroad**: national museums and libraries with open collections (e.g. Nationalmuseum and DigitaltMuseum in Sweden, Deutsche Digitale Bibliothek, Library of Congress, the British Library on Flickr Commons, Europeana as a portal), and Commons. Here too: read the licence per item.
+
+**20th century**: national museums often have little that is free. Look for photographers who died more than 70 years ago (in the Netherlands e.g. Emmy Andriesse, d. 1953), government photo archives released as CC0 (Anefo, Van de Poll) and CC BY-SA collections on Commons (e.g. IISG).
+
+**API blocked?** Then use the museum's website in the browser (see "A blocked API is not a blocked site" above): open a page on the museum's own site, run the search there with `fetch` on the same origin, and save the images as a blob download. One at a time, with about 2.5 seconds between requests; never in parallel. If a download doesn't reach the disk, fall back to a screenshot and crop it. Clean up temporary files and downloads afterwards. As everywhere: no logins, captchas or paywalls, and stop when a site says it doesn't want automated access.
+
 ## Reading scans and old handwriting
 When the user sends a photo or screenshot: read it yourself. Transcribe the relevant lines literally in `data/worklog.md` (uncertain letters in [square brackets]), translate where needed (Latin, Swedish, German, old Dutch) and name the source. Gothic script and Latin baptism registers are hard: say honestly what you can read with certainty and what you can't.

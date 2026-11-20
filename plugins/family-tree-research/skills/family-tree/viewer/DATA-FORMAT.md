@@ -155,7 +155,21 @@ A sibling with their own story appears as "Remarkable relative" with the ancesto
 With the script: `--stories stories.json`, keyed by GEDCOM id (`@I12@`) or full name. English keys (`text`, `sources`, `images`) and Dutch keys (`tekst`, `bronnen`, `beelden`) both work:
 
 ```json
-{"@I12@": {"text": {"en": "…", "nl": "…"}, "sources": [["Museum X", "https://…"]]},
+{"@I12@": {"text": {"en": "…", "nl": "…"},
+           "sources": [["Marriage record Katwijk 1781", "https://…"], ["Museum X", "https://…"]],
+           "images": [
+             {"bestand": "media/verhalen/katwijk-bomschuiten-1780.jpg", "soort": "prent",
+              "titel": "Fishing boats on the beach at Katwijk", "maker": "…", "datering": "c. 1780",
+              "bijschrift": {"en": "This is how the boats he sailed on were pulled onto the beach.", "nl": "Zo werden de schepen waarop hij voer het strand op getrokken."},
+              "bron": ["Rijksmuseum", "https://id.rijksmuseum.nl/…"]},
+             {"bestand": "media/verhalen/oude-kerk-katwijk.jpg", "soort": "tekening",
+              "titel": "The Old Church at Katwijk aan Zee", "maker": "…", "datering": "1790",
+              "bijschrift": {"en": "The church where he married in 1781.", "nl": "De kerk waar hij in 1781 trouwde."},
+              "bron": ["Rijksmuseum", "https://id.rijksmuseum.nl/…"]},
+             {"bestand": "media/verhalen/storm-1775.jpg", "soort": "prent",
+              "titel": "Storm on the Dutch coast", "maker": "…", "datering": "1775",
+              "bijschrift": {"en": "A storm like the one in which his brother drowned. This is Scheveningen, not Katwijk itself.", "nl": "Een storm zoals die waarin zijn broer verdronk. Dit is Scheveningen, niet Katwijk zelf."},
+              "bron": ["Wikimedia Commons, public domain", "https://commons.wikimedia.org/wiki/File:…"]}]},
  "Pieter de Vries": "Short text without sources."}
 ```
 
@@ -176,9 +190,22 @@ Optional top-level field. Per place it paints a picture of how people lived ther
     "leven": [{"van": 1625, "tot": 1800, "titel": "Life in Katwijk aan Zee", "tekst": "… (blank line = new paragraph)"}],
     "gebeurtenissen": [{"jaar": 1570, "tekst": "…", "bron": ["title", "https://…"]},
                        {"jaar": 1775, "van": 1771, "tot": 1780, "tekst": "In the 1770s …"}],
-    "beelden": [{"bestand": "media/tijdgeest/katwijk-1660.jpg", "van": 1620, "tot": 1720, "jaar": 1660,
-                 "titel": "Beach at Katwijk", "maker": "…", "datering": "c. 1650-1670",
-                 "bijschrift": "…", "bron": ["Rijksmuseum", "https://id.rijksmuseum.nl/…"], "soort": "schilderij"}]
+    "beelden": [
+      {"bestand": "media/tijdgeest/katwijk-strand-1660.jpg", "van": 1620, "tot": 1720, "jaar": 1660, "soort": "schilderij",
+       "titel": "Beach at Katwijk", "maker": "…", "datering": "c. 1650-1670",
+       "bijschrift": "…", "bron": ["Rijksmuseum", "https://id.rijksmuseum.nl/…"]},
+      {"bestand": "media/tijdgeest/katwijk-walvis-1598.jpg", "van": 1598, "tot": 1598, "jaar": 1598, "soort": "prent",
+       "gebeurtenis": true, "titel": "Whale stranded near Katwijk, 1598", "maker": "…", "datering": "1598",
+       "bijschrift": "…", "bron": ["Rijksmuseum", "https://id.rijksmuseum.nl/…"]},
+      {"bestand": "media/tijdgeest/katwijk-sluis-1807.jpg", "van": 1790, "tot": 1830, "jaar": 1807, "soort": "tekening",
+       "titel": "Laying the first stone of the sluice", "maker": "…", "datering": "1804",
+       "bijschrift": "…", "bron": ["Rijksmuseum", "https://id.rijksmuseum.nl/…"]},
+      {"bestand": "media/tijdgeest/katwijk-vissersvrouwen-1870.jpg", "van": 1850, "tot": 1900, "jaar": 1870, "soort": "prent",
+       "titel": "Fishermen's wives waiting on the beach", "maker": "…", "datering": "c. 1870",
+       "bijschrift": "…", "bron": ["Rijksmuseum", "https://id.rijksmuseum.nl/…"]},
+      {"bestand": "media/tijdgeest/katwijk-school-1925.jpg", "van": 1910, "tot": 1940, "jaar": 1925, "soort": "foto",
+       "kind": true, "titel": "Schoolchildren in Katwijk", "maker": "…", "datering": "1925",
+       "bijschrift": "…", "bron": ["Wikimedia Commons, CC0", "https://commons.wikimedia.org/wiki/File:…"]}]
   }],
   "algemeen": {"naam": "Netherlands", "gebeurtenissen": [{"jaar": 1811, "tekst": "…", "bron": ["…", "https://…"]}]}
 }}

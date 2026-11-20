@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.3"
+  version: "0.9.4"
 ---
 
 # Family-tree research, hand in hand
@@ -87,7 +87,7 @@ The viewer has a **Story** view: from the start person step by step back in time
 - **Give the surname line its stories too.** Not only remarkable lives: also write a story for every generation of the user's own name line (and other main lines) for which the research already holds records. Ordinary lives become vivid from what the records say: occupations, ages, addresses, signatures, witnesses, a child born before the wedding, a remarriage to a sister-in-law. Read the research reports and work logs first; most of the material is already there.
 - **Ask what the family knows.** Occupations, a family shop, where they lived, nicknames, what grandma used to tell. One detail ("he was a milkman, they had a dairy shop") brings a story to life and is in no archive. Record it as a source: "<name> (own knowledge, <date>)".
 - **Never address the reader as a descendant.** No "your line", "your surname", "to you": you don't know who reads it, and from another start person it's wrong. Write "this family tree", "the line", "this branch", "the generations after him". Interface text ("whose story do you follow?") is fine.
-- Images with a story: only where they truly fit, and say so in the caption when it isn't the person themselves ("this is not <name> himself").
+- Images with a story: aim for 2–4 per story (see "Finding images" below). Say so in the caption when it isn't the person themselves ("this is not <name> himself").
 - Write stories in the user's language. See `references/viewer.md` ("Stories") for the format.
 
 ## Zeitgeist: how did they live?
@@ -95,14 +95,37 @@ The viewer has a **Story** view: from the start person step by step back in time
 For each place where many ancestors lived, build a zeitgeist (`zeitgeist/zeitgeist.json`, format in `viewer/DATA-FORMAT.md`, "Zeitgeist"): a few paragraphs about daily life per period, local events with year and source (storms, disasters, epidemics, war, buildings, notable incidents) and old prints, drawings or photos of the place. The viewer links it automatically to everyone who lived there at the time.
 
 - Start with the place with the most ancestors. Search local history sites, monument registers, museum collections and lists of disasters; give a source for every event and invent nothing.
-- Images: only freely usable work (public domain or CC0), with artist, date and source. The Rijksmuseum has an open search API (`data.rijksmuseum.nl/search/collection?description=<place>&imageAvailable=true`, objects via `id.rijksmuseum.nl/<id>`, images via IIIF); for other countries use national museum/library open-data collections and Wikimedia Commons. If the API is blocked, don't conclude the museum is closed: try its website (rijksmuseum.nl) in the browser, where search, object pages and images often still work (see "A blocked API is not a blocked site" in `references/sources.md`). If saving doesn't work, record title, artist and link per image so it can be done later.
-- **Check every image before you use it.** Rijksmuseum objects (Linked Art JSON) say `publicdomain/mark` (free) or `rightsstatements.org/vocab/InC` (copyright; often no image online at all). On Wikimedia Commons, read the licence via the API (`prop=imageinfo&iiprop=extmetadata`). Public domain and CC0 are fine; CC BY / CC BY-SA too, with photographer and licence in `maker`. Don't link to pages where the image can't actually be seen.
-- **Say what kind of image it is**: set `"soort"` to `foto`, `tekening`, `prent`, `schilderij`, `kaart`, `munt` or `affiche` (check the museum record, not the caption). The viewer then says "A drawing from that time" instead of calling everything a photo.
-- **Place images by time and age.** Mark images of a specific event with `"gebeurtenis": true` and images about children with `"kind": true` (see DATA-FORMAT.md). Then a famine photo of children lands with the ancestor who was a child then.
-- 20th century: national museums often have little that is free. Look for photographers who died more than 70 years ago (in the Netherlands e.g. Emmy Andriesse, d. 1953), government photo archives released as CC0 (Dutch National Archives / Anefo) and CC BY-SA collections on Wikimedia Commons (e.g. IISG).
-- Small drawings on a large mount: crop with IIIF (`…/pct:x,y,w,h/1800,/0/default.jpg`) instead of screenshotting the whole sheet.
+- Images: at least 4–6 per place, spread over the centuries the family lived there. How to find, check and process them: "Finding images (generously)" below.
 - Old newspapers (e.g. Delpher in the Netherlands) are often blocked; then ask the user for screenshots of search results.
 - See `references/viewer.md`, "Zeitgeist".
+
+## Finding images (generously)
+
+Images make the stories and the zeitgeist come alive, so searching for them is a fixed step in every round, not an extra. Better a well-chosen print of the village church than an empty chapter.
+
+**Targets**
+- Per own story: **2–4 images**. Think of the occupation (a smith at work, a dairy shop), the town or street, an event from the story (a flood, a ship, a fire), the church or village, the ship or factory.
+- Per zeitgeist place: **at least 4–6 images**, spread over the centuries the family lived there: roughly one every 30–50 years.
+- Big events (a siege, a flood, a famine, a war): an image with `"gebeurtenis": true`, so it only appears with people alive then. Images about children get `"kind": true`: a famine photo of children then lands with the ancestor who was a child at the time (see `viewer/DATA-FORMAT.md`).
+
+**Every round**
+1. First count which stories and places have 0–1 images, and fill those first. (Count in `data/stories.json` and `zeitgeist/zeitgeist.json`: the `beelden`/`images` lists per story and per place.)
+2. Make search terms per story and place: occupation, place, event, year (e.g. "smid", "Katwijk strand", "watersnood 1861", "Den Helder 1955"), in the language of the country.
+3. Search in the order of "Images" in `references/sources.md`: Rijksmuseum, Wikimedia Commons, Dutch National Archives (Anefo, Van de Poll), regional image banks; abroad national museums and libraries, and Commons.
+4. In the final report of the round, give per story and per place the number of images.
+
+**Check before you use**
+- Only public domain or CC0, or CC BY / CC BY-SA with the maker's name and the licence in `maker`. Read the licence in the object record itself (museum record, Commons `extmetadata`), never assume it.
+- No images under copyright, and no photos of recognisable private people found on the internet. (The user's own family photos are fine: see "Photos and documents".)
+- Don't link to pages where the image can't actually be seen.
+
+**Processing**
+- Crop away borders, mounts (passe-partouts), rulers, colour charts and the rest of a book page, so only the image remains (Pillow if available; IIIF regions for small drawings on a large mount: `…/pct:x,y,w,h/1400,/0/default.jpg`).
+- At most ~1400 px on the long side, JPEG, a tidy file name (`katwijk-strand-1660.jpg`, `smid-aan-het-werk-1890.jpg`).
+- Then make a contact sheet of all new images (one image with thumbnails) and **look at it yourself**: crooked crops, leftover borders, the wrong image, a near-duplicate.
+
+**Always fill in per image**
+`titel`, `maker`, `datering`, `soort` (`foto`, `tekening`, `prent`, `schilderij`, `kaart`, `munt` or `affiche`, from the museum record, not from the caption), `bron` (`[label, url]`) and a `bijschrift` (caption) in the user's language. The caption explains the link with the person or place, and says so when it is another place ("this is Dordrecht, not Zwijndrecht itself, but the market looked like this here too"). Zeitgeist images also get `van`/`tot`/`jaar`.
 
 ## Raised, adopted, foster
 
@@ -125,7 +148,7 @@ Users may add photos, scans of records and other documents per person. They're s
 | `references/onboarding.md` | Question order for new users, intake.json format |
 | `references/gedcom-export.md` | Downloading a GEDCOM per platform (Ancestry, MyHeritage, FamilySearch…) |
 | `references/research.md` | Method, rules of evidence, statuses, plausibility, privacy |
-| `references/sources.md` | Archives per country, Open Archives API, what's often blocked |
+| `references/sources.md` | Archives per country, Open Archives API, what's often blocked, where to find free images |
 | `references/gedcom-tool.md` | Adding people to the GEDCOM, check report, media |
 | `references/viewer.md` | Building data.json, publishing, updating, stories, zeitgeist |
 | `references/folders-and-files.md` | Folder layout (English/Dutch), progress template, where scripts run |
