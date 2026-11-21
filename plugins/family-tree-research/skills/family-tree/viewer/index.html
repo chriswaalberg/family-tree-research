@@ -731,7 +731,7 @@ nl:{loading:"Stamboom laden…",loadError:"Kon de stamboom niet laden ({msg}).",
  dupTitle:"Komt {n} keer voor in de stamboom van {name}",detailsOf:"Details van {name}",and:"&amp;",
  showParents:"Toon ouders",hideParents:"Verberg ouders",showSibs:"Toon {n} broers en zussen",showSib1:"Toon broer of zus",hideSibs:"Verberg broers en zussen",hideSib1:"Verberg broer of zus",showKids:"Toon kinderen",
  zoomIn:"Inzoomen",zoomOut:"Uitzoomen",home:"Naar startpersoon",living:"Levend",
- notFound:"Nog niet gevonden",emptyTitle:"Nog niet gevonden",emptyBody:"Voor {name} zijn nog geen ouders gevonden. Zodra er ouders in de stamboom staan, verschijnt hier de {view}.",emptyPeople:"Deze stamboom bevat nog geen personen."},
+ notFound:"Nog niet gevonden",emptyTitle:"Nog niet gevonden",emptyBody:"Voor {name} zijn nog geen ouders gevonden. Zodra er ouders in de stamboom staan, zie je hier meer.",emptyPeople:"Deze stamboom bevat nog geen personen."},
 en:{loading:"Loading family tree…",loadError:"Could not load the family tree ({msg}).",title:"Family tree",titleFam:"{name} family tree",titleOf:"Family tree of {name}",
  v_familie:"Family",v_stamlijn:"Line",madeWith:"Made with {link} v{v}",v_tree:"Family tree",modes:"What do you want to see?",rp_title:"Start with…",rp_sub:"The story, the cards and the family tree all start with this person.",rp_other:"Find someone else…",rp_btn:"Choose another start person",v_tijdlijn:"Timeline",v_waaier:"Fan",v_kosmos:"Cosmos",tabs:"View",startPeople:"Start person",
  search:"Find a person",searchPh:"Name, year or place",searchEmpty:"Type a name, year or place",searchNone:"No one found",searchAnc:"Ancestors of {name}",searchOthers:"Others",searchPeople:"People",genShort:"gen. {n}",
@@ -758,10 +758,10 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  dupTitle:"Appears {n} times in {name}'s tree",detailsOf:"Details of {name}",and:"&amp;",
  showParents:"Show parents",hideParents:"Hide parents",showSibs:"Show {n} siblings",showSib1:"Show sibling",hideSibs:"Hide siblings",hideSib1:"Hide sibling",showKids:"Show children",
  zoomIn:"Zoom in",zoomOut:"Zoom out",home:"Go to start person",living:"Living",
- notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
+ notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.32",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.33",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1701,7 +1701,7 @@ function initSearch(){
   const dlg=$("searchDlg"),inp=$("sq"),menu=$("sres");let idx=null,items=[],cur=-1;
   const open=()=>{if(!idx)idx=P.map((p,i)=>({i,t:NORM([p.n,p.by,p.dy,p.bplac,p.dplac].filter(Boolean).join(" "))}));inp.value="";run();dlg.showModal();setTimeout(()=>inp.focus(),20)};
   const mark=k=>{items.forEach((e,j)=>e.dataset.selected=j===k?"true":"false");cur=k;if(items[k])items[k].scrollIntoView({block:"nearest"})};
-  const pick=i=>{const r=SEARCH_ROOT;SEARCH_ROOT=false;dlg.close();r?setRootHard(i):setRoot(i)};
+  const pick=i=>{const r=SEARCH_ROOT;SEARCH_ROOT=false;dlg.close();r?setRootHard(i):state.view==="verhaal"?vhOpen(i,true):setRoot(i)}; /* Story: open the trail to them, like Interesting people */
   function run(){
     const toks=NORM(inp.value).split(/\s+/).filter(Boolean);
     if(!toks.length){menu.innerHTML="";items=[];cur=-1;menu.dataset.empty=_t("searchEmpty");return}
