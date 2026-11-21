@@ -663,6 +663,7 @@ def base_map(people, coords):
             out.append((min(xs), min(ys), max(xs), max(ys), pts))
         return out
     land, lakes, bord = prep(F["land"]), prep(F["meren"]), prep(F["grenzen"])
+    rivers = [(a, b, c2, d, pts, r[0]) for r, (a, b, c2, d, pts) in zip(F.get("rivieren", []), prep([r[1:] for r in F.get("rivieren", [])]))]
     fine = {}
     for cx, cy in sorted(cells):
         x0, y0, x1, y1 = cx * c, cy * c, (cx + 1) * c, (cy + 1) * c
@@ -680,9 +681,21 @@ def base_map(people, coords):
                     for ln in clip_line(pts + pts[:1], x0, y0, x1, y1): cell.setdefault(key + "k", []).append(geo_encode(ln))
                 else:
                     for ln in clip_line(pts, x0, y0, x1, y1): cell.setdefault(key, []).append(geo_encode(ln))
+        # rivers: [scalerank, x0, y0, dx1, ...] per piece inside the cell
+        for a0, b0, a1, b1, pts, rank in rivers:
+            if a1 < x0 or a0 > x1 or b1 < y0 or b0 > y1: continue
+            for ln in clip_line(pts, x0, y0, x1, y1): cell.setdefault("r", []).append([rank] + geo_encode(ln))
         fine[f"{cx},{cy}"] = cell  # an empty cell = sea (the viewer then knows the cell is included)
+    # coarse rivers (for route maps) only near the places: lines that reach within ~2,500 km of a pinned place
+    grof = dict(geo["grof"])
+    if grof.get("rivieren"):
+        qg = grof["q"]; far = [map_window(v[0], v[1], 5000) for v in pin.values()]
+        def near(r):
+            pts = geo_decode(r[1:]); xs = [t[0] / qg for t in pts]; ys = [t[1] / qg for t in pts]
+            return any(min(xs) <= bx1 and max(xs) >= bx0 and min(ys) <= by1 and max(ys) >= by0 for bx0, by0, bx1, by1 in far)
+        grof["rivieren"] = [r for r in grof["rivieren"] if near(r)]
     out = {"bron": "Natural Earth", "fijn_max_km": MAP_FINE_MAX_KM, "cel": MAP_CELL,
-           "fijn": {"q": q, "cellen": fine}, "grof": geo["grof"]}
+           "fijn": {"q": q, "cellen": fine}, "grof": grof}
     size = len(json.dumps(out, separators=(",", ":"))) // 1024
     print(f"Base map: {len(fine)} detailed cell(s) around the places, coarse world map; {size} kB")
     return out

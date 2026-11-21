@@ -750,7 +750,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.25",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.26",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1961,6 +1961,8 @@ function drawFamilie(){
    says the exact spot is unknown. All numbers to tune are here. */
 const MAP={FAR_KM:300,SAME_KM:1,DETAIL_KM:120,NEAR_X:5,NEAR_MIN_KM:8,OVER_KM:1500,GLOBE_KM:5000,REGIO_KM:320,LAND_KM:1800,BEND:.22,
   W:360,H:360,IW:128,IH:104,PAD:.3,MINPX:.7,
+  /* rivers (variant 2b): bed RIV_BED x the line width, line width RIV_W x 1.6 / 1.2 / 0.8 by scalerank (<= 4, <= 7, other); route maps x RIV_ROUTE, scalerank <= RIV_ROUTE_MAX */
+  RIV_W:.5,RIV_BED:3.2,RIV_OP:.7,RIV_ROUTE:.7,RIV_ROUTE_MAX:6,river:"#c8b796",riverBed:"#efe5cf",
   pap:"#f3ead6",ink:"#5b4630",red:"#b3342b",sea:"#b9a684",bord:"#8c7558",soft:"#e8dcc0",lab:"#7d6849",
   font:"'Iowan Old Style','Palatino','Georgia',serif"};
 let MAP_GEO=null,MAP_UID=0;
@@ -1988,10 +1990,18 @@ function mapSame(a,b){return !!a&&!!b&&(mapKey(a)===mapKey(b)||mapKm(a,b)<MAP.SA
 function mapGeo(){if(MAP_GEO)return MAP_GEO;const L=D.landkaart,dec=(r,q)=>{const p=[];let x=0,y=0,x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
     for(let i=0;i+1<r.length;i+=2){x+=r[i];y+=r[i+1];const a=x/q,b=y/q;p.push([a,b]);if(a<x0)x0=a;if(a>x1)x1=a;if(b<y0)y0=b;if(b>y1)y1=b}return {p,b:[x0,y0,x1,y1]}};
   const G=L.grof,qg=G.q,F=L.fijn||{q:1000,cellen:{}};
-  MAP_GEO={grof:{land:G.land.map(r=>dec(r,qg)),meren:(G.meren||[]).map(r=>dec(r,qg)),grenzen:(G.grenzen||[]).map(r=>dec(r,qg))},
+  /* rivers: [scalerank, ...ring] */
+  const riv=(r,q)=>Object.assign(dec(r.slice(1),q),{rank:r[0]});
+  MAP_GEO={grof:{land:G.land.map(r=>dec(r,qg)),meren:(G.meren||[]).map(r=>dec(r,qg)),grenzen:(G.grenzen||[]).map(r=>dec(r,qg)),rivieren:(G.rivieren||[]).map(r=>riv(r,qg))},riv:r=>riv(r,F.q),
     cel:L.cel||1,fmax:L.fijn_max_km||320,cells:F.cellen||{},cache:{},dec:r=>dec(r,F.q)};return MAP_GEO}
 function mapCell(key){const g=mapGeo();if(key in g.cache)return g.cache[key];const c=g.cells[key];if(!c)return g.cache[key]=null;
-  const o={};for(const k of ["l","lk","m","mk","g"])o[k]=(c[k]||[]).map(g.dec);return g.cache[key]=o}
+  const o={};for(const k of ["l","lk","m","mk","g"])o[k]=(c[k]||[]).map(g.dec);o.r=(c.r||[]).map(g.riv);return g.cache[key]=o}
+/* rivers, quiet: a broad soft bed with a thin half-transparent line in it (round ends); width by scalerank; a route map: thinner, only the big ones */
+function mapRivers(prj,rs,route){let s="";
+  for(const [lo,hi,f] of [[0,4,1.6],[5,7,1.2],[8,99,.8]]){if(route&&lo>6)continue;
+    const d=mapD(prj,rs.filter(r=>r.rank>=lo&&r.rank<=hi&&(!route||r.rank<=MAP.RIV_ROUTE_MAX)),0);if(!d)continue;const w=MAP.RIV_W*f*(route?MAP.RIV_ROUTE:1);
+    s+=`<path d="${d}" fill="none" stroke="${MAP.riverBed}" stroke-width="${(w*MAP.RIV_BED).toFixed(2)}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="${MAP.river}" stroke-opacity="${MAP.RIV_OP}" stroke-width="${w.toFixed(2)}" stroke-linecap="round" stroke-linejoin="round"/>`}
+  return s}
 /* projections: a local flat map (equirectangular with cos(lat)), km wide; and an orthographic globe */
 function mapFlat(lon,lat,km,w,h){const k=Math.cos(lat*Math.PI/180),s=w/(km/111.32),f=(a,b)=>[w/2+(a-lon)*k*s,h/2-(b-lat)*s];
   const dx=w/2/(k*s)*(1+MAP.PAD),dy=h/2/s*(1+MAP.PAD);f.bb=[lon-dx,lat-dy,lon+dx,lat+dy];f.km=km;f.w=w;f.h=h;return f}
@@ -2013,10 +2023,12 @@ function mapBase(prj,w,h,o){const g=mapGeo(),fine=o.coarse?null:mapFine(prj),ink
   if(o.sea)s+=`<rect width="${w}" height="${h}" fill="${o.sea}"/>`;
   if(fine){const all=k=>fine.flatMap(c=>c[k]);
     s+=`<path d="${mapD(prj,all("l"),1)}" fill="${o.fill}"/><path d="${mapD(prj,all("lk"),0)}" fill="none" stroke="${ink}" stroke-width="${sw}" stroke-linejoin="round"/>`;
+    if(o.rivers)s+=mapRivers(prj,all("r"),o.rivers==="route");
     s+=`<path d="${mapD(prj,all("m"),1)}" fill="${o.sea||MAP.pap}"/><path d="${mapD(prj,all("mk"),0)}" fill="none" stroke="${ink}" stroke-width="${sw*.6}"/>`;
     if(o.borders)s+=`<path d="${mapD(prj,all("g"),0)}" fill="none" stroke="${MAP.bord}" stroke-width=".9" stroke-dasharray="3 2.5"/>`}
   else{s+=`<path d="${mapD(prj,g.grof.land,1)}" fill="${o.fill}" stroke="${ink}" stroke-width="${sw}" stroke-linejoin="round"/>`;
-    if(!prj.globe){s+=`<path d="${mapD(prj,g.grof.meren,1)}" fill="${o.sea||MAP.pap}" stroke="${ink}" stroke-width="${sw*.6}"/>`;
+    if(!prj.globe){if(o.rivers)s+=mapRivers(prj,g.grof.rivieren,o.rivers==="route");
+      s+=`<path d="${mapD(prj,g.grof.meren,1)}" fill="${o.sea||MAP.pap}" stroke="${ink}" stroke-width="${sw*.6}"/>`;
       if(o.borders)s+=`<path d="${mapD(prj,g.grof.grenzen,0)}" fill="none" stroke="${MAP.bord}" stroke-width=".8" stroke-dasharray="3 2.5"/>`}}
   return s}
 function mapPin(x,y,r){r=r||7;const c=MAP.red;return `<g transform="translate(${x.toFixed(1)},${y.toFixed(1)})"><circle r="${(r*2.6).toFixed(1)}" fill="${c}" opacity=".16"/><path d="M0,0 C-${r},-${r*1.3} -${r},-${r*2.6} 0,-${r*2.6} C${r},-${r*2.6} ${r},-${r*1.3} 0,0Z" fill="${c}" stroke="#fff" stroke-width="1.5"/><circle cy="-${(r*1.75).toFixed(1)}" r="${(r*.38).toFixed(1)}" fill="#fff"/></g>`}
@@ -2048,7 +2060,7 @@ function mapLabels(pts,taken){let s="";for(const q of pts){if(q.x<12||q.x>MAP.W-
 /* near: the detail map around t; "others" are small ink points (with names when there is room). "near" = the distance of a short move:
    the map then zooms in to NEAR_X times that distance (at least NEAR_MIN_KM), so two villages a few km apart don't sit on top of each other */
 function mapDetail(t,others,near){const km=t.prec==="land"?MAP.LAND_KM:t.prec==="regio"?MAP.REGIO_KM:near?Math.max(MAP.NEAR_MIN_KM,Math.min(MAP.DETAIL_KM,near*MAP.NEAR_X)):MAP.DETAIL_KM,p=mapFlat(t.lon,t.lat,km,MAP.W,MAP.H),id="mh"+(++MAP_UID);
-  let s=`<defs>${mapHatch(id)}</defs>`+mapBase(p,MAP.W,MAP.H,{fill:MAP.pap,sea:`url(#${id})`,borders:1});
+  let s=`<defs>${mapHatch(id)}</defs>`+mapBase(p,MAP.W,MAP.H,{fill:MAP.pap,sea:`url(#${id})`,borders:1,rivers:1});
   /* the pin and its name (right of it, ~9 px per letter) are taken before the other names look for room */
   const [x,y]=p(t.lon,t.lat),tw=mapName(t.n).length*9,taken=[[x-24,y-14],[x-24,y],[x-24,y+14],[x+12,y-8]].concat(tw>80?[[x+12+tw-80,y-8]]:[]);const pts=(others||[]).map(o=>{const [a,b]=p(o.lon,o.lat);return {x:a,y:b,n:mapName(o.n)}}).filter(q=>q.x>0&&q.x<MAP.W&&q.y>0&&q.y<MAP.H&&Math.hypot(q.x-x,q.y-y)>8);
   pts.forEach(q=>s+=mapDot(q.x,q.y));s+=mapLabels(pts,taken);
@@ -2076,7 +2088,7 @@ function mapLeg(prj,a,b,km){const [x0,y0]=prj(a.lon,a.lat),[x1,y1]=prj(b.lon,b.l
 function mapGlobeBase(prj,id){const R=150,cx=MAP.W/2,cy=MAP.H/2,c="mg"+id;return `<rect width="${MAP.W}" height="${MAP.H}" fill="${MAP.pap}"/><circle cx="${cx}" cy="${cy}" r="${R}" fill="url(#${id})" stroke="${MAP.ink}" stroke-width="1.2"/><clipPath id="${c}"><circle cx="${cx}" cy="${cy}" r="${R}"/></clipPath><g clip-path="url(#${c})"><path d="${mapD(prj,mapGeo().grof.land,1)}" fill="${MAP.pap}" stroke="${MAP.ink}" stroke-width=".7" stroke-linejoin="round"/></g>`}
 /* far: a route from "from" (where the trail was) to t (the new place) */
 function mapRoute(from,t){const km=mapKm(from,t),prj=mapFit([from,t],400),id="mh"+(++MAP_UID);
-  let s=`<defs>${mapHatch(id)}</defs>`+(prj.globe?mapGlobeBase(prj,id):mapBase(prj,MAP.W,MAP.H,{fill:MAP.pap,sea:`url(#${id})`,borders:1,sw:.9}));
+  let s=`<defs>${mapHatch(id)}</defs>`+(prj.globe?mapGlobeBase(prj,id):mapBase(prj,MAP.W,MAP.H,{fill:MAP.pap,sea:`url(#${id})`,borders:1,sw:.9,rivers:"route"}));
   const [x0,y0]=prj(from.lon,from.lat),[x1,y1]=prj(t.lon,t.lat),L=mapLeg(prj,from,t,km);
   const fn=mapName(from.n),fw=fn.length*7,fx=x0<x1?x0+8:x0-8-fw;
   s+=L.svg+mapRing(x0,y0)+mapLabel(x0+(x0<x1?8:-8),y0+4,fn,{size:13,anchor:x0<x1?"start":"end"});

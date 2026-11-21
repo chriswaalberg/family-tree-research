@@ -5,8 +5,9 @@ Only for maintainers: the plugin ships the result. Download the GeoJSON files fr
 https://github.com/nvkelso/natural-earth-vector/tree/master/geojson into one folder, then:
   python3 -I tools/make_geo.py <folder> plugins/family-tree-research/skills/family-tree/scripts/geo/natural-earth.json
 
-Layers: "fijn" (10m land, lakes with scalerank <= 6, land borders; simplified, for the detail maps) and
-"grof" (50m land, lakes, land borders; for overviews, routes and the globe).
+Layers: "fijn" (10m land, lakes with scalerank <= 6, land borders, rivers; simplified, for the detail maps) and
+"grof" (50m land, lakes, land borders, rivers with scalerank <= 6; for overviews, routes and the globe).
+Rivers: 10m rivers_lake_centerlines + rivers_europe without lake centerlines, each line [scalerank, ...ring].
 Rings are delta-encoded integers in units of 1/Q degree: [x0, y0, dx1, dy1, ...]. Standard library only.
 """
 import json, os, sys
@@ -58,6 +59,20 @@ def layer(path, tol, q, closed, keep=lambda p: True, minsize=0):
             if len(s) >= (4 if closed else 2): out.append(enc(s, q))
     return out
 
+def river_layer(paths, tol, q, maxrank=99):
+    """Rivers (Natural Earth river centerlines + rivers_europe, without lake centerlines): [scalerank, x0, y0, dx1, dy1, ...]."""
+    out = []
+    for path in paths:
+        for f in json.load(open(path, encoding="utf-8"))["features"]:
+            pr = f["properties"]
+            if "lake" in str(pr.get("featurecla", "")).lower(): continue
+            rank = int(pr.get("scalerank") or 9)
+            if rank > maxrank: continue
+            for r in rings(f["geometry"]):
+                sp = dp([tuple(p[:2]) for p in r], tol)
+                if len(sp) >= 2: out.append([rank] + enc(sp, q))
+    return out
+
 def main():
     src, dst = sys.argv[1], sys.argv[2]
     P = lambda n: os.path.join(src, n + ".geojson")
@@ -69,16 +84,19 @@ def main():
                    "Rings: delta-encoded integers in 1/q degree. fijn = 10m (detail maps), grof = 50m (overviews, routes, globe).",
         "fijn": {"q": QF, "land": layer(P("ne_10m_land"), .004, QF, True, minsize=.01),
                  "meren": layer(P("ne_10m_lakes"), .004, QF, True, lakes, minsize=.02),
-                 "grenzen": layer(P("ne_10m_admin_0_boundary_lines_land"), .004, QF, False)},
+                 "grenzen": layer(P("ne_10m_admin_0_boundary_lines_land"), .004, QF, False),
+                 "rivieren": river_layer([P("ne_10m_rivers_lake_centerlines"), P("ne_10m_rivers_europe")], .004, QF)},
         "grof": {"q": QG, "land": layer(P("ne_50m_land"), .04, QG, True, minsize=.15),
                  "meren": layer(P("ne_50m_lakes"), .04, QG, True, lakes, minsize=.3),
-                 "grenzen": layer(P("ne_50m_admin_0_boundary_lines_land"), .04, QG, False)},
+                 "grenzen": layer(P("ne_50m_admin_0_boundary_lines_land"), .04, QG, False),
+                 "rivieren": river_layer([P("ne_10m_rivers_lake_centerlines"), P("ne_10m_rivers_europe")], .04, QG, 6)},
     }
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     with open(dst, "w", encoding="utf-8") as fh:
         json.dump(data, fh, separators=(",", ":"))
     for k in ("fijn", "grof"):
-        print(k, {n: (len(v), sum(len(r) for r in v) // 2) for n, v in data[k].items() if n != "q"})
+        print(k, {n: (len(v), sum(len(r) for r in v) // 2) for n, v in data[k].items() if n != "q"},
+              {n: len(json.dumps(v, separators=(",", ":"))) // 1024 for n, v in data[k].items() if n != "q"})
     print(dst, os.path.getsize(dst) // 1024, "kB")
 
 if __name__ == "__main__":
