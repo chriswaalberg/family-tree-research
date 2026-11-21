@@ -57,6 +57,7 @@ The template text (written by the viewer for people without an own story) also g
 - In an artifact only **images** work (thumbnail + view large). The artifact viewer can't open or download links to PDFs and other files. So convert a PDF record to an image (e.g. with `pdftoppm -jpeg -r 150`) before linking it; in the standalone HTML file PDF links do work.
 - After that: only republish `data.json`, with `slug` + `base_version` of the live version (get it with `get_artifact`). If you get a conflict (409): read the live version again and retry. Only republish index.html when the plugin has a newer viewer.
 - The artifact is private. The user can share it themselves via the share button in Claude. Tell them.
+- Link to one person's chapter in Story: add `#story/<id>` (or `#verhaal/<id>`) to the address, with the GEDCOM id without @ (e.g. `#story/I4`). The 🔗 button next to a name in Story copies it (in an artifact only the `#…` part, because the page can't see its own claude.ai address).
 
 **No Artifact tool, but the desktop app**: build a standalone file and make a Cowork artifact from it:
 ```

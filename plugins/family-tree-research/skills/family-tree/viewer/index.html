@@ -387,7 +387,13 @@ main{padding-top:6px}
 .vh-head{margin:4px 0 18px;padding-left:58px}
 .vh-head h2{font-family:Fraunces,Georgia,serif;font-size:30px;font-weight:700;line-height:1.15;margin:0 0 6px;color:var(--walnut);font-variation-settings:"opsz" 144}
 .vh-head p{margin:0 0 12px;color:#6b5a48;font-size:14.5px;line-height:1.55;max-width:60ch}
-.vh-acts{display:flex;flex-wrap:wrap;gap:8px}
+.vh-acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.vh-pick{font:inherit;font-size:13.5px;font-weight:600;color:var(--walnut);background:#fffaf1;border:1px solid #d9c6a3;border-radius:999px;padding:5px 30px 5px 12px;max-width:100%;cursor:pointer;
+  appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237a5c3a' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;background-size:14px}
+.vh-lnk{position:relative;border:0;background:none;padding:2px 4px;margin-left:4px;vertical-align:middle;cursor:pointer;color:#a8916f;line-height:0;border-radius:6px}
+.vh-lnk:hover,.vh-lnk:focus-visible{color:var(--walnut);background:#f3e8d4}.vh-lnk svg{width:17px;height:17px}
+.vh-tip{position:absolute;z-index:6;left:0;top:calc(100% + 6px);width:max-content;max-width:min(320px,80vw);background:var(--walnut);color:#fff;font:500 13px/1.4 system-ui,sans-serif;padding:7px 10px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.vh-tip input{display:block;width:100%;margin-top:5px;font:inherit;padding:3px 5px;border-radius:4px;border:0}
 .vh .btn:not([data-variant]){background:var(--walnut);color:#f8eedb}
 .vh .btn:not([data-variant]):hover{background:#3b2a20}
 .vh-route{position:sticky;top:0;z-index:4;display:flex;flex-wrap:nowrap;overflow-x:auto;align-items:center;gap:2px;margin:0 -2px 14px;padding:8px 10px 8px 58px;
@@ -398,14 +404,12 @@ main{padding-top:6px}
 .vh-rc.on{color:var(--walnut);font-weight:600;background:#e6d6b8}
 .vh-ra{flex:none;color:#b8a88f;font-size:13px}
 .vh-ch{position:relative;padding:0 0 22px 58px}
-.vh-ch::before{content:"";position:absolute;left:22px;top:0;bottom:0;border-left:2px dotted #cdb58a}
-.vh-ch:first-of-type::before{top:24px}
-.vh-ch:last-child::before{bottom:auto;height:24px}
-.vh-dot{position:absolute;left:0;top:14px;width:46px;height:46px;border-radius:50%;background:var(--walnut);color:var(--gold2);border:2px solid var(--lc,var(--gold));
-  display:flex;align-items:center;justify-content:center;font:600 12.5px/1 Fraunces,Georgia,serif;font-variant-numeric:tabular-nums;box-shadow:0 2px 6px rgba(40,25,10,.25)}
-.vh-card{background:var(--paper);border:1px solid var(--line);border-top:4px solid var(--lc,var(--gold));border-radius:14px;box-shadow:var(--shadow-card);padding:16px 20px 18px}
+/* the year: a big number standing in the left margin, half behind the card, in the colour of the line */
+.vh-dot{position:absolute;left:-22px;top:2px;z-index:0;writing-mode:vertical-rl;transform:rotate(180deg);font:800 96px/1 Fraunces,Georgia,serif;
+  font-variant-numeric:lining-nums;letter-spacing:-.02em;color:var(--lc,var(--gold));opacity:.3;pointer-events:none}
+.vh-card{position:relative;z-index:1;background:var(--paper);border:1px solid var(--line);border-top:4px solid var(--lc,var(--gold));border-radius:14px;box-shadow:var(--shadow-card);padding:16px 20px 18px}
 .vh-k{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#9c7633;font-weight:600}
-.vh-card h3{margin:4px 0 4px;line-height:1.2}
+.vh-card h3{margin:4px 0 4px;line-height:1.2;position:relative}
 .vh-nm{border:0;background:none;padding:0;text-align:left;cursor:pointer;font-family:Fraunces,Georgia,serif;font-weight:700;font-size:23px;color:var(--walnut);font-variation-settings:"opsz" 72}
 .vh-nm:hover{text-decoration:underline;text-decoration-color:var(--gold2);text-underline-offset:4px}
 .vh-facts{font-size:12.5px;color:#7d6b59;line-height:1.55;font-variant-numeric:tabular-nums}
@@ -469,7 +473,7 @@ main{padding-top:6px}
   .topband .tabs{max-width:100%;min-width:0}.topband .tabs>[role=tablist]{max-width:100%;overflow-x:auto;scrollbar-width:none;justify-content:flex-start}.topband .tabs>[role=tablist]::-webkit-scrollbar{display:none}
   .topband .tabs>[role=tablist]>[role=tab]{padding:7px 6px;font-size:13px;flex:none}
   .vh-head,.vh-route{padding-left:0}.vh-head h2{font-size:25px}
-  .vh-ch{padding-left:40px}.vh-ch::before{left:15px}.vh-dot{width:32px;height:32px;font-size:10px;top:12px}
+  .vh-ch{padding-left:40px}.vh-dot{left:-12px;font-size:62px}
   .vh-card{padding:14px 14px 16px}.vh-nm{font-size:20px}.vh-txt p,.vh-sib p{font-size:16px}
   .vh-fork .opts{grid-template-columns:1fr}
   .vh-route{padding-left:6px}
@@ -750,7 +754,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.26",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.27",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1197,7 +1201,7 @@ Object.assign(I18N.nl,{v_verhaal:"Verhaal",
  vh_title:"Het verhaal van {name}",
  map_k:"Op de kaart",map_from:"{km} km van {from}",map_vague:"precieze plek onbekend",map_note:"Kustlijnen en grenzen van nu (Natural Earth).",
  vh_intro:"Stap voor stap terug in de tijd. Bij elke persoon kies je wiens verhaal je volgt: dat van de vader of dat van de moeder. Het gouden sterretje wijst het rijkste spoor aan: het verst terug, best onderbouwd en met de meeste verhalen.",
- vh_auto:"Volg het rijkste spoor tot het eind",vh_restart:"Opnieuw beginnen",vh_route:"Je route",
+ vh_auto:"Volg het rijkste spoor tot het eind",vh_restart:"Opnieuw beginnen",vh_pick:"✦ Interessante personen",vh_pick_rich:"Rijkste verhalen",vh_pick_old:"Oudste voorouders",vh_link:"Kopieer een link naar {name}",vh_link_ok:"Link gekopieerd",vh_link_frame:"Gekopieerd: {h} — plak dit achter het adres van deze pagina",vh_link_fail:"Kopieer deze link:",vh_route:"Je route",
  vh_step0:"Hier begint het",vh_stepN:"Stap {k} · {rel} van {root}",
  vh_begin:"Dit verhaal begint bij {fn}.",
  vh_born_dp:"{Fn} werd {date} geboren in {place}.",vh_born_d:"{Fn} werd {date} geboren.",vh_born_p:"{Fn} werd geboren in {place}.",vh_born_none:"Wanneer en waar {fn} geboren is, weten we nog niet.",
@@ -1223,7 +1227,7 @@ Object.assign(I18N.en,{v_verhaal:"Story",
  vh_title:"The story of {name}",
  map_k:"On the map",map_from:"{km} km from {from}",map_vague:"exact spot unknown",map_note:"Present-day coastlines and borders (Natural Earth).",
  vh_intro:"Step by step back in time. At every person you choose whose story to follow: the father's or the mother's. The golden star marks the richest trail: furthest back, best supported and with the most stories.",
- vh_auto:"Follow the richest trail to the end",vh_restart:"Start over",vh_route:"Your route",
+ vh_auto:"Follow the richest trail to the end",vh_restart:"Start over",vh_pick:"✦ Interesting people",vh_pick_rich:"Richest stories",vh_pick_old:"Oldest ancestors",vh_link:"Copy a link to {name}",vh_link_ok:"Link copied",vh_link_frame:"Copied: {h} — paste it after the address of this page",vh_link_fail:"Copy this link:",vh_route:"Your route",
  vh_step0:"Where it begins",vh_stepN:"Step {k} · {rel} of {root}",
  vh_begin:"This story begins with {fn}.",
  vh_born_dp:"{Fn} was born {date} in {place}.",vh_born_d:"{Fn} was born {date}.",vh_born_p:"{Fn} was born in {place}.",vh_born_none:"We don't yet know when or where {fn} was born.",
@@ -1451,21 +1455,69 @@ function vhTemplate(i,child,flags){const p=P[i],fn=vhFn(p),pr=vhPro(p),T=(k,v)=>
 function vhCode(path,k){let s="";for(let j=1;j<=k;j++)s+=P[path[j-1]].f===path[j]?"v":"m";return s}
 function vhState(){if(!state.vh||state.vh.root!==state.root)state.vh={root:state.root,path:[state.root]};return state.vh}
 function vhGo(path,focus){state.vh.path=path;vhRedraw(focus);navPush()}
+/* links to a person in Story (#verhaal/I4, #story/I4) and the "Interesting people" menu.
+   vhPathTo: the shortest trail from a start person (the current one first) to this person through parents (not via a "wrong" link);
+   not an ancestor but a brother/sister of one: the trail to that sibling, where this person shows as a remarkable relative. */
+function vhPathTo(from,to){if(from===to)return [from];const prev=new Map([[from,-1]]),q=[from];
+  while(q.length){const x=q.shift();for(const p of parentsOf(x)){if(prev.has(p)||vhStatus(x,p)==="fout")continue;prev.set(p,x);
+    if(p===to){const out=[p];let c=x;while(c>=0){out.unshift(c);c=prev.get(c)}return out}q.push(p)}}return null}
+function vhRoute(i){const roots=[...new Set([state.root].concat(META.starts.map(s=>s.persoon)))];
+  for(const r of roots){const p=vhPathTo(r,i);if(p)return {path:p}}
+  for(const r of roots)for(const j of vhSibs(i)){const p=vhPathTo(r,j);if(p)return {path:p,sib:i}}
+  return null}
+function vhIdOf(i){return String(P[i].id!=null?P[i].id:i)}
+function vhFind(id){id=String(id).replace(/^@|@$/g,"");const k=P.findIndex(p=>p.id!=null&&String(p.id).replace(/^@|@$/g,"")===id);return k>=0?k:(/^\d+$/.test(id)&&P[+id]?+id:-1)}
+function vhHashPerson(h){let m;try{m=/^(verhaal|story)\/(.+)$/.exec(decodeURIComponent(h))}catch(e){m=null}return m?vhFind(m[2]):-1}
+/* open Story at person i: along the trail from a start person, scrolled to their chapter; nobody leads there: i becomes the start person */
+function vhOpen(i,glide){const r=vhRoute(i);
+  if(r){if(r.path[0]!==state.root){state.hist.push(state.root);state.root=r.path[0]}state.vh={root:state.root,path:r.path}}
+  else if(i!==state.root){state.hist.push(state.root);state.root=i;state.vh=null}
+  state.view="verhaal";render();
+  if(r&&(r.path.length>1||r.sib!=null))vhRedraw(r.path.length-1,r.sib,glide)}
+/* interesting people: the longest own stories (images count too) and the earliest-born ancestors at the end of a line, both only when Story can reach them */
+let VH_PICK=null;
+function vhPickList(){if(VH_PICK&&VH_PICK.root===state.root)return VH_PICK;const ok=i=>!!vhRoute(i),anc=i=>{if(parentsOf(i).length||META.starts.some(x=>x.persoon===i)||i===state.root)return false;const r=vhRoute(i);return !!r&&r.sib==null}; /* oldest: ends of a line (no known parents) */
+  const rich=P.map((p,i)=>[i,vhHas(p)?lab(p.verhaal).length+400*(Array.isArray(p.verhaal_beelden)?p.verhaal_beelden.length:0):0]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).map(x=>x[0]).filter(ok).slice(0,8);
+  const old=P.map((p,i)=>[i,p.living?0:p.by||0]).filter(x=>x[1]>0).sort((a,b)=>a[1]-b[1]).map(x=>x[0]).filter(anc).slice(0,6);
+  return VH_PICK={root:state.root,rich,old}}
+function vhPickHtml(){const {rich,old}=vhPickList();if(!rich.length&&!old.length)return"";
+  const o=i=>`<option value="${i}">${slEsc(P[i].n)} (${slEsc(yrs(P[i]))})</option>`;
+  return `<select class="vh-pick" data-a="pick" aria-label="${slEsc(_t("vh_pick").replace(/^\W+/,""))}"><option value="">${slEsc(_t("vh_pick"))}</option>${rich.length?`<optgroup label="${slEsc(_t("vh_pick_rich"))}">${rich.map(o).join("")}</optgroup>`:""}${old.length?`<optgroup label="${slEsc(_t("vh_pick_old"))}">${old.map(o).join("")}</optgroup>`:""}</select>`}
+/* copy a link to this person; inside a published artifact the page can't see its own claude.ai address, so then only the #part */
+function vhCopyLink(btn,i){const h="#"+(LANG==="nl"?"verhaal":"story")+"/"+encodeURIComponent(vhIdOf(i));
+  let framed=true;try{framed=window.top!==window}catch(e){}
+  const text=framed?h:location.href.split("#")[0]+h,h3=btn.closest("h3")||btn.parentElement;
+  const tip=(html,ms)=>{h3.querySelectorAll(".vh-tip").forEach(t=>t.remove());const t=document.createElement("div");t.className="vh-tip";t.setAttribute("role","status");t.innerHTML=html;h3.appendChild(t);
+    const inp=t.querySelector("input");if(inp){inp.focus();inp.select()}setTimeout(()=>t.remove(),ms)};
+  const fail=()=>tip(`${slEsc(_t("vh_link_fail"))}<input readonly value="${slEsc(text)}">`,12000);
+  try{navigator.clipboard.writeText(text).then(()=>tip(slEsc(framed?_t("vh_link_frame",{h}):_t("vh_link_ok")),framed?6000:2500),fail)}catch(e){fail()}}
 /* scroll naar een hoofdstuk, net onder de (sticky) routebalk; maxTop = grens zodat de pagina daarna niet hoeft te springen */
 function vhPageTop(e){let y=0;while(e){y+=e.offsetTop;e=e.offsetParent}return y} /* zonder transforms (de infade-animatie schuift 14px) */
-function vhScrollTo(e,maxTop){const r=document.querySelector(".vh-route"),off=(r?r.offsetHeight:0)+24;
-  let top=vhPageTop(e)-off;if(maxTop!=null)top=Math.min(top,maxTop);
-  scrollTo({top:Math.max(0,top),behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"instant":"smooth"})}
+/* glide: a slow, visible scroll for a jump from the "Interesting people" menu; the time grows with the distance, so you feel how far back you go */
+const VH_SCROLL={native:false,base:600,perPx:.25,max:2500,ease:"inout"};
+let VH_GLIDE=0;
+/* every frame jumps instantly (behavior "instant"): the page has html{scroll-behavior:smooth}, which would smooth each step again and make the glide lag, then rush */
+function vhGlide(topOf){cancelAnimationFrame(VH_GLIDE);const y0=scrollY,d=topOf()-y0;if(Math.abs(d)<2)return;
+  const S=VH_SCROLL,ms=Math.min(S.max,S.base+Math.abs(d)*S.perPx),t0=performance.now();
+  const ease=S.ease==="out"?t=>1-Math.pow(1-t,3):t=>(1-Math.cos(Math.PI*t))/2;
+  const stop=()=>{cancelAnimationFrame(VH_GLIDE);removeEventListener("wheel",stop);removeEventListener("touchstart",stop);removeEventListener("keydown",stop)};
+  addEventListener("wheel",stop,{passive:true});addEventListener("touchstart",stop,{passive:true});addEventListener("keydown",stop);
+  const step=now=>{const t=Math.min(1,(now-t0)/ms);scrollTo({top:y0+(topOf()-y0)*ease(t),behavior:"instant"});if(t<1)VH_GLIDE=requestAnimationFrame(step);else stop()};VH_GLIDE=requestAnimationFrame(step)}
+function vhScrollTo(e,maxTop,glide){const r=document.querySelector(".vh-route"),off=(r?r.offsetHeight:0)+24;
+  const topOf=()=>{let t=vhPageTop(e)-off;if(maxTop!=null)t=Math.min(t,maxTop);return Math.max(0,t)};
+  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(glide&&!reduce&&!VH_SCROLL.native){vhGlide(topOf);return}
+  scrollTo({top:topOf(),behavior:reduce?"instant":"smooth"})}
 /* opnieuw tekenen zonder sprong: de stage houdt zijn oude hoogte vast tot het scrollen klaar is (anders klemt de browser de scroll als het pad korter wordt) */
-function vhRedraw(focus){const st=$("stage"),hold=st.offsetHeight;st.style.minHeight=hold+"px";st.innerHTML="";const w=drawVerhaal();st.appendChild(w);
+function vhRedraw(focus,sib,glide){const st=$("stage"),hold=st.offsetHeight;st.style.minHeight=hold+"px";st.innerHTML="";const w=drawVerhaal();st.appendChild(w);
   let done=false;const release=()=>{if(done)return;done=true;st.style.minHeight=""};
   if(focus==null){release();return}
-  (async()=>{const e=st.querySelector(`.vh-ch[data-k="${focus}"]`);if(!e){release();return}
+  (async()=>{const ch=st.querySelector(`.vh-ch[data-k="${focus}"]`),e=sib!=null&&ch&&ch.querySelector(`.vh-sib[data-j="${sib}"]`)||ch;if(!e){release();return}
     const imgs=[...st.querySelectorAll(".vh-ch img")].filter(i=>!i.complete&&+i.closest(".vh-ch").dataset.k<=focus);
     if(imgs.length)await Promise.race([Promise.all(imgs.map(i=>i.decode().catch(()=>{}))),new Promise(r=>setTimeout(r,400))]);
     const cs=getComputedStyle(st),natural=w.offsetHeight+parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom)+parseFloat(cs.borderTopWidth)+parseFloat(cs.borderBottomWidth);
     const extra=Math.max(0,st.offsetHeight-natural),maxTop=document.documentElement.scrollHeight-extra-innerHeight;
-    vhScrollTo(e,maxTop);
+    vhScrollTo(e,maxTop,glide);
     /* pas loslaten als de positie binnen de nieuwe hoogte valt; anders klemt de browser alsnog en breekt de scroll af */
     const tryRelease=()=>{if(scrollY<=maxTop+1){removeEventListener("scroll",tryRelease);release()}};
     addEventListener("scroll",tryRelease,{passive:true});setTimeout(tryRelease,400)})()}
@@ -1523,7 +1575,7 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
   const w=document.createElement("div");w.className="vh";
   const route=path.map((i,k)=>`<button type="button" class="vh-rc" data-k="${k}">${slEsc(vhFn(P[i]))}</button>`).join('<span class="vh-ra">›</span>');
   w.innerHTML=`<div class="vh-head"><h2>${slEsc(_t("vh_title",{name:rfn}))}</h2><p>${_t("vh_intro")}</p>
-    <div class="vh-acts"><button type="button" class="btn" data-size="sm" data-a="auto">★ ${_t("vh_auto")}</button>${path.length>1?`<button type="button" class="btn" data-size="sm" data-variant="outline" data-a="restart">${_t("vh_restart")}</button>`:""}</div></div>
+    <div class="vh-acts"><button type="button" class="btn" data-size="sm" data-a="auto">★ ${_t("vh_auto")}</button>${path.length>1?`<button type="button" class="btn" data-size="sm" data-variant="outline" data-a="restart">${_t("vh_restart")}</button>`:""}${vhPickHtml()}</div></div>
     ${path.length>1?`<nav class="vh-route" aria-label="${_t("vh_route")}">${route}</nav>`:""}`;
   let prevRank=5;
   path.forEach((i,k)=>{const p=P[i],child=k?path[k-1]:null,code=vhCode(path,k),last=k===path.length-1;
@@ -1564,7 +1616,7 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     /* broers/zussen met een eigen verhaal */
     const sib=vhSibs(i).filter(j=>vhHas(P[j])).map(j=>{const q=P[j],ppr=vhPro(p);
       const rl=_t(q.x==="M"?"vh_sib_M":q.x==="F"?"vh_sib_F":"vh_sib_X",ppr);
-      return `<aside class="vh-sib"><div class="vh-k">✦ ${_t("vh_special")}</div><h4><span>${slEsc(rl)}</span> <button type="button" class="vh-nm" data-sib="${j}:${i}">${slEsc(q.n)}</button> <small>${slEsc(yrs(q))}</small></h4>${vhStoryHtml(q)}${vhSources(q)}</aside>`}).join("");
+      return `<aside class="vh-sib" data-j="${j}"><div class="vh-k">✦ ${_t("vh_special")}</div><h4><span>${slEsc(rl)}</span> <button type="button" class="vh-nm" data-sib="${j}:${i}">${slEsc(q.n)}</button> <small>${slEsc(yrs(q))}</small></h4>${vhStoryHtml(q)}${vhSources(q)}</aside>`}).join("");
     /* afslag */
     let fork="";
     const par=parentsOf(i),best=vhBest(i);
@@ -1589,9 +1641,9 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     const scans=vhScans(p),imgs=(typeof mediaList==="function"&&!p.living)?mediaList(p).filter(m=>mediaIsImg(m)&&!scans.has(m.bestand)):[];
     const yr=p.by||(p.bdate?vhDate(p.bdate)?.bare?.match(/\d{3,4}/)?.[0]:"")||"?";
     const ch=document.createElement("section");ch.className="vh-ch"+(last&&k?" vh-new":"");ch.dataset.k=k;ch.style.setProperty("--lc",lc);
-    ch.innerHTML=`<div class="vh-dot" aria-hidden="true">${p.living&&!p.by?"•":slEsc(String(yr))}</div>
+    ch.innerHTML=`<div class="vh-dot" aria-hidden="true">${p.living&&!p.by?"":slEsc(String(yr))}</div>
       <article class="vh-card"><div class="vh-k">${relLabel}</div>
-      <h3><button type="button" class="vh-nm" data-i="${i}" title="${_t("vh_details")}">${slEsc(p.n)}</button></h3>
+      <h3><button type="button" class="vh-nm" data-i="${i}" title="${_t("vh_details")}">${slEsc(p.n)}</button>${p.living?"":`<button type="button" class="vh-lnk" data-lnk="${i}" title="${slEsc(_t("vh_link",{name:p.n}))}" aria-label="${slEsc(_t("vh_link",{name:p.n}))}"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></button>`}</h3>
       ${facts?`<div class="vh-facts">${facts}</div>`:""}${imgs.length?`<div class="vh-media">${imgs.slice(0,4).map((m,j)=>`<button type="button" class="vh-mt" data-mj="${j}" title="${slEsc(mediaName(m))}"><img loading="lazy" src="${slEsc(m.bestand)}" alt=""></button>`).join("")}${imgs.length>4?`<button type="button" class="vh-mt more" data-mj="4">+${imgs.length-4}</button>`:""}</div>`:""}${cert}${body}${sib}${fork}</article>`;
     ch.querySelector(`.vh-nm[data-i]`).onclick=()=>slSheet(i,child,code,path[0]);
     ch.querySelectorAll(".vh-mt").forEach(b=>b.onclick=()=>mediaView(imgs,+b.dataset.mj));
@@ -1599,7 +1651,8 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     w.appendChild(ch)});
   /* events */
   w.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
-    if(b.dataset.go!=null){vhGo(path.concat(+b.dataset.go),path.length)}
+    if(b.dataset.lnk!=null){vhCopyLink(b,+b.dataset.lnk)}
+    else if(b.dataset.go!=null){vhGo(path.concat(+b.dataset.go),path.length)}
     else if(b.dataset.alt){const [k,alt]=b.dataset.alt.split(":").map(Number);vhGo(path.slice(0,k+1).concat(alt),k+1)}
     else if(b.dataset.sib!=null){const [j,a]=b.dataset.sib.split(":").map(Number);slSheet(j,null,"",a)}
     else if(b.dataset.k!=null&&b.classList.contains("vh-rc")){const e2=w.querySelector(`.vh-ch[data-k="${b.dataset.k}"]`);if(e2)vhScrollTo(e2)}
@@ -1607,6 +1660,7 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     else if(b.dataset.a==="auto"){const np=path.slice(),seen=new Set(np);let cur=np[np.length-1],n=0;
       while(n++<60){const q=vhBest(cur);if(q<0||seen.has(q))break;np.push(q);seen.add(q);cur=q}
       vhGo(np,Math.min(path.length,np.length-1))}});
+  {const sel=w.querySelector(".vh-pick");if(sel)sel.onchange=()=>{const v=sel.value;sel.value="";if(v!=="")vhOpen(+v,true)}}
   /* route-balk volgt waar je bent */
   if(path.length>1){let raf=0;const upd=()=>{raf=0;if(!w.isConnected){removeEventListener("scroll",onS);return}
       let cur=0;w.querySelectorAll(".vh-ch").forEach(c=>{if(c.getBoundingClientRect().top<innerHeight*.4)cur=+c.dataset.k});
@@ -2556,7 +2610,7 @@ function langInit(){let l=null;try{l=new URLSearchParams(location.search).get("l
 document.querySelector("#stage #loading")&&($("loading").textContent=_t("loading"));
 fetch("data.json").then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(d=>{D=d;P=prepareData(d);langInit();
   if(!P.length){applyTexts();$("stage").innerHTML=`<div class="empty"><div class="et">${_t("emptyTitle")}</div><p>${_t("emptyPeople")}</p></div>`;return}
-  const h=location.hash.slice(1),budget=/^(kaartbudget|cardbudget)$/.test(h);if(VIEWS.includes(h))state.view=h;
+  const h=location.hash.slice(1),budget=/^(kaartbudget|cardbudget)$/.test(h),linked=vhHashPerson(h);if(VIEWS.includes(h))state.view=h;
   state.root=META.perView[state.view]!=null&&P[META.perView[state.view]]?META.perView[state.view]:META.starts[0].persoon;
   applyTexts();initSearch();
   $("back").onclick=()=>{if(state.hist.length){state.root=state.hist.pop();render()}};
@@ -2566,8 +2620,8 @@ fetch("data.json").then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.
   $("swBtn").onclick=()=>swOpen(state.root);
   $("treeBtn").onclick=()=>{state.view=state.lastTree||"familie";render()};
   addEventListener("popstate",navPop);
-  addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(/^(kaartbudget|cardbudget)$/.test(h)){swBudgetShow();return}if(VIEWS.includes(h)&&h!==state.view){state.view=h;render()}});
-  render();if(budget)swBudgetShow();
+  addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(/^(kaartbudget|cardbudget)$/.test(h)){swBudgetShow();return}const k=vhHashPerson(h);if(k>=0){vhOpen(k);return}if(VIEWS.includes(h)&&h!==state.view){state.view=h;render()}});
+  if(linked>=0)vhOpen(linked);else render();if(budget)swBudgetShow();
 }).catch(e=>{$("stage").innerHTML=`<div id="loading">${_t("loadError",{msg:slEsc(e.message)})}</div>`;console.error(e)});
 </script>
 </body>
