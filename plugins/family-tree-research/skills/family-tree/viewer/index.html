@@ -761,7 +761,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.29",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.30",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1502,35 +1502,49 @@ function vhCopyLink(btn,i){const h="#"+(LANG==="nl"?"verhaal":"story")+"/"+encod
     const inp=t.querySelector("input");if(inp){inp.focus();inp.select()}setTimeout(()=>t.remove(),ms)};
   const fail=()=>tip(`${slEsc(_t("vh_link_fail"))}<input readonly value="${slEsc(text)}">`,12000);
   try{navigator.clipboard.writeText(text).then(()=>tip(slEsc(framed?_t("vh_link_frame",{h}):_t("vh_link_ok")),framed?6000:2500),fail)}catch(e){fail()}}
-/* scroll naar een hoofdstuk, net onder de (sticky) routebalk; maxTop = grens zodat de pagina daarna niet hoeft te springen */
+/* scroll naar een hoofdstuk, net onder de (sticky) routebalk; maxTop = function giving the limit now, so the page doesn't have to jump afterwards */
 function vhPageTop(e){let y=0;while(e){y+=e.offsetTop;e=e.offsetParent}return y} /* zonder transforms (de infade-animatie schuift 14px) */
 /* glide: a slow, visible scroll for a jump from the "Interesting people" menu; the time grows with the distance, so you feel how far back you go */
 const VH_SCROLL={native:false,base:600,perPx:.25,max:2500,ease:"inout"};
 let VH_GLIDE=0;
-/* every frame jumps instantly (behavior "instant"): the page has html{scroll-behavior:smooth}, which would smooth each step again and make the glide lag, then rush */
-function vhGlide(topOf){cancelAnimationFrame(VH_GLIDE);const y0=scrollY,d=topOf()-y0;if(Math.abs(d)<2)return;
+/* every frame jumps instantly (behavior "instant"): the page has html{scroll-behavior:smooth}, which would smooth each step again and make the glide lag, then rush.
+   topOf() is asked again every frame: images above the target that load during the glide push it down. done(byUser) when the glide ends. */
+function vhGlide(topOf,done){cancelAnimationFrame(VH_GLIDE);const y0=scrollY,d=topOf()-y0;if(Math.abs(d)<2){if(done)done(false);return}
   const S=VH_SCROLL,ms=Math.min(S.max,S.base+Math.abs(d)*S.perPx),t0=performance.now();
   const ease=S.ease==="out"?t=>1-Math.pow(1-t,3):t=>(1-Math.cos(Math.PI*t))/2;
-  const stop=()=>{cancelAnimationFrame(VH_GLIDE);removeEventListener("wheel",stop);removeEventListener("touchstart",stop);removeEventListener("keydown",stop)};
+  const stop=ev=>{cancelAnimationFrame(VH_GLIDE);removeEventListener("wheel",stop);removeEventListener("touchstart",stop);removeEventListener("keydown",stop);if(done){const f=done;done=null;f(!!ev)}};
   addEventListener("wheel",stop,{passive:true});addEventListener("touchstart",stop,{passive:true});addEventListener("keydown",stop);
   const step=now=>{const t=Math.min(1,(now-t0)/ms);scrollTo({top:y0+(topOf()-y0)*ease(t),behavior:"instant"});if(t<1)VH_GLIDE=requestAnimationFrame(step);else stop()};VH_GLIDE=requestAnimationFrame(step)}
-function vhScrollTo(e,maxTop,glide){const r=document.querySelector(".vh-route"),off=(r?r.offsetHeight:0)+24;
-  const topOf=()=>{let t=vhPageTop(e)-off;if(maxTop!=null)t=Math.min(t,maxTop);return Math.max(0,t)};
-  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if(glide&&!reduce&&!VH_SCROLL.native){vhGlide(topOf);return}
-  scrollTo({top:topOf(),behavior:reduce?"instant":"smooth"})}
+/* returns {topOf, gliding()}; maxTop may be a number or a function (recomputed every call) */
+function vhScrollTo(e,maxTop,glide,done){
+  const topOf=()=>{const r=document.querySelector(".vh-route"),off=(r?r.offsetHeight:0)+24;let t=vhPageTop(e)-off;const m=typeof maxTop==="function"?maxTop():maxTop;if(m!=null)t=Math.min(t,m);return Math.max(0,t)};
+  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;let gl=false;
+  if(glide&&!reduce&&!VH_SCROLL.native){gl=true;vhGlide(topOf,u=>{gl=false;if(done)done(u)})}
+  else scrollTo({top:topOf(),behavior:reduce?"instant":"smooth"}); /* done only follows a glide; a smooth scroll is simply re-aimed by the caller */
+  return {topOf,gliding:()=>gl,smooth:!reduce}}
 /* opnieuw tekenen zonder sprong: de stage houdt zijn oude hoogte vast tot het scrollen klaar is (anders klemt de browser de scroll als het pad korter wordt) */
 function vhRedraw(focus,sib,glide){const st=$("stage"),hold=st.offsetHeight;st.style.minHeight=hold+"px";st.innerHTML="";const w=drawVerhaal();st.appendChild(w);
   let done=false;const release=()=>{if(done)return;done=true;st.style.minHeight=""};
   if(focus==null){release();return}
   (async()=>{const ch=st.querySelector(`.vh-ch[data-k="${focus}"]`),e=sib!=null&&ch&&ch.querySelector(`.vh-sib[data-j="${sib}"]`)||ch;if(!e){release();return}
+    /* images above the target decide where it lands: load them now (not lazily during the scroll) */
     const imgs=[...st.querySelectorAll(".vh-ch img")].filter(i=>!i.complete&&+i.closest(".vh-ch").dataset.k<=focus);
+    imgs.forEach(i=>i.loading="eager");
     if(imgs.length)await Promise.race([Promise.all(imgs.map(i=>i.decode().catch(()=>{}))),new Promise(r=>setTimeout(r,400))]);
-    const cs=getComputedStyle(st),natural=w.offsetHeight+parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom)+parseFloat(cs.borderTopWidth)+parseFloat(cs.borderBottomWidth);
-    const extra=Math.max(0,st.offsetHeight-natural),maxTop=document.documentElement.scrollHeight-extra-innerHeight;
-    vhScrollTo(e,maxTop,glide);
+    /* the extra height the stage still holds on to, and the scroll limit, both measured now (images keep loading) */
+    const extra=()=>{if(done)return 0;const cs=getComputedStyle(st),natural=w.offsetHeight+parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom)+parseFloat(cs.borderTopWidth)+parseFloat(cs.borderBottomWidth);return Math.max(0,st.offsetHeight-natural)};
+    const maxTop=()=>document.documentElement.scrollHeight-extra()-innerHeight;
+    /* follow: an image above the target that loads after the scroll moves the target; follow it until the reader scrolls themselves or all images are in */
+    let quit=false,glided=false;const late=imgs.filter(i=>!i.complete);
+    const userQuit=()=>{quit=true;unfollow()};
+    const unfollow=()=>{removeEventListener("wheel",userQuit);removeEventListener("touchstart",userQuit);removeEventListener("keydown",userQuit);late.forEach(i=>{i.removeEventListener("load",onImg);i.removeEventListener("error",onImg)})};
+    const follow=()=>{if(quit||!sc||sc.gliding())return;const t=sc.topOf();if(Math.abs(scrollY-t)>2)scrollTo({top:t,behavior:glided||!sc.smooth?"instant":"smooth"})};
+    const onImg=()=>{follow();if(late.every(i=>i.complete))unfollow()};
+    let sc=null;
+    sc=vhScrollTo(e,maxTop,glide,byUser=>{if(byUser){quit=true;unfollow();return}glided=true;follow()});
+    if(late.length&&!quit){addEventListener("wheel",userQuit,{passive:true});addEventListener("touchstart",userQuit,{passive:true});addEventListener("keydown",userQuit);late.forEach(i=>{i.addEventListener("load",onImg);i.addEventListener("error",onImg)})}
     /* pas loslaten als de positie binnen de nieuwe hoogte valt; anders klemt de browser alsnog en breekt de scroll af */
-    const tryRelease=()=>{if(scrollY<=maxTop+1){removeEventListener("scroll",tryRelease);release()}};
+    const tryRelease=()=>{if(scrollY<=maxTop()+1){removeEventListener("scroll",tryRelease);release()}};
     addEventListener("scroll",tryRelease,{passive:true});setTimeout(tryRelease,400)})()}
 
 /* tijdgeest: data.json → "tijdgeest": {plaatsen:[{id,naam,match,leven,gebeurtenissen,beelden}], algemeen:{gebeurtenissen}} */
