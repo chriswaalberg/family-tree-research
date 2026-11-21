@@ -1495,11 +1495,15 @@ function vhTijdgeest(i,seen){const T=vhTG();if(!T)return"";const p=P[i];if(p.liv
   if(pick.length){pick.forEach(x=>seen.add(x.key));
     html+=`<div class="vh-k">${_t("vh_tg_events")}</div><ul class="vh-ev">${pick.map(({ev,lok})=>`<li data-y="${ev.jaar||ev.van||""}"${lok?' data-lok="1"':""}${ev.gewicht!=null&&isFinite(+ev.gewicht)?` data-w="${+ev.gewicht}"`:""}><b>${ev.van&&ev.tot&&ev.van!==ev.tot?ev.van+"–"+String(ev.tot).slice(-2):ev.jaar}</b><span>${slEsc(lab(ev.tekst))}${ev.bron?` <a href="${slEsc(ev.bron[1])}" target="_blank" rel="noopener" title="${slEsc(ev.bron[0])}">${_t("vh_src1")}</a>`:""}${ev.links&&ev.links.length?`<span class="vh-evl">${slEsc(lab(ev.links_label)||"")} ${ev.links.map(l=>`<a href="${slEsc(l[1])}" target="_blank" rel="noopener">${slEsc(lab(l[0]))}</a>`).join(" · ")}</span>`:""}</span></li>`).join("")}</ul>`}
   return html?`<section class="vh-tg">${html}</section>`:""}
-/* Story: one map per person with the places of their life (and the story's places) */
-function vhMapFig(p){if(!mapHas()||p.living)return "";const svg=mapLife(mapStops(p),(p.verhaal_plekken||[]).filter(x=>x.jaar==null).map(x=>mapCo(x.plaats)).filter(Boolean));if(!svg)return "";
+/* Story: one map per person with the places of their life (and the story's places); only when at least one of those places is new on the trail
+   ("seen" = the places of the people before; within MAP.SAME_KM counts as the same place), so the same map never shows twice */
+function vhMapFig(p,seen){if(!mapHas()||p.living)return "";const st=mapStops(p),ex=(p.verhaal_plekken||[]).filter(x=>x.jaar==null).map(x=>mapCo(x.plaats)).filter(Boolean);
+  const pts=st.concat(ex).filter(q=>q.prec==="plaats"),nw=pts.filter(q=>!(seen||[]).some(o=>mapKm(o,q)<MAP.SAME_KM));
+  if(seen)nw.forEach(q=>seen.push(q));if(!nw.length)return "";
+  const svg=mapLife(st,ex);if(!svg)return "";
   return `<figure class="vh-map">${svg}<figcaption>${slEsc(_t("map_life",{name:vhFn(p)}))} <small>${slEsc(_t("map_note"))}</small></figcaption></figure>`}
 function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
-  const S=vhState(),path=S.path,root=P[path[0]],rfn=vhFn(root),flags={dtb:false},tgSeen=new Set();tgSeen.assign=vhAssignImages(path);
+  const S=vhState(),path=S.path,root=P[path[0]],rfn=vhFn(root),flags={dtb:false},tgSeen=new Set(),mapSeen=[];tgSeen.assign=vhAssignImages(path);
   const w=document.createElement("div");w.className="vh";
   const route=path.map((i,k)=>`<button type="button" class="vh-rc" data-k="${k}">${slEsc(vhFn(P[i]))}</button>`).join('<span class="vh-ra">›</span>');
   w.innerHTML=`<div class="vh-head"><h2>${slEsc(_t("vh_title",{name:rfn}))}</h2><p>${_t("vh_intro")}</p>
@@ -1566,7 +1570,7 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     ch.innerHTML=`<div class="vh-dot" aria-hidden="true">${p.living&&!p.by?"•":slEsc(String(yr))}</div>
       <article class="vh-card"><div class="vh-k">${relLabel}</div>
       <h3><button type="button" class="vh-nm" data-i="${i}" title="${_t("vh_details")}">${slEsc(p.n)}</button></h3>
-      ${facts?`<div class="vh-facts">${facts}</div>`:""}${imgs.length?`<div class="vh-media">${imgs.slice(0,4).map((m,j)=>`<button type="button" class="vh-mt" data-mj="${j}" title="${slEsc(mediaName(m))}"><img loading="lazy" src="${slEsc(m.bestand)}" alt=""></button>`).join("")}${imgs.length>4?`<button type="button" class="vh-mt more" data-mj="4">+${imgs.length-4}</button>`:""}</div>`:""}${cert}${vhMapFig(p)}${body}${sib}${fork}</article>`;
+      ${facts?`<div class="vh-facts">${facts}</div>`:""}${imgs.length?`<div class="vh-media">${imgs.slice(0,4).map((m,j)=>`<button type="button" class="vh-mt" data-mj="${j}" title="${slEsc(mediaName(m))}"><img loading="lazy" src="${slEsc(m.bestand)}" alt=""></button>`).join("")}${imgs.length>4?`<button type="button" class="vh-mt more" data-mj="4">+${imgs.length-4}</button>`:""}</div>`:""}${cert}${vhMapFig(p,mapSeen)}${body}${sib}${fork}</article>`;
     ch.querySelector(`.vh-nm[data-i]`).onclick=()=>slSheet(i,child,code,path[0]);
     ch.querySelectorAll(".vh-mt").forEach(b=>b.onclick=()=>mediaView(imgs,+b.dataset.mj));
     ch.querySelectorAll(".vh-fimg").forEach(b=>b.onclick=()=>mediaView(vhScanItems(b.dataset.tgimg,b.dataset.scan,b.dataset.tgt),0));
