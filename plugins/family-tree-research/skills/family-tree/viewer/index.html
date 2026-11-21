@@ -750,7 +750,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.24",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.25",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1959,7 +1959,7 @@ function drawFamilie(){
    small overview in the corner (red box = the detail). A far move: a route map (curved red dotted line, open circle at the place the
    trail came from, pin at the new place, distance halfway); above GLOBE_KM a paper globe. Precision "regio"/"land": no pin, the caption
    says the exact spot is unknown. All numbers to tune are here. */
-const MAP={FAR_KM:300,SAME_KM:10,DETAIL_KM:120,OVER_KM:1500,GLOBE_KM:5000,REGIO_KM:320,LAND_KM:1800,BEND:.22,
+const MAP={FAR_KM:300,SAME_KM:1,DETAIL_KM:120,NEAR_X:5,NEAR_MIN_KM:8,OVER_KM:1500,GLOBE_KM:5000,REGIO_KM:320,LAND_KM:1800,BEND:.22,
   W:360,H:360,IW:128,IH:104,PAD:.3,MINPX:.7,
   pap:"#f3ead6",ink:"#5b4630",red:"#b3342b",sea:"#b9a684",bord:"#8c7558",soft:"#e8dcc0",lab:"#7d6849",
   font:"'Iowan Old Style','Palatino','Georgia',serif"};
@@ -1972,8 +1972,18 @@ function mapHas(){return !!(D&&D.coordinaten&&D.landkaart)}
 function mapKm(a,b){const r=Math.PI/180,p1=a.lat*r,p2=b.lat*r,dl=(b.lon-a.lon)*r;
   return Math.round(6371*Math.acos(Math.min(1,Math.sin(p1)*Math.sin(p2)+Math.cos(p1)*Math.cos(p2)*Math.cos(dl))))}
 function mapNum(k){return String(k).replace(/\B(?=(\d{3})+(?!\d))/g,LANG==="nl"?".":",")}
-function mapName(pl){return String(pl||"").split(",")[0].replace(/\s*\(.*?\)\s*/g," ").trim()}
-function mapSub(pl){const a=String(pl||"").split(",").map(x=>x.trim()).filter(Boolean);return a.slice(1).join(", ")}
+/* a place name is "town, province, country"; with four or more parts the first ones are a street or address in that town
+   ("Rapenburg, Leiden, Zuid-Holland, Nederland"): the town is then the third part from the end */
+function mapParts(pl){return String(pl||"").split(",").map(x=>x.trim()).filter(Boolean)}
+function mapTownIx(a){return a.length>=4?a.length-3:0}
+function mapName(pl){const a=mapParts(pl);return (a[mapTownIx(a)]||"").replace(/\s*\(.*?\)\s*/g," ").trim()}
+function mapSub(pl){const a=mapParts(pl);return a.slice(mapTownIx(a)+1).join(", ")}
+/* the same place: the same core name (Katwijk = Katwijk aan Zee = Katwijk aan de Rijn; Den Haag = 's-Gravenhage via MAP_ALIAS), or almost the same
+   spot (within MAP.SAME_KM). Neighbouring villages a few km apart are different places. */
+const MAP_ALIAS={"'s-gravenhage":"den haag","s-gravenhage":"den haag","the hague":"den haag","'s-hertogenbosch":"den bosch","s-hertogenbosch":"den bosch"};
+function mapKey(q){let t=NORM(mapName(q.n)).replace(/\s+/g," ").trim();t=MAP_ALIAS[t]||t;const a=mapParts(q.n);
+  return t.replace(/\s+(aan|op) (de |den |het )?[\w-]+$|\s+(binnen|buiten)$/,"")+(a.length>1?"|"+NORM(a[a.length-1]):"")}
+function mapSame(a,b){return !!a&&!!b&&(mapKey(a)===mapKey(b)||mapKm(a,b)<MAP.SAME_KM)}
 /* Natural Earth from data.json, decoded once: rings of [lon, lat] with their box */
 function mapGeo(){if(MAP_GEO)return MAP_GEO;const L=D.landkaart,dec=(r,q)=>{const p=[];let x=0,y=0,x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
     for(let i=0;i+1<r.length;i+=2){x+=r[i];y+=r[i+1];const a=x/q,b=y/q;p.push([a,b]);if(a<x0)x0=a;if(a>x1)x1=a;if(b<y0)y0=b;if(b>y1)y1=b}return {p,b:[x0,y0,x1,y1]}};
@@ -2035,10 +2045,12 @@ function mapLabels(pts,taken){let s="";for(const q of pts){if(q.x<12||q.x>MAP.W-
     const w=q.n.length*6.5,free=(x0,y)=>x0>10&&x0+w<MAP.W-10&&!taken.some(o=>x0<o[0]+80&&x0+w>o[0]-6&&Math.abs(o[1]-y)<14);
     const opts=[[q.x+12,q.y+4,"start",q.x+12],[q.x-8,q.y+4,"end",q.x-8-w],[q.x,q.y+17,"middle",q.x-w/2],[q.x,q.y-9,"middle",q.x-w/2]],o=opts.find(([,y,,x0])=>free(x0,y));
     if(!o)continue;taken.push([o[3],o[1]]);s+=mapLabel(o[0],o[1],q.n,{size:12,anchor:o[2]})}return s}
-/* near: the detail map around t; "others" are small ink points (with names when there is room) */
-function mapDetail(t,others){const km=t.prec==="land"?MAP.LAND_KM:t.prec==="regio"?MAP.REGIO_KM:MAP.DETAIL_KM,p=mapFlat(t.lon,t.lat,km,MAP.W,MAP.H),id="mh"+(++MAP_UID);
+/* near: the detail map around t; "others" are small ink points (with names when there is room). "near" = the distance of a short move:
+   the map then zooms in to NEAR_X times that distance (at least NEAR_MIN_KM), so two villages a few km apart don't sit on top of each other */
+function mapDetail(t,others,near){const km=t.prec==="land"?MAP.LAND_KM:t.prec==="regio"?MAP.REGIO_KM:near?Math.max(MAP.NEAR_MIN_KM,Math.min(MAP.DETAIL_KM,near*MAP.NEAR_X)):MAP.DETAIL_KM,p=mapFlat(t.lon,t.lat,km,MAP.W,MAP.H),id="mh"+(++MAP_UID);
   let s=`<defs>${mapHatch(id)}</defs>`+mapBase(p,MAP.W,MAP.H,{fill:MAP.pap,sea:`url(#${id})`,borders:1});
-  const [x,y]=p(t.lon,t.lat),taken=[[x+40,y-8]];const pts=(others||[]).map(o=>{const [a,b]=p(o.lon,o.lat);return {x:a,y:b,n:mapName(o.n)}}).filter(q=>q.x>0&&q.x<MAP.W&&q.y>0&&q.y<MAP.H&&Math.hypot(q.x-x,q.y-y)>8);
+  /* the pin and its name (right of it, ~9 px per letter) are taken before the other names look for room */
+  const [x,y]=p(t.lon,t.lat),tw=mapName(t.n).length*9,taken=[[x-24,y-14],[x-24,y],[x-24,y+14],[x+12,y-8]].concat(tw>80?[[x+12+tw-80,y-8]]:[]);const pts=(others||[]).map(o=>{const [a,b]=p(o.lon,o.lat);return {x:a,y:b,n:mapName(o.n)}}).filter(q=>q.x>0&&q.x<MAP.W&&q.y>0&&q.y<MAP.H&&Math.hypot(q.x-x,q.y-y)>8);
   pts.forEach(q=>s+=mapDot(q.x,q.y));s+=mapLabels(pts,taken);
   if(t.prec==="plaats")s+=mapPin(x,y)+mapPlaceLabel(x,y,mapName(t.n),true);
   else s+=mapLabel(x,y,mapName(t.n),{size:17,bold:1});
@@ -2071,7 +2083,7 @@ function mapRoute(from,t){const km=mapKm(from,t),prj=mapFit([from,t],400),id="mh
   s+=(t.prec==="plaats"?mapPin(x1,y1):mapDot(x1,y1,4))+mapPlaceLabel(x1,y1,mapName(t.n),true,[[fx,fx+fw,y0+4],[L.mx-30,L.mx+30,L.my+4]])+L.km;
   return mapSvg(s+mapFrame(MAP.W,MAP.H),mapName(from.n)+" → "+mapName(t.n))}
 /* one map for a new place in the trail: a route when the trail comes from far, else the detail map */
-function mapFor(t,from,others){return from&&mapKm(from,t)>=MAP.FAR_KM?mapRoute(from,t):mapDetail(t,others)}
+function mapFor(t,from,others){const d=from?mapKm(from,t):0;return d>=MAP.FAR_KM?mapRoute(from,t):mapDetail(t,others,d||0)}
 /* the first paragraph that names a place: the town, or for a move abroad also the country ("Australie" matches "Australië") */
 function mapMention(paras,pl,home){const t=NORM(mapName(pl)),last=a=>NORM(String(a||"").split(",").pop()).trim(),c=last(pl),abroad=String(pl).includes(",")&&home&&c!==last(home);
   return paras.findIndex(x=>{const n=NORM(x);return n.includes(t)||(abroad&&c.length>3&&n.includes(c))})}
@@ -2136,7 +2148,7 @@ function swPickEvents(evs){const sc=x=>{const li=document.createElement("ul");li
   return evs.map((x,j)=>({x,j,s:sc(x)})).sort((a,b)=>b.s-a.s||a.j-b.j).slice(0,SW_EV_MAX).sort((a,b)=>a.j-b.j).map(o=>o.x)}
 function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
   const path=SW.path,root=path[0],rfn=vhFn(P[root]),flags={dtb:false},seen=new Set();seen.assign=vhAssignImages(path);
-  /* maps: one Cards run is one chain; a place gets a map the first time it appears in it (within MAP.SAME_KM counts as the same place), a move from far always */
+  /* maps: one Cards run is one chain; a place gets a map the first time it appears in it (the same place by name, see mapSame), a move from far always */
   const MS={seen:[],here:null};
   SW.gens=path.map((i,k)=>{const p=P[i],child=k?path[k-1]:null,code=vhCode(path,k),fn=vhFn(p),cards=[];
     const lc=k===0?"#b48a3c":(LINE_COL[code.length>=2?code.slice(0,2):(code==="v"?"vv":"mv")]||"#b48a3c");
@@ -2213,18 +2225,18 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     const merged=[];for(const c of mid){const l=merged[merged.length-1];if(c.kind==="events"&&l&&l.kind==="events"&&l.len+c.len<=220){l.li+=c.li;l.len+=c.len;l.html=`<div class="sw-k">${slEsc(l.head)}</div><ul class="sw-ev">${l.li}</ul>`}else merged.push(c)}
     return {i,lc,fn,cards:swOverlay(head.concat(merged,tail))}})}
 /* the map moments of one person on the trail (Story and Cards alike): walking through their life from where the trail was (MS.here = the birthplace
-   of the person before), every place that is new on the trail (MS.seen; within MAP.SAME_KM counts as the same place) and every move of MAP.FAR_KM
+   of the person before), every place that is new on the trail (MS.seen; the same place = mapSame: same core name or within MAP.SAME_KM) and every move of MAP.FAR_KM
    or more gets a map, each at its own moment. A country or region alone ("Australie") gives way to a town in that country later in life (and gives it its year). */
 function mapEvents(p,MS){if(!mapHas()||p.living)return [];
   const plk=(p.verhaal_plekken||[]).map(x=>{const c=mapCo(x.plaats);return c&&Object.assign(c,{al:x.alinea,ka:x.kaart,y:x.jaar})}).filter(Boolean);
   let st=mapStops(p);st=st.concat(plk.filter(q=>!st.some(o=>o.n===q.n)));
   const land=q=>NORM(String(q.n).split(",").pop()).trim();
   st=st.filter((q,i)=>{if(q.prec==="plaats")return true;const nx=st.slice(i+1).find(o=>o.prec==="plaats"&&land(o)===land(q));if(nx&&q.y!=null)nx.y0=Math.min(nx.y0!=null?nx.y0:Infinity,q.y);return !nx});
-  const isNew=q=>!MS.seen.some(o=>mapKm(o,q)<MAP.SAME_KM),same=(a,b)=>a&&b&&mapKm(a,b)<MAP.SAME_KM,ev=[];let prev=MS.here;
+  const isNew=q=>!MS.seen.some(o=>mapSame(o,q)),same=mapSame,ev=[];let prev=MS.here;
   st.forEach(q=>{const d=prev?mapKm(prev,q):0,nw=isNew(q),dup=ev.some(e=>e.from&&prev&&((same(e.from,prev)&&same(e.t,q))||(same(e.from,q)&&same(e.t,prev))));
     /* a birthplace map comes before the story's first paragraph of that year (half a year earlier) */
     if((nw||d>=MAP.FAR_KM)&&!dup)ev.push({t:q,from:prev,d,far:d>=MAP.FAR_KM,nw,y:q.y0!=null?q.y0:q.y!=null?q.y-(q.k==="b"?.5:0):p.by||null});
-    if(nw)MS.seen.push(q);if(!prev||d>=MAP.SAME_KM)prev=q});
+    if(nw)MS.seen.push(q);if(!prev||!mapSame(prev,q))prev=q});
   MS.here=mapCo(p.bplac)||st[0]||MS.here;return ev}
 /* the map and its caption parts for one moment */
 function mapOf(e){return mapFor(e.t,e.from,e.far||!e.from?[]:[e.from])}
