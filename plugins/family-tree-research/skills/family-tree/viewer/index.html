@@ -231,6 +231,7 @@ svg text{font-family:Inter,sans-serif}
 .sheet .ct{margin:12px 0 4px;padding:10px 12px;background:var(--secondary);border-radius:calc(var(--radius) - 2px);font-size:13px;line-height:1.5;word-break:break-word}
 .sheet .ct a{color:var(--foreground)}
 .sheet>footer{flex-direction:row!important;flex-wrap:wrap;padding:16px 22px 18px!important}
+.btn.vhgo{background:var(--gold2);color:var(--walnut);border-color:var(--gold2)}.btn.vhgo:hover{background:#e6c27c;border-color:#e6c27c}
 .sbtn{justify-content:flex-start!important;min-width:250px;color:var(--muted-foreground)!important;font-weight:400!important;gap:8px!important}
 .sbtn .kbd{margin-left:auto;font-size:11px;border:1px solid var(--border);border-radius:5px;padding:0 6px;color:var(--muted-foreground)}
 #back:disabled{display:none}
@@ -713,7 +714,7 @@ nl:{loading:"Stamboom laden…",loadError:"Kon de stamboom niet laden ({msg}).",
  summary:"{name} · {years} · {n} voorouders over {g} generaties",summary1:"{name} · {years} · {n} voorouders over 1 generatie",summaryNone:"{name} · {years} · nog geen voorouders gevonden",
  l_vv:"vaders vader",l_vm:"vaders moeder",l_mv:"moeders vader",l_mm:"moeders moeder",unknown:"Onbekend",unknownL:"onbekend",notAssessed:"Geen beoordeling",
  cert_zeker:"Zeker",cert_waarschijnlijk:"Waarschijnlijk",cert_mogelijk:"Mogelijk",cert_onbekend:"Onbekend / niet onderzocht",cert_fout:"Fout gevonden",cert_niet:"Niet gecheckt",
- before1600:"vóór 1600",tipClick:"Klik om startpersoon te maken",relChildTip:"Relatie met kind: ",occursFan:"Komt {n}× voor in deze waaier",
+ before1600:"vóór 1600",tipClick:"Klik voor meer over deze persoon",readStory:"Lees het verhaal",relChildTip:"Relatie met kind: ",occursFan:"Komt {n}× voor in deze waaier",
  fanParents:"ouders",fanGrand:"grootouders",fanGen:"{n}e gen.",lg_dup:"komt vaker voor (kwartierverlies)",lg_inlaw:"aangetrouwd",lg_missing:"nog niet gevonden",
  hint_waaier:"Beweeg over een vak voor details, klik om die persoon in het midden te zetten. Een rood stipje betekent dat deze voorouder meerdere keren in de waaier staat.",
  hint_kosmos:"Grote stippen zijn directe voorouders, kleine stippen hun andere nakomelingen (ooms, tantes, neven, nichten). Beweeg over een stip om de directe familie te zien.",
@@ -740,7 +741,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  summary:"{name} · {years} · {n} ancestors across {g} generations",summary1:"{name} · {years} · {n} ancestors across 1 generation",summaryNone:"{name} · {years} · no ancestors found yet",
  l_vv:"father's father",l_vm:"father's mother",l_mv:"mother's father",l_mm:"mother's mother",unknown:"Unknown",unknownL:"unknown",notAssessed:"Not assessed",
  cert_zeker:"Certain",cert_waarschijnlijk:"Probable",cert_mogelijk:"Possible",cert_onbekend:"Unknown / not researched",cert_fout:"Error found",cert_niet:"Not checked",
- before1600:"before 1600",tipClick:"Click to make start person",relChildTip:"Relation to child: ",occursFan:"Appears {n}× in this fan",
+ before1600:"before 1600",tipClick:"Click for more about this person",readStory:"Read the story",relChildTip:"Relation to child: ",occursFan:"Appears {n}× in this fan",
  fanParents:"parents",fanGrand:"grandparents",fanGen:"gen. {n}",lg_dup:"appears more than once (pedigree collapse)",lg_inlaw:"related by marriage",lg_missing:"not found yet",
  hint_waaier:"Hover over a segment for details, click to put that person in the centre. A red dot means this ancestor appears more than once in the fan.",
  hint_kosmos:"Large dots are direct ancestors, small dots their other descendants (uncles, aunts, cousins). Hover over a dot to see the immediate family.",
@@ -761,7 +762,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.33",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.34",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -939,7 +940,7 @@ function drawFan(){
     node.addEventListener("mouseenter",e=>{showTip(e,i,extra);(segsById.get(i)||[]).forEach(s=>{s.setAttribute("stroke","#c0392b");s.setAttribute("stroke-width",2.5)})});
     node.addEventListener("mousemove",moveTip);
     node.addEventListener("mouseleave",()=>{hideTip();(segsById.get(i)||[]).forEach(s=>{s.setAttribute("stroke","#fffdf9");s.setAttribute("stroke-width",s.dataset.sw||1)})});
-    node.addEventListener("click",()=>setRoot(i));
+    node.addEventListener("click",()=>{hideTip();personSheet(i)});
   }
   // move circles that mark duplicates after segments; already in gTxt
   return svg;
@@ -1010,7 +1011,7 @@ function drawCosmos(){
         nodeEls.forEach((el2,x)=>el2.style.opacity=keep.has(x)?1:.25)});
     c.addEventListener("mousemove",moveTip);
     c.addEventListener("mouseleave",()=>{hideTip();edges.forEach(([e])=>e.style.opacity="");nodeEls.forEach(e=>e.style.opacity="")});
-    c.addEventListener("click",()=>setRoot(n.x));
+    c.addEventListener("click",()=>{hideTip();personSheet(n.x)});
   });
   const tr=el("text",{x:R.px,y:R.py-15,"text-anchor":"middle","font-size":13,"font-weight":600,fill:"#2a2622","paint-order":"stroke",stroke:"#fffdf9","stroke-width":4},svg);tr.textContent=short(P[root]);
   // surname labels for grandparents
@@ -1099,10 +1100,10 @@ function drawTijdlijn(){
       <div class="ln">${p.bdate?"° "+p.bdate:n.est&&!p.living?_t("estBorn",{y:n.y}):""}${p.bplac?" · "+spl(p.bplac):""}</div>${p.ddate||p.dplac?`<div class="ln">† ${p.ddate||"?"}${p.dplac?" · "+spl(p.dplac):""}${p.by&&p.dy?" "+_t("age",{n:p.dy-p.by}):""}</div>`:""}
       ${c?`<div class="ln"><span class="exc" style="background:${CERT[c[0]]||"#bfb6a8"}"></span>${_t("relToChild")}${certLabel(c[0])}</div>`:""}
       ${g>0?`<table><tr><th>${relName}</th><th>${_t("th_exp")}</th><th>${_t("th_found")}</th><th>${_t("th_dup")}</th><th>${_t("th_miss")}</th></tr><tr><td>${_t("genN",{n:g})}</td><td>${exp}</td><td>${found}</td><td>${found-un}</td><td>${exp-found}</td></tr></table>`:""}
-      <div class="btns">${n.i!==base?`<button class="btn" data-variant="outline" data-size="sm" data-a="root">${_t("makeRoot")}</button>`:""}${n.i!==base?`<button class="btn" data-size="sm" data-a="kw">${_t("openLine")}</button>`:""}</div>`;
+      <div class="btns">${vhBtn("sm")}${n.i!==base?`<button class="btn" data-variant="outline" data-size="sm" data-a="root">${_t("makeRoot")}</button>`:""}${n.i!==base?`<button class="btn" data-variant="outline" data-size="sm" data-a="kw">${_t("openLine")}</button>`:""}</div>`;
     pop.style.display="";placePop(n);
     pop.querySelector(".x").onclick=e=>{e.stopPropagation();close()};
-    pop.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{if(b.dataset.a==="root")setRoot(n.i);else{slOpen(n.i)}})}
+    pop.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const a=b.dataset.a;if(a==="story"){close();vhOpen(n.i)}else if(a==="root")setRoot(n.i);else{slOpen(n.i)}})}
   function placePop(n){const x=(PAD+n.x)*Z,y=Y(n.y)*Z,WW=W*Z,HH=H*Z;let L=x+14,T=y-10;if(L+300>WW)L=x-314;if(T+pop.offsetHeight>HH)T=HH-pop.offsetHeight-6;const pw=pop.offsetWidth,ph=pop.offsetHeight;L=Math.min(Math.max(L,sc.scrollLeft+50),sc.scrollLeft+sc.clientWidth-pw-8);T=Math.min(Math.max(T,sc.scrollTop+6),sc.scrollTop+sc.clientHeight-ph-6);pop.style.left=L+"px";pop.style.top=T+"px"}
   function close(){pop.style.display="none";hl.innerHTML="";openN=null}
   svg.addEventListener("click",close);
@@ -1190,7 +1191,7 @@ function slDrawer(){
 function slSheet(i,child,code,base,act){
   const dlg=slDrawer();navPush({sheet:1});
   const p=P[i],hasChild=child!=null&&child>=0;
-  const rel=hasChild?(P[child].f===i?_t("rel_fatherOf",{name:short(P[child])}):_t("rel_motherOf",{name:short(P[child])})):(i===base?_t("rel_start"):_t("rel_sibOf",{name:short(P[base])}));
+  const rel=hasChild?(P[child].f===i?_t("rel_fatherOf",{name:short(P[child])}):_t("rel_motherOf",{name:short(P[child])})):(i===base?_t("rel_start"):famSibs(base).includes(i)?_t("rel_sibOf",{name:short(P[base])}):"");
   const num=code?parseInt("1"+code.replace(/v/g,"0").replace(/m/g,"1"),2):0;
   const c=hasChild?certOf(child,i):null;
   const line=(sym,d,pl)=>d||pl?`<div class="ln">${sym} ${[d,pl].filter(Boolean).map(slEsc).join(" · ")}</div>`:"";
@@ -1198,13 +1199,20 @@ function slSheet(i,child,code,base,act){
     <header><p class="rel">${rel}${code?_t("genKw",{g:code.length,k:num}):""}</p><h2 id="slsheet-t">${slEsc(p.n)}</h2></header>
     <section>${line("°",p.bdate,p.bplac)}${line("†",p.ddate,p.dplac)}${jobLine(p)}
     ${c?`<div class="ct"><b style="color:${CERT[c[0]]||"#7a7068"}">${slEsc(certLabel(c[0]))}</b>${_t("relWith",{name:slEsc(short(P[child]))})}${c[3]&&!/^(biologisch|biological)$/i.test(c[3])?`<br><b style="color:#9c7633">♥ ${slEsc(_t("vh_adopt_par",Object.assign({child:vhFn(P[child])},vhPro(p))))}</b>`:""}${c[1]?`<br>${_t("source")}${slLink(c[1])}`:""}${c[2]?`<br>${slLink(c[2])}`:""}</div>`:hasChild?`<div class="ct">${_t("notAssessedRel",{name:slEsc(short(P[child]))})}</div>`:""}</section>
-    <footer>${act?`<button type="button" class="btn" data-a="act">${act.label}</button>`:""}${i!==base?`<button type="button" class="btn" data-variant="outline" data-a="root">${_t("makeRoot")}</button>`:""}<button type="button" class="btn" data-variant="ghost" data-a="x">${_t("close")}</button></footer></div>`;
+    <footer>${vhBtn()}${act?`<button type="button" class="btn" data-a="act">${act.label}</button>`:""}${i!==base?`<button type="button" class="btn" data-variant="outline" data-a="root">${_t("makeRoot")}</button>`:""}<button type="button" class="btn" data-variant="ghost" data-a="x">${_t("close")}</button></footer></div>`;
   const go=fn=>{dlg.close();setTimeout(fn,60)};
   dlg.querySelector('[data-a="x"]').onclick=()=>dlg.close();
   const rb=dlg.querySelector('[data-a="root"]');if(rb)rb.onclick=()=>go(()=>{setRoot(i);scrollTo(0,0)});
   const ab=dlg.querySelector('[data-a="act"]');if(ab)ab.onclick=()=>go(act.fn);
-  mediaAdd(dlg,p);if(!dlg.open)dlg.showModal();
+  vhBtnWire(dlg,i,go);mediaAdd(dlg,p);if(!dlg.open)dlg.showModal();
 }
+/* "Read the story": first button on every person card outside Story; opens Story at that person (vhOpen) */
+function vhBtn(size){return state.view==="verhaal"?"":`<button type="button" class="btn vhgo"${size?` data-size="${size}"`:""} data-a="story">${_t("readStory")}</button>`}
+function vhBtnWire(dlg,i,go){const b=dlg.querySelector('[data-a="story"]');if(b)b.onclick=()=>go(()=>{vhOpen(i);scrollTo(0,0)})}
+/* person card for views whose tap used to make someone the start person (Fan, Cosmos): ancestors get their line code and the child they belong to */
+function personSheet(i){const r=state.root,pth=i===r?null:pathTo(r,i);
+  if(pth&&pth.length>1)slSheet(i,pth[pth.length-2],codeOf(pth),r)
+  else slSheet(i,null,"",r)}
 /* ================= VERHAAL (kies-je-eigen-pad terug in de tijd) ================= */
 Object.assign(I18N.nl,{v_verhaal:"Verhaal",
  vh_title:"Het verhaal van {name}",
@@ -1865,7 +1873,7 @@ function famSheet(i,info){
   const cf=p.f>=0?certOf(i,p.f):null,cm=p.m>=0?certOf(i,p.m):null;
   const crow=(lab,q,c)=>q>=0?`<div>${lab}: ${slEsc(short(P[q]))}${c?` · <b style="color:${CERT[c[0]]||"#7a7068"}">${slEsc(certLabel(c[0]))}</b>${c[1]?` · ${slLink(c[1])}`:""}`:""}</div>`:"";
   const hasPar=parentsOf(i).length>0,ns=famSibs(i).length;
-  const btns=[];
+  const btns=[vhBtn()];
   if(info.line&&hasPar)btns.push(`<button type="button" class="btn" data-a="up">${F.up.has(i)?_t("hideParents"):_t("showParents")}</button>`);
   if((info.line||i===r)&&ns)btns.push(`<button type="button" class="btn" data-variant="outline" data-a="sib">${F.sib.has(i)?(ns===1?_t("hideSib1"):_t("hideSibs")):(ns===1?_t("showSib1"):_t("showSibs",{n:ns}))}</button>`);
   if(i!==r)btns.push(`<button type="button" class="btn" data-variant="outline" data-a="root">${_t("makeRoot")}</button>`);
@@ -1878,7 +1886,7 @@ function famSheet(i,info){
   if(b("up"))b("up").onclick=()=>{famAnchor(i,F.up.has(i)?null:"up");go(()=>{F.up.has(i)?F.up.delete(i):F.up.add(i);F.focus=i;render()})};
   if(b("sib"))b("sib").onclick=()=>{famAnchor(i,null);go(()=>{F.sib.has(i)?F.sib.delete(i):F.sib.add(i);F.focus=i;render()})};
   if(b("root"))b("root").onclick=()=>go(()=>{setRootHard(i)});
-  mediaAdd(dlg,p);if(!dlg.open)dlg.showModal();
+  vhBtnWire(dlg,i,go);mediaAdd(dlg,p);if(!dlg.open)dlg.showModal();
 }
 /* Familie: bij uit-/inklappen blijft de aangeklikte kaart op dezelfde plek op het scherm staan */
 function famAnchor(i,dir){const F=famState(),sc=document.querySelector(".famsc");F.anchor=null;if(!sc)return;
