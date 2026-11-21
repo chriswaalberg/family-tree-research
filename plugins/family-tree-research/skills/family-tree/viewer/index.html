@@ -761,7 +761,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.30",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.31",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -894,8 +894,10 @@ function drawFan(){
       const [x0,y0]=pol(b0,ri+1),[x1,y1]=pol(b1,ri+1),[x2,y2]=pol(b1,ro-1),[x3,y3]=pol(b0,ro-1);
       const large=(b1-b0)>Math.PI?1:0;
       const col=colorFor(i,g,slot,child);
-      const op=mode==="lijn"&&g>=2?Math.max(.45,1-(g-2)*0.08):1;
-      const path=el("path",{d:`M${x0},${y0}A${ri+1},${ri+1} 0 ${large} 1 ${x1},${y1}L${x2},${y2}A${ro-1},${ro-1} 0 ${large} 0 ${x3},${y3}Z`,fill:col,"fill-opacity":op,stroke:"#fffdf9","stroke-width":1,class:"seg"},gSeg);if(AD.has(i))el("path",{d:path.getAttribute("d"),fill:"url(#adoptHatch)",stroke:ADOPT_COL,"stroke-width":1.2,"pointer-events":"none"},gSeg);
+      const op=mode==="lijn"&&g>=2?Math.max(.72,1-(g-2)*0.06):1;
+      // thin outer slivers: a fixed 1px white edge would cover them, so the edge shrinks with the slice
+      const sw=Math.min(1,ri*(a1-a0)/8);
+      const path=el("path",{d:`M${x0},${y0}A${ri+1},${ri+1} 0 ${large} 1 ${x1},${y1}L${x2},${y2}A${ro-1},${ro-1} 0 ${large} 0 ${x3},${y3}Z`,fill:col,"fill-opacity":op,stroke:"#fffdf9","stroke-width":sw,"data-sw":sw,class:"seg"},gSeg);if(AD.has(i))el("path",{d:path.getAttribute("d"),fill:"url(#adoptHatch)",stroke:ADOPT_COL,"stroke-width":1.2,"pointer-events":"none"},gSeg);
       if(!segsById.has(i))segsById.set(i,[]);segsById.get(i).push(path);
       const c=certOf(child,i);
       hook(path,i,(c?`<span class="mut">${_t("relChildTip")}</span>${certLabel(c[0])}${c[2]?" — "+c[2]:""}<br>`:"")+((occ.get(i)>1)?`<span style="color:#f2a093">${_t("occursFan",{n:occ.get(i)})}</span><br>`:""));
@@ -936,7 +938,7 @@ function drawFan(){
   function hook(node,i,extra){
     node.addEventListener("mouseenter",e=>{showTip(e,i,extra);(segsById.get(i)||[]).forEach(s=>{s.setAttribute("stroke","#c0392b");s.setAttribute("stroke-width",2.5)})});
     node.addEventListener("mousemove",moveTip);
-    node.addEventListener("mouseleave",()=>{hideTip();(segsById.get(i)||[]).forEach(s=>{s.setAttribute("stroke","#fffdf9");s.setAttribute("stroke-width",1)})});
+    node.addEventListener("mouseleave",()=>{hideTip();(segsById.get(i)||[]).forEach(s=>{s.setAttribute("stroke","#fffdf9");s.setAttribute("stroke-width",s.dataset.sw||1)})});
     node.addEventListener("click",()=>setRoot(i));
   }
   // move circles that mark duplicates after segments; already in gTxt
