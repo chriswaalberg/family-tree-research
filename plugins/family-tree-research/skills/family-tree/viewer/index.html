@@ -762,7 +762,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.35",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.36",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1103,7 +1103,7 @@ function drawTijdlijn(){
       <div class="btns">${vhBtn(n.i,"sm")}${n.i!==base?`<button class="btn" data-variant="outline" data-size="sm" data-a="root">${_t("makeRoot")}</button>`:""}${n.i!==base?`<button class="btn" data-variant="outline" data-size="sm" data-a="kw">${_t("openLine")}</button>`:""}</div>`;
     pop.style.display="";placePop(n);
     pop.querySelector(".x").onclick=e=>{e.stopPropagation();close()};
-    pop.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const a=b.dataset.a;if(a==="story"){close();vhOpen(n.i)}else if(a==="root")setRoot(n.i);else{slOpen(n.i)}})}
+    pop.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const a=b.dataset.a;if(a==="story"){close();setTimeout(()=>vhOpen(n.i),60)}else if(a==="root")setRoot(n.i);else{slOpen(n.i)}})}
   function placePop(n){const x=(PAD+n.x)*Z,y=Y(n.y)*Z,WW=W*Z,HH=H*Z;let L=x+14,T=y-10;if(L+300>WW)L=x-314;if(T+pop.offsetHeight>HH)T=HH-pop.offsetHeight-6;const pw=pop.offsetWidth,ph=pop.offsetHeight;L=Math.min(Math.max(L,sc.scrollLeft+50),sc.scrollLeft+sc.clientWidth-pw-8);T=Math.min(Math.max(T,sc.scrollTop+6),sc.scrollTop+sc.clientHeight-ph-6);pop.style.left=L+"px";pop.style.top=T+"px"}
   function close(){pop.style.display="none";hl.innerHTML="";openN=null}
   svg.addEventListener("click",close);
@@ -1206,10 +1206,11 @@ function slSheet(i,child,code,base,act){
   const ab=dlg.querySelector('[data-a="act"]');if(ab)ab.onclick=()=>go(act.fn);
   vhBtnWire(dlg,i,go);mediaAdd(dlg,p);if(!dlg.open)dlg.showModal();
 }
-/* "Read the story": first button on every person card outside Story; opens Story at that person (vhOpen). Only for people on a trail from the
-   current start person (vhRoute(i,true)), so it never changes the start person; nobody else gets the button */
-function vhBtn(i,size){return state.view==="verhaal"||!vhRoute(i,true)?"":`<button type="button" class="btn vhgo"${size?` data-size="${size}"`:""} data-a="story">${_t("readStory")}</button>`}
-function vhBtnWire(dlg,i,go){const b=dlg.querySelector('[data-a="story"]');if(b)b.onclick=()=>go(()=>{vhOpen(i);scrollTo(0,0)})}
+/* "Read the story": first button on every person card outside Story; opens Story at that person (vhOpen). Only for people Story shows from the
+   current start person (vhRoute(i,true)), so it never changes the start person: ancestors on a trail, and their brothers and sisters only with an
+   own story (the "Remarkable relative" aside; without one they appear nowhere in Story) */
+function vhBtn(i,size){const r=state.view==="verhaal"?null:vhRoute(i,true);return !r||(r.sib!=null&&!vhHas(P[i]))?"":`<button type="button" class="btn vhgo"${size?` data-size="${size}"`:""} data-a="story">${_t("readStory")}</button>`}
+function vhBtnWire(dlg,i,go){const b=dlg.querySelector('[data-a="story"]');if(b)b.onclick=()=>go(()=>vhOpen(i))}
 /* person card for views whose tap used to make someone the start person (Fan, Cosmos): ancestors get their line code and the child they belong to */
 function personSheet(i){const r=state.root,pth=i===r?null:pathTo(r,i);
   if(pth&&pth.length>1)slSheet(i,pth[pth.length-2],codeOf(pth),r)
