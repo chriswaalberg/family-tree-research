@@ -761,7 +761,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.28",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.29",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1208,7 +1208,7 @@ Object.assign(I18N.nl,{v_verhaal:"Verhaal",
  vh_title:"Het verhaal van {name}",
  map_k:"Op de kaart",map_from:"{km} km van {from}",map_vague:"precieze plek onbekend",map_note:"Kustlijnen en grenzen van nu (Natural Earth).",
  vh_intro:"Stap voor stap terug in de tijd. Bij elke persoon kies je wiens verhaal je volgt: dat van de vader of dat van de moeder. Het gouden sterretje wijst het rijkste spoor aan: het verst terug, best onderbouwd en met de meeste verhalen.",
- vh_auto:"Volg het rijkste spoor tot het eind",vh_restart:"Opnieuw beginnen",vh_pick:"✦ Interessante personen",vh_pick_rich:"Rijkste verhalen",vh_pick_old:"Oudste voorouders",vh_link:"Kopieer een link naar {name}",vh_link_ok:"Link gekopieerd",vh_link_frame:"Gekopieerd: {h} — plak dit achter het adres van deze pagina",vh_link_fail:"Kopieer deze link:",vh_route:"Je route",
+ vh_auto:"Volg het rijkste spoor tot het eind",vh_restart:"Opnieuw beginnen",vh_pick:"✦ Interessante personen",vh_pick_rich:"Rijkste verhalen",vh_pick_sib:"Broers en zussen van voorouders",vh_pick_old:"Oudste voorouders",vh_link:"Kopieer een link naar {name}",vh_link_ok:"Link gekopieerd",vh_link_frame:"Gekopieerd: {h} — plak dit achter het adres van deze pagina",vh_link_fail:"Kopieer deze link:",vh_route:"Je route",
  vh_step0:"Hier begint het",vh_stepN:"Stap {k} · {rel} van {root}",
  vh_begin:"Dit verhaal begint bij {fn}.",
  vh_born_dp:"{Fn} werd {date} geboren in {place}.",vh_born_d:"{Fn} werd {date} geboren.",vh_born_p:"{Fn} werd geboren in {place}.",vh_born_none:"Wanneer en waar {fn} geboren is, weten we nog niet.",
@@ -1234,7 +1234,7 @@ Object.assign(I18N.en,{v_verhaal:"Story",
  vh_title:"The story of {name}",
  map_k:"On the map",map_from:"{km} km from {from}",map_vague:"exact spot unknown",map_note:"Present-day coastlines and borders (Natural Earth).",
  vh_intro:"Step by step back in time. At every person you choose whose story to follow: the father's or the mother's. The golden star marks the richest trail: furthest back, best supported and with the most stories.",
- vh_auto:"Follow the richest trail to the end",vh_restart:"Start over",vh_pick:"✦ Interesting people",vh_pick_rich:"Richest stories",vh_pick_old:"Oldest ancestors",vh_link:"Copy a link to {name}",vh_link_ok:"Link copied",vh_link_frame:"Copied: {h} — paste it after the address of this page",vh_link_fail:"Copy this link:",vh_route:"Your route",
+ vh_auto:"Follow the richest trail to the end",vh_restart:"Start over",vh_pick:"✦ Interesting people",vh_pick_rich:"Richest stories",vh_pick_sib:"Brothers and sisters of ancestors",vh_pick_old:"Oldest ancestors",vh_link:"Copy a link to {name}",vh_link_ok:"Link copied",vh_link_frame:"Copied: {h} — paste it after the address of this page",vh_link_fail:"Copy this link:",vh_route:"Your route",
  vh_step0:"Where it begins",vh_stepN:"Step {k} · {rel} of {root}",
  vh_begin:"This story begins with {fn}.",
  vh_born_dp:"{Fn} was born {date} in {place}.",vh_born_d:"{Fn} was born {date}.",vh_born_p:"{Fn} was born in {place}.",vh_born_none:"We don't yet know when or where {fn} was born.",
@@ -1481,15 +1481,19 @@ function vhOpen(i,glide){const r=vhRoute(i);
   else if(i!==state.root){state.hist.push(state.root);state.root=i;state.vh=null}
   state.view="verhaal";render();
   if(r&&(r.path.length>1||r.sib!=null))vhRedraw(r.path.length-1,r.sib,glide)}
-/* interesting people: the longest own stories (images count too) and the earliest-born ancestors at the end of a line, both only when Story can reach them */
-let VH_PICK=null;
+/* interesting people, only people Story can reach: the longest own stories of ancestors (images count too), the longest own stories of brothers and sisters
+   of an ancestor (Story opens the trail to that ancestor; the label names them), and the earliest-born ancestors at the end of a line */
+let VH_PICK=null;const VH_PICK_N={rich:10,sib:5,old:6};
 function vhPickList(){if(VH_PICK&&VH_PICK.root===state.root)return VH_PICK;const ok=i=>!!vhRoute(i),anc=i=>{if(parentsOf(i).length||META.starts.some(x=>x.persoon===i)||i===state.root)return false;const r=vhRoute(i);return !!r&&r.sib==null}; /* oldest: ends of a line (no known parents) */
-  const rich=P.map((p,i)=>[i,vhHas(p)?lab(p.verhaal).length+400*(Array.isArray(p.verhaal_beelden)?p.verhaal_beelden.length:0):0]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).map(x=>x[0]).filter(ok).slice(0,8);
-  const old=P.map((p,i)=>[i,p.living?0:p.by||0]).filter(x=>x[1]>0).sort((a,b)=>a[1]-b[1]).map(x=>x[0]).filter(anc).slice(0,6);
-  return VH_PICK={root:state.root,rich,old}}
-function vhPickHtml(){const {rich,old}=vhPickList();if(!rich.length&&!old.length)return"";
-  const o=i=>`<option value="${i}">${slEsc(P[i].n)} (${slEsc(yrs(P[i]))})</option>`;
-  return `<select class="vh-pick" data-a="pick" aria-label="${slEsc(_t("vh_pick").replace(/^\W+/,""))}"><option value="">${slEsc(_t("vh_pick"))}</option>${rich.length?`<optgroup label="${slEsc(_t("vh_pick_rich"))}">${rich.map(o).join("")}</optgroup>`:""}${old.length?`<optgroup label="${slEsc(_t("vh_pick_old"))}">${old.map(o).join("")}</optgroup>`:""}</select>`}
+  const sto=P.map((p,i)=>[i,vhHas(p)?lab(p.verhaal).length+400*(Array.isArray(p.verhaal_beelden)?p.verhaal_beelden.length:0):0]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).map(x=>[x[0],vhRoute(x[0])]).filter(x=>x[1]);
+  const rich=sto.filter(x=>x[1].sib==null).map(x=>x[0]).slice(0,VH_PICK_N.rich),sib=sto.filter(x=>x[1].sib!=null).slice(0,VH_PICK_N.sib).map(x=>[x[0],x[1].path[x[1].path.length-1]]);
+  const old=P.map((p,i)=>[i,p.living?0:p.by||0]).filter(x=>x[1]>0).sort((a,b)=>a[1]-b[1]).map(x=>x[0]).filter(anc).slice(0,VH_PICK_N.old);
+  return VH_PICK={root:state.root,rich,sib,old}}
+function vhPickHtml(){const {rich,sib,old}=vhPickList();if(!rich.length&&!sib.length&&!old.length)return"";
+  const o=(i,extra)=>`<option value="${i}">${slEsc(P[i].n)} (${slEsc(yrs(P[i]))})${extra?", "+slEsc(extra):""}</option>`,
+    rel=(i,a)=>_t(P[i].x==="M"?"rel_brotherOf":P[i].x==="F"?"rel_sisterOf":"rel_sibOf",{name:P[a].n}),
+    grp=(k,h)=>h?`<optgroup label="${slEsc(_t(k))}">${h}</optgroup>`:"";
+  return `<select class="vh-pick" data-a="pick" aria-label="${slEsc(_t("vh_pick").replace(/^\W+/,""))}"><option value="">${slEsc(_t("vh_pick"))}</option>${grp("vh_pick_rich",rich.map(i=>o(i)).join(""))}${grp("vh_pick_sib",sib.map(([i,a])=>o(i,rel(i,a))).join(""))}${grp("vh_pick_old",old.map(i=>o(i)).join(""))}</select>`}
 /* copy a link to this person; inside a published artifact the page can't see its own claude.ai address, so then only the #part */
 function vhCopyLink(btn,i){const h="#"+(LANG==="nl"?"verhaal":"story")+"/"+encodeURIComponent(vhIdOf(i));
   let framed=true;try{framed=window.top!==window}catch(e){}
