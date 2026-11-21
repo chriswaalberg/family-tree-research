@@ -762,7 +762,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.34",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.35",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1100,7 +1100,7 @@ function drawTijdlijn(){
       <div class="ln">${p.bdate?"° "+p.bdate:n.est&&!p.living?_t("estBorn",{y:n.y}):""}${p.bplac?" · "+spl(p.bplac):""}</div>${p.ddate||p.dplac?`<div class="ln">† ${p.ddate||"?"}${p.dplac?" · "+spl(p.dplac):""}${p.by&&p.dy?" "+_t("age",{n:p.dy-p.by}):""}</div>`:""}
       ${c?`<div class="ln"><span class="exc" style="background:${CERT[c[0]]||"#bfb6a8"}"></span>${_t("relToChild")}${certLabel(c[0])}</div>`:""}
       ${g>0?`<table><tr><th>${relName}</th><th>${_t("th_exp")}</th><th>${_t("th_found")}</th><th>${_t("th_dup")}</th><th>${_t("th_miss")}</th></tr><tr><td>${_t("genN",{n:g})}</td><td>${exp}</td><td>${found}</td><td>${found-un}</td><td>${exp-found}</td></tr></table>`:""}
-      <div class="btns">${vhBtn("sm")}${n.i!==base?`<button class="btn" data-variant="outline" data-size="sm" data-a="root">${_t("makeRoot")}</button>`:""}${n.i!==base?`<button class="btn" data-variant="outline" data-size="sm" data-a="kw">${_t("openLine")}</button>`:""}</div>`;
+      <div class="btns">${vhBtn(n.i,"sm")}${n.i!==base?`<button class="btn" data-variant="outline" data-size="sm" data-a="root">${_t("makeRoot")}</button>`:""}${n.i!==base?`<button class="btn" data-variant="outline" data-size="sm" data-a="kw">${_t("openLine")}</button>`:""}</div>`;
     pop.style.display="";placePop(n);
     pop.querySelector(".x").onclick=e=>{e.stopPropagation();close()};
     pop.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const a=b.dataset.a;if(a==="story"){close();vhOpen(n.i)}else if(a==="root")setRoot(n.i);else{slOpen(n.i)}})}
@@ -1199,15 +1199,16 @@ function slSheet(i,child,code,base,act){
     <header><p class="rel">${rel}${code?_t("genKw",{g:code.length,k:num}):""}</p><h2 id="slsheet-t">${slEsc(p.n)}</h2></header>
     <section>${line("°",p.bdate,p.bplac)}${line("†",p.ddate,p.dplac)}${jobLine(p)}
     ${c?`<div class="ct"><b style="color:${CERT[c[0]]||"#7a7068"}">${slEsc(certLabel(c[0]))}</b>${_t("relWith",{name:slEsc(short(P[child]))})}${c[3]&&!/^(biologisch|biological)$/i.test(c[3])?`<br><b style="color:#9c7633">♥ ${slEsc(_t("vh_adopt_par",Object.assign({child:vhFn(P[child])},vhPro(p))))}</b>`:""}${c[1]?`<br>${_t("source")}${slLink(c[1])}`:""}${c[2]?`<br>${slLink(c[2])}`:""}</div>`:hasChild?`<div class="ct">${_t("notAssessedRel",{name:slEsc(short(P[child]))})}</div>`:""}</section>
-    <footer>${vhBtn()}${act?`<button type="button" class="btn" data-a="act">${act.label}</button>`:""}${i!==base?`<button type="button" class="btn" data-variant="outline" data-a="root">${_t("makeRoot")}</button>`:""}<button type="button" class="btn" data-variant="ghost" data-a="x">${_t("close")}</button></footer></div>`;
+    <footer>${vhBtn(i)}${act?`<button type="button" class="btn" data-a="act">${act.label}</button>`:""}${i!==base?`<button type="button" class="btn" data-variant="outline" data-a="root">${_t("makeRoot")}</button>`:""}<button type="button" class="btn" data-variant="ghost" data-a="x">${_t("close")}</button></footer></div>`;
   const go=fn=>{dlg.close();setTimeout(fn,60)};
   dlg.querySelector('[data-a="x"]').onclick=()=>dlg.close();
   const rb=dlg.querySelector('[data-a="root"]');if(rb)rb.onclick=()=>go(()=>{setRoot(i);scrollTo(0,0)});
   const ab=dlg.querySelector('[data-a="act"]');if(ab)ab.onclick=()=>go(act.fn);
   vhBtnWire(dlg,i,go);mediaAdd(dlg,p);if(!dlg.open)dlg.showModal();
 }
-/* "Read the story": first button on every person card outside Story; opens Story at that person (vhOpen) */
-function vhBtn(size){return state.view==="verhaal"?"":`<button type="button" class="btn vhgo"${size?` data-size="${size}"`:""} data-a="story">${_t("readStory")}</button>`}
+/* "Read the story": first button on every person card outside Story; opens Story at that person (vhOpen). Only for people on a trail from the
+   current start person (vhRoute(i,true)), so it never changes the start person; nobody else gets the button */
+function vhBtn(i,size){return state.view==="verhaal"||!vhRoute(i,true)?"":`<button type="button" class="btn vhgo"${size?` data-size="${size}"`:""} data-a="story">${_t("readStory")}</button>`}
 function vhBtnWire(dlg,i,go){const b=dlg.querySelector('[data-a="story"]');if(b)b.onclick=()=>go(()=>{vhOpen(i);scrollTo(0,0)})}
 /* person card for views whose tap used to make someone the start person (Fan, Cosmos): ancestors get their line code and the child they belong to */
 function personSheet(i){const r=state.root,pth=i===r?null:pathTo(r,i);
@@ -1478,7 +1479,7 @@ function vhGo(path,focus){state.vh.path=path;vhRedraw(focus);navPush()}
 function vhPathTo(from,to){if(from===to)return [from];const prev=new Map([[from,-1]]),q=[from];
   while(q.length){const x=q.shift();for(const p of parentsOf(x)){if(prev.has(p)||vhStatus(x,p)==="fout")continue;prev.set(p,x);
     if(p===to){const out=[p];let c=x;while(c>=0){out.unshift(c);c=prev.get(c)}return out}q.push(p)}}return null}
-function vhRoute(i){const roots=[...new Set([state.root].concat(META.starts.map(s=>s.persoon)))];
+function vhRoute(i,own){const roots=own?[state.root]:[...new Set([state.root].concat(META.starts.map(s=>s.persoon)))];
   for(const r of roots){const p=vhPathTo(r,i);if(p)return {path:p}}
   for(const r of roots)for(const j of vhSibs(i)){const p=vhPathTo(r,j);if(p)return {path:p,sib:i}}
   return null}
@@ -1873,7 +1874,7 @@ function famSheet(i,info){
   const cf=p.f>=0?certOf(i,p.f):null,cm=p.m>=0?certOf(i,p.m):null;
   const crow=(lab,q,c)=>q>=0?`<div>${lab}: ${slEsc(short(P[q]))}${c?` · <b style="color:${CERT[c[0]]||"#7a7068"}">${slEsc(certLabel(c[0]))}</b>${c[1]?` · ${slLink(c[1])}`:""}`:""}</div>`:"";
   const hasPar=parentsOf(i).length>0,ns=famSibs(i).length;
-  const btns=[vhBtn()];
+  const btns=[vhBtn(i)];
   if(info.line&&hasPar)btns.push(`<button type="button" class="btn" data-a="up">${F.up.has(i)?_t("hideParents"):_t("showParents")}</button>`);
   if((info.line||i===r)&&ns)btns.push(`<button type="button" class="btn" data-variant="outline" data-a="sib">${F.sib.has(i)?(ns===1?_t("hideSib1"):_t("hideSibs")):(ns===1?_t("showSib1"):_t("showSibs",{n:ns}))}</button>`);
   if(i!==r)btns.push(`<button type="button" class="btn" data-variant="outline" data-a="root">${_t("makeRoot")}</button>`);
