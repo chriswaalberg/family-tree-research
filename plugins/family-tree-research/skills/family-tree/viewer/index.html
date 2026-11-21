@@ -565,6 +565,7 @@ main{padding-top:6px}
 .vh-map svg{border-radius:6px;box-shadow:0 2px 10px rgba(60,40,20,.18)}
 .vh-map figcaption{font-size:13px;opacity:.8;margin-top:6px}
 .vh-map figcaption small{display:block;font-size:11px;opacity:.75}
+.vh-txt .vh-map{margin:14px 0}
 .sw .sw-fig img{display:block;width:100%;height:auto;max-height:52dvh;object-fit:cover}
 .sw .sw-cap{font-size:13px;line-height:1.4;opacity:.9;margin-top:10px}
 .sw .sw-cap b{display:block;font-family:Fraunces,Georgia,serif;font-size:21px;line-height:1.2;margin-bottom:4px}
@@ -1174,7 +1175,7 @@ function slSheet(i,child,code,base,act){
 /* ================= VERHAAL (kies-je-eigen-pad terug in de tijd) ================= */
 Object.assign(I18N.nl,{v_verhaal:"Verhaal",
  vh_title:"Het verhaal van {name}",
- map_k:"Op de kaart",map_from:"{km} km van {from}",map_vague:"precieze plek onbekend",map_life:"Waar {name} woonde",map_note:"Kustlijnen en grenzen van nu (Natural Earth).",
+ map_k:"Op de kaart",map_from:"{km} km van {from}",map_vague:"precieze plek onbekend",map_note:"Kustlijnen en grenzen van nu (Natural Earth).",
  vh_intro:"Stap voor stap terug in de tijd. Bij elke persoon kies je wiens verhaal je volgt: dat van de vader of dat van de moeder. Het gouden sterretje wijst het rijkste spoor aan: het verst terug, best onderbouwd en met de meeste verhalen.",
  vh_auto:"Volg het rijkste spoor tot het eind",vh_restart:"Opnieuw beginnen",vh_route:"Je route",
  vh_step0:"Hier begint het",vh_stepN:"Stap {k} · {rel} van {root}",
@@ -1200,7 +1201,7 @@ Object.assign(I18N.nl,{v_verhaal:"Verhaal",
  vh_special:"Bijzonder familielid",vh_tg_life:"Het leven in {plaats}",vh_tg_events:"In die tijd",vh_adopt_big:"{fn} was niet de biologische {rel} van {child}. {Hij} nam {child} aan als {zijn} eigen kind en was in alles {czijn} {papa}. Vanaf hier volgen we de familie waarin {child} opgroeide.",vh_adopt:"aangenomen als eigen kind",vh_adopt_par:"nam {child} aan als eigen kind",vh_papa_v:"papa",vh_papa_m:"mama",vh_sib_M:"{Zijn} broer",vh_sib_F:"{Zijn} zus",vh_sib_X:"{Zijn} broer of zus",vh_sources:"Bronnen",vh_details:"Alle gegevens"});
 Object.assign(I18N.en,{v_verhaal:"Story",
  vh_title:"The story of {name}",
- map_k:"On the map",map_from:"{km} km from {from}",map_vague:"exact spot unknown",map_life:"Where {name} lived",map_note:"Present-day coastlines and borders (Natural Earth).",
+ map_k:"On the map",map_from:"{km} km from {from}",map_vague:"exact spot unknown",map_note:"Present-day coastlines and borders (Natural Earth).",
  vh_intro:"Step by step back in time. At every person you choose whose story to follow: the father's or the mother's. The golden star marks the richest trail: furthest back, best supported and with the most stories.",
  vh_auto:"Follow the richest trail to the end",vh_restart:"Start over",vh_route:"Your route",
  vh_step0:"Where it begins",vh_stepN:"Step {k} · {rel} of {root}",
@@ -1495,15 +1496,10 @@ function vhTijdgeest(i,seen){const T=vhTG();if(!T)return"";const p=P[i];if(p.liv
   if(pick.length){pick.forEach(x=>seen.add(x.key));
     html+=`<div class="vh-k">${_t("vh_tg_events")}</div><ul class="vh-ev">${pick.map(({ev,lok})=>`<li data-y="${ev.jaar||ev.van||""}"${lok?' data-lok="1"':""}${ev.gewicht!=null&&isFinite(+ev.gewicht)?` data-w="${+ev.gewicht}"`:""}><b>${ev.van&&ev.tot&&ev.van!==ev.tot?ev.van+"–"+String(ev.tot).slice(-2):ev.jaar}</b><span>${slEsc(lab(ev.tekst))}${ev.bron?` <a href="${slEsc(ev.bron[1])}" target="_blank" rel="noopener" title="${slEsc(ev.bron[0])}">${_t("vh_src1")}</a>`:""}${ev.links&&ev.links.length?`<span class="vh-evl">${slEsc(lab(ev.links_label)||"")} ${ev.links.map(l=>`<a href="${slEsc(l[1])}" target="_blank" rel="noopener">${slEsc(lab(l[0]))}</a>`).join(" · ")}</span>`:""}</span></li>`).join("")}</ul>`}
   return html?`<section class="vh-tg">${html}</section>`:""}
-/* Story: one map per person with the places of their life (and the story's places); only when at least one of those places is new on the trail
-   ("seen" = the places of the people before; within MAP.SAME_KM counts as the same place), so the same map never shows twice */
-function vhMapFig(p,seen){if(!mapHas()||p.living)return "";const st=mapStops(p),ex=(p.verhaal_plekken||[]).filter(x=>x.jaar==null).map(x=>mapCo(x.plaats)).filter(Boolean);
-  const pts=st.concat(ex).filter(q=>q.prec==="plaats"),nw=pts.filter(q=>!(seen||[]).some(o=>mapKm(o,q)<MAP.SAME_KM));
-  if(seen)nw.forEach(q=>seen.push(q));if(!nw.length)return "";
-  const svg=mapLife(st,ex);if(!svg)return "";
-  return `<figure class="vh-map">${svg}<figcaption>${slEsc(_t("map_life",{name:vhFn(p)}))} <small>${slEsc(_t("map_note"))}</small></figcaption></figure>`}
+/* Story: a map at each moment from mapEvents, with its caption and the note about present-day coastlines */
+function vhMapEl(e){const c=mapCap(e);return `<figure class="vh-map">${mapOf(e)}<figcaption><b>${slEsc(c.name)}</b>${c.sub?" · "+slEsc(c.sub):""}${c.line?" · "+slEsc(c.line):""}<small>${slEsc(_t("map_note"))}</small></figcaption></figure>`}
 function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
-  const S=vhState(),path=S.path,root=P[path[0]],rfn=vhFn(root),flags={dtb:false},tgSeen=new Set(),mapSeen=[];tgSeen.assign=vhAssignImages(path);
+  const S=vhState(),path=S.path,root=P[path[0]],rfn=vhFn(root),flags={dtb:false},tgSeen=new Set(),mapMS={seen:[],here:null};tgSeen.assign=vhAssignImages(path);
   const w=document.createElement("div");w.className="vh";
   const route=path.map((i,k)=>`<button type="button" class="vh-rc" data-k="${k}">${slEsc(vhFn(P[i]))}</button>`).join('<span class="vh-ra">›</span>');
   w.innerHTML=`<div class="vh-head"><h2>${slEsc(_t("vh_title",{name:rfn}))}</h2><p>${_t("vh_intro")}</p>
@@ -1530,15 +1526,21 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     const facts=[p.bdate||p.bplac?`° ${[p.bdate,p.bplac].filter(Boolean).map(slEsc).join(" · ")}`:"",p.ddate||p.dplac?`† ${[p.ddate,p.dplac].filter(Boolean).map(slEsc).join(" · ")}`:""].filter(Boolean).join("<br>");
     const own=vhHas(p);
     const tpl=vhTemplate(i,child,flags);
-    const tgHtml=vhTijdgeest(i,tgSeen);let body;
+    const tgHtml=vhTijdgeest(i,tgSeen),mev=mapEvents(p,mapMS);let body;
     if(own){/* one timeline: paragraphs (with their images) and zeitgeist pieces sorted by year */
       const paras=vhParaList(lab(p.verhaal)),pimgs=(Array.isArray(p.verhaal_beelden)?p.verhaal_beelden:[]).filter(b=>b&&b.bestand),slot=vhImgSlots(paras,pimgs),py=vhParaYears(paras,p);
-      const items=paras.map((x,j)=>({type:"p",y:py[j],html:`<p>${vhMd(x)}</p>`+pimgs.filter((b,k)=>slot[k]===j).map(vhFig).join("")})).concat(vhTgPieces(tgHtml));
+      /* the map right after the paragraph that names the place someone moved to; no such paragraph: by the year of the move */
+      /* maps: right after the paragraph that names the new place (mapPara), else at the year of that moment */
+      const mj=mev.map(e=>mapPara(e,paras,p));
+      const items=paras.map((x,j)=>({type:"p",y:py[j],html:`<p>${vhMd(x)}</p>`+mev.filter((e,k)=>mj[k]===j).map(vhMapEl).join("")+pimgs.filter((b,k)=>slot[k]===j).map(vhFig).join("")}))
+        .concat(mev.filter((e,k)=>mj[k]<0).map(e=>({type:"p",y:e.y,html:vhMapEl(e)})),vhTgPieces(tgHtml));
       body="";let run=[],tg=[];const flush=()=>{if(run.length){body+=`<div class="vh-txt">${run.join("")}</div>`;run=[]}if(tg.length){body+=vhTgBox(tg);tg=[]}};
       for(const it of vhSortByYear(items)){if(it.type==="p"){if(tg.length)flush();run.push(it.html)}else{if(run.length){body+=`<div class="vh-txt">${run.join("")}</div>`;run=[]}tg.push(it)}}
       flush();body+=`<div class="vh-txt">${vhSources(p)}</div>`}
     else{const P1=g=>g&&g.length?`<p>${slEsc(g.join(" "))}</p>`:"";
-      body=`<div class="vh-txt">${P1(tpl.g1)}</div>${tgHtml}<div class="vh-txt">${P1(tpl.g2)}${tpl.note.map(n=>`<p class="vh-note">${slEsc(n)}</p>`).join("")}</div>`}
+      /* the birthplace map after the birth and family text; a later move before the part that tells it */
+      const early=e=>e.y==null||p.by==null||e.y<=p.by;
+      body=`<div class="vh-txt">${P1(tpl.g1)}</div>${mev.filter(early).map(vhMapEl).join("")}${tgHtml}${mev.filter(e=>!early(e)).map(vhMapEl).join("")}<div class="vh-txt">${P1(tpl.g2)}${tpl.note.map(n=>`<p class="vh-note">${slEsc(n)}</p>`).join("")}</div>`}
     /* broers/zussen met een eigen verhaal */
     const sib=vhSibs(i).filter(j=>vhHas(P[j])).map(j=>{const q=P[j],ppr=vhPro(p);
       const rl=_t(q.x==="M"?"vh_sib_M":q.x==="F"?"vh_sib_F":"vh_sib_X",ppr);
@@ -1570,7 +1572,7 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     ch.innerHTML=`<div class="vh-dot" aria-hidden="true">${p.living&&!p.by?"•":slEsc(String(yr))}</div>
       <article class="vh-card"><div class="vh-k">${relLabel}</div>
       <h3><button type="button" class="vh-nm" data-i="${i}" title="${_t("vh_details")}">${slEsc(p.n)}</button></h3>
-      ${facts?`<div class="vh-facts">${facts}</div>`:""}${imgs.length?`<div class="vh-media">${imgs.slice(0,4).map((m,j)=>`<button type="button" class="vh-mt" data-mj="${j}" title="${slEsc(mediaName(m))}"><img loading="lazy" src="${slEsc(m.bestand)}" alt=""></button>`).join("")}${imgs.length>4?`<button type="button" class="vh-mt more" data-mj="4">+${imgs.length-4}</button>`:""}</div>`:""}${cert}${vhMapFig(p,mapSeen)}${body}${sib}${fork}</article>`;
+      ${facts?`<div class="vh-facts">${facts}</div>`:""}${imgs.length?`<div class="vh-media">${imgs.slice(0,4).map((m,j)=>`<button type="button" class="vh-mt" data-mj="${j}" title="${slEsc(mediaName(m))}"><img loading="lazy" src="${slEsc(m.bestand)}" alt=""></button>`).join("")}${imgs.length>4?`<button type="button" class="vh-mt more" data-mj="4">+${imgs.length-4}</button>`:""}</div>`:""}${cert}${body}${sib}${fork}</article>`;
     ch.querySelector(`.vh-nm[data-i]`).onclick=()=>slSheet(i,child,code,path[0]);
     ch.querySelectorAll(".vh-mt").forEach(b=>b.onclick=()=>mediaView(imgs,+b.dataset.mj));
     ch.querySelectorAll(".vh-fimg").forEach(b=>b.onclick=()=>mediaView(vhScanItems(b.dataset.tgimg,b.dataset.scan,b.dataset.tgt),0));
@@ -1937,7 +1939,7 @@ function drawFamilie(){
    small overview in the corner (red box = the detail). A far move: a route map (curved red dotted line, open circle at the place the
    trail came from, pin at the new place, distance halfway); above GLOBE_KM a paper globe. Precision "regio"/"land": no pin, the caption
    says the exact spot is unknown. All numbers to tune are here. */
-const MAP={FAR_KM:300,SAME_KM:10,PER_PERSON:2,DETAIL_KM:120,OVER_KM:1500,GLOBE_KM:5000,REGIO_KM:320,LAND_KM:1800,BEND:.22,
+const MAP={FAR_KM:300,SAME_KM:10,DETAIL_KM:120,OVER_KM:1500,GLOBE_KM:5000,REGIO_KM:320,LAND_KM:1800,BEND:.22,
   W:360,H:360,IW:128,IH:104,PAD:.3,MINPX:.7,
   pap:"#f3ead6",ink:"#5b4630",red:"#b3342b",sea:"#b9a684",bord:"#8c7558",soft:"#e8dcc0",lab:"#7d6849",
   font:"'Iowan Old Style','Palatino','Georgia',serif"};
@@ -2009,7 +2011,10 @@ function mapInset(t,km,pts){const iw=MAP.IW,ih=MAP.IH,m=14,
   return `<g transform="translate(${cn[0]},${cn[1]})"><clipPath id="${id}"><rect width="${iw}" height="${ih}"/></clipPath><rect x="-3" y="-3" width="${iw+6}" height="${ih+6}" fill="${MAP.pap}" stroke="${MAP.ink}" stroke-width="1"/><g clip-path="url(#${id})">${ins}</g><rect width="${iw}" height="${ih}" fill="none" stroke="${MAP.ink}" stroke-width=".6"/></g>`}
 /* labels for the other places: skipped when they would sit on top of something already labelled */
 function mapLabels(pts,taken){let s="";for(const q of pts){if(q.x<12||q.x>MAP.W-12||q.y<12||q.y>MAP.H-12)continue;
-    if(taken.some(o=>Math.abs(o[0]-q.x)<70&&Math.abs(o[1]-q.y)<14))continue;taken.push([q.x,q.y]);s+=mapPlaceLabel(q.x,q.y,q.n,false)}return s}
+    /* right of the point, else left of it, else below or above it; a name with no room at all is left out */
+    const w=q.n.length*6.5,free=(x0,y)=>x0>10&&x0+w<MAP.W-10&&!taken.some(o=>x0<o[0]+80&&x0+w>o[0]-6&&Math.abs(o[1]-y)<14);
+    const opts=[[q.x+12,q.y+4,"start",q.x+12],[q.x-8,q.y+4,"end",q.x-8-w],[q.x,q.y+17,"middle",q.x-w/2],[q.x,q.y-9,"middle",q.x-w/2]],o=opts.find(([,y,,x0])=>free(x0,y));
+    if(!o)continue;taken.push([o[3],o[1]]);s+=mapLabel(o[0],o[1],q.n,{size:12,anchor:o[2]})}return s}
 /* near: the detail map around t; "others" are small ink points (with names when there is room) */
 function mapDetail(t,others){const km=t.prec==="land"?MAP.LAND_KM:t.prec==="regio"?MAP.REGIO_KM:MAP.DETAIL_KM,p=mapFlat(t.lon,t.lat,km,MAP.W,MAP.H),id="mh"+(++MAP_UID);
   let s=`<defs>${mapHatch(id)}</defs>`+mapBase(p,MAP.W,MAP.H,{fill:MAP.pap,sea:`url(#${id})`,borders:1});
@@ -2026,7 +2031,8 @@ function mapSlerp(a,b,t){const r=Math.PI/180,v=q=>[Math.cos(q.lat*r)*Math.cos(q.
   return {lat:Math.atan2(z,Math.hypot(x,y))/r,lon:Math.atan2(y,x)/r}}
 /* a window around several points: flat (centre and width in km) or, when they lie far apart, a globe */
 function mapFit(pts,minKm){const far=pts.some((a,i)=>pts.some((b,j)=>j>i&&mapKm(a,b)>MAP.GLOBE_KM));
-  if(far){const c=pts.length===2?mapSlerp(pts[0],pts[1],.5):mapSlerp(pts[0],pts[pts.length-1],.5);return mapOrtho(c.lon,Math.max(-60,Math.min(60,c.lat)),150,MAP.W/2,MAP.H/2)}
+  /* a globe turns to the middle of the two places farthest apart, so both ends (and everything between) are on the front */
+  if(far){let A=pts[0],B=pts[1]||pts[0],best=-1;pts.forEach((a,i)=>pts.forEach((b,j)=>{if(j>i){const d=mapKm(a,b);if(d>best){best=d;A=a;B=b}}}));const c=mapSlerp(A,B,.5);return mapOrtho(c.lon,Math.max(-60,Math.min(60,c.lat)),150,MAP.W/2,MAP.H/2)}
   const la0=Math.min(...pts.map(q=>q.lat)),la1=Math.max(...pts.map(q=>q.lat)),lo0=Math.min(...pts.map(q=>q.lon)),lo1=Math.max(...pts.map(q=>q.lon));
   const lat=(la0+la1)/2,lon=(lo0+lo1)/2,span=Math.max((la1-la0)*111.32,(lo1-lo0)*111.32*Math.cos(lat*Math.PI/180));
   return mapFlat(lon,lat,Math.max(minKm||MAP.DETAIL_KM,span*1.45),MAP.W,MAP.H)}
@@ -2034,7 +2040,7 @@ function mapFit(pts,minKm){const far=pts.some((a,i)=>pts.some((b,j)=>j>i&&mapKm(
 function mapLeg(prj,a,b,km){const [x0,y0]=prj(a.lon,a.lat),[x1,y1]=prj(b.lon,b.lat);let d,mx,my;
   if(prj.globe){const pts=[];for(let i=0;i<=48;i++){const q=mapSlerp(a,b,i/48);pts.push(prj(q.lon,q.lat))}d="M"+pts.map(q=>q[0].toFixed(1)+","+q[1].toFixed(1)).join("L");[mx,my]=pts[24]}
   else{const cx=(x0+x1)/2-(y1-y0)*MAP.BEND,cy=(y0+y1)/2+(x1-x0)*MAP.BEND;d=`M${x0.toFixed(1)},${y0.toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;mx=(x0+x1)/4+cx/2;my=(y0+y1)/4+cy/2}
-  return {svg:`<path d="${d}" fill="none" stroke="${MAP.red}" stroke-width="2.2" stroke-dasharray="6 4"/>`,km:km?mapLabel(mx,my+4,mapNum(km)+" km",{size:13,bold:1,fill:MAP.red}):"",mx,my}}
+  return {d:km||0,svg:`<path d="${d}" fill="none" stroke="${MAP.red}" stroke-width="2.2" stroke-dasharray="6 4"/>`,km:km?mapLabel(mx,my+4,mapNum(km)+" km",{size:13,bold:1,fill:MAP.red}):"",mx,my}}
 function mapGlobeBase(prj,id){const R=150,cx=MAP.W/2,cy=MAP.H/2,c="mg"+id;return `<rect width="${MAP.W}" height="${MAP.H}" fill="${MAP.pap}"/><circle cx="${cx}" cy="${cy}" r="${R}" fill="url(#${id})" stroke="${MAP.ink}" stroke-width="1.2"/><clipPath id="${c}"><circle cx="${cx}" cy="${cy}" r="${R}"/></clipPath><g clip-path="url(#${c})"><path d="${mapD(prj,mapGeo().grof.land,1)}" fill="${MAP.pap}" stroke="${MAP.ink}" stroke-width=".7" stroke-linejoin="round"/></g>`}
 /* far: a route from "from" (where the trail was) to t (the new place) */
 function mapRoute(from,t){const km=mapKm(from,t),prj=mapFit([from,t],400),id="mh"+(++MAP_UID);
@@ -2046,19 +2052,9 @@ function mapRoute(from,t){const km=mapKm(from,t),prj=mapFit([from,t],400),id="mh
   return mapSvg(s+mapFrame(MAP.W,MAP.H),mapName(from.n)+" → "+mapName(t.n))}
 /* one map for a new place in the trail: a route when the trail comes from far, else the detail map */
 function mapFor(t,from,others){return from&&mapKm(from,t)>=MAP.FAR_KM?mapRoute(from,t):mapDetail(t,others)}
-/* Story: all of one person's places on one map, in the order of their life: open circle = first, ink points, red pin = last */
-function mapLife(stops,extra){const st=stops.filter(q=>q.prec==="plaats"),ex=(extra||[]).filter(q=>q.prec==="plaats"&&!st.some(o=>mapKm(o,q)<MAP.SAME_KM));
-  if(!st.length&&!ex.length)return "";if(st.length+ex.length===1)return mapDetail(st[0]||ex[0],[]);
-  const all=st.concat(ex),prj=mapFit(all,MAP.DETAIL_KM),id="mh"+(++MAP_UID);
-  let s=`<defs>${mapHatch(id)}</defs>`+(prj.globe?mapGlobeBase(prj,id):mapBase(prj,MAP.W,MAP.H,{fill:MAP.pap,sea:`url(#${id})`,borders:1}));
-  for(let i=1;i<st.length;i++){const km=mapKm(st[i-1],st[i]);if(km<MAP.SAME_KM)continue;const L=mapLeg(prj,st[i-1],st[i],km>=MAP.FAR_KM?km:0);s+=L.svg+L.km}
-  const xy=q=>{const [x,y]=prj(q.lon,q.lat);return {x,y,n:mapName(q.n)}},taken=[],last=st.length?xy(st[st.length-1]):null;
-  const pts=[];st.forEach((q,i)=>{if(i===st.length-1)return;const p=xy(q);if(pts.some(o=>Math.hypot(o.x-p.x,o.y-p.y)<4))return;s+=i===0?mapRing(p.x,p.y):mapDot(p.x,p.y);pts.push(p)});
-  ex.forEach(q=>{const p=xy(q);s+=mapDot(p.x,p.y,3);pts.push(p)});
-  if(last){s+=mapPin(last.x,last.y)+mapPlaceLabel(last.x,last.y,last.n,true);taken.push([last.x+40,last.y-8])}
-  s+=mapLabels(pts.filter(p=>!last||Math.hypot(p.x-last.x,p.y-last.y)>6),taken);
-  if(!prj.globe&&prj.km<MAP.OVER_KM)s+=mapInset(st[st.length-1]||all[0],prj.km,all.map(q=>{const p=xy(q);return [p.x,p.y]}).concat(last?[[last.x+60,last.y-8]]:[]));
-  return mapSvg(s+mapFrame(MAP.W,MAP.H),all.map(q=>mapName(q.n)).join(", "))}
+/* the first paragraph that names a place: the town, or for a move abroad also the country ("Australie" matches "Australië") */
+function mapMention(paras,pl,home){const t=NORM(mapName(pl)),last=a=>NORM(String(a||"").split(",").pop()).trim(),c=last(pl),abroad=String(pl).includes(",")&&home&&c!==last(home);
+  return paras.findIndex(x=>{const n=NORM(x);return n.includes(t)||(abroad&&c.length>3&&n.includes(c))})}
 /* a person's places in the order of their life: birth, homes ("woon", by year), death; story places with a year join in */
 function mapStops(p){const out=[],add=(pl,y,k)=>{const c=mapCo(pl);if(!c)return;const l=out[out.length-1];if(l&&l.n===c.n)return;out.push(Object.assign(c,{y,k}))};
   const w=(p.woon||[]).slice().sort((a,b)=>(a[1]||0)-(b[1]||0));add(p.bplac,p.by,"b");w.forEach(x=>add(x[0],x[1],"w"));
@@ -2184,7 +2180,7 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     /* an own story that already tells the death (death year + "died"/"overleed") keeps its sentence there; the farewell card then shows only the word and the year */
     const dTold=vhHas(p)&&swToldDeath(p),dS=dTold?S.d.filter((s,j)=>!/^vh_died/.test(S.dk[j])):S.d,dShow=S.d.length;
     if(dShow||S.n.length)add("death",`<div class="sw-k">${dShow?_t("sw_death"):""}</div><div class="sw-big">${dShow&&p.dy?p.dy:""}</div>${dS.length?`<div class="sw-t">${T(dS)}</div>`:""}${S.n.map(n=>`<div class="sw-note">${slEsc(n)}</div>`).join("")}`,{len:dS.join(" ").length});
-    swMapCard(p,MS,add);
+    swMapCard(p,MS,add,cards);
     /* the fork: father or mother; the richest trail plays on by itself */
     const par=parentsOf(i);
     if(par.length===2){const nxt=path[k+1];
@@ -2196,24 +2192,32 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     const head=cards.filter(c=>c.kind==="intro"||c.hook),tail=cards.filter(c=>c.kind==="death"||c.kind==="fork"||c.kind==="end"),mid=vhSortByYear(cards.filter(c=>!head.includes(c)&&!tail.includes(c)));
     const merged=[];for(const c of mid){const l=merged[merged.length-1];if(c.kind==="events"&&l&&l.kind==="events"&&l.len+c.len<=220){l.li+=c.li;l.len+=c.len;l.html=`<div class="sw-k">${slEsc(l.head)}</div><ul class="sw-ev">${l.li}</ul>`}else merged.push(c)}
     return {i,lc,fn,cards:swOverlay(head.concat(merged,tail))}})}
-/* the map cards of one person in the chain (at most MAP.PER_PERSON): walking through their life from where the trail was ("here" = the birthplace
-   of the person before), every place that is new in the chain and every move of MAP.FAR_KM or more is a candidate; far moves go first, then new places,
-   shown in the order of their life. A country or region alone ("Australie") gives way to a town in that country later in life (and gives it its year). */
-function swMapCard(p,MS,add){if(!mapHas()||p.living)return;
-  const plk=(p.verhaal_plekken||[]).map(x=>{const c=mapCo(x.plaats);return c&&Object.assign(c,{at:x.kaart!=null?x.kaart:x.alinea,y:x.jaar})}).filter(Boolean);
+/* the map moments of one person on the trail (Story and Cards alike): walking through their life from where the trail was (MS.here = the birthplace
+   of the person before), every place that is new on the trail (MS.seen; within MAP.SAME_KM counts as the same place) and every move of MAP.FAR_KM
+   or more gets a map, each at its own moment. A country or region alone ("Australie") gives way to a town in that country later in life (and gives it its year). */
+function mapEvents(p,MS){if(!mapHas()||p.living)return [];
+  const plk=(p.verhaal_plekken||[]).map(x=>{const c=mapCo(x.plaats);return c&&Object.assign(c,{al:x.alinea,ka:x.kaart,y:x.jaar})}).filter(Boolean);
   let st=mapStops(p);st=st.concat(plk.filter(q=>!st.some(o=>o.n===q.n)));
   const land=q=>NORM(String(q.n).split(",").pop()).trim();
   st=st.filter((q,i)=>{if(q.prec==="plaats")return true;const nx=st.slice(i+1).find(o=>o.prec==="plaats"&&land(o)===land(q));if(nx&&q.y!=null)nx.y0=Math.min(nx.y0!=null?nx.y0:Infinity,q.y);return !nx});
-  const isNew=q=>!MS.seen.some(o=>mapKm(o,q)<MAP.SAME_KM),ev=[];let prev=MS.here;
-  st.forEach((q,j)=>{const d=prev?mapKm(prev,q):0,nw=isNew(q);const same=(a,b)=>a&&b&&mapKm(a,b)<MAP.SAME_KM,dup=ev.some(e=>e.from&&prev&&((same(e.from,prev)&&same(e.t,q))||(same(e.from,q)&&same(e.t,prev))));
-    if((nw||d>=MAP.FAR_KM)&&!dup)ev.push({t:q,from:prev,d,far:d>=MAP.FAR_KM,nw,j});if(nw)MS.seen.push(q);if(!prev||d>=MAP.SAME_KM)prev=q});
-  const pick=ev.filter(e=>e.far).sort((a,b)=>b.d-a.d||a.j-b.j).concat(ev.filter(e=>!e.far)).slice(0,MAP.PER_PERSON).sort((a,b)=>a.j-b.j);
-  pick.forEach(e=>{const t=e.t,from=e.from,others=e.far?[]:ev.filter(o=>o.nw&&!o.far&&o!==e&&!pick.includes(o)).map(o=>o.t).concat(from?[from]:[]);
+  const isNew=q=>!MS.seen.some(o=>mapKm(o,q)<MAP.SAME_KM),same=(a,b)=>a&&b&&mapKm(a,b)<MAP.SAME_KM,ev=[];let prev=MS.here;
+  st.forEach(q=>{const d=prev?mapKm(prev,q):0,nw=isNew(q),dup=ev.some(e=>e.from&&prev&&((same(e.from,prev)&&same(e.t,q))||(same(e.from,q)&&same(e.t,prev))));
     /* a birthplace map comes before the story's first paragraph of that year (half a year earlier) */
-    let y=t.y0!=null?t.y0:t.y!=null?t.y-(t.k==="b"?.5:0):p.by||null;if(t.at!=null&&vhHas(p)){const py=vhParaYears(vhParaList(swCardText(p)),p);if(py[t.at-1]!=null)y=py[t.at-1]}
-    const sub=mapSub(t.n),line=[from&&e.d>=MAP.SAME_KM?_t("map_from",{km:mapNum(e.d),from:mapName(from.n)}):"",t.prec!=="plaats"?_t("map_vague"):""].filter(Boolean).join(" · ");
-    add("map",`<div class="sw-k">${_t("map_k")}</div><figure class="sw-map">${mapFor(t,from,others)}</figure><div class="sw-cap"><b>${slEsc(mapName(t.n))}</b>${sub?slEsc(sub):""}${line?`<span>${slEsc(line)}</span>`:""}</div>`,{y,len:60})});
-  MS.here=mapCo(p.bplac)||st[0]||MS.here}
+    if((nw||d>=MAP.FAR_KM)&&!dup)ev.push({t:q,from:prev,d,far:d>=MAP.FAR_KM,nw,y:q.y0!=null?q.y0:q.y!=null?q.y-(q.k==="b"?.5:0):p.by||null});
+    if(nw)MS.seen.push(q);if(!prev||d>=MAP.SAME_KM)prev=q});
+  MS.here=mapCo(p.bplac)||st[0]||MS.here;return ev}
+/* the map and its caption parts for one moment */
+function mapOf(e){return mapFor(e.t,e.from,e.far||!e.from?[]:[e.from])}
+function mapCap(e){return {name:mapName(e.t.n),sub:mapSub(e.t.n),line:[e.from&&e.d>=MAP.SAME_KM?_t("map_from",{km:mapNum(e.d),from:mapName(e.from.n)}):"",e.t.prec!=="plaats"?_t("map_vague"):""].filter(Boolean).join(" · ")}}
+/* which paragraph (or card) a moment belongs after: the one a story place points at, else the first that names a new place (town, or the country
+   for a move abroad); a return to a known place goes by its year (-1) */
+function mapPara(e,paras,p,cards){const at=cards?(e.t.ka!=null?e.t.ka:e.t.al):e.t.al;if(at!=null)return at-1<paras.length?at-1:-1;return e.nw?mapMention(paras,e.t.n,p.bplac):-1}
+/* Cards: one map card per moment */
+function swMapCard(p,MS,add,cards){const evs=mapEvents(p,MS);if(!evs.length)return;const cp=vhHas(p)?vhParaList(swCardText(p)):[],py=cp.length?vhParaYears(cp,p):[];
+  evs.forEach(e=>{const c=mapCap(e);let y=e.y;const after=cp.length?mapPara(e,cp,p,1):-1;if(after>=0&&py[after]!=null)y=py[after];
+    add("map",`<div class="sw-k">${_t("map_k")}</div><figure class="sw-map">${mapOf(e)}</figure><div class="sw-cap"><b>${slEsc(c.name)}</b>${c.sub?slEsc(c.sub):""}${c.line?`<span>${slEsc(c.line)}</span>`:""}</div>`,{y,len:60});
+    /* right after that story card (past its image), so the stable sort by year keeps it there */
+    if(after>=0&&cards){const m=cards.pop(),ref=cards.filter(x=>x.kind==="story")[after];if(ref){let k=cards.indexOf(ref)+1;while(cards[k]&&(cards[k].kind==="img"||cards[k].kind==="map")&&cards[k].y===ref.y)k++;cards.splice(k,0,m)}else cards.push(m)}})}
 /* text on the image (like Stories): a story card and the story image right after it, or a life card and the zeitgeist image right
    after (else right before) it, become one card: the photo full-screen, the text over it, a small credit line below.
    Clippings, scans, documents and maps stay cards of their own. */
