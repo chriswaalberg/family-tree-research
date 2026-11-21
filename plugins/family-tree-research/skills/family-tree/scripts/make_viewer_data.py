@@ -274,6 +274,28 @@ def dated_places(node, tags):
     return out
 
 
+# what happened at a place, for the sentence before a map ("woon_feiten"): GEDCOM tag -> stored kind (Dutch, like the other values)
+FACT_KIND = {"CHR": "doop", "BAPM": "doop", "RESI": "woonde", "CENS": "volkstelling", "OCCU": "beroep", "EDUC": "school",
+             "EMIG": "emigratie", "IMMI": "immigratie", "NATU": "naturalisatie", "EVEN": "gebeurtenis",
+             "MARR": "huwelijk", "MARB": "ondertrouw", "MARL": "ondertrouw", "ENGA": "verloving", "DIV": "scheiding"}
+
+
+def placed_facts(node, tags):
+    """[year, place, kind, extra] for dated events with a place (extra: the occupation, or the type of an EVEN)."""
+    out = []
+    for e in node["c"]:
+        if e["t"] not in tags or e["t"] not in FACT_KIND: continue
+        y = year_of((sub(e, "DATE") or {}).get("v", ""))
+        pl = (sub(e, "PLAC") or {}).get("v", "").strip()
+        if not pl:
+            ad = sub(e, "ADDR")
+            pl = ((sub(ad, "CITY") or {}).get("v", "") if ad else "").strip()
+        if not (y and pl): continue
+        x = e["v"].strip() if e["t"] == "OCCU" else (sub(e, "TYPE") or {}).get("v", "").strip() if e["t"] == "EVEN" else ""
+        out.append([y, pl, FACT_KIND[e["t"]]] + ([x] if x else []))
+    return out
+
+
 def residence_spans(points, by, dy):
     """Dated places -> [[place, from, to], ...]: consecutive records in one place form one period,
     widened by WOON_MARGIN but never past the midpoint to a record elsewhere, never before birth or after death."""
@@ -398,6 +420,30 @@ NEWS_LINK = re.compile(r"resolver\.kb\.nl|delpher\.nl|trove\.nla\.gov\.au|newspa
 NEWS_NAME = re.compile(r"\b(\w*(courant|krant|dagblad|nieuwsblad|handelsblad|weekblad|telegraaf|tidning|zeitung)\w*"
                        r"|\w*(residentie|maas|nieuws|dorps|stads|amstel|zaan|gooi|eem|graafschap|grens|lands?)bode|newspaper|gazette|herald|tribune|chronicle|advertiser|weekly)\b", re.I)
 NEWS_TITLE = re.compile(r"\b(De Tijd|Het Vaderland|Het Volk|The Times)\b")  # titles that are plain words in lower case
+
+
+def map_town(pl):
+    """The town in a place name, as the viewer's mapName: with four or more parts the third from the end (a street in a town)."""
+    a = [x.strip() for x in str(pl or "").split(",") if x.strip()]
+    return re.sub(r"\s*\(.*?\)\s*", " ", a[len(a) - 3 if len(a) >= 4 else 0] if a else "").strip()
+
+
+def story_map_warnings(p, coords):
+    """Places of someone with an own story that may get a map (birth, homes, death, story places without "alinea")
+    but are named nowhere in the story text: the viewer then puts a short template sentence before that map."""
+    txt = p.get("verhaal")
+    txt = " ".join(txt.values()) if isinstance(txt, dict) else " ".join(txt) if isinstance(txt, list) else str(txt or "")
+    t = norm(txt)
+    pls = [p.get("bplac")] + [w[0] for w in p.get("woon") or []] + [p.get("dplac")] \
+        + [x["plaats"] for x in p.get("verhaal_plekken") or [] if x.get("alinea") is None]
+    miss = []
+    for pl in pls:
+        if not pl or pl not in coords: continue
+        tw = map_town(pl)
+        if tw and norm(tw) not in t and tw not in miss: miss.append(tw)
+    if not miss: return 0
+    print(f"  note, story of {p['n']}: map place(s) not named in the story: {', '.join(miss)}", file=sys.stderr)
+    return 1
 
 
 def story_clipping_warnings(p):
@@ -815,11 +861,18 @@ def main():
     for i, r in enumerate(indis):
         p = people[i]
         pts = dated_places(r, WOON_TAGS)
+        # the same facts with what they were, so the map of a place can say why the person was there (not birth or death: the viewer has those)
+        wf = [x for x in placed_facts(r, WOON_TAGS) if not (x[2] == "doop" and place_key(x[1]) == place_key(p.get("bplac")))]
         if p.get("by") and p.get("bplac"): pts.append((p["by"], p["bplac"]))
         if p.get("dy") and p.get("dplac"): pts.append((p["dy"], p["dplac"]))
         for c in subs(r, "FAMS"):
             fam = fams.get(c["v"])
-            if fam: pts += dated_places(fam, ("MARR", "MARB", "MARL", "ENGA", "DIV", "RESI", "CENS", "EVEN"))
+            if fam:
+                pts += dated_places(fam, ("MARR", "MARB", "MARL", "ENGA", "DIV", "RESI", "CENS", "EVEN"))
+                h, w2 = sub(fam, "HUSB"), sub(fam, "WIFE")
+                sp = [idx.get(o["v"]) for o in (h, w2) if o and idx.get(o["v"]) not in (None, i)]
+                wf += [x + ([] if len(x) > 3 else [""]) + ([sp[0]] if sp and x[2] in ("huwelijk", "ondertrouw", "verloving", "scheiding") else [])
+                       for x in placed_facts(fam, ("MARR", "MARB", "MARL", "ENGA", "DIV", "RESI", "CENS", "EVEN"))]
         for j in p["ch"]:
             q = people[j]
             if q.get("by") and q.get("bplac"): pts.append((q["by"], q["bplac"]))
@@ -838,6 +891,7 @@ def main():
             k = country_key(x[0])
             if home and k and k != home: x.append(k)
         if w: p["woon"] = w
+        if wf: p["woon_feiten"] = sorted([list(x) for x in {tuple(x) for x in wf}], key=lambda x: (x[0], x[2]))
 
     # ---- media: copy local files (only with --media-dir)
     for p in people:  # original GEDCOM path -> published path (for "scan" on story images)
@@ -950,7 +1004,7 @@ def main():
         if not dead and y is not None and y >= cutoff:
             p["levend"] = True; n_lev += 1
             if a.levenden_verbergen:
-                for k in ("bdate", "bplac", "ddate", "dplac", "by", "dy", "r", "media", "beroep", "woon", "weg"):
+                for k in ("bdate", "bplac", "ddate", "dplac", "by", "dy", "r", "media", "beroep", "woon", "woon_feiten", "weg"):
                     p.pop(k, None)
 
     # ---- start people
@@ -1059,6 +1113,9 @@ def main():
         if out["coordinaten"]:
             lk = base_map(people, out["coordinaten"])
             if lk: out["landkaart"] = lk
+            n_mw = sum(story_map_warnings(p, out["coordinaten"]) for p in people if p.get("verhaal"))
+            if n_mw: print(f"  {n_mw} stor{'y' if n_mw == 1 else 'ies'} with map places the text doesn't name: the viewer adds a short sentence"
+                           " before those maps; name the place in the story (or give it \"alinea\" in \"plekken\") to place the map yourself")
     out["personen"] = people
     with open(a.uit, "w", encoding="utf-8") as fh:
         json.dump(out, fh, ensure_ascii=False, separators=(",", ":"))
