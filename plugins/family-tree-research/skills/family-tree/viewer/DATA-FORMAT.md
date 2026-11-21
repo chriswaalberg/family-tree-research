@@ -25,6 +25,8 @@ python3 make_viewer_data.py tree.ged data.json --start @I1@:Femke \
 | `regios` | object | no | Region codes: `{code: {"naam": …, "kleur": "#hex"}}` (`naam` = name, `kleur` = colour). `naam` can be text or `{"en": …, "nl": …}`. Use a country or country-region code (`NL`, `NL-ZH`, `BE-VAN`, `SE-M`). The viewer colours by **country of birth**: it takes the part before the hyphen (`NL-ZH` → `NL`). For well-known countries (NL, BE, DE, SE, NO, DK, FR, GB, US, ID) the viewer has its own names and colours; for other codes it uses `naam` and `kleur` from this table. |
 | `plaatsen` | object | no | Place → region code, for people without `r`. Keys are compared without capitals and accents; first the whole place name, then each comma-separated part (`"Leiden, Zuid-Holland, Nederland"` → `leiden`, `zuid-holland`, `nederland`). |
 | `tijdgeest` | object | no | Life and times per place (see "Zeitgeist" below). |
+| `coordinaten` | object | no | Coordinates for the maps: `{place: [lat, lon, precision]}`, e.g. `"Åhus, Skåne, Zweden": [55.9235, 14.2955, "plaats"]`. Keys are the place names exactly as in `bplac`, `dplac`, `woon` and `verhaal_plekken`. Precision: `plaats` (town or village: a pin), `regio` (province, county, state) or `land` (country): then the map says the exact spot is unknown and shows no pin. Made by `make_viewer_data.py --coords` from the file of `geocode_places.py` (see "Coordinates" below); places without coordinates are left out. |
+| `landkaart` | object | no | The base map for the maps, made by `make_viewer_data.py --coords` from Natural Earth (public domain, `scripts/geo/natural-earth.json`): `fijn` = detailed coastlines, lakes and land borders, cut into cells of `cel` degrees around the places (`{"x,y": {"l": land, "lk": coast, "m": lakes, "mk": lake shores, "g": borders}}`; an empty cell is sea), `grof` = the whole world, coarse (`land`, `meren`, `grenzen`), for overviews, routes and the globe. Rings are delta-encoded integers in 1/`q` degree. Maps up to `fijn_max_km` wide use `fijn`. Don't edit by hand. |
 
 Without a region code the viewer also recognises the country from the last part of the birth or death place (`…, Sweden`). A place that matches nothing gets the "Unknown" colour. It never throws an error.
 
@@ -153,6 +155,8 @@ For most people the viewer writes a text from the data (birth, age at the child'
 | `verhaal_bronnen` | list | Sources: `[["title", "https://…"], …]`, shown under the story. |
 | `verhaal_beelden` | list | Old images with the story: `[{"bestand": "media/verhalen/x.jpg", "titel": …, "maker": …, "datering": …, "bijschrift": …, "bron": ["title", "https://…"]}]` (`maker` = artist, `datering` = dating, `bijschrift` = caption, `bron` = source). Optional `soort` as with zeitgeist images (`foto`, `tekening`, …, `krant` for a newspaper clipping). Optional `alinea` (paragraph, 1-based): the image comes right after that paragraph, in the Story view between it and the next one and in Cards as the card after it. Without `alinea` the viewer places it after the paragraph that mentions the year from `datering` or a clear word from the title or caption, and otherwise spreads the images evenly over the story. Rule: every story image fits a moment in the story (same place, within ~15 years) and has an `alinea`; `make_viewer_data.py` warns (no error) when the year in `datering` lies outside (birth − 10) to (death + 10), or when `alinea` is missing or the paragraph doesn't exist. Optional `stond_er_al` (English input also: `built`, `standing_since`): the year a building in the image was built, for a later image of a building that still stood the same way in their time (a 1916 photo of a church from 1653), or for a later drawing of something that already existed then (a coat of arms). It turns the dating warning off; the script still warns if that year is after death + 10. Say it in the caption too. Optional `scan`: for a cropped clipping (`soort: "krant"`), the full scan as it hangs in the tree: the path from the GEDCOM `OBJE`/`FILE` (or media.csv), e.g. `"scan": "scans/1958-08-22 Weekly - … .jpg"`. `make_viewer_data.py` turns it into the same `media/<name>` that `--media-dir` makes for that file, and warns when it is not one of this person's media. The viewer then leaves that scan out of the document buttons in Story and Cards (the person sheet keeps it), and a tap on the clipping opens the clipping and then the full scan. Optional `kaart` (English input also: `card`; 1-based): after which card of `verhaal_kaarten` the image comes in Cards. Without `kaart` Cards falls back to `alinea`; `make_viewer_data.py` warns when a story has cards and an image has no `kaart` or one that doesn't exist. |
 
+| `verhaal_plekken` | list | Places the story points at, for its map (input key `plekken` or `places`): `[{"plaats": "Ahuys", "alinea": 1, "kaart": 1}]` (`plaats` = place, `alinea` = paragraph, `kaart` = card of `verhaal_kaarten`, both 1-based like story images; optional `jaar` (year) and `bijschrift` (caption)). Use it for a place the story mentions that is not a birth place or home in the tree (a port someone sailed from, a town abroad). Every `plaats` needs coordinates (see "Coordinates"). Plain strings work too: `"plekken": ["Ahuys"]`. |
+
 A sibling with their own story appears as "Remarkable relative" with the ancestor on the trail.
 
 With the script: `--stories stories.json`, keyed by GEDCOM id (`@I12@`) or full name. English keys (`text`, `cards`, `sources`, `images`) and Dutch keys (`tekst`, `kaarten`, `bronnen`, `beelden`) both work. `make_viewer_data.py` warns (no error) when cards differ in number per language, a card has more than 250 characters, card 1 has a year or age, an image has no or a wrong `kaart`, or a story without cards has a paragraph over 350 characters:
@@ -228,6 +232,27 @@ Field names: `plaatsen` = places, `naam` = name, `van`/`tot` = from/to year, `ja
 - Lifespan: birth year to death year; without a death year the viewer assumes 60 years.
 - Texts can also be `{"en": …, "nl": …}`. Publish images as `media/tijdgeest/<name>` next to index.html. Only use images that are free to use (public domain or CC0), and credit artist and source.
 - With the script: `--zeitgeist zeitgeist.json`.
+
+## Coordinates (script input, for the maps)
+
+`scripts/geocode_places.py tree.ged data/place-coords.json [--stories data/stories.json]` collects every place in the GEDCOM (and the `plekken` of the stories) and looks up the missing ones with OpenStreetMap's Nominatim, one per second. The file is a cache and can be edited by hand:
+
+```json
+{
+  "Åhus, Skåne, Zweden": {"lat": 55.9235, "lon": 14.2955, "precisie": "plaats", "bron": "nominatim: Åhus, Kristianstads kommun, Skåne County, Sweden"},
+  "Ahuys": {"lat": 55.9235, "lon": 14.2955, "precisie": "plaats", "bron": "manual: old spelling of Åhus"},
+  "Australie": {"lat": -24.78, "lon": 134.76, "precisie": "land", "bron": "nominatim: Australia"}
+}
+```
+
+- `precisie` (precision): `plaats`, `regio`, `land`, or `onbekend` (not found; looked up again only with `--retry`). English keys `precision`/`source` are read too.
+- An entry whose `bron` (source) does not start with `nominatim` is a manual correction: the script never changes it, not even with `--refresh`.
+- `"controleren": true` (check): the result lies in another country than the name ends with, the name had no country, or only a broader name was found. Check these by hand.
+- Names like `Ndg` or `unknown` are skipped. The request only names the plugin, never the user or the people in the tree. Coordinates from Nominatim: © OpenStreetMap contributors (ODbL).
+
+`make_viewer_data.py --coords data/place-coords.json` puts the coordinates of the places that are used into `coordinaten`, and warns about places without coordinates. Names are matched exactly first, then without capitals and accents; a short name without a comma in a story ("Amersfoort") matches the one place that starts with it.
+
+**What the viewer does with them.** Story: one map per person with the places of their life (birth, homes, death, and `verhaal_plekken`), joined by a red dotted line; open circle = first place, red pin = last. Cards: a map card when a place is new in the trail (one Cards run; within 10 km counts as the same place) or someone moves 300 km or more, at most two per person (far moves first). Near: a detail map (120 km) with a small overview in a free corner; far: a route with the distance; over 5,000 km a globe. A map card counts as a card in the card budget but is not a text card (it breaks a run). The numbers are in `const MAP` in index.html.
 
 ## Old format (v1)
 

@@ -559,6 +559,12 @@ main{padding-top:6px}
 .sw .sw-ev .vh-evl{display:block;font-size:13px;opacity:.8;margin-top:3px}
 .sw .sw-ev a{color:inherit;font-size:13px}
 .sw .sw-fig{margin:0}
+.sw .sw-map{margin:4px auto 0;width:100%;max-width:min(100%,50dvh);border-radius:8px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.sw .sw-card.f1 .sw-map{max-width:min(100%,38dvh)}
+.vh-map{margin:14px 0 6px;max-width:400px}
+.vh-map svg{border-radius:6px;box-shadow:0 2px 10px rgba(60,40,20,.18)}
+.vh-map figcaption{font-size:13px;opacity:.8;margin-top:6px}
+.vh-map figcaption small{display:block;font-size:11px;opacity:.75}
 .sw .sw-fig img{display:block;width:100%;height:auto;max-height:52dvh;object-fit:cover}
 .sw .sw-cap{font-size:13px;line-height:1.4;opacity:.9;margin-top:10px}
 .sw .sw-cap b{display:block;font-family:Fraunces,Georgia,serif;font-size:21px;line-height:1.2;margin-bottom:4px}
@@ -743,7 +749,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.22",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.23",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1168,6 +1174,7 @@ function slSheet(i,child,code,base,act){
 /* ================= VERHAAL (kies-je-eigen-pad terug in de tijd) ================= */
 Object.assign(I18N.nl,{v_verhaal:"Verhaal",
  vh_title:"Het verhaal van {name}",
+ map_k:"Op de kaart",map_from:"{km} km van {from}",map_vague:"precieze plek onbekend",map_life:"Waar {name} woonde",map_note:"Kustlijnen en grenzen van nu (Natural Earth).",
  vh_intro:"Stap voor stap terug in de tijd. Bij elke persoon kies je wiens verhaal je volgt: dat van de vader of dat van de moeder. Het gouden sterretje wijst het rijkste spoor aan: het verst terug, best onderbouwd en met de meeste verhalen.",
  vh_auto:"Volg het rijkste spoor tot het eind",vh_restart:"Opnieuw beginnen",vh_route:"Je route",
  vh_step0:"Hier begint het",vh_stepN:"Stap {k} · {rel} van {root}",
@@ -1193,6 +1200,7 @@ Object.assign(I18N.nl,{v_verhaal:"Verhaal",
  vh_special:"Bijzonder familielid",vh_tg_life:"Het leven in {plaats}",vh_tg_events:"In die tijd",vh_adopt_big:"{fn} was niet de biologische {rel} van {child}. {Hij} nam {child} aan als {zijn} eigen kind en was in alles {czijn} {papa}. Vanaf hier volgen we de familie waarin {child} opgroeide.",vh_adopt:"aangenomen als eigen kind",vh_adopt_par:"nam {child} aan als eigen kind",vh_papa_v:"papa",vh_papa_m:"mama",vh_sib_M:"{Zijn} broer",vh_sib_F:"{Zijn} zus",vh_sib_X:"{Zijn} broer of zus",vh_sources:"Bronnen",vh_details:"Alle gegevens"});
 Object.assign(I18N.en,{v_verhaal:"Story",
  vh_title:"The story of {name}",
+ map_k:"On the map",map_from:"{km} km from {from}",map_vague:"exact spot unknown",map_life:"Where {name} lived",map_note:"Present-day coastlines and borders (Natural Earth).",
  vh_intro:"Step by step back in time. At every person you choose whose story to follow: the father's or the mother's. The golden star marks the richest trail: furthest back, best supported and with the most stories.",
  vh_auto:"Follow the richest trail to the end",vh_restart:"Start over",vh_route:"Your route",
  vh_step0:"Where it begins",vh_stepN:"Step {k} · {rel} of {root}",
@@ -1487,6 +1495,9 @@ function vhTijdgeest(i,seen){const T=vhTG();if(!T)return"";const p=P[i];if(p.liv
   if(pick.length){pick.forEach(x=>seen.add(x.key));
     html+=`<div class="vh-k">${_t("vh_tg_events")}</div><ul class="vh-ev">${pick.map(({ev,lok})=>`<li data-y="${ev.jaar||ev.van||""}"${lok?' data-lok="1"':""}${ev.gewicht!=null&&isFinite(+ev.gewicht)?` data-w="${+ev.gewicht}"`:""}><b>${ev.van&&ev.tot&&ev.van!==ev.tot?ev.van+"–"+String(ev.tot).slice(-2):ev.jaar}</b><span>${slEsc(lab(ev.tekst))}${ev.bron?` <a href="${slEsc(ev.bron[1])}" target="_blank" rel="noopener" title="${slEsc(ev.bron[0])}">${_t("vh_src1")}</a>`:""}${ev.links&&ev.links.length?`<span class="vh-evl">${slEsc(lab(ev.links_label)||"")} ${ev.links.map(l=>`<a href="${slEsc(l[1])}" target="_blank" rel="noopener">${slEsc(lab(l[0]))}</a>`).join(" · ")}</span>`:""}</span></li>`).join("")}</ul>`}
   return html?`<section class="vh-tg">${html}</section>`:""}
+/* Story: one map per person with the places of their life (and the story's places) */
+function vhMapFig(p){if(!mapHas()||p.living)return "";const svg=mapLife(mapStops(p),(p.verhaal_plekken||[]).filter(x=>x.jaar==null).map(x=>mapCo(x.plaats)).filter(Boolean));if(!svg)return "";
+  return `<figure class="vh-map">${svg}<figcaption>${slEsc(_t("map_life",{name:vhFn(p)}))} <small>${slEsc(_t("map_note"))}</small></figcaption></figure>`}
 function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
   const S=vhState(),path=S.path,root=P[path[0]],rfn=vhFn(root),flags={dtb:false},tgSeen=new Set();tgSeen.assign=vhAssignImages(path);
   const w=document.createElement("div");w.className="vh";
@@ -1555,7 +1566,7 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     ch.innerHTML=`<div class="vh-dot" aria-hidden="true">${p.living&&!p.by?"•":slEsc(String(yr))}</div>
       <article class="vh-card"><div class="vh-k">${relLabel}</div>
       <h3><button type="button" class="vh-nm" data-i="${i}" title="${_t("vh_details")}">${slEsc(p.n)}</button></h3>
-      ${facts?`<div class="vh-facts">${facts}</div>`:""}${imgs.length?`<div class="vh-media">${imgs.slice(0,4).map((m,j)=>`<button type="button" class="vh-mt" data-mj="${j}" title="${slEsc(mediaName(m))}"><img loading="lazy" src="${slEsc(m.bestand)}" alt=""></button>`).join("")}${imgs.length>4?`<button type="button" class="vh-mt more" data-mj="4">+${imgs.length-4}</button>`:""}</div>`:""}${cert}${body}${sib}${fork}</article>`;
+      ${facts?`<div class="vh-facts">${facts}</div>`:""}${imgs.length?`<div class="vh-media">${imgs.slice(0,4).map((m,j)=>`<button type="button" class="vh-mt" data-mj="${j}" title="${slEsc(mediaName(m))}"><img loading="lazy" src="${slEsc(m.bestand)}" alt=""></button>`).join("")}${imgs.length>4?`<button type="button" class="vh-mt more" data-mj="4">+${imgs.length-4}</button>`:""}</div>`:""}${cert}${vhMapFig(p)}${body}${sib}${fork}</article>`;
     ch.querySelector(`.vh-nm[data-i]`).onclick=()=>slSheet(i,child,code,path[0]);
     ch.querySelectorAll(".vh-mt").forEach(b=>b.onclick=()=>mediaView(imgs,+b.dataset.mj));
     ch.querySelectorAll(".vh-fimg").forEach(b=>b.onclick=()=>mediaView(vhScanItems(b.dataset.tgimg,b.dataset.scan,b.dataset.tgt),0));
@@ -1917,6 +1928,139 @@ function drawFamilie(){
   return wrap;
 }
 
+/* ===== LANDKAART (maps in Story and Cards): ink on paper, drawn from Natural Earth (D.landkaart) and D.coordinaten =====
+   One look everywhere: cream paper, hatched sea, dotted borders, a double frame. Near (< FAR_KM): a detail map around the place with a
+   small overview in the corner (red box = the detail). A far move: a route map (curved red dotted line, open circle at the place the
+   trail came from, pin at the new place, distance halfway); above GLOBE_KM a paper globe. Precision "regio"/"land": no pin, the caption
+   says the exact spot is unknown. All numbers to tune are here. */
+const MAP={FAR_KM:300,SAME_KM:10,PER_PERSON:2,DETAIL_KM:120,OVER_KM:1500,GLOBE_KM:5000,REGIO_KM:320,LAND_KM:1800,BEND:.22,
+  W:360,H:360,IW:128,IH:104,PAD:.3,MINPX:.7,
+  pap:"#f3ead6",ink:"#5b4630",red:"#b3342b",sea:"#b9a684",bord:"#8c7558",soft:"#e8dcc0",lab:"#7d6849",
+  font:"'Iowan Old Style','Palatino','Georgia',serif"};
+let MAP_GEO=null,MAP_UID=0;
+/* a place's coordinates: {n, lat, lon, prec} or null */
+function mapCo(pl){const C=D&&D.coordinaten;if(!C||!pl)return null;let c=C[pl];
+  if(!c){const k=NORM(pl);for(const [n,v] of Object.entries(C))if(NORM(n)===k){c=v;break}}
+  return c?{n:pl,lat:c[0],lon:c[1],prec:c[2]||"plaats"}:null}
+function mapHas(){return !!(D&&D.coordinaten&&D.landkaart)}
+function mapKm(a,b){const r=Math.PI/180,p1=a.lat*r,p2=b.lat*r,dl=(b.lon-a.lon)*r;
+  return Math.round(6371*Math.acos(Math.min(1,Math.sin(p1)*Math.sin(p2)+Math.cos(p1)*Math.cos(p2)*Math.cos(dl))))}
+function mapNum(k){return String(k).replace(/\B(?=(\d{3})+(?!\d))/g,LANG==="nl"?".":",")}
+function mapName(pl){return String(pl||"").split(",")[0].replace(/\s*\(.*?\)\s*/g," ").trim()}
+function mapSub(pl){const a=String(pl||"").split(",").map(x=>x.trim()).filter(Boolean);return a.slice(1).join(", ")}
+/* Natural Earth from data.json, decoded once: rings of [lon, lat] with their box */
+function mapGeo(){if(MAP_GEO)return MAP_GEO;const L=D.landkaart,dec=(r,q)=>{const p=[];let x=0,y=0,x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+    for(let i=0;i+1<r.length;i+=2){x+=r[i];y+=r[i+1];const a=x/q,b=y/q;p.push([a,b]);if(a<x0)x0=a;if(a>x1)x1=a;if(b<y0)y0=b;if(b>y1)y1=b}return {p,b:[x0,y0,x1,y1]}};
+  const G=L.grof,qg=G.q,F=L.fijn||{q:1000,cellen:{}};
+  MAP_GEO={grof:{land:G.land.map(r=>dec(r,qg)),meren:(G.meren||[]).map(r=>dec(r,qg)),grenzen:(G.grenzen||[]).map(r=>dec(r,qg))},
+    cel:L.cel||1,fmax:L.fijn_max_km||320,cells:F.cellen||{},cache:{},dec:r=>dec(r,F.q)};return MAP_GEO}
+function mapCell(key){const g=mapGeo();if(key in g.cache)return g.cache[key];const c=g.cells[key];if(!c)return g.cache[key]=null;
+  const o={};for(const k of ["l","lk","m","mk","g"])o[k]=(c[k]||[]).map(g.dec);return g.cache[key]=o}
+/* projections: a local flat map (equirectangular with cos(lat)), km wide; and an orthographic globe */
+function mapFlat(lon,lat,km,w,h){const k=Math.cos(lat*Math.PI/180),s=w/(km/111.32),f=(a,b)=>[w/2+(a-lon)*k*s,h/2-(b-lat)*s];
+  const dx=w/2/(k*s)*(1+MAP.PAD),dy=h/2/s*(1+MAP.PAD);f.bb=[lon-dx,lat-dy,lon+dx,lat+dy];f.km=km;f.w=w;f.h=h;return f}
+function mapOrtho(lon,lat,R,cx,cy){const r=Math.PI/180,l0=lon*r,p0=lat*r;
+  const f=(a,b)=>{const l=a*r,p=b*r,c=Math.sin(p0)*Math.sin(p)+Math.cos(p0)*Math.cos(p)*Math.cos(l-l0);
+    let x=Math.cos(p)*Math.sin(l-l0),y=Math.cos(p0)*Math.sin(p)-Math.sin(p0)*Math.cos(p)*Math.cos(l-l0);
+    if(c<0){const n=Math.hypot(x,y)||1;x/=n;y/=n}return [cx+x*R,cy-y*R]};f.bb=[-180,-90,180,90];f.globe=1;return f}
+/* SVG path of rings inside the map's box; points closer than MINPX are skipped */
+function mapD(prj,rings,closed){const bb=prj.bb;let d="";
+  for(const r of rings){const b=r.b;if(b[2]<bb[0]||b[0]>bb[2]||b[3]<bb[1]||b[1]>bb[3])continue;let s="",n=0,lx=1e9,ly=1e9;
+    for(const [a,c] of r.p){const [x,y]=prj(a,c);if(Math.abs(x-lx)<MAP.MINPX&&Math.abs(y-ly)<MAP.MINPX)continue;s+=(n?"L":"M")+x.toFixed(1)+","+y.toFixed(1);n++;lx=x;ly=y}
+    if(n>=(closed?3:2))d+=s+(closed?"Z":"")}return d}
+/* the detailed cells cover this flat map? (a missing cell = not in data.json; an empty one = sea) */
+function mapFine(prj){const g=mapGeo();if(prj.globe||prj.km>g.fmax)return null;const c=g.cel,bb=prj.bb,keys=[];
+  for(let x=Math.floor(bb[0]/c);x<=Math.floor(bb[2]/c);x++)for(let y=Math.floor(bb[1]/c);y<=Math.floor(bb[3]/c);y++){const k=x+","+y;if(!(k in g.cells))return null;keys.push(k)}
+  return keys.map(mapCell).filter(Boolean)}
+/* sea, land, lakes and borders; o: {fill, sea, sw, borders, coarse} */
+function mapBase(prj,w,h,o){const g=mapGeo(),fine=o.coarse?null:mapFine(prj),ink=MAP.ink,sw=o.sw||1;let s=`<rect width="${w}" height="${h}" fill="${MAP.pap}"/>`;
+  if(o.sea)s+=`<rect width="${w}" height="${h}" fill="${o.sea}"/>`;
+  if(fine){const all=k=>fine.flatMap(c=>c[k]);
+    s+=`<path d="${mapD(prj,all("l"),1)}" fill="${o.fill}"/><path d="${mapD(prj,all("lk"),0)}" fill="none" stroke="${ink}" stroke-width="${sw}" stroke-linejoin="round"/>`;
+    s+=`<path d="${mapD(prj,all("m"),1)}" fill="${o.sea||MAP.pap}"/><path d="${mapD(prj,all("mk"),0)}" fill="none" stroke="${ink}" stroke-width="${sw*.6}"/>`;
+    if(o.borders)s+=`<path d="${mapD(prj,all("g"),0)}" fill="none" stroke="${MAP.bord}" stroke-width=".9" stroke-dasharray="3 2.5"/>`}
+  else{s+=`<path d="${mapD(prj,g.grof.land,1)}" fill="${o.fill}" stroke="${ink}" stroke-width="${sw}" stroke-linejoin="round"/>`;
+    if(!prj.globe){s+=`<path d="${mapD(prj,g.grof.meren,1)}" fill="${o.sea||MAP.pap}" stroke="${ink}" stroke-width="${sw*.6}"/>`;
+      if(o.borders)s+=`<path d="${mapD(prj,g.grof.grenzen,0)}" fill="none" stroke="${MAP.bord}" stroke-width=".8" stroke-dasharray="3 2.5"/>`}}
+  return s}
+function mapPin(x,y,r){r=r||7;const c=MAP.red;return `<g transform="translate(${x.toFixed(1)},${y.toFixed(1)})"><circle r="${(r*2.6).toFixed(1)}" fill="${c}" opacity=".16"/><path d="M0,0 C-${r},-${r*1.3} -${r},-${r*2.6} 0,-${r*2.6} C${r},-${r*2.6} ${r},-${r*1.3} 0,0Z" fill="${c}" stroke="#fff" stroke-width="1.5"/><circle cy="-${(r*1.75).toFixed(1)}" r="${(r*.38).toFixed(1)}" fill="#fff"/></g>`}
+function mapDot(x,y,r){return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r||3.5}" fill="${MAP.ink}" stroke="#fff" stroke-width="1.5"/>`}
+function mapRing(x,y){return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.5" fill="${MAP.pap}" stroke="${MAP.red}" stroke-width="2"/>`}
+function mapLabel(x,y,t,o){o=o||{};return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-family="${MAP.font}" font-size="${o.size||12}" font-style="${o.bold?"normal":"italic"}" font-weight="${o.bold?"bold":"normal"}" text-anchor="${o.anchor||"middle"}" fill="${o.fill||MAP.ink}" paint-order="stroke" stroke="${MAP.pap}" stroke-width="3.5" stroke-linejoin="round">${slEsc(t)}</text>`}
+function mapFrame(w,h){return `<rect x="4" y="4" width="${w-8}" height="${h-8}" fill="none" stroke="${MAP.ink}" stroke-width="1.2"/><rect x="8" y="8" width="${w-16}" height="${h-16}" fill="none" stroke="${MAP.ink}" stroke-width=".4"/>`}
+function mapHatch(id){return `<pattern id="${id}" width="4.5" height="4.5" patternUnits="userSpaceOnUse"><line x1="0" y1="2.25" x2="4.5" y2="2.25" stroke="${MAP.sea}" stroke-width=".6"/></pattern>`}
+function mapSvg(body,label){return `<svg viewBox="0 0 ${MAP.W} ${MAP.H}" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${slEsc(label||"")}" style="display:block">${body}</svg>`}
+/* a place label that never falls off the edge: right of the point, or left of it near the right edge */
+function mapPlaceLabel(x,y,t,big,avoid){const right=x>MAP.W-110,w=String(t).length*(big?9:6.5),lx=right?x-12-w:x+12,ly=y-(big?8:-4);
+  /* would it sit on another label ([x0, x1, y] boxes)? then above the pin, kept inside the frame */
+  if(big&&avoid&&avoid.some(b=>lx<b[1]&&lx+w>b[0]&&Math.abs(ly-b[2])<18)){const cx=Math.max(14+w/2,Math.min(MAP.W-14-w/2,x));return mapLabel(cx,y-26,t,{size:17,bold:1})}
+  return mapLabel(right?x-12:x+12,ly,t,{size:big?17:12,bold:big,anchor:right?"end":"start"})}
+/* the overview in the corner: a wide coarse map with a red box around the detail */
+function mapInset(t,km,pts){const iw=MAP.IW,ih=MAP.IH,m=14,
+    /* the first free corner (bottom right, bottom left, top right, top left): no point or label of the map under it; none free = no overview */
+    cn=[[MAP.W-iw-m,MAP.H-ih-m],[m,MAP.H-ih-m],[MAP.W-iw-m,m],[m,m]].find(([cx,cy])=>!(pts||[]).some(([x,y])=>x>cx-14&&x<cx+iw+14&&y>cy-24&&y<cy+ih+14));
+  if(!cn)return "";const ok=Math.max(MAP.OVER_KM,km*6),q=mapFlat(t.lon,t.lat,ok,iw,ih),id="mc"+(++MAP_UID);
+  let ins=mapBase(q,iw,ih,{fill:MAP.soft,sw:.5,coarse:1});const [x,y]=q(t.lon,t.lat),bw=Math.max(6,iw*km/ok);
+  ins+=`<rect x="${(x-bw/2).toFixed(1)}" y="${(y-bw/2).toFixed(1)}" width="${bw.toFixed(1)}" height="${bw.toFixed(1)}" fill="none" stroke="${MAP.red}" stroke-width="1.6"/>`;
+  return `<g transform="translate(${cn[0]},${cn[1]})"><clipPath id="${id}"><rect width="${iw}" height="${ih}"/></clipPath><rect x="-3" y="-3" width="${iw+6}" height="${ih+6}" fill="${MAP.pap}" stroke="${MAP.ink}" stroke-width="1"/><g clip-path="url(#${id})">${ins}</g><rect width="${iw}" height="${ih}" fill="none" stroke="${MAP.ink}" stroke-width=".6"/></g>`}
+/* labels for the other places: skipped when they would sit on top of something already labelled */
+function mapLabels(pts,taken){let s="";for(const q of pts){if(q.x<12||q.x>MAP.W-12||q.y<12||q.y>MAP.H-12)continue;
+    if(taken.some(o=>Math.abs(o[0]-q.x)<70&&Math.abs(o[1]-q.y)<14))continue;taken.push([q.x,q.y]);s+=mapPlaceLabel(q.x,q.y,q.n,false)}return s}
+/* near: the detail map around t; "others" are small ink points (with names when there is room) */
+function mapDetail(t,others){const km=t.prec==="land"?MAP.LAND_KM:t.prec==="regio"?MAP.REGIO_KM:MAP.DETAIL_KM,p=mapFlat(t.lon,t.lat,km,MAP.W,MAP.H),id="mh"+(++MAP_UID);
+  let s=`<defs>${mapHatch(id)}</defs>`+mapBase(p,MAP.W,MAP.H,{fill:MAP.pap,sea:`url(#${id})`,borders:1});
+  const [x,y]=p(t.lon,t.lat),taken=[[x+40,y-8]];const pts=(others||[]).map(o=>{const [a,b]=p(o.lon,o.lat);return {x:a,y:b,n:mapName(o.n)}}).filter(q=>q.x>0&&q.x<MAP.W&&q.y>0&&q.y<MAP.H&&Math.hypot(q.x-x,q.y-y)>8);
+  pts.forEach(q=>s+=mapDot(q.x,q.y));s+=mapLabels(pts,taken);
+  if(t.prec==="plaats")s+=mapPin(x,y)+mapPlaceLabel(x,y,mapName(t.n),true);
+  else s+=mapLabel(x,y,mapName(t.n),{size:17,bold:1});
+  if(km<MAP.OVER_KM)s+=mapInset(t,km,[[x,y],[x+60,y-8]].concat(pts.map(q=>[q.x,q.y])));
+  return mapSvg(s+mapFrame(MAP.W,MAP.H),mapName(t.n))}
+/* the middle of two places on the globe (for the centre of a globe and a great circle) */
+function mapSlerp(a,b,t){const r=Math.PI/180,v=q=>[Math.cos(q.lat*r)*Math.cos(q.lon*r),Math.cos(q.lat*r)*Math.sin(q.lon*r),Math.sin(q.lat*r)],A=v(a),B=v(b);
+  const o=Math.acos(Math.max(-1,Math.min(1,A[0]*B[0]+A[1]*B[1]+A[2]*B[2])));if(o<1e-9)return {lat:a.lat,lon:a.lon};
+  const s1=Math.sin((1-t)*o)/Math.sin(o),s2=Math.sin(t*o)/Math.sin(o),x=s1*A[0]+s2*B[0],y=s1*A[1]+s2*B[1],z=s1*A[2]+s2*B[2];
+  return {lat:Math.atan2(z,Math.hypot(x,y))/r,lon:Math.atan2(y,x)/r}}
+/* a window around several points: flat (centre and width in km) or, when they lie far apart, a globe */
+function mapFit(pts,minKm){const far=pts.some((a,i)=>pts.some((b,j)=>j>i&&mapKm(a,b)>MAP.GLOBE_KM));
+  if(far){const c=pts.length===2?mapSlerp(pts[0],pts[1],.5):mapSlerp(pts[0],pts[pts.length-1],.5);return mapOrtho(c.lon,Math.max(-60,Math.min(60,c.lat)),150,MAP.W/2,MAP.H/2)}
+  const la0=Math.min(...pts.map(q=>q.lat)),la1=Math.max(...pts.map(q=>q.lat)),lo0=Math.min(...pts.map(q=>q.lon)),lo1=Math.max(...pts.map(q=>q.lon));
+  const lat=(la0+la1)/2,lon=(lo0+lo1)/2,span=Math.max((la1-la0)*111.32,(lo1-lo0)*111.32*Math.cos(lat*Math.PI/180));
+  return mapFlat(lon,lat,Math.max(minKm||MAP.DETAIL_KM,span*1.45),MAP.W,MAP.H)}
+/* a red dotted leg from a to b: a great circle on the globe, a 22% curve on a flat map; the distance halfway when asked */
+function mapLeg(prj,a,b,km){const [x0,y0]=prj(a.lon,a.lat),[x1,y1]=prj(b.lon,b.lat);let d,mx,my;
+  if(prj.globe){const pts=[];for(let i=0;i<=48;i++){const q=mapSlerp(a,b,i/48);pts.push(prj(q.lon,q.lat))}d="M"+pts.map(q=>q[0].toFixed(1)+","+q[1].toFixed(1)).join("L");[mx,my]=pts[24]}
+  else{const cx=(x0+x1)/2-(y1-y0)*MAP.BEND,cy=(y0+y1)/2+(x1-x0)*MAP.BEND;d=`M${x0.toFixed(1)},${y0.toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;mx=(x0+x1)/4+cx/2;my=(y0+y1)/4+cy/2}
+  return {svg:`<path d="${d}" fill="none" stroke="${MAP.red}" stroke-width="2.2" stroke-dasharray="6 4"/>`,km:km?mapLabel(mx,my+4,mapNum(km)+" km",{size:13,bold:1,fill:MAP.red}):"",mx,my}}
+function mapGlobeBase(prj,id){const R=150,cx=MAP.W/2,cy=MAP.H/2,c="mg"+id;return `<rect width="${MAP.W}" height="${MAP.H}" fill="${MAP.pap}"/><circle cx="${cx}" cy="${cy}" r="${R}" fill="url(#${id})" stroke="${MAP.ink}" stroke-width="1.2"/><clipPath id="${c}"><circle cx="${cx}" cy="${cy}" r="${R}"/></clipPath><g clip-path="url(#${c})"><path d="${mapD(prj,mapGeo().grof.land,1)}" fill="${MAP.pap}" stroke="${MAP.ink}" stroke-width=".7" stroke-linejoin="round"/></g>`}
+/* far: a route from "from" (where the trail was) to t (the new place) */
+function mapRoute(from,t){const km=mapKm(from,t),prj=mapFit([from,t],400),id="mh"+(++MAP_UID);
+  let s=`<defs>${mapHatch(id)}</defs>`+(prj.globe?mapGlobeBase(prj,id):mapBase(prj,MAP.W,MAP.H,{fill:MAP.pap,sea:`url(#${id})`,borders:1,sw:.9}));
+  const [x0,y0]=prj(from.lon,from.lat),[x1,y1]=prj(t.lon,t.lat),L=mapLeg(prj,from,t,km);
+  const fn=mapName(from.n),fw=fn.length*7,fx=x0<x1?x0+8:x0-8-fw;
+  s+=L.svg+mapRing(x0,y0)+mapLabel(x0+(x0<x1?8:-8),y0+4,fn,{size:13,anchor:x0<x1?"start":"end"});
+  s+=(t.prec==="plaats"?mapPin(x1,y1):mapDot(x1,y1,4))+mapPlaceLabel(x1,y1,mapName(t.n),true,[[fx,fx+fw,y0+4],[L.mx-30,L.mx+30,L.my+4]])+L.km;
+  return mapSvg(s+mapFrame(MAP.W,MAP.H),mapName(from.n)+" → "+mapName(t.n))}
+/* one map for a new place in the trail: a route when the trail comes from far, else the detail map */
+function mapFor(t,from,others){return from&&mapKm(from,t)>=MAP.FAR_KM?mapRoute(from,t):mapDetail(t,others)}
+/* Story: all of one person's places on one map, in the order of their life: open circle = first, ink points, red pin = last */
+function mapLife(stops,extra){const st=stops.filter(q=>q.prec==="plaats"),ex=(extra||[]).filter(q=>q.prec==="plaats"&&!st.some(o=>mapKm(o,q)<MAP.SAME_KM));
+  if(!st.length&&!ex.length)return "";if(st.length+ex.length===1)return mapDetail(st[0]||ex[0],[]);
+  const all=st.concat(ex),prj=mapFit(all,MAP.DETAIL_KM),id="mh"+(++MAP_UID);
+  let s=`<defs>${mapHatch(id)}</defs>`+(prj.globe?mapGlobeBase(prj,id):mapBase(prj,MAP.W,MAP.H,{fill:MAP.pap,sea:`url(#${id})`,borders:1}));
+  for(let i=1;i<st.length;i++){const km=mapKm(st[i-1],st[i]);if(km<MAP.SAME_KM)continue;const L=mapLeg(prj,st[i-1],st[i],km>=MAP.FAR_KM?km:0);s+=L.svg+L.km}
+  const xy=q=>{const [x,y]=prj(q.lon,q.lat);return {x,y,n:mapName(q.n)}},taken=[],last=st.length?xy(st[st.length-1]):null;
+  const pts=[];st.forEach((q,i)=>{if(i===st.length-1)return;const p=xy(q);if(pts.some(o=>Math.hypot(o.x-p.x,o.y-p.y)<4))return;s+=i===0?mapRing(p.x,p.y):mapDot(p.x,p.y);pts.push(p)});
+  ex.forEach(q=>{const p=xy(q);s+=mapDot(p.x,p.y,3);pts.push(p)});
+  if(last){s+=mapPin(last.x,last.y)+mapPlaceLabel(last.x,last.y,last.n,true);taken.push([last.x+40,last.y-8])}
+  s+=mapLabels(pts.filter(p=>!last||Math.hypot(p.x-last.x,p.y-last.y)>6),taken);
+  if(!prj.globe&&prj.km<MAP.OVER_KM)s+=mapInset(st[st.length-1]||all[0],prj.km,all.map(q=>{const p=xy(q);return [p.x,p.y]}).concat(last?[[last.x+60,last.y-8]]:[]));
+  return mapSvg(s+mapFrame(MAP.W,MAP.H),all.map(q=>mapName(q.n)).join(", "))}
+/* a person's places in the order of their life: birth, homes ("woon", by year), death; story places with a year join in */
+function mapStops(p){const out=[],add=(pl,y,k)=>{const c=mapCo(pl);if(!c)return;const l=out[out.length-1];if(l&&l.n===c.n)return;out.push(Object.assign(c,{y,k}))};
+  const w=(p.woon||[]).slice().sort((a,b)=>(a[1]||0)-(b[1]||0));add(p.bplac,p.by,"b");w.forEach(x=>add(x[0],x[1],"w"));
+  (p.verhaal_plekken||[]).filter(x=>x.jaar!=null).forEach(x=>{const c=mapCo(x.plaats);if(!c)return;const j=out.findIndex(o=>(o.y||0)>x.jaar);c.y=x.jaar;c.k="s";if(j<0)out.push(c);else out.splice(j,0,c)});
+  if(p.dplac)add(p.dplac,p.dy,"d");return out}
+
 /* ===== SWIPE (experimental Swipe Stories: full-screen cards that play by themselves, built from the Story view) ===== */
 Object.assign(I18N.nl,{sw_btn:"Kaarten",sw_btn_t:"Het verhaal als kaarten die vanzelf doorlopen",sw_close:"Sluiten",sw_pause:"Pauze",sw_play:"Verder",sw_next:"Volgende",sw_prev:"Vorige",
  sw_hint:"Tik rechts: verder · tik links: terug · vasthouden: pauze · omhoog vegen: een generatie verder terug",
@@ -1972,6 +2116,8 @@ function swPickEvents(evs){const sc=x=>{const li=document.createElement("ul");li
   return evs.map((x,j)=>({x,j,s:sc(x)})).sort((a,b)=>b.s-a.s||a.j-b.j).slice(0,SW_EV_MAX).sort((a,b)=>a.j-b.j).map(o=>o.x)}
 function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
   const path=SW.path,root=path[0],rfn=vhFn(P[root]),flags={dtb:false},seen=new Set();seen.assign=vhAssignImages(path);
+  /* maps: one Cards run is one chain; a place gets a map the first time it appears in it (within MAP.SAME_KM counts as the same place), a move from far always */
+  const MS={seen:[],here:null};
   SW.gens=path.map((i,k)=>{const p=P[i],child=k?path[k-1]:null,code=vhCode(path,k),fn=vhFn(p),cards=[];
     const lc=k===0?"#b48a3c":(LINE_COL[code.length>=2?code.slice(0,2):(code==="v"?"vv":"mv")]||"#b48a3c");
     const rel=k===0?_t("vh_step0"):_t("vh_stepN",{k,rel:vhCap(vhRelWord(k,p.x)),root:rfn});
@@ -2034,6 +2180,7 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     /* an own story that already tells the death (death year + "died"/"overleed") keeps its sentence there; the farewell card then shows only the word and the year */
     const dTold=vhHas(p)&&swToldDeath(p),dS=dTold?S.d.filter((s,j)=>!/^vh_died/.test(S.dk[j])):S.d,dShow=S.d.length;
     if(dShow||S.n.length)add("death",`<div class="sw-k">${dShow?_t("sw_death"):""}</div><div class="sw-big">${dShow&&p.dy?p.dy:""}</div>${dS.length?`<div class="sw-t">${T(dS)}</div>`:""}${S.n.map(n=>`<div class="sw-note">${slEsc(n)}</div>`).join("")}`,{len:dS.join(" ").length});
+    swMapCard(p,MS,add);
     /* the fork: father or mother; the richest trail plays on by itself */
     const par=parentsOf(i);
     if(par.length===2){const nxt=path[k+1];
@@ -2045,6 +2192,24 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     const head=cards.filter(c=>c.kind==="intro"||c.hook),tail=cards.filter(c=>c.kind==="death"||c.kind==="fork"||c.kind==="end"),mid=vhSortByYear(cards.filter(c=>!head.includes(c)&&!tail.includes(c)));
     const merged=[];for(const c of mid){const l=merged[merged.length-1];if(c.kind==="events"&&l&&l.kind==="events"&&l.len+c.len<=220){l.li+=c.li;l.len+=c.len;l.html=`<div class="sw-k">${slEsc(l.head)}</div><ul class="sw-ev">${l.li}</ul>`}else merged.push(c)}
     return {i,lc,fn,cards:swOverlay(head.concat(merged,tail))}})}
+/* the map cards of one person in the chain (at most MAP.PER_PERSON): walking through their life from where the trail was ("here" = the birthplace
+   of the person before), every place that is new in the chain and every move of MAP.FAR_KM or more is a candidate; far moves go first, then new places,
+   shown in the order of their life. A country or region alone ("Australie") gives way to a town in that country later in life (and gives it its year). */
+function swMapCard(p,MS,add){if(!mapHas()||p.living)return;
+  const plk=(p.verhaal_plekken||[]).map(x=>{const c=mapCo(x.plaats);return c&&Object.assign(c,{at:x.kaart!=null?x.kaart:x.alinea,y:x.jaar})}).filter(Boolean);
+  let st=mapStops(p);st=st.concat(plk.filter(q=>!st.some(o=>o.n===q.n)));
+  const land=q=>NORM(String(q.n).split(",").pop()).trim();
+  st=st.filter((q,i)=>{if(q.prec==="plaats")return true;const nx=st.slice(i+1).find(o=>o.prec==="plaats"&&land(o)===land(q));if(nx&&q.y!=null)nx.y0=Math.min(nx.y0!=null?nx.y0:Infinity,q.y);return !nx});
+  const isNew=q=>!MS.seen.some(o=>mapKm(o,q)<MAP.SAME_KM),ev=[];let prev=MS.here;
+  st.forEach((q,j)=>{const d=prev?mapKm(prev,q):0,nw=isNew(q);const same=(a,b)=>a&&b&&mapKm(a,b)<MAP.SAME_KM,dup=ev.some(e=>e.from&&prev&&((same(e.from,prev)&&same(e.t,q))||(same(e.from,q)&&same(e.t,prev))));
+    if((nw||d>=MAP.FAR_KM)&&!dup)ev.push({t:q,from:prev,d,far:d>=MAP.FAR_KM,nw,j});if(nw)MS.seen.push(q);if(!prev||d>=MAP.SAME_KM)prev=q});
+  const pick=ev.filter(e=>e.far).sort((a,b)=>b.d-a.d||a.j-b.j).concat(ev.filter(e=>!e.far)).slice(0,MAP.PER_PERSON).sort((a,b)=>a.j-b.j);
+  pick.forEach(e=>{const t=e.t,from=e.from,others=e.far?[]:ev.filter(o=>o.nw&&!o.far&&o!==e&&!pick.includes(o)).map(o=>o.t).concat(from?[from]:[]);
+    /* a birthplace map comes before the story's first paragraph of that year (half a year earlier) */
+    let y=t.y0!=null?t.y0:t.y!=null?t.y-(t.k==="b"?.5:0):p.by||null;if(t.at!=null&&vhHas(p)){const py=vhParaYears(vhParaList(swCardText(p)),p);if(py[t.at-1]!=null)y=py[t.at-1]}
+    const sub=mapSub(t.n),line=[from&&e.d>=MAP.SAME_KM?_t("map_from",{km:mapNum(e.d),from:mapName(from.n)}):"",t.prec!=="plaats"?_t("map_vague"):""].filter(Boolean).join(" · ");
+    add("map",`<div class="sw-k">${_t("map_k")}</div><figure class="sw-map">${mapFor(t,from,others)}</figure><div class="sw-cap"><b>${slEsc(mapName(t.n))}</b>${sub?slEsc(sub):""}${line?`<span>${slEsc(line)}</span>`:""}</div>`,{y,len:60})});
+  MS.here=mapCo(p.bplac)||st[0]||MS.here}
 /* text on the image (like Stories): a story card and the story image right after it, or a life card and the zeitgeist image right
    after (else right before) it, become one card: the photo full-screen, the text over it, a small credit line below.
    Clippings, scans, documents and maps stay cards of their own. */
@@ -2062,7 +2227,7 @@ const SW_BUDGET_MAX=15,SW_BUDGET_RUN=3;
 function swBudgetOf(i){const keep=SW;let cs;try{SW={path:swPlan([i])};swBuild();cs=SW.gens[0].cards}finally{SW=keep}
   cs=cs.filter(c=>c.kind!=="fork"&&c.kind!=="end");let run=[],best=[],sn=0;
   const cardLab=c=>{if(c.kind==="story"){sn++;return _t("bg_card",{n:sn})}const d=document.createElement("div");d.innerHTML=c.html;const k=d.querySelector(".sw-k");return (k?k.textContent:c.kind).replace(/^✦\s*/,"").trim()||c.kind};
-  cs.forEach(c=>{const l=cardLab(c);if(c.kind==="img"||c.kind==="ov"){run=[]}else{run.push(l);if(run.length>best.length)best=run.slice()}});
+  cs.forEach(c=>{const l=cardLab(c);if(c.kind==="img"||c.kind==="ov"||c.kind==="map"){run=[]}else{run.push(l);if(run.length>best.length)best=run.slice()}});
   return {n:cs.length,run:best.length,where:best}}
 function swBudgetShow(){let el=$("swb");if(!el){el=document.createElement("div");el.id="swb";el.className="swb";el.setAttribute("role","dialog");document.body.appendChild(el)}
   const row=i=>{const b=swBudgetOf(i),many=b.n>SW_BUDGET_MAX,long=b.run>SW_BUDGET_RUN;
@@ -2072,7 +2237,7 @@ function swBudgetShow(){let el=$("swb");if(!el){el=document.createElement("div")
   const tbl=rs=>rs.length?`<table><thead><tr><th>${_t("bg_who")}</th><th>${_t("bg_n")}</th><th>${_t("bg_run")}</th><th>${_t("bg_where")}</th></tr></thead><tbody>${rs.map(r=>r.html).join("")}</tbody></table>`:`<p>${_t("bg_none")}</p>`;
   el.innerHTML=`<div class="swb-in"><button type="button" class="swb-x">${_t("bg_close")}</button><h2>${_t("bg_title")}</h2><p>${_t("bg_intro",{max:SW_BUDGET_MAX,run:SW_BUDGET_RUN})}</p><h3>${_t("bg_own")}</h3><div class="swb-t">${tbl(own)}</div><h3>${_t("bg_other")}</h3><div class="swb-t">${tbl(other)}</div></div>`;
   el.hidden=false;if(!/^#(kaartbudget|cardbudget)$/.test(location.hash))history.replaceState(null,"","#"+(LANG==="nl"?"kaartbudget":"cardbudget"));el.querySelector(".swb-x").onclick=()=>{el.hidden=true;history.replaceState(null,"","#"+state.view)}}
-function swDur(c){if(c.stay)return 0;if(c.img)return c.paper?12000:7000;return Math.max(5000,Math.min(15000,3200+48*(c.len||60)))+(c.kind==="ov"?1500:0)}
+function swDur(c){if(c.stay)return 0;if(c.kind==="map")return 8000;if(c.img)return c.paper?12000:7000;return Math.max(5000,Math.min(15000,3200+48*(c.len||60)))+(c.kind==="ov"?1500:0)}
 function swOpen(root){
   if(!$("sw")){const d=document.createElement("div");d.id="sw";d.className="sw";d.hidden=true;d.setAttribute("role","dialog");d.setAttribute("aria-modal","true");
     d.innerHTML=`<button type="button" class="sw-nav l" data-nav="-1">‹</button><div class="sw-phone"><div class="sw-cards"></div><div class="sw-top"><div class="sw-bars"></div><div class="sw-head"><div class="sw-av"></div><div class="sw-who"><b></b><span></span></div><button type="button" class="sw-pp"></button><button type="button" class="sw-x">✕</button></div><div class="sw-route"></div></div><div class="sw-hint"></div></div><button type="button" class="sw-nav r" data-nav="1">›</button>`;

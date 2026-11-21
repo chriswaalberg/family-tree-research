@@ -17,6 +17,7 @@ Family tree/                    (Stamboom/)
 │   ├── regions.json            (regios.json)         ← place → country/region (start from the plugin's basic version)
 │   ├── media.csv                                     ← which photo/scan belongs to which person
 │   ├── stories.json            (verhalen.json)       ← own stories per person, with sources (Story view)
+│   ├── place-coords.json       (plaatsen-coords.json) ← coordinates per place for the maps (geocode_places.py; manual fixes stay)
 │   ├── data.json                                     ← generated for the viewer
 │   └── worklog.md              (werklog.md)          ← what was searched, found and not found
 ├── reports/                    (rapporten/)

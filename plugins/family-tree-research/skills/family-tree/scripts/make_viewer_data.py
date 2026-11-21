@@ -6,6 +6,7 @@ Only a GEDCOM is required. Optional:
   --regions    region table as JSON: {"regios": {code: {"naam": ..., "kleur": "#hex"}}, "plaatsen": {place: code}}
   --stories    the user's own stories per person as JSON (see DATA-FORMAT.md, "Stories")
   --zeitgeist  life and times per place (daily life, events, old images) as JSON (see DATA-FORMAT.md, "Zeitgeist")
+  --coords     coordinates per place as JSON, from geocode_places.py (for the maps in Story and Cards)
   --media-dir  copy photos and documents (GEDCOM OBJE/FILE) into this folder as media/<name>,
                so they can be published next to index.html
 
@@ -512,6 +513,184 @@ def zeitgeist_card_warnings(pl, L):
     return len(out)
 
 
+def story_places(lst):
+    """"plekken"/"places" of a story: [{"plaats": "Ahuys", "alinea": 1, "kaart": 1}] or plain strings -> Dutch keys."""
+    out = []
+    for pl in lst or []:
+        if isinstance(pl, str): pl = {"plaats": pl}
+        if not isinstance(pl, dict): continue
+        e = {"plaats": pl.get("plaats") or pl.get("place")}
+        for nl, en in (("alinea", "paragraph"), ("kaart", "card"), ("jaar", "year"), ("bijschrift", "caption")):
+            v = pl.get(nl, pl.get(en))
+            if v is not None: e[nl] = v
+        if e["plaats"]: out.append(e)
+    return out
+
+
+def coords_for(people, cf):
+    """{place: [lat, lon, precision]} for every place a person or story uses; warns about places without coordinates."""
+    by_norm = {norm(k): v for k, v in cf.items() if not k.startswith("_") and isinstance(v, dict)}
+    used = []
+    for p in people:
+        for pl in [p.get("bplac"), p.get("dplac")] + [w[0] for w in p.get("woon") or []] + [x["plaats"] for x in p.get("verhaal_plekken") or []]:
+            if pl and pl not in used: used.append(pl)
+    out, missing, vague = {}, [], 0
+    used = [pl for pl in used if not re.match(r"^(ndg|onbekend|unknown|\?+|-+|n/?a|nvt)$", pl.strip(), re.I)]  # not a place
+    for pl in used:
+        e = cf.get(pl) if isinstance(cf.get(pl), dict) else by_norm.get(norm(pl))
+        if not e and "," not in pl:  # a short name in a story ("Amersfoort"): the one place in the file that starts with it
+            hit = [v for k, v in by_norm.items() if k.split(",")[0].strip() == norm(pl)]
+            if len(hit) == 1: e = hit[0]
+        prec = e and (e.get("precisie") or PREC_EN.get(str(e.get("precision", "")).lower(), e.get("precision")))
+        if not e or e.get("lat") is None or e.get("lon") is None or prec in (None, "onbekend", "unknown"):
+            missing.append(pl); continue
+        prec = prec if prec in ("plaats", "regio", "land") else "plaats"
+        if prec != "plaats": vague += 1
+        out[pl] = [round(float(e["lat"]), 4), round(float(e["lon"]), 4), prec]
+    print(f"Coordinates: {len(out)} of {len(used)} place(s)" + (f", {vague} only region/country (no pin)" if vague else ""))
+    if missing:
+        print(f"  warning, {len(missing)} place(s) without coordinates (run geocode_places.py, or add them by hand): "
+              + "; ".join(missing[:15]) + (" ..." if len(missing) > 15 else ""), file=sys.stderr)
+    return out
+
+
+# ---------------------------------------------------------------- base map (Natural Earth) for the maps
+GEO_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "geo", "natural-earth.json")
+MAP_FINE_MAX_KM = 320   # maps up to this width use the detailed (10m) coastlines; wider maps the coarse (50m) ones
+MAP_DETAIL_KM = 120     # width of the detail map around one place (keep equal to MAP_DETAIL_KM in the viewer)
+MAP_CELL = 1            # detailed coastlines are cut into cells of this many degrees
+
+
+def geo_decode(r):
+    out, x, y = [], 0, 0
+    for i in range(0, len(r) - 1, 2):
+        x += r[i]; y += r[i + 1]; out.append((x, y))
+    return out
+
+
+def geo_encode(pts):
+    out, px, py = [], 0, 0
+    for i, (x, y) in enumerate(pts):
+        if i and x == px and y == py: continue
+        out += [x - px, y - py] if i else [x, y]; px, py = x, y
+    return out
+
+
+def clip_poly(pts, x0, y0, x1, y1):
+    """Sutherland-Hodgman: a polygon cut to a rectangle (for the fill; the edges of the cut are never stroked)."""
+    def cut(pts, inside, inter):
+        out = []
+        for i, b in enumerate(pts):
+            a = pts[i - 1]
+            if inside(b):
+                if not inside(a): out.append(inter(a, b))
+                out.append(b)
+            elif inside(a): out.append(inter(a, b))
+        return out
+    def ix(xc):
+        return lambda a, b: (xc, round(a[1] + (b[1] - a[1]) * (xc - a[0]) / (b[0] - a[0])))
+    def iy(yc):
+        return lambda a, b: (round(a[0] + (b[0] - a[0]) * (yc - a[1]) / (b[1] - a[1])), yc)
+    for inside, inter in ((lambda p: p[0] >= x0, ix(x0)), (lambda p: p[0] <= x1, ix(x1)),
+                          (lambda p: p[1] >= y0, iy(y0)), (lambda p: p[1] <= y1, iy(y1))):
+        pts = cut(pts, inside, inter)
+        if not pts: return []
+    return pts
+
+
+def clip_line(pts, x0, y0, x1, y1):
+    """A line (coast, border) cut to a rectangle: the pieces inside (Liang-Barsky per segment)."""
+    out, cur = [], []
+    for a, b in zip(pts, pts[1:]):
+        dx, dy = b[0] - a[0], b[1] - a[1]; t0, t1 = 0.0, 1.0; ok = True
+        for pp, qq in ((-dx, a[0] - x0), (dx, x1 - a[0]), (-dy, a[1] - y0), (dy, y1 - a[1])):
+            if pp == 0:
+                if qq < 0: ok = False; break
+            else:
+                t = qq / pp
+                if pp < 0: t0 = max(t0, t)
+                else: t1 = min(t1, t)
+        if not ok or t0 > t1:
+            if len(cur) > 1: out.append(cur)
+            cur = []; continue
+        pa = (round(a[0] + dx * t0), round(a[1] + dy * t0)); pb = (round(a[0] + dx * t1), round(a[1] + dy * t1))
+        if not cur or cur[-1] != pa:
+            if len(cur) > 1: out.append(cur)
+            cur = [pa]
+        cur.append(pb)
+        if t1 < 1:
+            out.append(cur); cur = []
+    if len(cur) > 1: out.append(cur)
+    return out
+
+
+def map_window(lat, lon, km):
+    """lon/lat box of a map km wide around a point (square, with 30% to spare)."""
+    import math
+    dlat = km / 111.32 / 2 * 1.3
+    dlon = dlat / max(.15, math.cos(math.radians(lat)))
+    return lon - dlon, lat - dlat, lon + dlon, lat + dlat
+
+
+def base_map(people, coords):
+    """The coastlines, lakes and borders the maps need: the detailed ones cut into cells around the places, the coarse world whole."""
+    import math
+    try:
+        with open(GEO_FILE, encoding="utf-8") as fh: geo = json.load(fh)
+    except OSError:
+        print(f"  warning, no base map ({GEO_FILE} missing): the maps are left out", file=sys.stderr); return None
+    pin = {k: v for k, v in coords.items() if v[2] == "plaats"}
+    boxes = [map_window(v[0], v[1], MAP_DETAIL_KM) for v in pin.values()]
+    # Story: one map per person with all their places; when that fits the detailed width, its whole window is needed
+    for p in people:
+        pts = [pin[x] for x in [p.get("bplac"), p.get("dplac")] + [w[0] for w in p.get("woon") or []]
+               + [x["plaats"] for x in p.get("verhaal_plekken") or []] if x in pin]
+        if len(pts) < 2: continue
+        la0, la1 = min(q[0] for q in pts), max(q[0] for q in pts); lo0, lo1 = min(q[1] for q in pts), max(q[1] for q in pts)
+        span = max((la1 - la0) * 111.32, (lo1 - lo0) * 111.32 * math.cos(math.radians((la0 + la1) / 2)))
+        if span * 1.4 <= MAP_FINE_MAX_KM:
+            boxes.append(map_window((la0 + la1) / 2, (lo0 + lo1) / 2, max(MAP_DETAIL_KM, span * 1.4)))
+    cells = set()
+    for x0, y0, x1, y1 in boxes:
+        for cx in range(math.floor(x0 / MAP_CELL), math.floor(x1 / MAP_CELL) + 1):
+            for cy in range(math.floor(y0 / MAP_CELL), math.floor(y1 / MAP_CELL) + 1):
+                cells.add((cx, cy))
+    F = geo["fijn"]; q = F["q"]; c = MAP_CELL * q
+    def prep(lst):
+        out = []
+        for r in lst:
+            pts = geo_decode(r); xs = [t[0] for t in pts]; ys = [t[1] for t in pts]
+            out.append((min(xs), min(ys), max(xs), max(ys), pts))
+        return out
+    land, lakes, bord = prep(F["land"]), prep(F["meren"]), prep(F["grenzen"])
+    fine = {}
+    for cx, cy in sorted(cells):
+        x0, y0, x1, y1 = cx * c, cy * c, (cx + 1) * c, (cy + 1) * c
+        cell = {}
+        for key, src, poly in (("l", land, True), ("m", lakes, True), ("g", bord, False)):
+            for a0, b0, a1, b1, pts in src:
+                if a1 < x0 or a0 > x1 or b1 < y0 or b0 > y1: continue
+                if poly:
+                    if a0 >= x0 and a1 <= x1 and b0 >= y0 and b1 <= y1:
+                        cell.setdefault(key, []).append(geo_encode(pts))
+                        cell.setdefault(key + "k", []).append(geo_encode(pts + pts[:1]))
+                        continue
+                    cp = clip_poly(pts, x0, y0, x1, y1)
+                    if len(cp) >= 3: cell.setdefault(key, []).append(geo_encode(cp))
+                    for ln in clip_line(pts + pts[:1], x0, y0, x1, y1): cell.setdefault(key + "k", []).append(geo_encode(ln))
+                else:
+                    for ln in clip_line(pts, x0, y0, x1, y1): cell.setdefault(key, []).append(geo_encode(ln))
+        fine[f"{cx},{cy}"] = cell  # an empty cell = sea (the viewer then knows the cell is included)
+    out = {"bron": "Natural Earth", "fijn_max_km": MAP_FINE_MAX_KM, "cel": MAP_CELL,
+           "fijn": {"q": q, "cellen": fine}, "grof": geo["grof"]}
+    size = len(json.dumps(out, separators=(",", ":"))) // 1024
+    print(f"Base map: {len(fine)} detailed cell(s) around the places, coarse world map; {size} kB")
+    return out
+
+
+PREC_EN = {"place": "plaats", "town": "plaats", "region": "regio", "country": "land", "unknown": "onbekend"}
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("gedcom")
@@ -528,6 +707,7 @@ def main():
     ap.add_argument("--zeitgeist", "--tijdgeest", dest="tijdgeest", help="life and times per place as JSON (optional, for the Story view)")
     ap.add_argument("--stories", "--verhalen", dest="verhalen", help="own stories per person as JSON (optional, for the Story view)")
     ap.add_argument("--living-years", "--levend-grens", dest="levend_grens", type=int, default=100, help="years (default 100)")
+    ap.add_argument("--coords", "--coordinaten", dest="coordinaten", help="coordinates per place as JSON, from geocode_places.py (optional, for the maps)")
     ap.add_argument("--media-dir", "--media-map", dest="media_map", help="copy local photos/documents into this folder (as media/<name>)")
     ap.add_argument("--media-max", type=int, default=2000,
                     help="shrink photos to at most this many pixels (longest side) if Pillow is available; 0 = don't")
@@ -776,6 +956,8 @@ def main():
                 img = val.get("beelden") or val.get("images")
                 crd = val.get("kaarten") or val.get("cards")  # short version for Cards (blank line = new card)
                 if crd: people[i]["verhaal_kaarten"] = crd
+                plk = story_places(val.get("plekken") or val.get("places"))  # places the story points at (for its map)
+                if plk: people[i]["verhaal_plekken"] = plk
                 if src: people[i]["verhaal_bronnen"] = src
                 if img: people[i]["verhaal_beelden"] = img_kinds(img)
             else:
@@ -829,6 +1011,12 @@ def main():
         print(f"Zeitgeist: {len(tg.get('plaatsen', []))} place(s), "
               f"{sum(len(x.get('beelden', [])) for x in tg.get('plaatsen', []))} images, {n_tk} life block(s) with cards"
               + (f", {n_tw} warning(s) about cards (see above)" if n_tw else ""))
+    if a.coordinaten:
+        with open(a.coordinaten, encoding="utf-8") as fh:
+            out["coordinaten"] = coords_for(people, json.load(fh))
+        if out["coordinaten"]:
+            lk = base_map(people, out["coordinaten"])
+            if lk: out["landkaart"] = lk
     out["personen"] = people
     with open(a.uit, "w", encoding="utf-8") as fh:
         json.dump(out, fh, ensure_ascii=False, separators=(",", ":"))

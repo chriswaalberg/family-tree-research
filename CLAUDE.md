@@ -15,9 +15,11 @@ plugins/family-tree-research/
     scripts/gedcom_tool.py           new / add / check / media   (Dutch aliases: nieuw / toevoegen / controleer)
     scripts/make_viewer_data.py      GEDCOM (+csv, regions, stories, zeitgeist, media) → data.json
     scripts/standalone_viewer.py     index.html + data.json → one HTML file
+    scripts/geocode_places.py        GEDCOM (+stories) → coordinates per place (Nominatim, cached; manual fixes stay)
+    scripts/geo/natural-earth.json   simplified Natural Earth (public domain) for the maps; rebuilt with tools/make_geo.py
     viewer/index.html                the viewer (single file, ~320 kB, minified-ish JS; English + Dutch via I18N table)
     viewer/DATA-FORMAT.md            data.json format (field names are Dutch, documented in English)
-    examples/                        7-person example family + regions-basic.json, example-stories.json and
+    examples/                        7-person example family + regions-basic.json, example-coords.json, example-stories.json and
                                      example-zeitgeist.json (fictional, to test the Story view) and one real CC0 photo in
                                      examples/media/tijdgeest/ (Den Helder, 1955, Anefo)
 docs/screenshots/                    screenshots for the README (example family only, never real data)
@@ -45,13 +47,13 @@ S=plugins/family-tree-research/skills/family-tree
 python3 -I $S/scripts/make_viewer_data.py $S/examples/example.ged /tmp/ex.json \
   --csv $S/examples/example-relations.csv --regions $S/examples/regions-basic.json \
   --stories $S/examples/example-stories.json --zeitgeist $S/examples/example-zeitgeist.json \
-  --start @I1@:Femke --start @I2@:Thomas
+  --coords $S/examples/example-coords.json --start @I1@:Femke --start @I2@:Thomas
 python3 -I $S/scripts/gedcom_tool.py check $S/examples/example.ged /tmp/check.md --start @I1@
 python3 -I $S/scripts/gedcom_tool.py check $S/examples/example.ged /tmp/check-nl.md --start @I1@ --lang nl
 python3 -I $S/scripts/standalone_viewer.py $S/viewer/index.html /tmp/ex.json /tmp/ex.html --media $S/examples
 ```
 
-Then open `/tmp/ex.html` (or screenshot it with Playwright, desktop + mobile) and click through all tabs: Family, Line, Story, Timeline, Fan, Cosmos, and open ▶ Cards (tap through Femke → Thomas → Pieter; the Den Helder photo card must show). Click the name in the title and pick Thomas: title, Story and Cards must follow. The footer must say "Made with Family Tree Research v<version>" with the version from plugin.json. In the Story view, follow Femke → Thomas → Pieter: Pieter must show his own (example) story, a "Life in Den Helder" block with the 1955 photo, and the 1963 example event with a source link and an "Example links" line; Anna's template text must say she lived through the Second World War "roughly from age 15 to 20". In English, no Dutch words may appear (e.g. "bron"). Check the browser console for errors. Also test with `--lang nl`. If you touched `gedcom_tool.py new/add`, test them with both English and Dutch JSON keys (formats in references/onboarding.md and references/gedcom-tool.md).
+Then open `/tmp/ex.html` (or screenshot it with Playwright, desktop + mobile) and click through all tabs: Family, Line, Story, Timeline, Fan, Cosmos, and open ▶ Cards (tap through Femke → Thomas → Pieter; the Den Helder photo card must show). Maps: in Story, Femke, Thomas and Pieter each have a map (Pieter: Den Helder → Amersfoort, the overview in a free corner, not over a pin); in Cards each of them gets one map card (Pieter: "Den Helder, 97 km from Amersfoort"); via Thomas → Anna a route Amersfoort → Göteborg with the distance. Click the name in the title and pick Thomas: title, Story and Cards must follow. The footer must say "Made with Family Tree Research v<version>" with the version from plugin.json. In the Story view, follow Femke → Thomas → Pieter: Pieter must show his own (example) story, a "Life in Den Helder" block with the 1955 photo, and the 1963 example event with a source link and an "Example links" line; Anna's template text must say she lived through the Second World War "roughly from age 15 to 20". In English, no Dutch words may appear (e.g. "bron"). Check the browser console for errors. Also test with `--lang nl`. If you touched `gedcom_tool.py new/add`, test them with both English and Dutch JSON keys (formats in references/onboarding.md and references/gedcom-tool.md).
 
 If `examples/example-data.json` should change, regenerate it with the first command (output to `$S/examples/example-data.json`).
 
@@ -73,6 +75,7 @@ The viewer is one file (~1,700 lines, CSS + HTML + JS). Find your way by these m
   - `vhImgSlots`/`vhStoryHtml`: story images next to their paragraph (`alinea`, else year or a clear word from title/caption, else spread evenly); used by the Story view and by Cards.
   - `vhTijdgeest`: renders "Life in …", the assigned images (each with a label by `soort` via `vhKind`: "A drawing from that time") and "Around that time" (max 4 local + 1 national event; a national event in the same year as a local one is dropped; optional `links`).
   - `drawVerhaal`: the chapters, father/mother choice, route bar, "Remarkable relative" asides, certainty and adoption callouts.
+- `/* ===== LANDKAART` (maps): `const MAP` holds every number (FAR_KM 300, SAME_KM 10, PER_PERSON 2, DETAIL_KM 120, OVER_KM 1500, GLOBE_KM 5000) and the paper colours. `mapGeo`/`mapCell` decode `D.landkaart` (fine cells, coarse world); `mapFlat`/`mapOrtho` project; `mapBase` draws sea (hatched), land, lakes, borders (fine when `mapFine` finds all cells, else coarse); `mapDetail` (near: pin + overview `mapInset` in the first free corner), `mapRoute` (far: curved dotted line, globe above GLOBE_KM, km in Dutch/English number format via `mapNum`), `mapLife` (Story: all places of one life), `mapStops` (birth, `woon` by year, story places with a year, death). Cards: `swMapCard` (one Cards run = one chain; "here" = the birthplace of the person before; new places and far moves, far first, at most PER_PERSON; a country alone gives way to a town in it). Story: `vhMapFig`. Map cards are kind `map` (break text runs in the budget, 8 s).
 - `/* ===== SWIPE` ("Cards" in the UI, button `#swBtn`; CSS under `/* ===== SWIPE` too): full-screen cards that play by themselves, overlay `#sw`.
   - `swSentences`: vhTemplate's sentences sorted by kind (birth, family, death, era) by wrapping `_t` for one call, so the Story view's code stays untouched. New template keys go into `SW_KIND`.
   - `swCardText`/`swCardImgs`: Cards use the card version `verhaal_kaarten` (images placed by `kaart`) when there is one, else the paragraphs of `verhaal`; the first card of a card version is the hook (`hook:true`) and always follows the intro. The Story view never uses them.

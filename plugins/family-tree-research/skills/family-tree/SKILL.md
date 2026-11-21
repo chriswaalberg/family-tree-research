@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.22"
+  version: "0.9.23"
 ---
 
 # Family-tree research, hand in hand
@@ -172,7 +172,8 @@ Users may add photos, scans of records and other documents per person. They're s
 | `references/viewer.md` | Building data.json, publishing, updating, stories, zeitgeist |
 | `references/folders-and-files.md` | Folder layout (English/Dutch), progress template, where scripts run |
 | `scripts/gedcom_tool.py` | `new` / `add` / `check` / `media` |
-| `scripts/make_viewer_data.py` | GEDCOM (+CSV, +regions, +stories, +zeitgeist, +media) → data.json |
+| `scripts/make_viewer_data.py` | GEDCOM (+CSV, +regions, +stories, +zeitgeist, +coordinates, +media) → data.json |
+| `scripts/geocode_places.py` | GEDCOM (+stories) → coordinates per place (Nominatim, cached, manual fixes stay) for the maps |
 | `scripts/standalone_viewer.py` | Viewer + data (+ media) in one standalone HTML file |
 | `viewer/index.html`, `viewer/DATA-FORMAT.md` | The viewer and the data format |
 | `examples/` | Mini family tree (7 people) and `regions-basic.json` |

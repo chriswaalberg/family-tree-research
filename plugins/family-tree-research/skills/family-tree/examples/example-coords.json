@@ -1,0 +1,45 @@
+{
+ "Amersfoort, Utrecht, Nederland": {
+  "bron": "nominatim: Amersfoort, Utrecht, Netherlands",
+  "lat": 52.1638,
+  "lon": 5.4089,
+  "precisie": "plaats"
+ },
+ "Antwerpen, Antwerpen, België": {
+  "bron": "nominatim: Antwerp, Flanders, Belgium",
+  "lat": 51.2211,
+  "lon": 4.3997,
+  "precisie": "plaats"
+ },
+ "Den Helder, Noord-Holland, Nederland": {
+  "bron": "nominatim: Den Helder, North Holland, Netherlands",
+  "lat": 52.9509,
+  "lon": 4.7936,
+  "precisie": "plaats"
+ },
+ "Göteborg, Västra Götaland, Sverige": {
+  "bron": "nominatim: Gothenburg, Göteborgs Stad, Västra Götaland County, 411 10, Sweden",
+  "lat": 57.7072,
+  "lon": 11.967,
+  "precisie": "plaats"
+ },
+ "Leuven, Vlaams-Brabant, België": {
+  "bron": "nominatim: Leuven, Flemish Brabant, Flanders, Belgium",
+  "lat": 50.8792,
+  "lon": 4.7012,
+  "precisie": "plaats"
+ },
+ "Mechelen, Antwerpen, België": {
+  "bron": "nominatim: Mechelen, Antwerp, Flanders, Belgium",
+  "lat": 51.0281,
+  "lon": 4.4803,
+  "precisie": "plaats"
+ },
+ "Utrecht, Utrecht, Nederland": {
+  "bron": "nominatim: Utrecht, Netherlands",
+  "lat": 52.0842,
+  "lon": 5.0988,
+  "precisie": "plaats"
+ },
+ "_uitleg": "Coordinates per place, as written in the GEDCOM. precisie: plaats | regio | land | onbekend. An entry whose bron does not start with 'nominatim' is a manual correction and is never changed by geocode_places.py. controleren: true = check this one. Coordinates from Nominatim: © OpenStreetMap contributors (ODbL)."
+}
