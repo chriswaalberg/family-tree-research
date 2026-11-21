@@ -14,7 +14,7 @@ The coordinates file ({place as written in the GEDCOM: entry}):
   precisie (precision): "plaats" (town or village), "regio" (province, county, state) or "land" (country).
   With "regio" or "land" the map says the exact spot is unknown instead of placing a pin.
   An entry whose "bron" does not start with "nominatim" counts as a manual correction and is never changed,
-  not even with --refresh. "controleren": true = the result may be wrong (other country, or a guess); check it.
+  not even with --refresh. "controleren": true = the result may be wrong (other country, a street or building, or a guess); check it.
   Not found: {"precisie": "onbekend", ...}; looked up again only with --retry.
 English keys ("precision", "source", "check") are read too; the script writes the Dutch ones (as in data.json).
 
@@ -31,6 +31,9 @@ PREC_EN = {"place": "plaats", "town": "plaats", "region": "regio", "country": "l
 # (a "municipality" is a town in many countries, e.g. Leiden: that stays a place)
 REGION_TYPES = {"state", "province", "region", "county", "state_district", "archipelago"}
 COUNTRY_TYPES = {"country", "continent"}
+# a street, road or building for a place name is almost always wrong (Ameide -> a street in Rotterdam): accepted, but marked to check
+NOT_A_TOWN_TYPES = {"road", "street", "highway", "building", "house", "house_number", "amenity", "shop", "office", "leisure",
+                    "tourism", "railway", "aeroway", "man_made", "industrial", "retail", "commercial"}
 NOT_A_PLACE = re.compile(r"^(ndg|onbekend|unknown|\?+|-+|n/?a|nvt)$", re.I)
 
 
@@ -200,6 +203,8 @@ def main():
             elif prec == "plaats":
                 chk.append("single name without country")
             if used: chk.append(f"only found as \"{', '.join(parts[used:])}\"")
+            kind = {(hit.get("addresstype") or "").lower(), (hit.get("category") or "").lower(), (hit.get("type") or "").lower()}
+            if kind & NOT_A_TOWN_TYPES: chk.append(f"found as a {hit.get('addresstype') or hit.get('category')}: {hit.get('name', '')}")
             if chk: e["controleren"] = True; n_chk += 1
             data[p] = e
             if prec == "plaats": n_ok += 1

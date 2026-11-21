@@ -247,7 +247,7 @@ Field names: `plaatsen` = places, `naam` = name, `van`/`tot` = from/to year, `ja
 
 - `precisie` (precision): `plaats`, `regio`, `land`, or `onbekend` (not found; looked up again only with `--retry`). English keys `precision`/`source` are read too.
 - An entry whose `bron` (source) does not start with `nominatim` is a manual correction: the script never changes it, not even with `--refresh`.
-- `"controleren": true` (check): the result lies in another country than the name ends with, the name had no country, or only a broader name was found. Check these by hand.
+- `"controleren": true` (check): the result lies in another country than the name ends with, the name had no country, only a broader name was found, or the hit is a street, road or building (Nominatim sometimes picks a street named after a village). Check these by hand.
 - Names like `Ndg` or `unknown` are skipped. The request only names the plugin, never the user or the people in the tree. Coordinates from Nominatim: © OpenStreetMap contributors (ODbL).
 
 `make_viewer_data.py --coords data/place-coords.json` puts the coordinates of the places that are used into `coordinaten`, and warns about places without coordinates. Names are matched exactly first, then without capitals and accents; a short name without a comma in a story ("Amersfoort") matches the one place that starts with it.
