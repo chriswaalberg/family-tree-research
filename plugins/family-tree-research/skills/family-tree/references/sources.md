@@ -24,7 +24,7 @@ Using another tool is fine. Getting around a site's own barrier is not: if a sit
 | **Open Archieven** (openarchieven.nl, "Open Archives") | Millions of records from dozens of archives: civil registration (BS) births/marriages/deaths, church registers (DTB), population registers, notarial deeds | Free API, see below. First choice. |
 | **WieWasWie** (wiewaswie.nl) | National index of civil and church records | Website; search by name, role, place, period. |
 | **Archieven.nl** | Search portal of many regional archives, often with scans | Website. May be blocked; then via the user. |
-| **Delpher** (delpher.nl) | Newspapers (family announcements, news) | Search name + place; useful after 1850. |
+| **Delpher** (delpher.nl) | Newspapers (family announcements, adverts, auctions, news) | Search name + place or address; useful after 1850. Works without a key via SRU: `scripts/delpher.py`, see below. |
 | **CBG** (cbg.nl) | Family announcements, personal record cards (died after 1938 and before 1994) | Record cards cost money: only mention them. |
 | **Genealogie Online** | Other people's trees | Only as a lead, never as proof. |
 | **FamilySearch** | Worldwide indexes and scans | Free account needed; often via the user. |
@@ -39,6 +39,16 @@ Using another tool is fine. Getting around a site's own barrier is not: if a sit
 - Opening a record: the `url` from the result (it lists everyone in the record with their roles: father, mother, bride, witness…). Use that URL as the source too.
 - Max. 4 requests per second: take it easy, no tight loops.
 - Coverage differs per region and period. Nothing found doesn't mean it doesn't exist. Then try WieWasWie and the regional archive.
+
+### Delpher (newspapers) via SRU
+
+Delpher's website can be awkward for a script, but the KB's SRU service answers directly, without a key. `scripts/delpher.py` wraps it (`search`, `text`, `locate`, `cut`; run it with `--help`). By hand:
+
+- Search: `https://jsru.kb.nl/sru/sru?version=1.2&operation=searchRetrieve&x-collection=DDD_artikel&recordSchema=ddd&maximumRecords=20&query=<CQL>`, e.g. `"F. Jansen" AND Leiden`, `Jansen AND "Breestraat 12"`, plus `AND date within "1910-01-01 1920-12-31"`. Each record has the date, paper title, page and `ddd:metadataKey` (the article urn, e.g. `MMKB04:000139340:mpeg21:a0065`).
+- Text of an article: `http://resolver.kb.nl/resolve?urn=<article urn>:ocr`. The article itself (to cite): `http://resolver.kb.nl/resolve?urn=<article urn>`.
+- Page of an article: `ddd:pageurl` in the SRU record (query `metadataKey="<article urn>"`), else the page named most often on the article's Delpher page. Pages are `p` + 3 to 5 digits.
+- Page scan (JPEG 2000): `…resolve?urn=<issue urn>:pNNN:image`; word positions (ALTO, pixels of that scan): `…:pNNN:alto`.
+- Names, addresses and business names find a lot (adverts, auctions, anniversaries), much more than the civil records say about occupations and shops. OCR misspells: also try one word, or the surname with the street.
 
 ### Dutch timeline
 - From 1811: civil registration (Burgerlijke Stand, BS). Marriage and death records name the parents.

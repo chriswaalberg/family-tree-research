@@ -392,6 +392,34 @@ def story_image_warnings(p, images):
     return len(out)
 
 
+# A story that leans on a newspaper should show the clipping: a link to Delpher or Trove in its sources,
+# or a newspaper's name in a source's label
+NEWS_LINK = re.compile(r"resolver\.kb\.nl|delpher\.nl|trove\.nla\.gov\.au|newspapers\.com|chroniclingamerica", re.I)
+NEWS_NAME = re.compile(r"\b(\w*(courant|krant|dagblad|nieuwsblad|handelsblad|weekblad|telegraaf|tidning|zeitung)\w*"
+                       r"|\w*(residentie|maas|nieuws|dorps|stads|amstel|zaan|gooi|eem|graafschap|grens|lands?)bode|newspaper|gazette|herald|tribune|chronicle|advertiser|weekly)\b", re.I)
+NEWS_TITLE = re.compile(r"\b(De Tijd|Het Vaderland|Het Volk|The Times)\b")  # titles that are plain words in lower case
+
+
+def story_clipping_warnings(p):
+    """A story citing a newspaper (Delpher/Trove link or a paper's name in a source) without a "krant" image."""
+    src = p.get("verhaal_bronnen")
+    if not src: return 0
+    if any(isinstance(b, dict) and str(b.get("soort") or "").lower() == "krant" for b in p.get("verhaal_beelden") or []):
+        return 0
+    hits = []
+    for s in src if isinstance(src, list) else [src]:
+        label, url = (s[0] if s else "", s[1] if len(s) > 1 else "") if isinstance(s, (list, tuple)) else \
+                     ((s.get("label") or s.get("titel") or s.get("title") or "", s.get("url") or "") if isinstance(s, dict) else (str(s), ""))
+        label = next(iter(label.values()), "") if isinstance(label, dict) else str(label)
+        m = NEWS_LINK.search(str(url)) or NEWS_LINK.search(label) or NEWS_NAME.search(label) or NEWS_TITLE.search(label)
+        if m: hits.append(label.strip() or str(url))
+    if not hits: return 0
+    print(f"  warning, story of {p['n']}: this story cites a newspaper without a clipping ({hits[0][:70]}"
+          + (f" and {len(hits) - 1} more" if len(hits) > 1 else "") + "): add the clipping the text leans on as a story image"
+          " with \"soort\": \"krant\" (scripts/delpher.py cuts it), and put other finds in media.csv as documents", file=sys.stderr)
+    return 1
+
+
 CARD_MAX = 250       # characters per card (aim for ~200)
 PARA_LONG = 350      # a story paragraph this long, without a card version: suggest one
 FIRST_CARD_TIME = re.compile(
@@ -985,6 +1013,7 @@ def main():
                 if hit: b["scan"] = hit
                 else: print(f"  warning, story image of {p['n']}: \"scan\": {sc} is not one of this person's photos/documents (OBJE)", file=sys.stderr)
         n_warn = sum(story_image_warnings(p, p["verhaal_beelden"]) for p in people if p.get("verhaal_beelden"))
+        n_warn += sum(story_clipping_warnings(p) for p in people if p.get("verhaal"))
         n_cw = sum(story_card_warnings(p) for p in people if p.get("verhaal"))
         n_kv = sum(1 for p in people if p.get("verhaal_kaarten"))
         print(f"Stories: {n_vh} read, {n_kv} with cards" + (f", {n_warn} warning(s) about story images" if n_warn else "")

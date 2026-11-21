@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.37"
+  version: "0.9.38"
 ---
 
 # Family-tree research, hand in hand
@@ -99,6 +99,7 @@ The viewer has a **Story** view: from the start person step by step back in time
 - **Ask what the family knows.** Occupations, a family shop, where they lived, nicknames, what grandma used to tell. One detail ("he was a milkman, they had a dairy shop") brings a story to life and is in no archive. Record it as a source: "<name> (own knowledge, <date>)".
 - **Never address the reader as a descendant.** No "your line", "your surname", "to you": you don't know who reads it, and from another start person it's wrong. Write "this family tree", "the line", "this branch", "the generations after him". Interface text ("whose story do you follow?") is fine.
 - Images with a story: search for 2–4 per story, but only use an image that fits a concrete moment in the story, in place and time (see "Finding images" below). Say so in the caption when it isn't the person themselves ("this is not <name> himself").
+- **A newspaper the story leans on is shown, not only cited.** Every newspaper item quoted in `text`, or that a sentence rests on (an advert, an announcement, a court report), goes into the story as a clipping: a story image with `"soort": "krant"`, `alinea`, `card` and a `bron` with the link to the article. Other finds about the same matter (more adverts, job ads, New Year wishes) don't go into the story: link them to the person as `document` via `data/media.csv`, so they show as small clickable images under "Photos and documents" and the story and the cards don't get longer. `make_viewer_data.py` warns when a story cites a newspaper without a clipping ("this story cites a newspaper without a clipping").
 - Write stories in the user's language. See `references/viewer.md` ("Stories") for the format.
 
 ## Zeitgeist: how did they live?
@@ -110,7 +111,7 @@ For each place where many ancestors lived, build a zeitgeist (`zeitgeist/zeitgei
 - Cards show at most 3 events per person; give the events that matter most for the family `"gewicht": 1` or higher (a flood that hit their street, the war), and minor ones nothing.
 - Start with the place with the most ancestors. Search local history sites, monument registers, museum collections and lists of disasters; give a source for every event and invent nothing.
 - Images: at least 4–6 per place, spread over the centuries the family lived there. How to find, check and process them: "Finding images (generously)" below.
-- Old newspapers (e.g. Delpher in the Netherlands) are often blocked; then ask the user for screenshots of search results.
+- Old newspapers bring places and businesses to life. Delpher (the Netherlands) can be searched directly with `scripts/delpher.py` (see `references/sources.md`); if a newspaper site is blocked, ask the user for screenshots of search results.
 - See `references/viewer.md`, "Zeitgeist".
 
 ## Finding images (generously)
@@ -119,7 +120,8 @@ Images make the stories and the zeitgeist come alive, so searching for them is a
 
 **Targets**
 - Per own story: **search for 2–4 images**. That is a search target, not a quota: no good image, then no image. Think of the occupation (a smith at work, a dairy shop), the town or street, an event from the story (a flood, a ship, a fire), the church or village, the ship or factory.
-- **Newspaper clippings are good story images** (Delpher, Trove, family papers): an announcement, a court report, a sports result. Crop to the heading and the relevant paragraph only, set `"soort": "krant"`, and say in the caption that it was shortened. Keep clippings at least ~1000 px wide (don't shrink them further): on a phone the Cards view shows the whole clipping at full width, and small print must stay readable. If the full scan hangs in the tree (an `OBJE` of that person), always point to it with `"scan": "<path as in the GEDCOM>"`: a tap on the clipping then opens the whole page, and the scan isn't shown twice. Old newspapers are usually public domain; check the archive's terms.
+- **Newspaper clippings are good story images, and required ones when the story leans on the paper** (Delpher, Trove, family papers): an announcement, an advert, a court report, a sports result. Every newspaper item quoted in the text or that a sentence rests on becomes a story image (`"soort": "krant"`, `alinea`, `card`, `bron` with the link); further finds about the same matter go to the person as `document` via `media.csv` (see "Stories" above). Crop to the heading and the relevant paragraph only, and say in the caption that it was shortened.
+- **Cutting a Delpher clipping:** `scripts/delpher.py` searches (`search`), reads the OCR text (`text`), and makes a wide crop around a word with a ruler and a faint grid in page pixels (`locate <article urn> "<name>"`). Look at that crop at true size, read the edges off the grid (from the rule above the heading to the rule below the last relevant line, inside the column rules), then cut exactly that box (`cut <urn> x0,y0,x1,y1 --out … --check`) and look at the result: letters cut off at an edge, or a strip of the neighbouring advert, means another try with a few pixels more or less. Don't let a script guess the edges between separator lines: that proved unreliable. `cut` enlarges narrow clippings to 1000 px wide. Keep clippings at least ~1000 px wide (don't shrink them further): on a phone the Cards view shows the whole clipping at full width, and small print must stay readable. If the full scan hangs in the tree (an `OBJE` of that person), always point to it with `"scan": "<path as in the GEDCOM>"`: a tap on the clipping then opens the whole page, and the scan isn't shown twice. Old newspapers are usually public domain; check the archive's terms.
 - Per zeitgeist place: **at least 4–6 images**, spread over the centuries the family lived there: roughly one every 30–50 years.
 - Big events (a siege, a flood, a famine, a war): an image with `"gebeurtenis": true`, so it only appears with people alive then. Images about children get `"kind": true`: a famine photo of children then lands with the ancestor who was a child at the time (see `viewer/DATA-FORMAT.md`).
 
@@ -175,6 +177,7 @@ Users may add photos, scans of records and other documents per person. They're s
 | `scripts/make_viewer_data.py` | GEDCOM (+CSV, +regions, +stories, +zeitgeist, +coordinates, +media) → data.json |
 | `scripts/geocode_places.py` | GEDCOM (+stories) → coordinates per place (Nominatim, cached, manual fixes stay) for the maps |
 | `scripts/standalone_viewer.py` | Viewer + data (+ media) in one standalone HTML file |
+| `scripts/delpher.py` | Delpher newspapers: `search`, `text`, `locate` (crop with ruler) and `cut` (the clipping) |
 | `viewer/index.html`, `viewer/DATA-FORMAT.md` | The viewer and the data format |
 | `examples/` | Mini family tree (7 people) and `regions-basic.json` |
 

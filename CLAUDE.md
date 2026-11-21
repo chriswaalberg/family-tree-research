@@ -16,6 +16,7 @@ plugins/family-tree-research/
     scripts/make_viewer_data.py      GEDCOM (+csv, regions, stories, zeitgeist, media) → data.json
     scripts/standalone_viewer.py     index.html + data.json → one HTML file
     scripts/geocode_places.py        GEDCOM (+stories) → coordinates per place (Nominatim, cached; manual fixes stay)
+    scripts/delpher.py               Delpher newspapers via SRU: search / text / locate (crop with ruler) / cut (needs Pillow)
     scripts/geo/natural-earth.json   simplified Natural Earth (public domain) for the maps; rebuilt with tools/make_geo.py
     viewer/index.html                the viewer (single file, ~320 kB, minified-ish JS; English + Dutch via I18N table)
     viewer/DATA-FORMAT.md            data.json format (field names are Dutch, documented in English)
