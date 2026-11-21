@@ -750,7 +750,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.23",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.24",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1137,11 +1137,31 @@ function slGenWord(n){return n===1?_t("gen1"):_t("genPl",{n})}
 function slOpen(i){const pth=pathTo(state.root,i);if(!pth||pth.length<2)return false;const s=[];for(let k=2;k<pth.length;k++)s[k]=pth[k-1]===P[pth[k-2]].f?0:1;
   state.slRoot=state.root;state.slSel=s;state.view="stamlijn";render();
   setTimeout(()=>{const e=document.querySelector(`.slc[data-i="${i}"]`);if(e){e.scrollIntoView({behavior:"smooth",block:"center"});e.animate([{boxShadow:"0 0 0 4px #c0392b"},{boxShadow:"0 0 0 0 transparent"}],{duration:1600,delay:400})}},60);return true}
+/* ===== GESCHIEDENIS (browser back button) =====
+   The address stays clean (no #). Every real step gets its own history entry: another view, another start person, a step in Story,
+   opening Cards, opening a person's sheet. Back undoes that step (or closes Cards / the sheet). A link with #verhaal, #waaier, …
+   still opens that view; #kaartbudget / #cardbudget still opens the card budget. */
+const NAV={restoring:false,pop:false};
+function navUrl(){return location.pathname+location.search}
+function navSnap(){return {nav:1,view:state.view,root:state.root,vh:state.vh&&state.vh.root===state.root?state.vh.path.slice():null,lastTree:state.lastTree||null}}
+function navSame(a,b){return !!a&&!!b&&a.view===b.view&&a.root===b.root&&JSON.stringify(a.vh||null)===JSON.stringify(b.vh||null)&&!!a.sw===!!b.sw&&!!a.sheet===!!b.sheet}
+function navPush(extra){if(NAV.restoring||NAV.pop)return;const s=Object.assign(navSnap(),extra||{}),cur=history.state;
+  if(!cur||!cur.nav){history.replaceState(s,"",/^#(kaartbudget|cardbudget)$/.test(location.hash)?location.href:navUrl());return}
+  if(!navSame(cur,s))history.pushState(s,"",navUrl())}
+/* closing Cards or a sheet by its own button: step back in history too, so Back doesn't reopen it */
+function navUnwind(key){if(!NAV.pop&&history.state&&history.state[key])history.back()}
+function navPop(e){const s=e.state;if(!s||!s.nav||!P||!P.length)return;NAV.pop=true;
+  try{if(!s.sw&&typeof SW!=="undefined"&&SW)swClose();
+    const dl=$("slsheet");if(!s.sheet&&dl&&dl.open)dl.close();
+    const now=navSnap();if(now.view!==s.view||now.root!==s.root||JSON.stringify(now.vh||null)!==JSON.stringify(s.vh||null)){
+      state.view=s.view;state.root=s.root;if(s.lastTree)state.lastTree=s.lastTree;if(s.vh)state.vh={root:s.root,path:s.vh.slice()};render()}
+    if(s.sw&&!SW)swOpen(state.root)}
+  finally{NAV.pop=false}}
 function slDrawer(){
   let dlg=$("slsheet");if(dlg)return dlg;
   dlg=document.createElement("dialog");dlg.id="slsheet";dlg.className="drawer";dlg.setAttribute("aria-labelledby","slsheet-t");document.body.appendChild(dlg);
   const nativeClose=dlg.close.bind(dlg);let timer=null;
-  dlg.close=()=>{if(!dlg.open||dlg.dataset.closing)return;const sh=dlg.firstElementChild;if(sh){sh.style.translate="";sh.style.transition=""}
+  dlg.close=()=>{if(!dlg.open||dlg.dataset.closing)return;navUnwind("sheet");const sh=dlg.firstElementChild;if(sh){sh.style.translate="";sh.style.transition=""}
     if(matchMedia("(prefers-reduced-motion: reduce)").matches){nativeClose();return}
     dlg.dataset.closing="true";timer=setTimeout(()=>{dlg.removeAttribute("data-closing");nativeClose()},540)};
   dlg.addEventListener("cancel",e=>{e.preventDefault();dlg.close()});
@@ -1155,7 +1175,7 @@ function slDrawer(){
   dlg.addEventListener("pointerup",end);dlg.addEventListener("pointercancel",end);
   return dlg}
 function slSheet(i,child,code,base,act){
-  const dlg=slDrawer();
+  const dlg=slDrawer();navPush({sheet:1});
   const p=P[i],hasChild=child!=null&&child>=0;
   const rel=hasChild?(P[child].f===i?_t("rel_fatherOf",{name:short(P[child])}):_t("rel_motherOf",{name:short(P[child])})):(i===base?_t("rel_start"):_t("rel_sibOf",{name:short(P[base])}));
   const num=code?parseInt("1"+code.replace(/v/g,"0").replace(/m/g,"1"),2):0;
@@ -1430,7 +1450,7 @@ function vhTemplate(i,child,flags){const p=P[i],fn=vhFn(p),pr=vhPro(p),T=(k,v)=>
 
 function vhCode(path,k){let s="";for(let j=1;j<=k;j++)s+=P[path[j-1]].f===path[j]?"v":"m";return s}
 function vhState(){if(!state.vh||state.vh.root!==state.root)state.vh={root:state.root,path:[state.root]};return state.vh}
-function vhGo(path,focus){state.vh.path=path;vhRedraw(focus)}
+function vhGo(path,focus){state.vh.path=path;vhRedraw(focus);navPush()}
 /* scroll naar een hoofdstuk, net onder de (sticky) routebalk; maxTop = grens zodat de pagina daarna niet hoeft te springen */
 function vhPageTop(e){let y=0;while(e){y+=e.offsetTop;e=e.offsetParent}return y} /* zonder transforms (de infade-animatie schuift 14px) */
 function vhScrollTo(e,maxTop){const r=document.querySelector(".vh-route"),off=(r?r.offsetHeight:0)+24;
@@ -2244,17 +2264,17 @@ function swBudgetShow(){let el=$("swb");if(!el){el=document.createElement("div")
   const other=P.map((p,i)=>i).filter(i=>!vhHas(P[i])&&!P[i].living).map(i=>({i,b:swBudgetOf(i)})).filter(x=>x.b.n>SW_BUDGET_MAX).map(x=>row(x.i));
   const tbl=rs=>rs.length?`<table><thead><tr><th>${_t("bg_who")}</th><th>${_t("bg_n")}</th><th>${_t("bg_run")}</th><th>${_t("bg_where")}</th></tr></thead><tbody>${rs.map(r=>r.html).join("")}</tbody></table>`:`<p>${_t("bg_none")}</p>`;
   el.innerHTML=`<div class="swb-in"><button type="button" class="swb-x">${_t("bg_close")}</button><h2>${_t("bg_title")}</h2><p>${_t("bg_intro",{max:SW_BUDGET_MAX,run:SW_BUDGET_RUN})}</p><h3>${_t("bg_own")}</h3><div class="swb-t">${tbl(own)}</div><h3>${_t("bg_other")}</h3><div class="swb-t">${tbl(other)}</div></div>`;
-  el.hidden=false;if(!/^#(kaartbudget|cardbudget)$/.test(location.hash))history.replaceState(null,"","#"+(LANG==="nl"?"kaartbudget":"cardbudget"));el.querySelector(".swb-x").onclick=()=>{el.hidden=true;history.replaceState(null,"","#"+state.view)}}
+  el.hidden=false;if(!/^#(kaartbudget|cardbudget)$/.test(location.hash))history.replaceState(null,"","#"+(LANG==="nl"?"kaartbudget":"cardbudget"));el.querySelector(".swb-x").onclick=()=>{el.hidden=true;history.replaceState(navSnap(),"",navUrl())}}
 function swDur(c){if(c.stay)return 0;if(c.kind==="map")return 8000;if(c.img)return c.paper?12000:7000;return Math.max(5000,Math.min(15000,3200+48*(c.len||60)))+(c.kind==="ov"?1500:0)}
 function swOpen(root){
   if(!$("sw")){const d=document.createElement("div");d.id="sw";d.className="sw";d.hidden=true;d.setAttribute("role","dialog");d.setAttribute("aria-modal","true");
     d.innerHTML=`<button type="button" class="sw-nav l" data-nav="-1">‹</button><div class="sw-phone"><div class="sw-cards"></div><div class="sw-top"><div class="sw-bars"></div><div class="sw-head"><div class="sw-av"></div><div class="sw-who"><b></b><span></span></div><button type="button" class="sw-pp"></button><button type="button" class="sw-x">✕</button></div><div class="sw-route"></div></div><div class="sw-hint"></div></div><button type="button" class="sw-nav r" data-nav="1">›</button>`;
     document.body.appendChild(d);swWire(d)}
   const r=root!=null?root:state.root;
-  SW={path:swPlan([r]),g:0,c:0,t:0,paused:false,hold:false,last:0,hint:true};swBuild();
+  SW={path:swPlan([r]),g:0,c:0,t:0,paused:false,hold:false,last:0,hint:true};swBuild();navPush({sw:1});
   const el=$("sw");el.hidden=false;document.documentElement.style.overflow="hidden";
   swShow("none");el.querySelector(".sw-x").focus();SW.raf=requestAnimationFrame(swTick)}
-function swClose(){const el=$("sw");if(!el)return;el.hidden=true;document.documentElement.style.overflow="";if(SW)cancelAnimationFrame(SW.raf);SW=null;const b=$("swBtn");if(b)b.focus()}
+function swClose(){const el=$("sw");if(!el)return;if(SW)navUnwind("sw");el.hidden=true;document.documentElement.style.overflow="";if(SW)cancelAnimationFrame(SW.raf);SW=null;const b=$("swBtn");if(b)b.focus()}
 function swCard(){return SW.gens[SW.g].cards[SW.c]}
 function swShow(dir){const el=$("sw"),G=SW.gens[SW.g],c=G.cards[SW.c],box=el.querySelector(".sw-cards");SW.shownAt=performance.now();
   SW.t=0;SW.dur=swDur(c);
@@ -2484,7 +2504,7 @@ function render(){
   if(v==="kosmos"){stage.appendChild(drawCosmos());legend(colorLegend(state.color).concat([[_t("lg_inlaw"),"#8d7f6e","ring"]],adoptSet(state.root).size?[[_t("lg_adopt_k"),ADOPT_COL,"ring"]]:[]));$("hint").textContent=_t("hint_kosmos")}
   }
   $("setbar").hidden=$("legend").style.display==="none"&&$("genWrap").style.display==="none";
-  if(location.hash.slice(1)!==v)history.replaceState(null,"","#"+v);
+  navPush();
 }
 /* startpersoon kiezen: de startpersonen uit de data, de huidige, of iemand zoeken */
 let SEARCH_ROOT=false,SEARCH_OPEN=null;
@@ -2521,6 +2541,7 @@ fetch("data.json").then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.
   document.querySelectorAll("#tabs button,#storyBtn").forEach(b=>b.onclick=()=>{state.view=b.dataset.v;render()});
   $("swBtn").onclick=()=>swOpen(state.root);
   $("treeBtn").onclick=()=>{state.view=state.lastTree||"familie";render()};
+  addEventListener("popstate",navPop);
   addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(/^(kaartbudget|cardbudget)$/.test(h)){swBudgetShow();return}if(VIEWS.includes(h)&&h!==state.view){state.view=h;render()}});
   render();if(budget)swBudgetShow();
 }).catch(e=>{$("stage").innerHTML=`<div id="loading">${_t("loadError",{msg:slEsc(e.message)})}</div>`;console.error(e)});
