@@ -493,6 +493,11 @@ main{padding-top:6px}
 .m-cards::before{content:"\25B6";font-size:10px}
 .mode[aria-pressed="true"]{background:var(--parch2);color:var(--walnut);box-shadow:0 1px 3px rgba(0,0,0,.25)}
 .topband #tabs[hidden]{display:none}
+/* "Interesting people" (Story only): sits where the tree tabs sit, in the same pill */
+.topband .vh-pick{background-color:rgba(255,240,215,.07);border:1px solid rgba(255,240,215,.12);border-radius:12px;color:#e6d6bb;font:600 14.5px/1.2 Inter,system-ui,sans-serif;padding:11px 36px 11px 16px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e6d6bb' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-position:right 13px center}
+.topband .vh-pick:hover{color:#fff4df;background-color:rgba(255,240,215,.12)}.topband .vh-pick:focus-visible{outline:2px solid #e8d5aa;outline-offset:2px}
+.topband .vh-pick option,.topband .vh-pick optgroup{color:#3a2a1c;background:#fffaf1}
 .topband .langsw{border-color:rgba(255,240,215,.18)}.topband .langsw button[aria-pressed="true"]{background:rgba(255,240,215,.16);color:#fff4df}
 .rootbtn{all:unset;cursor:pointer;color:inherit;font:inherit;border-bottom:2px dashed rgba(220,181,106,.5);display:inline;line-height:inherit}
 .rootbtn svg{width:.6em;height:.6em;margin-left:.15em;vertical-align:.08em}.rootbtn .nw{white-space:nowrap}
@@ -521,6 +526,7 @@ main{padding-top:6px}
   .modes{display:flex;width:100%}.mode{flex:1;padding:8px 6px;font-size:13.5px}
   .topband .tabs{flex:1 1 100%}.topband .tabs>[role=tablist]{width:100%;display:flex}.topband .tabs>[role=tablist]>[role=tab]{flex:1;padding:6px 2px;font-size:12.5px}
   .legwrap{gap:6px 14px}
+  #vhPickWrap{flex:1 1 100%}.topband .vh-pick{width:100%;font-size:13.5px;padding:9px 34px 9px 14px}
 }
 /* taalswitch */
 .langsw{display:inline-flex;align-items:center;border:1px solid rgba(232,213,170,.35);border-radius:8px;overflow:hidden;flex:none}
@@ -677,6 +683,7 @@ main{padding-top:6px}
       <button type="button" role="tab" data-v="waaier" data-t="v_waaier"></button>
       <button type="button" role="tab" data-v="kosmos" data-t="v_kosmos"></button>
     </nav></div>
+    <div id="vhPickWrap" hidden></div>
     <div id="starts" role="group" hidden></div>
     <button type="button" class="btn" data-variant="ghost" data-size="sm" id="back" data-t-title="backTitle"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg><span data-t="back"></span></button>
   </div>
@@ -754,7 +761,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, the {view} appears here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.27",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.28",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1575,7 +1582,7 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
   const w=document.createElement("div");w.className="vh";
   const route=path.map((i,k)=>`<button type="button" class="vh-rc" data-k="${k}">${slEsc(vhFn(P[i]))}</button>`).join('<span class="vh-ra">›</span>');
   w.innerHTML=`<div class="vh-head"><h2>${slEsc(_t("vh_title",{name:rfn}))}</h2><p>${_t("vh_intro")}</p>
-    <div class="vh-acts"><button type="button" class="btn" data-size="sm" data-a="auto">★ ${_t("vh_auto")}</button>${path.length>1?`<button type="button" class="btn" data-size="sm" data-variant="outline" data-a="restart">${_t("vh_restart")}</button>`:""}${vhPickHtml()}</div></div>
+    <div class="vh-acts"><button type="button" class="btn" data-size="sm" data-a="auto">★ ${_t("vh_auto")}</button>${path.length>1?`<button type="button" class="btn" data-size="sm" data-variant="outline" data-a="restart">${_t("vh_restart")}</button>`:""}</div></div>
     ${path.length>1?`<nav class="vh-route" aria-label="${_t("vh_route")}">${route}</nav>`:""}`;
   let prevRank=5;
   path.forEach((i,k)=>{const p=P[i],child=k?path[k-1]:null,code=vhCode(path,k),last=k===path.length-1;
@@ -1660,7 +1667,6 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     else if(b.dataset.a==="auto"){const np=path.slice(),seen=new Set(np);let cur=np[np.length-1],n=0;
       while(n++<60){const q=vhBest(cur);if(q<0||seen.has(q))break;np.push(q);seen.add(q);cur=q}
       vhGo(np,Math.min(path.length,np.length-1))}});
-  {const sel=w.querySelector(".vh-pick");if(sel)sel.onchange=()=>{const v=sel.value;sel.value="";if(v!=="")vhOpen(+v,true)}}
   /* route-balk volgt waar je bent */
   if(path.length>1){let raf=0;const upd=()=>{raf=0;if(!w.isConnected){removeEventListener("scroll",onS);return}
       let cur=0;w.querySelectorAll(".vh-ch").forEach(c=>{if(c.getBoundingClientRect().top<innerHeight*.4)cur=+c.dataset.k});
@@ -2555,7 +2561,7 @@ function initGenSlider(){const sl=$("gens"),MIN=3,ticks=sl.querySelector(".gsl-t
   GSL_SHOW=()=>show(cur());show(cur())}
 function render(){
   const v=state.view;
-  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v?"true":"false"));$("storyBtn").setAttribute("aria-pressed",v==="verhaal"?"true":"false");$("treeBtn").setAttribute("aria-pressed",v!=="verhaal"?"true":"false");$("tabs").hidden=v==="verhaal";if(v!=="verhaal")state.lastTree=v;
+  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v?"true":"false"));$("storyBtn").setAttribute("aria-pressed",v==="verhaal"?"true":"false");$("treeBtn").setAttribute("aria-pressed",v!=="verhaal"?"true":"false");$("tabs").hidden=v==="verhaal";{const pw=$("vhPickWrap"),ph=v==="verhaal"?vhPickHtml():"";pw.innerHTML=ph;pw.hidden=!ph;const sel=pw.querySelector("select");if(sel)sel.onchange=()=>{const x=sel.value;sel.value="";sel.blur();if(x!=="")vhOpen(+x,true)}}if(v!=="verhaal")state.lastTree=v;
   document.querySelectorAll("#starts [data-p]").forEach(b=>b.dataset.variant=+b.dataset.p===state.root?"primary":"outline");
   const hasP=parentsOf(state.root).length>0,ctl=(v==="waaier"||v==="kosmos")&&hasP;$("genWrap").style.display=ctl||(v==="tijdlijn"&&hasP)?"":"none";$("colorWrap").style.display=ctl?"":"none";if(typeof GSL_SHOW==="function")GSL_SHOW();
   const opts=[["lijn",_t("c_lijn")],["land",_t("c_land")],["zekerheid",v==="waaier"?_t("c_zek_v"):_t("c_zek_d")]];
