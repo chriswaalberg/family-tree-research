@@ -85,7 +85,9 @@ Give every research helper a short name and let it put `FTR_WHO=<name>` in front
 
 ## On a phone
 
-Only when the user asks for it (the tree contains living people): restart the Workshop with `--lan`. It prints an address with a secret key (`http://192.168.x.x:8790/?k=…`); give that to the user. The phone must be on the same Wi-Fi; macOS may ask once whether Python may accept incoming connections. Without the key nobody else on the network sees anything, and only this computer can send events. For the desktop app: add `"--lan"` to `runtimeArgs` and restart the entry.
+Only when the user asks for it (the tree contains living people): restart this tree's Workshop with `--lan`. Desktop app: `live.py launch --config family-tree.json --lan`, stop the `workshop` preview and `preview_start` it again; terminal: stop the background `serve` and start it with `--lan`. Then tell the user to tap the **phone button** at the top of the Workshop on the computer: it shows a QR code to point the phone's camera at (no typing). The phone must be on the same Wi-Fi; macOS may ask once whether Python may accept incoming connections.
+
+The address carries a secret key, because `--lan` opens the Workshop to everyone on that network (an office, a train, a café). Without the key nobody else sees anything, and only this computer can send events. The key is fixed per tree (kept in `~/.config/family-tree-research/workshop-keys.json`, never in the tree's folder) and the phone remembers it for 30 days, so it is needed once: after that a bookmark works, also after a restart. The QR code needs the internet once (a small library from cdnjs); without it the dialog shows the address to type.
 
 ## In the page
 

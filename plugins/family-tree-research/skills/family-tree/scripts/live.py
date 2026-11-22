@@ -88,6 +88,32 @@ def workshop_for(where=None):
     return None
 
 
+# ---------------------------------------------------------------- the phone key: the same for a tree on every start
+KEYS = os.path.join(os.path.expanduser("~"), ".config", "family-tree-research", "workshop-keys.json")
+
+
+def tree_key(data):
+    """The secret for the phone address of this tree. Kept in the user's own config folder (never in the tree's folder,
+    which may be in git), so a bookmark on the phone keeps working after a restart."""
+    try:
+        with open(KEYS, encoding="utf-8") as fh:
+            keys = json.load(fh)
+    except (OSError, ValueError):
+        keys = {}
+    k = _key(data)
+    if not isinstance(keys.get(k), str):
+        keys[k] = secrets.token_urlsafe(9)
+        try:
+            os.makedirs(os.path.dirname(KEYS), exist_ok=True)
+            fd = os.open(KEYS + ".tmp", os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                json.dump(keys, fh, indent=1)
+            os.replace(KEYS + ".tmp", KEYS)
+        except OSError:
+            pass  # no config folder: this start gets a key of its own
+    return keys[k]
+
+
 # ---------------------------------------------------------------- sending events (used by the other scripts too)
 def emit(kind, _where=None, **fields):
     """Send one event to the Workshop of this tree. Silent and fast when none is running or none belongs here."""
@@ -222,7 +248,7 @@ def make_handler(cfg, hub):
                 return self.body(403, b"This Workshop needs the address with ?k=... that live.py printed.", "text/plain")
             extra = {}
             if not self.local() and qs.get("k"):
-                extra["Set-Cookie"] = f"ftrk={cfg['token']}; Path=/; SameSite=Strict"
+                extra["Set-Cookie"] = f"ftrk={cfg['token']}; Path=/; Max-Age=2592000; SameSite=Strict"  # 30 days"
             p = unquote(u.path)
             if p in ("/", "/index.html"):
                 return self.file(os.path.join(VIEWER, "live.html"), extra)
@@ -232,6 +258,10 @@ def make_handler(cfg, hub):
                 return self.file(os.path.join(VIEWER, "index.html"), extra)
             if p == "/events":
                 return self.events()
+            if p == "/phone":  # the phone address with its key, only for the page on this computer (the QR button)
+                if not self.local():
+                    return self.body(403, b"only on this computer", "text/plain")
+                return self.body(200, json.dumps({"url": cfg.get("phone")}).encode("utf-8"), "application/json")
             if p == "/ping":  # which tree this Workshop shows (live.py serve/launch use it to reuse a running one)
                 return self.body(200, json.dumps({"data": cfg["data"], "pid": os.getpid()}).encode("utf-8"), "application/json")
             if p.startswith("/viewer/"):  # media next to the viewer: media/x.jpg
@@ -358,7 +388,7 @@ def cmd_serve(a):
         return
     host = "0.0.0.0" if a.lan else "127.0.0.1"
     hub = Hub()
-    cfg = {"data": data, "media": media, "token": secrets.token_urlsafe(9)}
+    cfg = {"data": data, "media": media, "token": tree_key(data) if a.lan else secrets.token_urlsafe(9)}
     srv = None
     for port in ([a.port] if a.exact else range(a.port, a.port + 40)):  # another tree may have the first port
         try:
@@ -383,7 +413,8 @@ def cmd_serve(a):
     print(f"watching {data}")
     if a.lan:
         ip = lan_ip()
-        print(f"phone on the same Wi-Fi: http://{ip or '<this computer>'}:{port}/?k={cfg['token']}")
+        cfg["phone"] = f"http://{ip}:{port}/?k={cfg['token']}" if ip else None
+        print(f"phone on the same Wi-Fi: http://{ip or '<this computer>'}:{port}/?k={cfg['token']}  (or tap the phone button in the Workshop for a QR code)")
         print("(only with that key; if macOS asks whether Python may accept incoming connections, allow it)")
     sys.stdout.flush()
 

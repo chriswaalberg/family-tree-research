@@ -161,6 +161,9 @@ aside{display:flex;flex-direction:column;gap:10px;padding:6px 18px 14px 0;min-he
 #ov .st{display:flex;gap:20px;justify-content:center;margin-top:10px;flex-wrap:wrap}
 #ov .st b{display:block;font:700 30px/1 var(--serif);color:var(--gold)}#ov .st span{font:600 9.5px var(--sans);letter-spacing:1.4px;text-transform:uppercase;color:var(--mut)}
 dialog{background:var(--bg2);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:18px;width:min(420px,92vw);max-height:80vh}
+.qr{background:#fff;padding:12px;border-radius:12px;width:min(250px,70vw);margin:14px auto 10px}.qr svg{display:block;width:100%;height:auto}
+#phoneDlg p{margin:6px 0;color:var(--mut)}#phoneDlg code{display:block;margin-top:8px;font-size:11px;color:var(--mut);overflow-wrap:anywhere}
+#phoneDlg .x{float:right;background:none;border:0;color:var(--mut);font-size:20px;cursor:pointer}
 dialog::backdrop{background:rgba(0,0,0,.5)}
 dialog h2{margin:0 0 10px;font:700 22px var(--serif)}
 dialog input{width:100%;font:15px var(--sans);padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);margin:8px 0}
@@ -189,7 +192,7 @@ dialog input{width:100%;font:15px var(--sans);padding:9px 12px;border-radius:10p
   <h1><span data-t="title">Workshop</span><span class="pill" id="pill"><i></i><span id="pillT">…</span></span></h1>
   <button type="button" class="rootbtn" id="rootBtn"></button>
  </div>
- <div class="hbtns"><span class="vsw" id="vsw"><button type="button" data-v="cosmos" data-t="v_cos">Cosmos</button><button type="button" data-v="fan" data-t="v_fan">Fan</button></span><a class="hbtn" id="viewerBtn" href="viewer/" target="_blank" rel="noopener"><span data-t="viewer">Viewer</span> ↗</a></div>
+ <div class="hbtns"><button type="button" class="hbtn" id="phoneBtn" hidden><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg></button><span class="vsw" id="vsw"><button type="button" data-v="cosmos" data-t="v_cos">Cosmos</button><button type="button" data-v="fan" data-t="v_fan">Fan</button></span><a class="hbtn" id="viewerBtn" href="viewer/" target="_blank" rel="noopener"><span data-t="viewer">Viewer</span> ↗</a></div>
  <div class="counts">
   <div class="cnt" id="c-p"><b>–</b><span data-t="people">people</span></div>
   <div class="cnt" id="c-r"><b>–</b><span data-t="links">links</span></div>
@@ -212,6 +215,7 @@ dialog input{width:100%;font:15px var(--sans);padding:9px 12px;border-radius:10p
  </aside>
 </main>
 <dialog id="rootDlg"></dialog>
+<dialog id="phoneDlg"></dialog>
 <script>
 "use strict";
 /* ===== TEXTS (EN / NL) ===== */
@@ -226,7 +230,8 @@ en:{title:"Workshop",treeOf:"Family tree of",people:"people",links:"links",open:
  job:"Occupation: {n}",jobD:"{j}",many:"and {n} more",source:"Source",nosource:"No source named yet",fatherOf:"father of {c}",motherOf:"mother of {c}",notInFan:"not in the line of ancestors",
  rejected:"REJECTED",gapsNew:"+{n} open questions",gapsNewD:"Every new ancestor has two parents of their own.",gold:"This link is certain now.",
  s_zeker:"certain",s_waarschijnlijk:"probable",s_mogelijk:"possible",s_fout:"wrong",s_onbekend:"unknown","s_niet gecheckt":"not checked",s_:"no status",
- empty:"Nobody in the tree yet.",srcMore:"+ {n} more",nowT:"Working on",focusT:"Now: {n}",r_wifeOf:"wife of {n}",r_husbandOf:"husband of {n}",r_partnerOf:"partner of {n}",
+ empty:"Nobody in the tree yet.",phoneBtn:"On your phone",phoneT:"Watch on your phone",phoneP:"Point your phone's camera at this code. It must be on the same Wi-Fi.",
+ phoneOnce:"Only once: after that a bookmark works, also after a restart.",phoneOff:"The Workshop only listens on this computer now. Ask Claude: “show the Workshop on my phone”.",phoneNoQR:"No code without internet. Type this address on your phone:",srcMore:"+ {n} more",nowT:"Working on",focusT:"Now: {n}",r_wifeOf:"wife of {n}",r_husbandOf:"husband of {n}",r_partnerOf:"partner of {n}",
  r_motherOf:"mother of {n}",r_fatherOf:"father of {n}",r_parentOf:"parent of {n}",r_daughterOf:"daughter of {n}",r_sonOf:"son of {n}",r_childOf:"child of {n}",
  r_sisterOf:"sister of {n}",r_brotherOf:"brother of {n}",r_siblingOf:"sibling of {n}",v_fan:"Fan",v_cos:"Cosmos",nothing:"Nothing found",why:"Reason or source added: {c} → {p}",whyN:"{n} links got a source or a reason",whyNd:"{names} and others",
  storyEdit:"Story updated: {n}",tg:"Life and times of {p}",tgD:"{e} events · {b} images · {l} periods",tgNew:"new place",certN:"{n} links changed certainty",
@@ -243,7 +248,8 @@ nl:{title:"Werkplaats",treeOf:"Stamboom van",people:"mensen",links:"relaties",op
  job:"Beroep: {n}",jobD:"{j}",many:"en nog {n} anderen",source:"Bron",nosource:"Nog geen bron genoemd",fatherOf:"vader van {c}",motherOf:"moeder van {c}",notInFan:"niet in de voorouderlijn",
  rejected:"AFGEWEZEN",gapsNew:"+{n} open vragen",gapsNewD:"Elke nieuwe voorouder heeft zelf ook weer twee ouders.",gold:"Deze koppeling is nu zeker.",
  s_zeker:"zeker",s_waarschijnlijk:"waarschijnlijk",s_mogelijk:"mogelijk",s_fout:"fout",s_onbekend:"onbekend","s_niet gecheckt":"niet gecheckt",s_:"geen status",
- empty:"Nog niemand in de boom.",srcMore:"+ {n} meer",nowT:"Nu bezig met",focusT:"Nu: {n}",r_wifeOf:"vrouw van {n}",r_husbandOf:"man van {n}",r_partnerOf:"partner van {n}",
+ empty:"Nog niemand in de boom.",phoneBtn:"Op je telefoon",phoneT:"Kijk mee op je telefoon",phoneP:"Richt de camera van je telefoon op deze code. Hij moet op hetzelfde wifi zitten.",
+ phoneOnce:"Eén keer nodig: daarna werkt een bladwijzer, ook na een herstart.",phoneOff:"De Werkplaats luistert nu alleen op deze computer. Vraag Claude: “zet de Werkplaats op mijn telefoon”.",phoneNoQR:"Geen code zonder internet. Tik dit adres over op je telefoon:",srcMore:"+ {n} meer",nowT:"Nu bezig met",focusT:"Nu: {n}",r_wifeOf:"vrouw van {n}",r_husbandOf:"man van {n}",r_partnerOf:"partner van {n}",
  r_motherOf:"moeder van {n}",r_fatherOf:"vader van {n}",r_parentOf:"ouder van {n}",r_daughterOf:"dochter van {n}",r_sonOf:"zoon van {n}",r_childOf:"kind van {n}",
  r_sisterOf:"zus van {n}",r_brotherOf:"broer van {n}",r_siblingOf:"broer of zus van {n}",v_fan:"Waaier",v_cos:"Kosmos",nothing:"Niets gevonden",why:"Bron of reden erbij: {c} → {p}",whyN:"{n} koppelingen kregen een bron of reden",whyNd:"{names} en anderen",
  storyEdit:"Verhaal bijgewerkt: {n}",tg:"Tijdgeest van {p}",tgD:"{e} gebeurtenissen · {b} beelden · {l} periodes",tgNew:"nieuwe plaats",certN:"{n} koppelingen veranderden van zekerheid",
@@ -681,6 +687,18 @@ function rootPick(){const d=$("#rootDlg"),starts=(D.startpersonen||[]).map(s=>ty
  d.querySelector("#pq").oninput=e=>{const q=fold(e.target.value).trim();d.querySelector("#pl2").innerHTML=q.length<2?"":P.map((p,i)=>[p,i]).filter(([p])=>fold(p.n+" "+(p.aka||[]).join(" ")).includes(q)).slice(0,30).map(([,i])=>row(i)).join("");wire()};
  wire();d.addEventListener("click",e=>{if(e.target===d)d.close()});d.showModal()}
 
+/* ===== PHONE: a QR code of the phone address (only on the computer that runs the Workshop; /phone refuses others) */
+let PHONE=undefined;
+async function phoneInit(){try{const r=await fetch("phone",{cache:"no-store"});if(!r.ok)return;PHONE=(await r.json()).url||null;
+ const b=$("#phoneBtn");b.hidden=false;b.title=b.ariaLabel=_t("phoneBtn");b.onclick=phoneShow}catch(e){}}
+function qrLib(){return window.qrcode?Promise.resolve(true):new Promise(res=>{const s=document.createElement("script");
+ s.src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js";s.onload=()=>res(!!window.qrcode);s.onerror=()=>res(false);document.head.append(s)})}
+async function phoneShow(){const d=$("#phoneDlg");d.innerHTML=`<button type="button" class="x" aria-label="×">×</button><h2>${esc(_t("phoneT"))}</h2>`;
+ d.querySelector(".x").onclick=()=>d.close();d.addEventListener("click",e=>{if(e.target===d)d.close()});
+ if(!PHONE){d.insertAdjacentHTML("beforeend",`<p>${esc(_t("phoneOff"))}</p>`);d.showModal();return}
+ d.insertAdjacentHTML("beforeend",`<p>${esc(_t("phoneP"))}</p><div class="qr"></div><p>${esc(_t("phoneOnce"))}</p><code>${esc(PHONE)}</code>`);d.showModal();
+ if(await qrLib()){const q=qrcode(0,"M");q.addData(PHONE);q.make();d.querySelector(".qr").innerHTML=q.createSvgTag({cellSize:6,margin:2,scalable:true})}
+ else{d.querySelector(".qr").remove();d.querySelector("code").insertAdjacentHTML("beforebegin",`<p>${esc(_t("phoneNoQR"))}</p>`)}}
 /* ===== START ===== */
 function setLang(d){let l=null;try{l=new URLSearchParams(location.search).get("lang")}catch(e){}const nl=(l==="nl"||l==="en")?l:((d.taal||d.lang)==="nl"?"nl":"en");
  if(nl!==LANG){LANG=nl;document.documentElement.lang=LANG;applyTexts()}}
@@ -691,7 +709,7 @@ async function start(){const d=await fetchData();if(!d){$("#feed").innerHTML=`<l
  $$("#vsw button").forEach(b=>{b.setAttribute("aria-pressed",b.dataset.v===VIEW?"true":"false");b.onclick=()=>setView(b.dataset.v)});wireTap();
  applyTexts();render();
  if(!P.length)feed("note",_t("empty"),"");
- $("#rootBtn").onclick=rootPick;
+ $("#rootBtn").onclick=rootPick;phoneInit();
  connect()}
 function connect(){const pill=$("#pill"),pt=$("#pillT");let es;
  try{es=new EventSource("events")}catch(e){pt.textContent=_t("offline");return}
