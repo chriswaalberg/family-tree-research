@@ -1,0 +1,13 @@
+{
+  "_note": "Settings for the example family, the same as the smoke test's first command. See references/viewer.md, \"One settings file\".",
+  "gedcom": "example.ged",
+  "output": "/tmp/ex-config.json",
+  "lang": "en",
+  "csv": "example-relations.csv",
+  "regions": "regions-basic.json",
+  "stories": "example-stories.json",
+  "zeitgeist": "example-zeitgeist.json",
+  "coords": "example-coords.json",
+  "start": ["@I1@:Femke", {"id": "@I2@", "label": "Thomas"}],
+  "publish": {"cloudflare": "example-family-tree", "media": ["media"]}
+}

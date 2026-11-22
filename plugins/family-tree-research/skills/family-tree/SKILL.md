@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.51"
+  version: "0.9.52"
 ---
 
 # Family-tree research, hand in hand
@@ -84,7 +84,7 @@ The core:
 
 ## Viewer
 
-Follow `references/viewer.md`. The viewer is `viewer/index.html` and reads a `data.json` built with `scripts/make_viewer_data.py` (Python standard library only). The data format is in `viewer/DATA-FORMAT.md`. Publish index.html + data.json together as an artifact; after changes, only data.json again. Set the viewer language to the user's language (`--lang en` or `--lang nl`); that is the language it opens in. Readers can switch between English and Dutch with the EN/NL switch in the header (remembered per browser, or force it with `?lang=en` / `?lang=nl` in the URL).
+Follow `references/viewer.md`. The viewer is `viewer/index.html` and reads a `data.json` built with `scripts/make_viewer_data.py` (Python standard library only). The data format is in `viewer/DATA-FORMAT.md`. Keep the build options in one settings file, `family-tree.json` (`stamboom.json` in Dutch), and build with `make_viewer_data.py --config family-tree.json`, so every rebuild is the same. Publish index.html + data.json together as an artifact; after changes, only data.json again. A public website instead (no Claude account needed to look): `scripts/publish_cloudflare.py`, and **always ask the user first**, every time, because living people are in it. Set the viewer language to the user's language (`--lang en` or `--lang nl`); that is the language it opens in. Readers can switch between English and Dutch with the EN/NL switch in the header (remembered per browser, or force it with `?lang=en` / `?lang=nl` in the URL).
 
 ## Stories
 
@@ -186,6 +186,7 @@ Users may add photos, scans of records and other documents per person. They're s
 | `scripts/make_viewer_data.py` | GEDCOM (+CSV, +regions, +stories, +zeitgeist, +coordinates, +media) → data.json |
 | `scripts/geocode_places.py` | GEDCOM (+stories) → coordinates per place (Nominatim, cached, manual fixes stay) for the maps |
 | `scripts/standalone_viewer.py` | Viewer + data (+ media) in one standalone HTML file |
+| `scripts/publish_cloudflare.py` | Settings file → data.json + site with noindex → `wrangler deploy` (asks first; `--dry-run` only checks) |
 | `scripts/archives.py` | Archives without a browser: Open Archives (search, show, scans), Amsterdam open data and Transkribus, SchiedamGEN, Erfgoed Leiden, Riksarkivet |
 | `scripts/delpher.py` | Delpher newspapers: `search`, `text`, `locate` (crop with ruler) and `cut` (the clipping) |
 | `viewer/index.html`, `viewer/DATA-FORMAT.md` | The viewer and the data format |

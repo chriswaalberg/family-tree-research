@@ -15,6 +15,7 @@ plugins/family-tree-research/
     scripts/gedcom_tool.py           new / rebuild / add / check / media   (Dutch aliases: nieuw / opbouwen / toevoegen / controleer)
     scripts/make_viewer_data.py      GEDCOM (+csv, regions, stories, zeitgeist, media) → data.json
     scripts/standalone_viewer.py     index.html + data.json → one HTML file
+    scripts/publish_cloudflare.py    settings file (family-tree.json / stamboom.json) → data.json + site with noindex → wrangler deploy
     scripts/geocode_places.py        GEDCOM (+stories) → coordinates per place (Nominatim, cached; manual fixes stay)
     scripts/delpher.py               Delpher newspapers via SRU: search / text / locate (crop with ruler) / cut (needs Pillow)
     scripts/archives.py              archives without a browser: Open Archives (search/show/scans), Amsterdam open data (saa), Transkribus,
@@ -56,9 +57,16 @@ python3 -I $S/scripts/gedcom_tool.py check $S/examples/example.ged /tmp/check.md
 python3 -I $S/scripts/gedcom_tool.py check $S/examples/example.ged /tmp/check-nl.md --start @I1@ --lang nl
 python3 -I $S/scripts/standalone_viewer.py $S/viewer/index.html /tmp/ex.json /tmp/ex.html --media $S/examples
 python3 -I $S/scripts/gedcom_tool.py rebuild $S/examples/example.ged $S/examples/rounds /tmp/rb.ged --csv /tmp/rb.csv --rejected /tmp/rb.md --lang nl
+python3 -I $S/scripts/make_viewer_data.py --config $S/examples/family-tree.json --updated none && python3 -I $S/scripts/make_viewer_data.py $S/examples/example.ged /tmp/ex-cli.json \
+  --csv $S/examples/example-relations.csv --regions $S/examples/regions-basic.json --stories $S/examples/example-stories.json \
+  --zeitgeist $S/examples/example-zeitgeist.json --coords $S/examples/example-coords.json --start @I1@:Femke --start @I2@:Thomas --updated none \
+  && cmp /tmp/ex-config.json /tmp/ex-cli.json && echo "config = command line"
+python3 -I $S/scripts/publish_cloudflare.py --config $S/examples/family-tree.json --dry-run --no-build
 ```
 
 Then open `/tmp/ex.html` (or screenshot it with Playwright, desktop + mobile) and click through all tabs: Family, Line, Story, Timeline, Fan, Cosmos, and open ▶ Cards (tap through Femke → Thomas → Pieter; the Den Helder photo card must show). Maps: in Story and in Cards, Femke (Utrecht), Thomas (Amersfoort) and Pieter (Den Helder, after the paragraph that names it) each get one map (Pieter: "Den Helder, 97 km from Amersfoort"); via Thomas → Anna a route Amersfoort → Göteborg with the distance. Click the name in the title and pick Thomas: title, Story and Cards must follow. The footer must say "Made with Family Tree Research v<version>" with the version from plugin.json. In the Story view, follow Femke → Thomas → Pieter: Pieter must show his own (example) story, a "Life in Den Helder" block with the 1955 photo, and the 1963 example event with a source link and an "Example links" line; Anna's template text must say she lived through the Second World War "roughly from age 15 to 20". In English, no Dutch words may appear (e.g. "bron"). Check the browser console for errors. Also test with `--lang nl`. The rebuild must end with 17 steps, 9 people, 7 relations and 1 rejected link; running it twice must give identical files (`cmp`). If you touched `rebuild`, also test that it stops with file + step on an unknown id, on a `drop_link` without reason and on re-adding the rejected Griet Bakker as Pieter's mother. If you touched `gedcom_tool.py new/add`, test them with both English and Dutch JSON keys (formats in references/onboarding.md and references/gedcom-tool.md).
+
+The settings-file build must give the same file as the command line (`config = command line`), and the publish dry run must end with "Dry run: nothing published." without missing media. Never run `publish_cloudflare.py` without `--dry-run` in a test.
 
 If `examples/example-data.json` should change, regenerate it with the first command (output to `$S/examples/example-data.json`).
 

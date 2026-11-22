@@ -15,6 +15,12 @@ Examples:
   python3 make_viewer_data.py tree.ged data.json --start @I12@:Femke --start "Thomas de Vries" --lang nl
   python3 make_viewer_data.py tree.ged data.json --csv relations.csv --regions regions.json --title "The De Vries family"
 
+All of this can live in one settings file, so the command stays short and every tool builds the same data.json:
+  python3 make_viewer_data.py --config family-tree.json
+  python3 make_viewer_data.py            (no GEDCOM given: uses family-tree.json or stamboom.json in this folder)
+Keys in English or Dutch; paths are relative to the settings file's folder; options on the command line win.
+Format: references/viewer.md, "One settings file".
+
 Without --start the script picks the person with the most known ancestors.
 Living people (no death, born less than 100 years ago, or estimated so via parents/children) get
 "levend": true. All their data is kept and shown; --hide-living leaves out their dates and places.
@@ -801,13 +807,92 @@ def base_map(people, coords):
 PREC_EN = {"place": "plaats", "town": "plaats", "region": "regio", "country": "land", "unknown": "onbekend"}
 
 
+# ---------------------------------------------------------------- settings file (--config)
+CONFIG_NAMES = ("family-tree.json", "stamboom.json")  # looked for in the current folder when no GEDCOM is given
+CONFIG_KEYS = {  # key in the settings file (English or Dutch) -> argparse dest
+    "gedcom": "gedcom", "ged": "gedcom", "output": "uit", "uit": "uit",
+    "csv": "csv", "regions": "regios", "regios": "regios", "start": "start",
+    "lineage_start": "stamlijn_start", "stamlijn_start": "stamlijn_start",
+    "title": "titel", "titel": "titel", "family_name": "familienaam", "familienaam": "familienaam",
+    "lang": "taal", "taal": "taal", "hide_living": "levenden_verbergen", "levenden_verbergen": "levenden_verbergen",
+    "zeitgeist": "tijdgeest", "tijdgeest": "tijdgeest", "stories": "verhalen", "verhalen": "verhalen",
+    "updated": "bijgewerkt", "bijgewerkt": "bijgewerkt", "living_years": "levend_grens", "levend_grens": "levend_grens",
+    "coords": "coordinaten", "coordinaten": "coordinaten", "media_dir": "media_map", "media_map": "media_map",
+    "media_max": "media_max", "media_base": "media_basis", "media_basis": "media_basis",
+}
+CONFIG_PATHS = {"gedcom", "uit", "csv", "regios", "tijdgeest", "verhalen", "coordinaten", "media_map", "media_basis"}
+CONFIG_PUBLISH = ("publish", "publiceren")  # read by publish_cloudflare.py, ignored here
+
+
+def find_config(folder="."):
+    for n in CONFIG_NAMES:
+        if os.path.isfile(os.path.join(folder, n)):
+            return os.path.join(folder, n)
+    return None
+
+
+def load_config(path):
+    """Read a settings file -> (options as argparse dests, publish section, folder). Paths become absolute."""
+    try:
+        with open(path, encoding="utf-8-sig") as fh:
+            raw = json.load(fh)
+    except (OSError, ValueError) as e:
+        sys.exit(f"Settings file {path}: {e}")
+    if not isinstance(raw, dict):
+        sys.exit(f"Settings file {path}: expected an object {{...}}")
+    base = os.path.dirname(os.path.abspath(path))
+    opts, publish, bad = {}, {}, []
+    for k, v in raw.items():
+        key = k.strip().lower().replace("-", "_").replace(" ", "_")
+        if key.startswith("_"):
+            continue  # "_note": "..." is a comment
+        if key in CONFIG_PUBLISH:
+            publish = v or {}
+            continue
+        dest = CONFIG_KEYS.get(key)
+        if not dest:
+            bad.append(k); continue
+        if v is None or v == "" or v == []:
+            continue
+        if dest in CONFIG_PATHS:
+            v = os.path.join(base, os.path.expanduser(str(v)))
+        elif dest == "start":
+            v = [v] if isinstance(v, (str, dict)) else list(v)
+            out = []
+            for s in v:
+                if isinstance(s, dict):
+                    who = s.get("id") or s.get("person") or s.get("persoon") or s.get("name") or s.get("naam")
+                    if not who: sys.exit(f"Settings file {path}: start entry without id: {s}")
+                    lab = s.get("label") or ""
+                    out.append(f"{who}:{lab}" if lab else str(who))
+                else:
+                    out.append(str(s))
+            v = out
+        elif dest == "taal" and v not in ("en", "nl"):
+            sys.exit(f"Settings file {path}: \"{k}\" must be \"en\" or \"nl\", got {v!r}")
+        elif dest in ("levend_grens", "media_max"):
+            v = int(v)
+        elif dest == "levenden_verbergen":
+            v = bool(v)
+        opts[dest] = v
+    if bad:
+        sys.exit(f"Settings file {path}: unknown key(s) {', '.join(bad)} (known: {', '.join(sorted(CONFIG_KEYS))}, publish)")
+    if not isinstance(publish, dict):
+        sys.exit(f"Settings file {path}: \"publish\" must be an object {{...}}")
+    opts.setdefault("uit", os.path.join(base, "data.json"))  # next to the settings file, not in whatever folder you're in
+    return opts, publish, base
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("gedcom")
-    ap.add_argument("uit", nargs="?", default="data.json", metavar="output")
+    ap.add_argument("gedcom", nargs="?", help="the GEDCOM (may come from the settings file instead)")
+    ap.add_argument("uit", nargs="?", default=None, metavar="output", help="data.json to write (default data.json)")
+    ap.add_argument("--config", "--instellingen", dest="config",
+                    help="settings file with the GEDCOM, output, paths and options (keys in English or Dutch; "
+                         "paths relative to its folder; command-line options win)")
     ap.add_argument("--csv", help="relation certainty CSV (optional)")
     ap.add_argument("--regions", "--regios", dest="regios", help="region table as JSON (optional)")
-    ap.add_argument("--start", action="append", default=[], help="start person: GEDCOM id (@I1@) or name, optionally with :label")
+    ap.add_argument("--start", action="append", default=None, help="start person: GEDCOM id (@I1@) or name, optionally with :label")
     ap.add_argument("--lineage-start", "--stamlijn-start", dest="stamlijn_start", help="different start person for the Line view (id or name)")
     ap.add_argument("--title", "--titel", dest="titel")
     ap.add_argument("--family-name", "--familienaam", dest="familienaam")
@@ -826,6 +911,28 @@ def main():
     ap.add_argument("--media-base", "--media-basis", dest="media_basis", help="folder where relative file paths in the GEDCOM start "
                                          "(default: the GEDCOM's folder, then the folder above)")
     a = ap.parse_args()
+    cfg = a.config
+    if not cfg and not a.gedcom:
+        cfg = find_config()
+        if not cfg:
+            ap.error(f"give a GEDCOM file, or --config, or put {' or '.join(CONFIG_NAMES)} in this folder")
+    cfg_start = None
+    if cfg:
+        # with a settings file, one loose .json argument is the output, not the GEDCOM
+        out_only = a.gedcom if a.gedcom and a.uit is None and a.gedcom.lower().endswith(".json") else None
+        opts, _, _ = load_config(cfg)
+        cfg_start = opts.pop("start", None)
+        ap.set_defaults(**opts)
+        a = ap.parse_args()  # again, so the command line wins over the settings file
+        if out_only:
+            a.gedcom, a.uit = opts.get("gedcom"), out_only
+        print(f"Settings: {cfg}")
+        if not a.gedcom:
+            sys.exit(f"Settings file {cfg}: no \"gedcom\" given")
+    if a.start is None:
+        a.start = cfg_start or []
+    if a.uit is None:
+        a.uit = "data.json"
 
     recs = parse_gedcom(read_text(a.gedcom))
     indis = [r for r in recs if r["t"] == "INDI" and r["x"]]
@@ -918,7 +1025,8 @@ def main():
             k = country_key(x[0])
             if home and k and k != home: x.append(k)
         if w: p["woon"] = w
-        if wf: p["woon_feiten"] = sorted([list(x) for x in {tuple(x) for x in wf}], key=lambda x: (x[0], x[2]))
+        # without duplicates, in GEDCOM order within a year and kind (a set here made the order differ per run)
+        if wf: p["woon_feiten"] = sorted([list(x) for x in dict.fromkeys(tuple(x) for x in wf)], key=lambda x: (x[0], x[2]))
 
     # ---- media: copy local files (only with --media-dir)
     for p in people:  # original GEDCOM path -> published path (for "scan" on story images)

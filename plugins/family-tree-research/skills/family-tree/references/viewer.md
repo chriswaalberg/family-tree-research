@@ -11,6 +11,7 @@ python3 -I scripts/make_viewer_data.py source/tree.ged data/data.json \
 ```
 
 - Only the GEDCOM is required. Without `--csv` everything gets "not checked".
+- Once the command has more than a few options, put them in a settings file (next section), so every rebuild and every tool uses the same ones.
 - Several `--start` are allowed (e.g. the user and their children); the first one opens by default, the others are offered when the reader clicks the name in the title.
 - `--lang en` or `--lang nl`: the user's language (default en). The Dutch options (`--taal`, `--titel`, `--verhalen`, `--tijdgeest`, `--regios`, `--media-map`) still work.
 - The footer says when the tree was last updated: the moment of the build by default (date and time). `--updated YYYY-MM-DD` (or `YYYY-MM-DDTHH:MM`) sets another moment (e.g. the day of the last research, when you only rebuild the viewer), `--updated none` leaves it out.
@@ -20,6 +21,29 @@ python3 -I scripts/make_viewer_data.py source/tree.ged data/data.json \
 - **Stories**: `--stories data/stories.json` (optional). Check "Stories: N read".
 - **Maps**: `--coords data/place-coords.json` (optional). Make or update that file first with `python3 -I scripts/geocode_places.py source/tree.ged data/place-coords.json --stories data/stories.json` (needs internet; about one place per second, places already in the file are skipped). Then go through the places it marks "CHECK" and "not found" with the user: fix them by hand in the file and set `"bron": "manual"` so they stay. Old spellings in stories (`Ahuys`) get their own entry. Check "Coordinates: N of M place(s)" and "Base map: … kB". The viewer then shows a map at every moment a place is new on the trail or someone moves 300 km or more, in Story and Cards, at that point in the story. Map cards count in the card budget (a well-travelled ancestor can go over 15: check `#kaartbudget`) but break a run of text cards.
 - **Photos and documents**: add `--media-dir viewer/media`. The script copies all linked files (see `gedcom-tool.md`, "media") into `viewer/media/` and reports how many weren't found. It shrinks big photos itself if Pillow is available; otherwise shrink them first. Crop screenshots first: no browser or system chrome in the viewer (see SKILL.md, "Photos and documents"). A PNG without transparency becomes a JPG; the path in data.json changes with it, so remove the old `media/<name>.png` with `remove`.
+
+### One settings file (`family-tree.json`, Dutch `stamboom.json`)
+
+In the tree folder, next to `PROGRESS.md`. It holds everything the build needs, so the command is just `make_viewer_data.py --config family-tree.json`, or `make_viewer_data.py` with no arguments from that folder (it then finds `family-tree.json` or `stamboom.json` by itself and says so):
+
+```json
+{
+  "gedcom": "source/tree.ged",
+  "output": "data/data.json",
+  "lang": "en", "title": "The Smith family tree", "family_name": "Smith",
+  "csv": "data/relations.csv", "regions": "data/regions.json",
+  "stories": "data/stories.json", "zeitgeist": "zeitgeist/zeitgeist.json",
+  "coords": "data/place-coords.json", "media_dir": "viewer/media",
+  "start": ["@I1@:Sanne", {"id": "@I2@", "label": "Tom"}],
+  "publish": {"cloudflare": "smith-family-tree", "media": ["zeitgeist/media", "stories/media"]}
+}
+```
+
+- Paths are relative to the settings file's folder, so it works from any folder. Without `output`: `data.json` next to the settings file.
+- Every option has a key, in English or Dutch: `gedcom`, `output`/`uit`, `lang`/`taal`, `title`/`titel`, `family_name`/`familienaam`, `start` (list; `"@I1@:Label"` or `{"id", "label"}`), `lineage_start`/`stamlijn_start`, `csv`, `regions`/`regios`, `stories`/`verhalen`, `zeitgeist`/`tijdgeest`, `coords`/`coordinaten`, `media_dir`/`media_map`, `media_base`/`media_basis`, `media_max`, `hide_living`/`levenden_verbergen`, `living_years`/`levend_grens`, `updated`/`bijgewerkt`. Keys starting with `_` are comments. An unknown key stops the script (typos don't go unnoticed).
+- `publish` (Dutch `publiceren`) is only for `publish_cloudflare.py` (section 2).
+- Options on the command line win over the file: `--config family-tree.json /tmp/test.json --lang nl` builds a Dutch test copy elsewhere (with a settings file, one loose `.json` argument is the output). A `--start` on the command line replaces the file's list.
+- Any other tool that builds data.json (a script, a shortcut, a panel) should call `make_viewer_data.py --config <file>` too, so a new option only goes into the settings file.
 
 ## Stories (`data/stories.json`)
 
@@ -50,6 +74,8 @@ The template text (written by the viewer for people without an own story) also g
 
 ## 2. Publishing
 
+Two routes: a **private artifact** on claude.ai (below; the user shares it from Claude) or a **website on Cloudflare** (further down; anyone with the link, no Claude account needed). Ask which one the user wants the first time; most start with the artifact.
+
 **With the Artifact tool** (tools `mcp__claude-artifacts__*`), the best route:
 
 - First time: `publish_files` with two files: `index.html` (from `viewer/`) and `data.json`, title "<Family name> family tree" (or "Stamboom <familienaam>" in Dutch), icon `tree`. The files must be where your file tools work; if they're only on the user's computer, stage them first.
@@ -68,6 +94,13 @@ python3 -I scripts/standalone_viewer.py viewer/index.html data/data.json family-
 → SendUserFile → `create_artifact` (later `update_artifact`).
 
 **No artifacts at all**: hand over `family-tree.html` as a download (SendUserFile) and put it in the connected folder. The file works offline in any browser (only the fonts come from Google Fonts) and can be emailed.
+
+**A website on Cloudflare** (`scripts/publish_cloudflare.py`): a fixed link like `https://smith-family-tree.<account>.workers.dev` that family can open without a Claude account. Needs a shell on the user's computer with Node.js, and the settings file above.
+
+- Once: the user makes a free Cloudflare account and logs in with `npx --yes wrangler@4 login` (a browser window opens; they do this themselves). Add `"publish": {"cloudflare": "<name>"}` to the settings file (lower-case letters, digits, dashes). Media folders that `make_viewer_data.py` doesn't copy (zeitgeist and story images, each a folder holding `tijdgeest/…` or `verhalen/…`) go in `"media": [...]`; their contents are published under `media/`.
+- First check without publishing: `python3 -I scripts/publish_cloudflare.py --config family-tree.json --dry-run` (add `--site <folder>` to keep and look at the site). It builds data.json, puts index.html, data.json and media together, adds `noindex` (in the page and as a header, so search engines skip it) and stops when a `media/…` file from data.json is missing or a file is over 25 MB.
+- **Always ask the user before publishing**, every time: the site is public for anyone with the link, and living people are in it (with their dates and places unless `"hide_living": true`). Say how many people and how many living. Only after their yes: run it again with `--yes` (without a terminal and without `--yes` the script refuses).
+- The link is in wrangler's output. Note it in the progress file. Later rounds: the same command; the link stays the same.
 
 ## 3. Explaining it to the user (first time, short)
 
