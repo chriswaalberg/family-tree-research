@@ -13,6 +13,7 @@ python3 -I scripts/make_viewer_data.py source/tree.ged data/data.json \
 - Only the GEDCOM is required. Without `--csv` everything gets "not checked".
 - Several `--start` are allowed (e.g. the user and their children); the first one opens by default, the others are offered when the reader clicks the name in the title.
 - `--lang en` or `--lang nl`: the user's language (default en). The Dutch options (`--taal`, `--titel`, `--verhalen`, `--tijdgeest`, `--regios`, `--media-map`) still work.
+- The footer says when the tree was last updated: today's date by default. `--updated YYYY-MM-DD` sets another date (e.g. the day of the last research, when you only rebuild the viewer), `--updated none` leaves it out.
 - **Living people**: everything is shown, including dates and places. If the user wants that hidden for living people (e.g. for a viewer that's shared widely), use `--hide-living`.
 - Check the output: number of people, "CSV: N relations read, 0 rows skipped". Rows skipped? Find out why (wrong id, relation doesn't exist in the GEDCOM).
 - New places without a country: add them to `data/regions.json` (start from `examples/regions-basic.json`).

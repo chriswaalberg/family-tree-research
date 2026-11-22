@@ -793,6 +793,8 @@ def main():
     ap.add_argument("--hide-living", "--levenden-verbergen", dest="levenden_verbergen", action="store_true", help="leave out dates and places of living people")
     ap.add_argument("--zeitgeist", "--tijdgeest", dest="tijdgeest", help="life and times per place as JSON (optional, for the Story view)")
     ap.add_argument("--stories", "--verhalen", dest="verhalen", help="own stories per person as JSON (optional, for the Story view)")
+    ap.add_argument("--updated", "--bijgewerkt", dest="bijgewerkt", help="'last updated' date shown in the viewer's footer, "
+                    "YYYY-MM-DD (default: today; 'none' leaves it out)")
     ap.add_argument("--living-years", "--levend-grens", dest="levend_grens", type=int, default=100, help="years (default 100)")
     ap.add_argument("--coords", "--coordinaten", dest="coordinaten", help="coordinates per place as JSON, from geocode_places.py (optional, for the maps)")
     ap.add_argument("--media-dir", "--media-map", dest="media_map", help="copy local photos/documents into this folder (as media/<name>)")
@@ -1077,6 +1079,11 @@ def main():
     for p in people: p.pop("_media_orig", None)
     fam = a.familienaam or surn0[starts[0]["persoon"]] or ""
     out = {"versie": 2, "taal": a.taal}
+    upd = a.bijgewerkt or datetime.date.today().isoformat()
+    if upd.lower() not in ("none", "geen"):
+        try: datetime.datetime.strptime(upd, "%Y-%m-%d")
+        except ValueError: sys.exit(f"--updated: expected a date like 2026-11-22, got {upd!r}")
+        out["bijgewerkt"] = upd
     if a.titel: out["titel"] = a.titel
     if fam: out["familienaam"] = fam
     out["startpersonen"] = starts
