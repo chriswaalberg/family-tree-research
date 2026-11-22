@@ -334,6 +334,7 @@ main{padding-top:6px}
 .vh-tree span{display:inline-flex;align-items:center;gap:6px;font:600 12.5px/1 Inter,system-ui,sans-serif;color:#f8eedb;background:#3b2a20;border-radius:999px;padding:7px 12px;white-space:nowrap;transition:background .15s}
 .vh-tree:hover span{background:#21170f}.vh-tree:focus-visible{outline:none}.vh-tree:focus-visible span{outline:2px solid #c9a04a;outline-offset:2px}
 .linebar{display:flex;align-items:center;flex-wrap:wrap;gap:10px 12px;margin:0 0 10px;padding:10px 12px 10px 16px;border-radius:14px;background:#f6e7c4;border:1px solid #dcc08a;color:#4b3a2a;font:500 13px/1.35 Inter,system-ui,sans-serif}
+.linebar[hidden]{display:none}
 .linebar .lb-t{flex:1 1 260px;min-width:0}.linebar .lb-t b{display:block;font-weight:600}
 .linebar .lb-n{font-size:12.5px;color:#6b5a48}.linebar .lb-n i{font-style:normal;color:#b49a77;margin:0 3px}
 .linebar .lb-b{display:flex;gap:8px;flex-wrap:wrap}
@@ -789,7 +790,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.46",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.47",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -2691,7 +2692,7 @@ function lineInfo(){const v=state.vh;if(!state.line||!v||v.root!==state.root||v.
   return {path,code,set:new Set(path),pre,pairs,last:path[path.length-1]}}
 /* make the whole line visible in the view about to be shown: enough generations, Family opened along it, Line on its branch */
 function lineFit(fam){const L=lineInfo();if(!L)return;const need=L.path.length-1;
-  if(state.gens<need)state.gens=Math.min(12,need);if((state.tlGens||5)<need)state.tlGens=Math.min(14,need);
+  if(state.gens<need)state.gens=need;if((state.tlGens||5)<need)state.tlGens=need;
   /* Family: only the line open (no side branches, no brothers and sisters), so it stands compact; the reader's own tree comes back on "Hide line" */
   const F=famState();if(!F.saved){F.saved={up:new Set(F.up),sib:new Set(F.sib)};F.up=new Set();F.sib=new Set()}L.path.slice(0,-1).forEach(i=>F.up.add(i));if(fam){F.focus=L.last;F.lineFit=true}
   const s=[];for(let k=2;k<L.path.length;k++)s[k]=L.path[k-1]===P[L.path[k-2]].f?0:1;state.slRoot=state.root;state.slSel=s}
@@ -2709,10 +2710,12 @@ window.__render=()=>render();
 /* generatie-slider: eigen component (track met streepje per generatie, getal in de knop) */
 /* generaties: één schuif in de instellingenbalk; Fan en Cosmos gebruiken state.gens (3–12), Tijdlijn state.tlGens (3–14) */
 let GSL_SHOW=null;
+/* the generations slider goes as far as the start person's tree is deep (at least 4), for Fan, Cosmos and Timeline alike */
+function genMax(){const st=ancestorStats(state.root);return Math.max(4,...st.gen.values())}
 function initGenSlider(){const sl=$("gens"),MIN=3,ticks=sl.querySelector(".gsl-ticks"),thumb=sl.querySelector(".gsl-thumb");
-  const key=()=>state.view==="tijdlijn"?"tlGens":"gens",MAX=()=>state.view==="tijdlijn"?14:12,cur=()=>state[key()]||5;
+  const key=()=>state.view==="tijdlijn"?"tlGens":"gens",MAX=genMax,cur=()=>state[key()]||5;
   sl.setAttribute("aria-label",_t("gens"));
-  const show=v=>{const mx=MAX();if(ticks.children.length!==mx-MIN+1)ticks.innerHTML=Array.from({length:mx-MIN+1},(_,k)=>`<i data-v="${MIN+k}"></i>`).join("");
+  const show=v=>{const mx=MAX();v=Math.min(v,mx);if(ticks.children.length!==mx-MIN+1)ticks.innerHTML=Array.from({length:mx-MIN+1},(_,k)=>`<i data-v="${MIN+k}"></i>`).join("");
     const f=(v-MIN)/(mx-MIN);sl.style.setProperty("--f",f);thumb.firstChild.textContent=v;sl.setAttribute("aria-valuenow",v);sl.setAttribute("aria-valuemax",mx);
     ticks.querySelectorAll("i").forEach(t=>t.classList.toggle("on",+t.dataset.v<=v))};
   const set=v=>{v=Math.max(MIN,Math.min(MAX(),Math.round(v)));if(v===cur())return;state[key()]=v;show(v);render()};
