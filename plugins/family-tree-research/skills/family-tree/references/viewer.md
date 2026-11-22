@@ -34,14 +34,12 @@ In the tree folder, next to `PROGRESS.md`. It holds everything the build needs, 
   "csv": "data/relations.csv", "regions": "data/regions.json",
   "stories": "data/stories.json", "zeitgeist": "zeitgeist/zeitgeist.json",
   "coords": "data/place-coords.json", "media_dir": "viewer/media",
-  "start": ["@I1@:Sanne", {"id": "@I2@", "label": "Tom"}],
-  "publish": {"cloudflare": "smith-family-tree", "media": ["zeitgeist/media", "stories/media"]}
+  "start": ["@I1@:Sanne", {"id": "@I2@", "label": "Tom"}]
 }
 ```
 
 - Paths are relative to the settings file's folder, so it works from any folder. Without `output`: `data.json` next to the settings file.
 - Every option has a key, in English or Dutch: `gedcom`, `output`/`uit`, `lang`/`taal`, `title`/`titel`, `family_name`/`familienaam`, `start` (list; `"@I1@:Label"` or `{"id", "label"}`), `lineage_start`/`stamlijn_start`, `csv`, `regions`/`regios`, `stories`/`verhalen`, `zeitgeist`/`tijdgeest`, `coords`/`coordinaten`, `media_dir`/`media_map`, `media_base`/`media_basis`, `media_max`, `hide_living`/`levenden_verbergen`, `living_years`/`levend_grens`, `updated`/`bijgewerkt`. Keys starting with `_` are comments. An unknown key stops the script (typos don't go unnoticed).
-- `publish` (Dutch `publiceren`) is only for `publish_cloudflare.py` (section 2).
 - Options on the command line win over the file: `--config family-tree.json /tmp/test.json --lang nl` builds a Dutch test copy elsewhere (with a settings file, one loose `.json` argument is the output). A `--start` on the command line replaces the file's list.
 - Any other tool that builds data.json (a script, a shortcut, a panel) should call `make_viewer_data.py --config <file>` too, so a new option only goes into the settings file.
 
@@ -74,8 +72,6 @@ The template text (written by the viewer for people without an own story) also g
 
 ## 2. Publishing
 
-Two routes: a **private artifact** on claude.ai (below; the user shares it from Claude) or a **website on Cloudflare** (further down; anyone with the link, no Claude account needed). Ask which one the user wants the first time; most start with the artifact.
-
 **With the Artifact tool** (tools `mcp__claude-artifacts__*`), the best route:
 
 - First time: `publish_files` with two files: `index.html` (from `viewer/`) and `data.json`, title "<Family name> family tree" (or "Stamboom <familienaam>" in Dutch), icon `tree`. The files must be where your file tools work; if they're only on the user's computer, stage them first.
@@ -94,13 +90,6 @@ python3 -I scripts/standalone_viewer.py viewer/index.html data/data.json family-
 → SendUserFile → `create_artifact` (later `update_artifact`).
 
 **No artifacts at all**: hand over `family-tree.html` as a download (SendUserFile) and put it in the connected folder. The file works offline in any browser (only the fonts come from Google Fonts) and can be emailed.
-
-**A website on Cloudflare** (`scripts/publish_cloudflare.py`): a fixed link like `https://smith-family-tree.<account>.workers.dev` that family can open without a Claude account. Needs a shell on the user's computer with Node.js, and the settings file above.
-
-- Once: the user makes a free Cloudflare account and logs in with `npx --yes wrangler@4 login` (a browser window opens; they do this themselves). Add `"publish": {"cloudflare": "<name>"}` to the settings file (lower-case letters, digits, dashes). Media folders that `make_viewer_data.py` doesn't copy (zeitgeist and story images, each a folder holding `tijdgeest/…` or `verhalen/…`) go in `"media": [...]`; their contents are published under `media/`.
-- First check without publishing: `python3 -I scripts/publish_cloudflare.py --config family-tree.json --dry-run` (add `--site <folder>` to keep and look at the site). It builds data.json, puts index.html, data.json and media together, adds `noindex` (in the page and as a header, so search engines skip it) and stops when a `media/…` file from data.json is missing or a file is over 25 MB.
-- **Always ask the user before publishing**, every time: the site is public for anyone with the link, and living people are in it (with their dates and places unless `"hide_living": true`). Say how many people and how many living. Only after their yes: run it again with `--yes` (without a terminal and without `--yes` the script refuses).
-- The link is in wrangler's output. Note it in the progress file. Later rounds: the same command; the link stays the same.
 
 ## 3. Explaining it to the user (first time, short)
 

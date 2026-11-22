@@ -7,7 +7,7 @@ Use **English names by default**. If the user speaks Dutch, use the Dutch names 
 ```
 Family tree/                    (Stamboom/)
 ├── PROGRESS.md                 (VOORTGANG.md)        ← always read first; always update at the end
-├── family-tree.json            (stamboom.json)       ← settings for the viewer build and publishing (see viewer.md, "One settings file")
+├── family-tree.json            (stamboom.json)       ← settings for the viewer build (see viewer.md, "One settings file")
 ├── README.md                   (LEESMIJ.md)          ← short explanation for the user: what is where
 ├── source/                     (bron/)               ← GEDCOMs: original unchanged + working version
 │   ├── original-<platform>-<date>.ged                ← the import (or original.ged from `new`): never changed
@@ -45,7 +45,7 @@ Updated: <date>
 - Start person: <name> (<GEDCOM id>)
 - Most curious about: …
 - Way of working: independently up to … / show after every generation
-- Viewer: <link> (artifact id <slug>, or Cloudflare worker <name>)
+- Viewer: <link> (artifact id <slug>)
 - Build: `make_viewer_data.py --config family-tree.json`
 - Works: Open Archives, … · Doesn't work (via the user): …
 

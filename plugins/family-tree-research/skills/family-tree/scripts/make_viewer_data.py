@@ -821,7 +821,7 @@ CONFIG_KEYS = {  # key in the settings file (English or Dutch) -> argparse dest
     "media_max": "media_max", "media_base": "media_basis", "media_basis": "media_basis",
 }
 CONFIG_PATHS = {"gedcom", "uit", "csv", "regios", "tijdgeest", "verhalen", "coordinaten", "media_map", "media_basis"}
-CONFIG_PUBLISH = ("publish", "publiceren")  # read by publish_cloudflare.py, ignored here
+CONFIG_IGNORED = ("publish", "publiceren")  # from 0.9.52 (publishing was taken out again): ignored, so old files keep working
 
 
 def find_config(folder="."):
@@ -832,7 +832,7 @@ def find_config(folder="."):
 
 
 def load_config(path):
-    """Read a settings file -> (options as argparse dests, publish section, folder). Paths become absolute."""
+    """Read a settings file -> options as argparse dests. Paths become absolute."""
     try:
         with open(path, encoding="utf-8-sig") as fh:
             raw = json.load(fh)
@@ -841,13 +841,12 @@ def load_config(path):
     if not isinstance(raw, dict):
         sys.exit(f"Settings file {path}: expected an object {{...}}")
     base = os.path.dirname(os.path.abspath(path))
-    opts, publish, bad = {}, {}, []
+    opts, bad = {}, []
     for k, v in raw.items():
         key = k.strip().lower().replace("-", "_").replace(" ", "_")
         if key.startswith("_"):
             continue  # "_note": "..." is a comment
-        if key in CONFIG_PUBLISH:
-            publish = v or {}
+        if key in CONFIG_IGNORED:
             continue
         dest = CONFIG_KEYS.get(key)
         if not dest:
@@ -876,11 +875,9 @@ def load_config(path):
             v = bool(v)
         opts[dest] = v
     if bad:
-        sys.exit(f"Settings file {path}: unknown key(s) {', '.join(bad)} (known: {', '.join(sorted(CONFIG_KEYS))}, publish)")
-    if not isinstance(publish, dict):
-        sys.exit(f"Settings file {path}: \"publish\" must be an object {{...}}")
+        sys.exit(f"Settings file {path}: unknown key(s) {', '.join(bad)} (known: {', '.join(sorted(CONFIG_KEYS))})")
     opts.setdefault("uit", os.path.join(base, "data.json"))  # next to the settings file, not in whatever folder you're in
-    return opts, publish, base
+    return opts
 
 
 def main():
@@ -920,7 +917,7 @@ def main():
     if cfg:
         # with a settings file, one loose .json argument is the output, not the GEDCOM
         out_only = a.gedcom if a.gedcom and a.uit is None and a.gedcom.lower().endswith(".json") else None
-        opts, _, _ = load_config(cfg)
+        opts = load_config(cfg)
         cfg_start = opts.pop("start", None)
         ap.set_defaults(**opts)
         a = ap.parse_args()  # again, so the command line wins over the settings file

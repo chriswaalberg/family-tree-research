@@ -8,6 +8,5 @@
   "stories": "example-stories.json",
   "zeitgeist": "example-zeitgeist.json",
   "coords": "example-coords.json",
-  "start": ["@I1@:Femke", {"id": "@I2@", "label": "Thomas"}],
-  "publish": {"cloudflare": "example-family-tree", "media": ["media"]}
+  "start": ["@I1@:Femke", {"id": "@I2@", "label": "Thomas"}]
 }
