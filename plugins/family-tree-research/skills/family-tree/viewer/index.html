@@ -791,7 +791,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.55",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.56",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -2014,6 +2014,22 @@ function drawFamilie(){
     btns.push({c:pc,type:"downx"})}
   if(F.down.has(r)&&(P[r].ch||[]).length){const m=DM.get(r);dplace(r,rootCard,(W-m.w)/2,0)}
   else if((P[r].ch||[]).length)btns.push({c:rootCard,type:"down"});
+  /* compact: slide each couple (with everything above it) toward its child, as far as cards and connector bars in every row allow; then the root row under its parents */
+  {const ups=fams.filter(f=>!f.sibOnly&&!f.down&&f.line&&f.child!==r&&f.line.key!=null).sort((a,b)=>a.f.g-b.f.g);
+    const occ=(skip)=>{const o=new Map(),put=(k,a,b)=>{(o.get(k)||o.set(k,[]).get(k)).push([a,b])};
+      for(const c of cards)if(!skip.has(c))put("c"+c.g,c.x,c.x+1);
+      for(const f of fams){const cs=f.sibOnly?f.kids:[f.f,f.m,...f.kids];if(cs.some(c=>skip.has(c)))continue;const xs=cs.map(c=>c.x+.5);put("b"+(f.sibOnly?f.kids[0].g+1:f.f.g),Math.min(...xs),Math.max(...xs))}
+      return o};
+    for(let pass=0;pass<2;pass++)for(const fm of ups){const k=fm.line.key,sub=new Set(cards.filter(c=>c.key&&(c.key.startsWith(k+"f")||c.key.startsWith(k+"m"))));
+      let want=fm.line.x-(fm.f.x+fm.m.x)/2;if(Math.abs(want)<.01)continue;
+      const o=occ(new Set([...sub,fm.line])),mine=new Map(),put=(k2,a,b)=>{const v=mine.get(k2);mine.set(k2,v?[Math.min(v[0],a),Math.max(v[1],b)]:[a,b])};
+      for(const c of sub)put("c"+c.g,c.x,c.x+1);
+      for(const f of fams){if(f===fm||f.sibOnly||f.down)continue;if(sub.has(f.f)){const xs=[f.f,f.m,...f.kids].map(c=>c.x+.5);put("b"+f.f.g,Math.min(...xs),Math.max(...xs))}}
+      for(const [k2,[a,b]] of mine){const gap=k2[0]==="c"?.5:.25;for(const [p,q] of o.get(k2)||[]){
+        if(q+gap<=a){if(want<0)want=Math.max(want,q+gap-a)}else if(p>=b+gap){if(want>0)want=Math.min(want,p-gap-b)}else want=0}}
+      if(Math.abs(want)>.01)for(const c of sub)c.x+=want}
+    const rf=fams.find(f=>!f.sibOnly&&!f.down&&f.child===r);if(rf){const s=(rf.f.x+rf.m.x)/2-rootCard.x;cards.forEach(c=>{if(c.g<=0)c.x+=s})}
+    const mn=Math.min(...cards.map(c=>c.x));cards.forEach(c=>c.x-=mn);W=Math.max(...cards.map(c=>c.x))+1}
   /* Story line with only the line open: a narrow staircase, every couple of the line straight above its child (partners 1.5 places apart, as in the normal layout) */
   if(LN&&!F.sib.size&&[...F.up].every(i=>LN.set.has(i))){let kid=rootCard;
     for(let n=0;n<60;n++){const fm=fams.find(f=>!f.sibOnly&&!f.down&&f.line===kid);if(!fm)break;fm.f.x=kid.x-.75;fm.m.x=kid.x+.75;
