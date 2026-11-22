@@ -8,21 +8,20 @@ The Workshop is a local page (`viewer/live.html`, served by `scripts/live.py`) t
 
 In Claude Code, before the first research round of a session (or a check of an imported tree), open the Workshop without asking. It is part of the experience, like the first viewer.
 
-**The Claude desktop app (a browser pane is available, tools named like `preview_start`)**: add an entry to `.claude/launch.json` in the user's family-tree folder and open it in the side panel:
+Every tree has its own Workshop. Several can run at once (two family trees, or a test tree next to the real one), each on its own port; opening one that already runs reuses it.
 
-```json
-{"version": "0.0.1", "configurations": [
-  {"name": "workshop", "runtimeExecutable": "python3",
-   "runtimeArgs": ["-I", "<absolute path to the skill>/scripts/live.py", "serve", "--config", "<absolute path>/family-tree.json"],
-   "port": 8790}
-]}
-```
+**The Claude desktop app (a browser pane is available, tools named like `preview_start`)**, every time, in this order:
 
-Then `preview_start` with `name: "workshop"`. Keep any other entries in that file. It runs in the side panel next to the conversation; the user can make the panel narrow, the page is built for that (and for phones).
+1. From the tree's folder: `python3 -I <skill>/scripts/live.py launch --config family-tree.json`. It writes the `workshop` entry in that folder's `.claude/launch.json` with the live.py of the current plugin version (a plugin update moves the path) and this tree's own port (its running Workshop's port, else a free one). Other entries stay. Never write that entry by hand.
+2. `preview_start` with `name: "workshop"`.
+3. Show the side panel: `show_pane` with `pane: "preview"` (the pane can be hidden after `preview_start`).
+4. Check that it is **this** tree: `curl -s http://127.0.0.1:<port>/ping` must name this tree's data.json, and `tabs_context` (or a screenshot) shows the tab "Werkplaats · <start person>" / "Workshop · <start person>". Close tabs of another tree's Workshop in the pane (`tabs_close`). Only then tell the user it's there.
 
-**The terminal (no browser pane)**: start `python3 -I scripts/live.py serve --config family-tree.json` as a background task and give the user the address it prints (`http://127.0.0.1:8790/`).
+**The terminal (no browser pane)**: from the tree's folder, start `python3 -I <skill>/scripts/live.py serve --config family-tree.json` as a background task and give the user the address it prints. If this tree's Workshop already runs, it prints that address and stops.
 
-`--config` reads the same settings file as `make_viewer_data.py` (`--data data/data.json` also works). data.json must exist: build the first viewer before you open the Workshop. Only one Workshop runs at a time; when 8790 is taken it uses the next free port and says so (then fix the port in launch.json).
+`--config` reads the same settings file as `make_viewer_data.py` (`--data data/data.json` also works). data.json must exist: build the first viewer before you open the Workshop.
+
+**Run the scripts from the tree's folder.** Events go only to the Workshop of the tree you are in: the one whose folder holds the current folder (for `rebuild` and `check`: the file they write or read). From elsewhere nothing arrives (never in another tree's Workshop); `note`/`progress` take `--tree <folder>`, other scripts `FTR_TREE=<folder>` in front.
 
 Say in one sentence what it is: "Next to our conversation you can now watch your tree grow while I search."
 

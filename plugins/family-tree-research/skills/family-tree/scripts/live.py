@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
 """live.py — the Workshop: watch the family tree grow while Claude researches (Claude Code only).
 
-  serve [--config family-tree.json | --data data.json]   start the local Workshop page (viewer/live.html)
-        [--port 8790] [--lan] [--media DIR ...]
+  serve [--config family-tree.json | --data data.json]   start the local Workshop page (viewer/live.html); one per tree:
+        [--port 8790] [--lan] [--media DIR ...]           if this tree's Workshop already runs, it says where and stops (0)
+  launch [--config ... | --data ...] [--lan]            desktop app: write the `workshop` entry in the tree's
+                                                        .claude/launch.json (this live.py, this tree's own port);
+                                                        run it before every preview_start
   note "<text>" [--person I4] [--kind note|read|found|nothing|ask]
                                                         tell the Workshop what you are doing (one line)
   progress "<task>" <done> <total> [--person I4] [--text ...]
                                                         a progress bar for a long script; send it every step
 
-The page shows the round Fan of the start person. Every time data.json changes (after gedcom_tool.py rebuild
+Events go only to the Workshop of the tree you work in: the one whose folder holds the current folder (or the file
+that rebuild/check writes, or FTR_TREE / --tree). Run scripts from the tree's folder.
+
+The page shows the start person's ancestors (Cosmos, or the round Fan). Every time data.json changes (after gedcom_tool.py rebuild
 and make_viewer_data.py) it compares the old and the new tree and animates the difference: new people fly in,
 rejected links crack, links that became certain turn gold. archives.py, delpher.py and gedcom_tool.py check/
 rebuild report what they do by themselves while a Workshop is running; for anything else use `note`.
@@ -23,33 +29,68 @@ A long script of your own can also call emit() directly instead of starting live
     live.emit("progress", task="side branches", done=42, total=123, person="I87")
 Helpers (subagents) set FTR_WHO=<short name> in front of their commands: each gets its own scanner beam.
 
-Standard library only. Dutch aliases: serveer/start, notitie (--persoon, --soort), voortgang (--tekst).
+Standard library only. Dutch aliases: serveer/start, notitie (--persoon, --soort, --boom), voortgang (--tekst, --boom).
 """
-import argparse, json, os, queue, secrets, signal, socket, sys, tempfile, threading, time, urllib.request
+import argparse, hashlib, json, os, queue, secrets, signal, socket, sys, tempfile, threading, time, urllib.request
 from collections import deque
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs, unquote
 
-POINTER = os.path.join(tempfile.gettempdir(), "family-tree-research-live.json")
+POINTERS = os.path.join(tempfile.gettempdir(), "family-tree-research-live")  # one file per running Workshop (per tree)
 HERE = os.path.dirname(os.path.abspath(__file__))
 VIEWER = os.path.normpath(os.path.join(HERE, "..", "viewer"))
 CONFIG_NAMES = ("family-tree.json", "stamboom.json")
 
 
-# ---------------------------------------------------------------- sending events (used by the other scripts too)
-def _pointer():
+# ---------------------------------------------------------------- which Workshops run (one per tree)
+def _key(data):
+    return hashlib.sha1(os.path.realpath(data).encode("utf-8")).hexdigest()[:12]
+
+
+def workshops():
+    """The running Workshops: [{port, pid, data, root}]. Files of stopped ones are removed on the way."""
+    out = []
     try:
-        with open(POINTER, encoding="utf-8") as fh:
-            p = json.load(fh)
-        os.kill(int(p["pid"]), 0)  # is that Workshop still running?
-        return p
-    except (OSError, ValueError, KeyError, TypeError):
-        return None
+        names = os.listdir(POINTERS)
+    except OSError:
+        return out
+    for n in names:
+        f = os.path.join(POINTERS, n)
+        try:
+            with open(f, encoding="utf-8") as fh:
+                p = json.load(fh)
+            os.kill(int(p["pid"]), 0)  # still running?
+            out.append(p)
+        except ProcessLookupError:
+            try:
+                os.remove(f)
+            except OSError:
+                pass
+        except (OSError, ValueError, KeyError, TypeError):
+            continue
+    return out
 
 
-def emit(kind, **fields):
-    """Send one event to a running Workshop. Silent and fast (one file read) when none is running."""
-    p = _pointer()
+def _inside(path, root):
+    path, root = os.path.realpath(path), os.path.realpath(root)
+    return path == root or path.startswith(root.rstrip(os.sep) + os.sep)
+
+
+def workshop_for(where=None):
+    """The Workshop of the tree you are working in: the one whose folder holds `where` (a file the script writes),
+    else the current folder (FTR_TREE overrides). None when no Workshop belongs here: then nothing is sent."""
+    spots = [p for p in (os.environ.get("FTR_TREE"), where, os.getcwd()) if p]
+    for spot in spots:
+        hits = [w for w in workshops() if w.get("root") and _inside(os.path.abspath(spot), w["root"])]
+        if hits:
+            return max(hits, key=lambda w: len(w["root"]))
+    return None
+
+
+# ---------------------------------------------------------------- sending events (used by the other scripts too)
+def emit(kind, _where=None, **fields):
+    """Send one event to the Workshop of this tree. Silent and fast when none is running or none belongs here."""
+    p = workshop_for(_where)
     if not p:
         return False
     ev = {"kind": kind, "t": round(time.time(), 2)}
@@ -190,6 +231,8 @@ def make_handler(cfg, hub):
                 return self.file(os.path.join(VIEWER, "index.html"), extra)
             if p == "/events":
                 return self.events()
+            if p == "/ping":  # which tree this Workshop shows (live.py serve/launch use it to reuse a running one)
+                return self.body(200, json.dumps({"data": cfg["data"], "pid": os.getpid()}).encode("utf-8"), "application/json")
             if p.startswith("/viewer/"):  # media next to the viewer: media/x.jpg
                 rel = os.path.normpath(p[len("/viewer/"):])
                 if rel.startswith("..") or os.path.isabs(rel):
@@ -272,30 +315,67 @@ def resolve(a):
     if not os.path.isfile(data):
         sys.exit(f"{data} does not exist yet: build it first with make_viewer_data.py")
     media.append(os.path.dirname(data))
-    return data, media
+    # the tree's folder: where the settings file is, else above data/ (events from scripts run there go to this Workshop)
+    root = os.path.abspath(a.root) if getattr(a, "root", None) else (
+        os.path.dirname(os.path.abspath(cfgp)) if not a.data else
+        (os.path.dirname(os.path.dirname(data)) if os.path.basename(os.path.dirname(data)).lower() == "data" else os.path.dirname(data)))
+    return data, media, root
+
+
+def running_for(data):
+    """A Workshop that already shows this data.json (and answers), or None."""
+    for w in workshops():
+        if os.path.realpath(w.get("data", "")) != os.path.realpath(data):
+            continue
+        try:
+            with urllib.request.urlopen(f"http://127.0.0.1:{w['port']}/ping", timeout=1) as r:
+                if os.path.realpath(json.load(r).get("data", "")) == os.path.realpath(data):
+                    return w
+        except Exception:
+            pass
+    return None
+
+
+def free_port(start, n=40):
+    for port in range(start, start + n):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            s.bind(("127.0.0.1", port))
+            return port
+        except OSError:
+            continue
+        finally:
+            s.close()
+    return None
 
 
 def cmd_serve(a):
-    data, media = resolve(a)
-    old = _pointer()
-    if old:
-        sys.exit(f"A Workshop is already running on port {old['port']} (pid {old['pid']}). Stop it first.")
+    data, media, root = resolve(a)
+    old = running_for(data)
+    if old:  # this tree already has a Workshop: use that one (exit 0, so the desktop app's preview_start doesn't fail)
+        print(f"Workshop for this tree is already running: http://127.0.0.1:{old['port']}/")
+        return
     host = "0.0.0.0" if a.lan else "127.0.0.1"
     hub = Hub()
     cfg = {"data": data, "media": media, "token": secrets.token_urlsafe(9)}
     srv = None
-    for port in range(a.port, a.port + 20):
+    for port in ([a.port] if a.exact else range(a.port, a.port + 40)):  # another tree may have the first port
         try:
             srv = ThreadingHTTPServer((host, port), make_handler(cfg, hub))
             break
         except OSError:
             continue
     if not srv:
-        sys.exit(f"No free port between {a.port} and {a.port + 19}")
+        sys.exit(f"Port {a.port} is taken by something else: run `live.py launch` again (it picks a free port)" if a.exact
+                 else f"No free port between {a.port} and {a.port + 39}")
     srv.daemon_threads = True
     port = srv.server_address[1]
+    os.makedirs(POINTERS, exist_ok=True)
+    POINTER = os.path.join(POINTERS, _key(data) + ".json")
     with open(POINTER, "w", encoding="utf-8") as fh:
-        json.dump({"port": port, "pid": os.getpid()}, fh)
+        json.dump({"port": port, "pid": os.getpid(), "data": data, "root": root}, fh)
+    if port != a.port:
+        print(f"(port {a.port} was taken, probably by another tree's Workshop: this one uses {port})")
     stop = threading.Event()
     threading.Thread(target=watch, args=(data, hub, stop), daemon=True).start()
     print(f"Workshop: http://127.0.0.1:{port}/   (viewer: http://127.0.0.1:{port}/viewer/)")
@@ -323,15 +403,51 @@ def cmd_serve(a):
             pass
 
 
+def cmd_launch(a):
+    """Write the `workshop` entry of the tree's .claude/launch.json with this live.py (so a plugin update never starts
+    an old one) and a port that is this tree's own: the running Workshop's port, else a free one."""
+    data, _, root = resolve(a)
+    w = running_for(data)
+    port = w["port"] if w else free_port(a.port)
+    if not port:
+        sys.exit(f"No free port from {a.port}")
+    path = os.path.abspath(a.file) if a.file else os.path.join(root, ".claude", "launch.json")
+    try:
+        with open(path, encoding="utf-8") as fh:
+            conf = json.load(fh)
+    except FileNotFoundError:
+        conf = {"version": "0.0.1", "configurations": []}
+    except ValueError as e:
+        sys.exit(f"{path} is not valid JSON ({e}): fix it first, nothing was changed")
+    src = ["--config", os.path.abspath(a.config or next(n for n in CONFIG_NAMES if os.path.isfile(n)))] if not a.data else ["--data", data]
+    entry = {"name": a.name, "runtimeExecutable": sys.executable or "python3",
+             "runtimeArgs": ["-I", os.path.abspath(__file__), "serve", *src, "--root", root, "--port", str(port), "--exact"]
+             + (["--lan"] if a.lan else []),
+             "port": port}
+    confs = [c for c in conf.get("configurations", []) if c.get("name") != a.name]  # other entries stay
+    conf["configurations"] = confs + [entry]
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        json.dump(conf, fh, indent=2, ensure_ascii=False)
+    os.replace(tmp, path)
+    print(f"{path}: entry \"{a.name}\" on port {port}" + (" (this tree's Workshop is already running there)" if w else "")
+          + f". Open it with preview_start name \"{a.name}\".")
+
+
 def cmd_progress(a):
+    if a.tree:
+        os.environ["FTR_TREE"] = a.tree
     if not emit("progress", task=a.task, done=a.done, total=a.total, person=a.person, text=a.text):
-        print("(no Workshop running: progress not shown)")
+        print("(no Workshop for this tree: progress not shown)")
 
 
 def cmd_note(a):
+    if a.tree:
+        os.environ["FTR_TREE"] = a.tree
     ok = emit(a.kind, text=a.text, person=a.person)
     if not ok:
-        print("(no Workshop running: note not shown)")
+        print("(no Workshop for this tree: note not shown)")
 
 
 def main():
@@ -343,12 +459,25 @@ def main():
     s.add_argument("--port", "--poort", type=int, default=8790)
     s.add_argument("--lan", "--wifi", action="store_true", help="also listen on the local network (address with a key)")
     s.add_argument("--media", action="append", help="extra folder to serve viewer media from (repeatable)")
+    s.add_argument("--root", help="the tree's folder (default: where the settings file is, else above data/)")
+    s.add_argument("--exact", action="store_true", help="only this port (launch.json entries use it)")
     s.set_defaults(func=cmd_serve)
+    la = sp.add_parser("launch", help="write the workshop entry in the tree's .claude/launch.json (desktop app)")
+    la.add_argument("--config", "--instellingen")
+    la.add_argument("--data")
+    la.add_argument("--port", "--poort", type=int, default=8790)
+    la.add_argument("--lan", "--wifi", action="store_true")
+    la.add_argument("--root")
+    la.add_argument("--media", action="append")
+    la.add_argument("--name", default="workshop")
+    la.add_argument("--file", help="launch.json to write (default: <tree folder>/.claude/launch.json)")
+    la.set_defaults(func=cmd_launch)
     n = sp.add_parser("note", aliases=["notitie"], help="show one line in the Workshop")
     n.add_argument("text")
     n.add_argument("--person", "--persoon", help="GEDCOM id (I4 or @I4@) or name: the scanner points there")
     n.add_argument("--kind", "--soort", default="note",
                    choices=["note", "read", "found", "nothing", "ask", "notitie", "lees", "gevonden", "niets", "vraag"])
+    n.add_argument("--tree", "--boom", help="the tree's folder, when you run this from somewhere else")
     n.set_defaults(func=cmd_note)
     g = sp.add_parser("progress", aliases=["voortgang"], help="a progress bar for a long script (send it every step)")
     g.add_argument("task", help="short name of the task, e.g. 'side branches'")
@@ -356,6 +485,7 @@ def main():
     g.add_argument("total", type=int)
     g.add_argument("--person", "--persoon", help="who is being checked now (GEDCOM id or name): the scanner points there")
     g.add_argument("--text", "--tekst", help="one line about this step")
+    g.add_argument("--tree", "--boom", help="the tree's folder, when you run this from somewhere else")
     g.set_defaults(func=cmd_progress)
     a = ap.parse_args()
     if getattr(a, "kind", None):

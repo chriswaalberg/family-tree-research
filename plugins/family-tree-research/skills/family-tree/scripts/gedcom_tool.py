@@ -26,7 +26,7 @@ _LIVE = []
 
 
 def live(kind, **fields):
-    """Tell a running Workshop (live.py serve) what happens. Does nothing when none is running."""
+    """Tell this tree's Workshop (live.py serve) what happens (`_where` = a file of the tree). Does nothing without one."""
     try:
         if not _LIVE:
             import importlib.util
@@ -490,9 +490,9 @@ def cmd_check(a):
     out += odd[:200] or [t["noodd"]]
     write(a.output, out)
     print(t["done"].format(f=a.output, p=len(indi), a=len(seen) - 1, g=len(gaps), o=len(odd)))
-    live("check", people=len(indi), ancestors=len(seen) - 1, gaps=len(gaps), odd=len(odd), start=start.strip("@"))
+    live("check", _where=a.gedcom, people=len(indi), ancestors=len(seen) - 1, gaps=len(gaps), odd=len(odd), start=start.strip("@"))
     for x, line in warns[:40]:
-        live("warn", person=x.strip("@"), text=re.sub(r"@[^@\s]+@,?\s*", "", re.sub(r"[*`_]", "", line)).replace("()", "").lstrip("- ").strip())
+        live("warn", _where=a.gedcom, person=x.strip("@"), text=re.sub(r"@[^@\s]+@,?\s*", "", re.sub(r"[*`_]", "", line)).replace("()", "").lstrip("- ").strip())
 
 
 # ---------------------------------------------------------------- media
@@ -1526,9 +1526,9 @@ def cmd_rebuild(a):
         print("\n".join(rb.log))
     n_indi = sum(1 for r in rb.recs if r[1] == "INDI")
     print(f"rebuild: {len(files)} round(s), {total} step(s) -> {a.output} ({n_indi} people)")
-    live("rebuild", rounds=len(files), steps=total, people=n_indi, title=title)
+    live("rebuild", _where=a.output, rounds=len(files), steps=total, people=n_indi, title=title)
     if steps_last:
-        live("steps", round=os.path.basename(last_path), title=title, steps=steps_last[-400:])
+        live("steps", _where=a.output, round=os.path.basename(last_path), title=title, steps=steps_last[-400:])
     if rb.places:
         print(f"places: {changed} place name(s) changed")
     if a.places_report or rb.places:

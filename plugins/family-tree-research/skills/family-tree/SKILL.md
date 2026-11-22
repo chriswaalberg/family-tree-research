@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.60"
+  version: "0.9.61"
 ---
 
 # Family-tree research, hand in hand
@@ -85,7 +85,7 @@ The core:
 
 ## The Workshop (Claude Code only)
 
-In Claude Code, open the Workshop at the start of research, without asking: a local page that shows the fan as a night sky and plays live what you search, check, add and reject (`scripts/live.py`, `viewer/live.html`). In the desktop app it goes in the side panel next to the conversation (a `workshop` entry in `.claude/launch.json` + `preview_start`); in a terminal give the user the address. With it open, rebuild the tree and data.json after every confirmed find instead of only at the end of a round, send a `live.py note` for work the scripts don't see, a `live.py progress` from long scripts of your own, and give helpers `FTR_WHO=<name>`. A phone only on request (`--lan`). Never offer or mention it in Cowork or claude.ai. All of it: `references/workshop.md`.
+In Claude Code, open the Workshop at the start of research, without asking: a local page that shows the fan as a night sky and plays live what you search, check, add and reject (`scripts/live.py`, `viewer/live.html`). In the desktop app it goes in the side panel next to the conversation: `live.py launch` (writes the `workshop` entry with the current path and this tree's port), `preview_start`, show the pane, check it is this tree (`/ping`, tab title); in a terminal give the user the address. Run the scripts from the tree's folder: events only go to that tree's Workshop. With it open, rebuild the tree and data.json after every confirmed find instead of only at the end of a round, send a `live.py note` for work the scripts don't see, a `live.py progress` from long scripts of your own, and give helpers `FTR_WHO=<name>`. A phone only on request (`--lan`). Never offer or mention it in Cowork or claude.ai. All of it: `references/workshop.md`.
 
 ## Viewer
 
