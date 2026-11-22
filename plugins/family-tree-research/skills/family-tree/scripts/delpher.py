@@ -36,6 +36,23 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 
+
+_LIVE = []
+
+
+def live(kind, **fields):
+    """Tell a running Workshop (live.py serve) what happens. Does nothing when none is running."""
+    try:
+        if not _LIVE:
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("ftr_live", os.path.join(os.path.dirname(os.path.abspath(__file__)), "live.py"))
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            _LIVE.append(mod.emit)
+        _LIVE[0](kind, **fields)
+    except Exception:
+        pass
+
 SRU = ("https://jsru.kb.nl/sru/sru?version=1.2&operation=searchRetrieve&x-collection=DDD_artikel"
        "&recordSchema=ddd&maximumRecords={n}&startRecord={start}&query={q}")
 RESOLVER = "http://resolver.kb.nl/resolve?urn="
@@ -204,6 +221,7 @@ def cmd_search(a):
     if a.van or a.tot:
         q = f'({q}) AND date within "{a.van or 1600}-01-01 {a.tot or 2100}-12-31"'
     total, recs = sru(q, n=a.max, start=a.start)
+    live("result", source="Delpher", q=a.query, n=total)
     print(f"{total} article(s) for: {q}" + (f"  (showing {a.start}-{a.start + len(recs) - 1})" if recs else ""))
     for r in recs:
         print(f"{r['date']}  {r['paper'][:40]:<40}  p.{r['page']:<3} {r['title'][:60]}\n            {r['urn']}")
@@ -299,6 +317,8 @@ def main():
             c.add_argument("--out", required=True); c.add_argument("--min-width", type=int, default=MIN_WIDTH)
             c.add_argument("--check", action="store_true", help="also write a ruler image of the box with some margin")
     a = ap.parse_args()
+    kind = {"cmd_search": "search", "cmd_text": "read"}.get(a.f.__name__, "clip")
+    live(kind, source="Delpher", q=getattr(a, "query", None) or getattr(a, "words", None) or getattr(a, "urn", None))
     a.f(a)
 
 

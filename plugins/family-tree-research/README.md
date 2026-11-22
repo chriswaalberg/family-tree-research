@@ -10,7 +10,8 @@ A plugin for Claude (Cowork) that takes you by the hand through your family hist
 4. **You read it as a story.** In the Story view you go back in time step by step from yourself and choose each time: continue with the father or the mother? "In the tree" shows the trail you are reading in every family tree view. Or press ▶ Cards to watch it as full-screen cards that play by themselves (made for children). Drawn maps show where every place lies, also far away (works offline too). For remarkable lives Claude writes a real story, with sources. Family legends ("we descend from…") get checked too.
 5. **How did they live?** For the places where your ancestors lived, Claude collects daily life, local events and old prints, which show up in the story at the right moment.
 6. **Photos and documents.** Link family photos and scans of records to people. They live in your GEDCOM and in the viewer.
-7. **Honest about limits.** Archives Claude can't get into (login, paywall) it simply tells you, and then asks you for a specific screenshot. Old handwriting it reads itself.
+7. **Watch it live (Claude Code).** In Claude Code a Workshop opens next to the conversation (or on your phone): your family tree as a night sky, where you see Claude search, check and add people while it happens.
+8. **Honest about limits.** Archives Claude can't get into (login, paywall) it simply tells you, and then asks you for a specific screenshot. Old handwriting it reads itself.
 
 ## Getting started
 

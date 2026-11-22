@@ -21,6 +21,23 @@ Standard library only; Python 3.8+.
 """
 import argparse, csv, datetime, json, os, re, sys
 
+
+_LIVE = []
+
+
+def live(kind, **fields):
+    """Tell a running Workshop (live.py serve) what happens. Does nothing when none is running."""
+    try:
+        if not _LIVE:
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("ftr_live", os.path.join(os.path.dirname(os.path.abspath(__file__)), "live.py"))
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            _LIVE.append(mod.emit)
+        _LIVE[0](kind, **fields)
+    except Exception:
+        pass
+
 MONTHS = {
     "jan": "JAN", "januari": "JAN", "january": "JAN", "feb": "FEB", "februari": "FEB", "february": "FEB",
     "mrt": "MAR", "maart": "MAR", "mar": "MAR", "march": "MAR", "apr": "APR", "april": "APR",
@@ -441,23 +458,27 @@ def cmd_check(a):
         out.append(t["nogaps"])
 
     out += ["", f"## {t['odd']}", ""]
-    odd = []
+    odd, warns = [], []
+
+    def flag(x, line):
+        odd.append(line)
+        warns.append((x, line))
     for x, r in indi.items():
         by = year(ev(r, ("BIRT", "BAPM", "CHR"))[0])
         dy = year(ev(r, ("DEAT", "BURI", "CREM"))[0])
         if by and dy and dy < by:
-            odd.append(t["deathbefore"].format(n=name(r), x=x, d=dy, b=by))
+            flag(x, t["deathbefore"].format(n=name(r), x=x, d=dy, b=by))
         if by and dy and dy - by > 105:
-            odd.append(t["old"].format(n=name(r), x=x, a=dy - by))
+            flag(x, t["old"].format(n=name(r), x=x, a=dy - by))
         _, f, m = parents(x, indi, fam)
         for role, o, lo, hi in (("father", f, 16, 75), ("mother", m, 14, 50)):
             if o and by:
                 oby = year(ev(indi[o], ("BIRT", "BAPM", "CHR"))[0])
                 ody = year(ev(indi[o], ("DEAT", "BURI", "CREM"))[0])
                 if oby and not (lo <= by - oby <= hi):
-                    odd.append(t["parentage"].format(n=name(r), x=x, b=by, role=t[role], a=by - oby))
+                    flag(x, t["parentage"].format(n=name(r), x=x, b=by, role=t[role], a=by - oby))
                 if ody and by > ody + (1 if role == "father" else 0):
-                    odd.append(t["afterdeath"].format(n=name(r), x=x, b=by, role=t[role], d=ody))
+                    flag(x, t["afterdeath"].format(n=name(r), x=x, b=by, role=t[role], d=ody))
     names = {}
     for x, r in indi.items():
         k = (name(r).lower(), year(ev(r, ("BIRT", "BAPM", "CHR"))[0]))
@@ -469,6 +490,9 @@ def cmd_check(a):
     out += odd[:200] or [t["noodd"]]
     write(a.output, out)
     print(t["done"].format(f=a.output, p=len(indi), a=len(seen) - 1, g=len(gaps), o=len(odd)))
+    live("check", people=len(indi), ancestors=len(seen) - 1, gaps=len(gaps), odd=len(odd), start=start.strip("@"))
+    for x, line in warns[:40]:
+        live("warn", person=x.strip("@"), text=re.sub(r"@[^@\s]+@,?\s*", "", re.sub(r"[*`_]", "", line)).replace("()", "").lstrip("- ").strip())
 
 
 # ---------------------------------------------------------------- media
@@ -1458,13 +1482,15 @@ def cmd_rebuild(a):
     files = round_files(a.rounds) if os.path.isdir(a.rounds) else []
     if not os.path.isdir(a.rounds):
         print(f"(no rounds folder {a.rounds} yet: output = original)")
-    total = 0
+    total, title = 0, ""
     for n, path in files:
         try:
             data = json.load(open(path, encoding="utf-8"))
         except json.JSONDecodeError as e:
             sys.exit(f"{path}: not valid JSON ({e})")
         total += rb.apply(n, path, data)
+        if isinstance(data, dict):
+            title = data.get("title") or data.get("titel") or os.path.splitext(os.path.basename(path))[0]
     changed, rest = rb.finish_places()
     last = os.path.basename(files[-1][1]) if files else "-"
     note = rb.t["built"].format(o=os.path.basename(a.original), k=len(files), last=last) if files else ""
@@ -1473,6 +1499,7 @@ def cmd_rebuild(a):
         print("\n".join(rb.log))
     n_indi = sum(1 for r in rb.recs if r[1] == "INDI")
     print(f"rebuild: {len(files)} round(s), {total} step(s) -> {a.output} ({n_indi} people)")
+    live("rebuild", rounds=len(files), steps=total, people=n_indi, title=title)
     if rb.places:
         print(f"places: {changed} place name(s) changed")
     if a.places_report or rb.places:

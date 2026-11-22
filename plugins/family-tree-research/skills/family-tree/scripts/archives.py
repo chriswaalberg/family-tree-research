@@ -53,6 +53,23 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 
+
+_LIVE = []
+
+
+def live(kind, **fields):
+    """Tell a running Workshop (live.py serve) what happens. Does nothing when none is running."""
+    try:
+        if not _LIVE:
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("ftr_live", os.path.join(os.path.dirname(os.path.abspath(__file__)), "live.py"))
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            _LIVE.append(mod.emit)
+        _LIVE[0](kind, **fields)
+    except Exception:
+        pass
+
 UA = "family-tree-research (genealogy plugin; https://github.com/chriswaalberg/family-tree-research)"
 PAUSE = 1.2          # seconds between two requests to the same site
 RETRIES = 5          # tries on 429/502/503/504 and timeouts
@@ -167,6 +184,7 @@ def cmd_oa_search(a):
         q["only_results_with_scans"] = "true"
     r = fetch_json(OA + "search.json?" + urllib.parse.urlencode(q))["response"]
     docs = r.get("docs", [])
+    live("result", source="Open Archives", q=q["name"], n=r["number_found"])
     print(f"## {q['name']}: {r['number_found']} found, showing {a.start + 1}-{a.start + len(docs)}")
     for d in docs:
         e = d.get("eventdate") or {}
@@ -609,12 +627,31 @@ def main(argv=None):
     p.set_defaults(func=cmd_leiden)
 
     a = ap.parse_args(argv)
+    live_start(a)
     try:
         a.func(a)
     except urllib.error.HTTPError as e:
         sys.exit(f"{e.url}: HTTP {e.code}. If this keeps happening the site may be closed to scripts: ask the user.")
     except urllib.error.URLError as e:
         sys.exit(f"Network error: {e.reason}. No network here? (background tasks often have none)")
+
+
+SOURCE_NAMES = {"oa": "Open Archives", "openarchieven": "Open Archives", "saa": "Amsterdam City Archives",
+                "amsterdam": "Amsterdam City Archives", "transkribus": "Transkribus", "schiedam": "SchiedamGEN",
+                "schiedamgen": "SchiedamGEN", "riksarkivet": "Riksarkivet", "zweden": "Riksarkivet", "sweden": "Riksarkivet",
+                "leiden": "Erfgoed Leiden", "erfgoedleiden": "Erfgoed Leiden"}
+
+
+def live_start(a):
+    """Tell the Workshop which archive is being searched or read, and for whom."""
+    fn = a.func.__name__
+    kind = "search" if fn.endswith("search") or fn in ("cmd_ra", "cmd_leiden") else "scan" if fn.endswith("scans") else "read"
+    q = next((getattr(a, k) for k in ("name", "terms", "query", "text") if isinstance(getattr(a, k, None), str)), "")
+    if not q:
+        lst = next((v for v in vars(a).values() if isinstance(v, list) and v and isinstance(v[0], str)), [])
+        q = " ".join(lst)[:160]
+    live(kind, source=SOURCE_NAMES.get(a.source, a.source), q=q, place=getattr(a, "place", None),
+         frm=getattr(a, "frm", None), to=getattr(a, "to", None))
 
 
 if __name__ == "__main__":

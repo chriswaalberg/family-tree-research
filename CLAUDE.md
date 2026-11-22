@@ -17,11 +17,14 @@ plugins/family-tree-research/
     scripts/standalone_viewer.py     index.html + data.json → one HTML file
     scripts/geocode_places.py        GEDCOM (+stories) → coordinates per place (Nominatim, cached; manual fixes stay)
     scripts/delpher.py               Delpher newspapers via SRU: search / text / locate (crop with ruler) / cut (needs Pillow)
+    scripts/live.py                  the Workshop (Claude Code only): serve (local page + SSE, watches data.json) / note / progress;
+                                     emit() is loaded by path by archives.py, delpher.py and gedcom_tool.py (check, rebuild)
     scripts/archives.py              archives without a browser: Open Archives (search/show/scans), Amsterdam open data (saa), Transkribus,
                                      SchiedamGEN, Riksarkivet, Erfgoed Leiden (one subcommand per source, Dutch aliases)
     scripts/geo/natural-earth.json   simplified Natural Earth (public domain) for the maps; rebuilt with tools/make_geo.py
     viewer/index.html                the viewer (single file, ~320 kB, minified-ish JS; English + Dutch via I18N table)
     viewer/DATA-FORMAT.md            data.json format (field names are Dutch, documented in English)
+    viewer/live.html                 the Workshop page (served by live.py, never published; night look only, built for ~400 px wide)
     examples/                        7-person example family + regions-basic.json, example-coords.json, example-stories.json and
                                      example-zeitgeist.json (fictional, to test the Story view) and one real CC0 photo in
                                      examples/media/tijdgeest/ (Den Helder, 1955, Anefo); examples/rounds/ = two fictional
@@ -106,6 +109,12 @@ The viewer is one file (~1,700 lines, CSS + HTML + JS). Find your way by these m
 - Menu: three modes `.modes` = `#storyBtn` (view `verhaal`), `#swBtn` (opens Cards) and `#treeBtn` (back to `state.lastTree`); the tree views `#tabs` only show outside Story, `#vhPickWrap` (Interesting people) only in Story. `render()` sets `aria-pressed`, `#tabs.hidden` and fills `#vhPickWrap`.
 - Settings bar `#setbar` (`.legwrap`) under the header: `#genWrap` (one slider: `state.gens` for Fan/Cosmos, `state.tlGens` for Timeline, both from 3 to `genMax()` = how deep the start person's tree is (at least 4); `initGenSlider`/`GSL_SHOW`), `#colorWrap` (Fan/Cosmos) and `#legend` (plain text). Hidden when empty (Story).
 - `/* ===== DATA` → `function prepareData` (also sets the language: `LANG=(d.taal||d.lang)==="nl"?"nl":"en"`), `const VIEWS`, and the `fetch("data.json")` line that `standalone_viewer.py` looks for.
+
+## Workshop (live.html + live.py)
+
+Claude Code only; never offered in Cowork (the skill says so in `references/workshop.md`). `live.py serve` binds 127.0.0.1 (`--lan`: 0.0.0.0 plus a `?k=` key, which sets a cookie; POST `/event` only from loopback), writes a pointer file in the system temp folder (`family-tree-research-live.json`, port + pid) that `emit()` reads, serves `/` = live.html, `/data.json`, `/viewer/` = index.html (+ media next to data.json or `media_dir`), `/events` (SSE: `hello` with the last 80 log events and the open progress tasks, then every event; `data` when data.json changed and parses). The page (`live.html`): `/* ===== TUNING` (`CFG`: rings, timings, how many arrivals animate one by one), `layout()` (round fan like the viewer's: father left, ring g from `RI(g)` to `RO(g)`, 0.8 per ring, rings = tree depth + 1, gaps = missing parents), `render(pending)`, `diffOf(old,new)` (by GEDCOM id: added/removed people, link added/removed, certainty, name, dates, story, media, occupation) and `dataChanged()` (phase 1 on the old fan: cracks and removals; phase 2: newcomers start `pending` and fly in, then certainty, names, dates, glyphs), `QUEUE`/`handle()` (events play in order; `progress` skips the queue), beams per `who` (`beamAim`, `findTarget`: a GEDCOM id, else first name + surname in the query), `fz()`/`UPX` (minimum text size on screen). Texts in its own small `I18N` (en/nl, from `taal`).
+
+Test: build example data in a temp folder, `live.py serve --data <it>`, open it narrow (400 px), send a `note`, a few `progress` steps, run `check`, then copy `examples/rounds/001…` and `002…` in one by one with `rebuild` + `make_viewer_data.py` and watch: Jan and Griet fly in (Griet probable), +4 open questions, then Griet's link cracks (REJECTED, she goes to "Not in the fan"), Thomas → Pieter turns gold, Anna becomes Anna Maria. No console errors.
 
 ## Releasing a new version
 
