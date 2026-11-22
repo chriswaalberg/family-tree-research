@@ -7,7 +7,8 @@ Every source has its own subcommand (Dutch names in brackets also work):
      (oa zoek)                  e.g. "Jan Jansen 1820-1850", or "Hendrik Jansen & Geesje Smit" (both in one record)
   oa show <archive:id> ...      a record, readable: event, everyone with their role, the source
      (oa toon)
-  oa scans <archive:id> ...     download the scans of a record (Amsterdam, Noord-Holland, Brabant, ...)
+  oa scans <archive:id> ...     download the scans of a record (The Hague, Rotterdam, Utrecht, Amsterdam,
+                                Noord-Holland, Brabant, ...)
   saa <uuid or link> ...        Amsterdam City Archives open data (OAI-PMH, CC0): record + scans of any of its
                                 36 indexes (passports, police reports '40-'45, family cards, population registers, ...)
   transkribus search <terms>    full text of Amsterdam civil records (also after 1880), Transkribus Read&Search
@@ -228,12 +229,17 @@ def cmd_oa_show(a):
 
 
 def oa_scan_urls(r):
+    """All scan links in a record, full size. They don't always sit in the same field (The Hague puts them
+    elsewhere), so take every image-service link: memorix thumbnails -> 1920x1080, proxy thumb -> download.
+    Viewer pages (/embed/) and 250x250 previews are copies of the same scan."""
     out = []
-    for sc in as_list(r.get("a2a_Source", {}).get("a2a_SourceAvailableScans", {}).get("a2a_Scan")):
-        u = flat(sc.get("a2a_Uri", ""))
-        if isinstance(u, str) and u.startswith("http"):
-            out.append(u)
-    return out
+    for u in re.findall(r'https?://(?:proxy\.archieven\.nl/(?:download|thumb)/|images\.memorix\.nl/[^/"]+/thumb/)[^"\s]+', json.dumps(r)):
+        if "/embed/" in u or "/250x250/" in u:
+            continue
+        u = u.replace("proxy.archieven.nl/thumb/", "proxy.archieven.nl/download/")
+        u = re.sub(r"/thumb/\d+x\d+/", "/thumb/640x480/", u)
+        out.append(u)
+    return list(dict.fromkeys(out))
 
 
 def big(u):
