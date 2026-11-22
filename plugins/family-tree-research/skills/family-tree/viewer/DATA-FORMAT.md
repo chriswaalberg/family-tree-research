@@ -66,6 +66,7 @@ Each item: `{"bestand": "media/grandma-1950.jpg", "titel": "Grandma Riet, 1950",
 
 - `bestand`: path next to `index.html` (e.g. `media/…`), an `https://` address or a `data:` URL.
 - `titel`: caption. Without it the viewer shows the file name.
+- `portret`: `true` for the person's portrait (made by `make_viewer_data.py` from `_PRIM Y` under the `OBJE`, which Ancestry, Family Tree Maker and RootsMagic also write, or from the `portrait` column of media.csv). The Story view shows the portrait as a polaroid at the top right of the person's block (above the name on phones), with `titel` as its caption; Cards uses it on the intro card. Without `portret` the first `foto` is the portrait. Other photos and documents stay small thumbnails.
 - `soort`: `foto` (photo), `scan` or `document`. It decides how ▶ Swipe shows the item: only a `foto` becomes the portrait on a person's first card; a `scan`, `document` or item without `soort` is never used as a picture there, only as a small "view document" button that opens it large. Elsewhere `soort` is informational.
 
 Images (`.jpg`, `.png`, `.gif`, `.webp`, …) appear as thumbnails in the detail panel; a click opens them large, with arrows to the next one. Other files (e.g. `.pdf`) appear as a link. For a living person with `"levenden_tonen": false` the viewer shows no media.

@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.44"
+  version: "0.9.45"
 ---
 
 # Family-tree research, hand in hand
@@ -157,7 +157,7 @@ If the user says a parent wasn't the biological parent but raised the child as t
 Users may add photos, scans of records and other documents per person. They're stored in the GEDCOM as standard `OBJE`/`FILE` links (so they also work in other genealogy programs) and appear in the viewer under "Photos and documents" for that person.
 
 - Files belong in the connected folder: records in `scans/`, family photos in `photos/`. Let the user put them there (or in Downloads; then move them), with who's in it in the file name.
-- Linking: one row per file in `data/media.csv` → `gedcom_tool.py media` (see `references/gedcom-tool.md`). A scan you read yourself and used as a source: link it right away too.
+- Linking: one row per file in `data/media.csv` → `gedcom_tool.py media` (see `references/gedcom-tool.md`). A scan you read yourself and used as a source: link it right away too. A good photo of the person themselves (a portrait, a wedding photo): put `yes` in the `portrait` column, so it becomes the polaroid at the top of their block in Story; without it the first photo is used.
 - Viewer: `make_viewer_data.py … --media-dir viewer/media` copies and publishes them (see `references/viewer.md`).
 - **Crop screenshots first.** If an image is a screenshot, cut away all browser and system chrome before linking: tab bar, address bar, menu bar, Dock, buttons and toolbars of the archive viewer. Only the record or photo remains. Set the original aside first (e.g. `_to_delete/originals-with-browser-chrome/`), crop (Pillow), and look at the result. An archive header line with the source reference is not browser chrome; keep it unless the user wants otherwise.
 - **Privacy:** photos of living people only if the user wants that; they'll be in the (private) artifact. Ask at the first photo of a living person.

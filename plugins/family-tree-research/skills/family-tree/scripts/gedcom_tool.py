@@ -499,7 +499,7 @@ def cmd_media(a):
         head = fh.readline(); fh.seek(0)
         delim = max(",;\t", key=head.count)
         rows = list(csv.DictReader(fh, delimiter=delim))
-    added, failed, extra = 0, [], {}
+    added, marked, failed, extra = 0, 0, [], {}
     for r in rows:
         row = {k.strip().lower(): (v or "").strip() for k, v in r.items() if k}
         who = row.get("person") or row.get("persoon") or row.get("id")
@@ -507,15 +507,25 @@ def cmd_media(a):
         f = row.get("file") or row.get("bestand")
         if not x or not f:
             failed.append(f"{who} / {f}"); continue
-        have = [l[7:].strip() for l in indi[x][2] if l.startswith("2 FILE ")]
-        if f in have or f in [e[0] for e in extra.get(x, [])]:
+        prim = (row.get("portrait") or row.get("portret") or "").lower() in ("y", "yes", "ja", "j", "1", "x", "true", "portrait", "portret")
+        rec = indi[x][2]
+        have = [l[7:].strip() for l in rec if l.startswith("2 FILE ")]
+        if f in have:
+            if prim:  # already linked: only mark it as the portrait (2 _PRIM Y under its OBJE)
+                k = next(i for i, l in enumerate(rec) if l.startswith("2 FILE ") and l[7:].strip() == f)
+                j = max(i for i in range(k) if rec[i].startswith("1 OBJE"))
+                end = next((i for i in range(k + 1, len(rec)) if rec[i][:1] in "01"), len(rec))
+                if not any(rec[i].startswith("2 _PRIM") for i in range(j, end)):
+                    rec.insert(j + 1, "2 _PRIM Y"); marked += 1
             continue
-        extra.setdefault(x, []).append((f, row.get("title") or row.get("titel") or "", row.get("type") or row.get("soort") or ""))
+        if f in [e[0] for e in extra.get(x, [])]:
+            continue
+        extra.setdefault(x, []).append((f, row.get("title") or row.get("titel") or "", row.get("type") or row.get("soort") or "", prim))
     for x, items in extra.items():
         rec = indi[x][2]
-        for f, title, kind in items:
+        for f, title, kind, prim in items:
             ext = os.path.splitext(f)[1].lstrip(".").lower() or "jpg"
-            rec += ["1 OBJE", f"2 FILE {f}", f"3 FORM {ext}"]
+            rec += ["1 OBJE"] + (["2 _PRIM Y"] if prim else []) + [f"2 FILE {f}", f"3 FORM {ext}"]
             typ = MEDIA_TYPE.get(kind.lower())
             if typ:
                 rec.append(f"4 TYPE {typ}")
@@ -523,7 +533,7 @@ def cmd_media(a):
                 rec.append(f"2 TITL {title}")
             added += 1
     write(a.output, [l for r in recs for l in r[2]])
-    print(f"media: {added} links added for {len(extra)} people -> {a.output}")
+    print(f"media: {added} links added for {len(extra)} people" + (f", {marked} existing photo(s) marked as portrait" if marked else "") + f" -> {a.output}")
     for f in failed:
         print("  not linked (person not found/not unique, or no file):", f)
 

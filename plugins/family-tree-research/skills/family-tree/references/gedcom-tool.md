@@ -73,5 +73,6 @@ Jan Jansen (1898),scans/1922 marriage Zwolle no 88.jpg,"Marriage record Zwolle 1
 - `person`: GEDCOM id, or a name with optional birth year in brackets if the name isn't unique.
 - `file`: path from the family-tree folder (`scans/…`, `photos/…`). Never put absolute paths from the user's computer in the GEDCOM.
 - `type`: `photo`, `scan` or `document` (becomes GEDCOM `TYPE photo/document`).
+- `portrait` (optional; Dutch `portret`): `yes` for the photo that is the person's portrait (becomes `2 _PRIM Y`). Without it the first photo is used. It also works for a file that is already linked: run `media` again with `portrait` filled in and only the mark is added.
 - Per file the script writes `1 OBJE / 2 FILE … / 3 FORM jpg / 4 TYPE photo / 2 TITL …` with the person. Files already linked are skipped, so it may run again after every round with the whole CSV.
 - Working with a version that's rebuilt from the original each time? Then run `media` as the last step.

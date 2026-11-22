@@ -435,6 +435,14 @@ main{padding-top:6px}
 .vh-txt a,.vh-sib a,.vh-src a,.vh-cx a{color:#8a5a1c;text-decoration:underline;text-underline-offset:2px}
 .vh-txt p.vh-note{font-family:Inter,system-ui,sans-serif;font-size:13px;line-height:1.5;color:#7d6b59;padding:8px 12px;background:#f6eedf;border-radius:8px}
 .vh-media{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+/* the portrait as a polaroid: square corners, a white border with a wide bottom for the caption, a slight tilt; above the name on phones */
+.vh-por{float:right;display:block;width:180px;margin:2px 0 14px 22px;padding:8px 8px 0;border:0;border-radius:0;background:#fffdf8;cursor:pointer;
+  box-shadow:0 3px 12px rgba(70,45,20,.22),0 0 0 1px rgba(70,45,20,.07);transform:rotate(1.6deg);transition:transform .2s,box-shadow .2s}
+.vh-por img{display:block;width:100%;height:auto;max-height:260px;object-fit:contain;background:#efe9df;border-radius:0}
+.vh-por-c{display:block;min-height:34px;padding:7px 2px 9px;font:italic 12px/1.3 Georgia,serif;color:#6f5f4d;text-align:center}
+.vh-por:hover{transform:rotate(1.6deg) translateY(-2px);box-shadow:0 8px 20px rgba(70,45,20,.26),0 0 0 1px rgba(70,45,20,.07)}
+.vh-por:focus-visible{outline:2px solid #c9a04a;outline-offset:4px}
+@media (max-width:560px){.vh-por{float:none;width:170px;margin:4px auto 18px}}
 .vh-mt{border:0;padding:0;cursor:pointer;width:76px;height:76px;border-radius:8px;overflow:hidden;background:#f1e8d8;box-shadow:0 1px 3px rgba(70,45,20,.2);font:600 14px Inter,system-ui,sans-serif;color:#7d6b59}
 .vh-mt img{width:100%;height:100%;object-fit:cover;display:block}
 .vh-mt:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(70,45,20,.25)}
@@ -781,7 +789,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.44",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.45",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1704,14 +1712,15 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     else{const nxt=path[k+1],alt=par.find(q=>q!==nxt);
       fork=`<div class="vh-took">${_t("vh_took",Object.assign({rel:p.f===nxt?_t("father"):_t("mother")},vhPro(p)))}${alt!=null?` <button type="button" class="vh-link" data-alt="${k}:${alt}">${slEsc(_t("vh_alt",Object.assign({rel:p.f===alt?_t("father"):_t("mother"),name:vhFn(P[alt])},vhPro(p))))}</button>`:""}</div>`}
     const scans=vhScans(p),imgs=(typeof mediaList==="function"&&!p.living)?mediaList(p).filter(m=>mediaIsImg(m)&&!scans.has(m.bestand)):[];
+    const por=portraitOf(imgs),thumbs=imgs.filter(m=>m!==por);
     const yr=p.by||(p.bdate?vhDate(p.bdate)?.bare?.match(/\d{3,4}/)?.[0]:"")||"?";
     const ch=document.createElement("section");ch.className="vh-ch"+(last&&k?" vh-new":"");ch.dataset.k=k;ch.style.setProperty("--lc",lc);
     ch.innerHTML=`<div class="vh-dot" aria-hidden="true">${p.living&&!p.by?"":slEsc(String(yr))}</div>
-      <article class="vh-card"><div class="vh-k">${relLabel}</div>
+      <article class="vh-card">${por?`<button type="button" class="vh-por" data-mj="${imgs.indexOf(por)}" title="${slEsc(mediaName(por))}"><img src="${slEsc(por.bestand)}" alt="${slEsc(mediaName(por))}"><span class="vh-por-c">${por.titel?slEsc(por.titel):""}</span></button>`:""}<div class="vh-k">${relLabel}</div>
       <h3><button type="button" class="vh-nm" data-i="${i}" title="${_t("vh_details")}">${slEsc(p.n)}</button>${akaHtml(p)}${p.living?"":`<button type="button" class="vh-lnk" data-lnk="${i}" title="${slEsc(_t("vh_link",{name:p.n}))}" aria-label="${slEsc(_t("vh_link",{name:p.n}))}"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></button>`}</h3>
-      ${facts?`<div class="vh-facts">${facts}</div>`:""}${imgs.length?`<div class="vh-media">${imgs.slice(0,4).map((m,j)=>`<button type="button" class="vh-mt" data-mj="${j}" title="${slEsc(mediaName(m))}"><img loading="lazy" src="${slEsc(m.bestand)}" alt=""></button>`).join("")}${imgs.length>4?`<button type="button" class="vh-mt more" data-mj="4">+${imgs.length-4}</button>`:""}</div>`:""}${cert}${body}${sib}${fork}</article>`;
+      ${facts?`<div class="vh-facts">${facts}</div>`:""}${thumbs.length?`<div class="vh-media">${thumbs.slice(0,4).map(m=>`<button type="button" class="vh-mt" data-mj="${imgs.indexOf(m)}" title="${slEsc(mediaName(m))}"><img loading="lazy" src="${slEsc(m.bestand)}" alt=""></button>`).join("")}${thumbs.length>4?`<button type="button" class="vh-mt more" data-mj="${imgs.indexOf(thumbs[4])}">+${thumbs.length-4}</button>`:""}</div>`:""}${cert}${body}${sib}${fork}</article>`;
     ch.querySelector(`.vh-nm[data-i]`).onclick=()=>slSheet(i,child,code,path[0]);
-    ch.querySelectorAll(".vh-mt").forEach(b=>b.onclick=()=>mediaView(imgs,+b.dataset.mj));
+    ch.querySelectorAll(".vh-mt,.vh-por").forEach(b=>b.onclick=()=>mediaView(imgs,+b.dataset.mj));
     ch.querySelectorAll(".vh-fimg").forEach(b=>b.onclick=()=>mediaView(vhScanItems(b.dataset.tgimg,b.dataset.scan,b.dataset.tgt),0));
     w.appendChild(ch)});
   /* events */
@@ -2307,7 +2316,7 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     const S=swSentences(i,child,flags),T=a=>a.map(s=>`<p>${slEsc(s)}</p>`).join("");
     /* media: only soort "foto" becomes a portrait on the intro card; scans, documents (and media without soort) are small buttons that open the media viewer */
     const scans=vhScans(p),imgs=(typeof mediaList==="function"&&!p.living)?mediaList(p).filter(m=>mediaIsImg(m)&&!scans.has(m.bestand)):[],isFoto=m=>/^(foto|photo)$/i.test(m.soort||"");
-    const foto=imgs.find(isFoto),docs=imgs.filter(m=>!isFoto(m));
+    const foto=portraitOf(imgs),docs=imgs.filter(m=>!isFoto(m)&&m!==foto);
     /* the portrait is a button: a tap opens it large (with the documents) and never moves to the next card */
     const por=foto?`<button type="button" class="sw-por-btn" data-por="1" title="${slEsc(mediaName(foto))}"><img class="sw-por" src="${slEsc(foto.bestand)}" alt="${slEsc(mediaName(foto))}"></button>`:"";
     const docb=docs.length?`<div class="sw-docs">${docs.slice(0,3).map((m,j)=>`<button type="button" class="sw-doc" data-doc="${j}" title="${slEsc(mediaName(m))}"><img src="${slEsc(m.bestand)}" alt=""><span>${_t(/^(scan|document)$/i.test(m.soort||"")?"sw_doc":"sw_view")}</span></button>`).join("")}</div>`:"";
@@ -2596,6 +2605,8 @@ function firstName(p){if(!p)return"";return ((p.g||p.n||"").replace(/'[^']*'/g,"
    data.json: persoon.media = [{"bestand":"media/x.jpg","titel":"…","soort":"foto|scan|document"}, …] */
 const MEDIA_IMG=/\.(jpe?g|png|gif|webp|avif|bmp|svg)(\?|#|$)/i;
 function mediaIsImg(m){return /^data:image\//.test(m.bestand)||MEDIA_IMG.test(m.bestand)}
+/* the portrait: the photo marked _PRIM Y in the GEDCOM ("portret": true), else the first "foto"; never a scan or document */
+function portraitOf(imgs){const pf=m=>/^(foto|photo)$/i.test(m.soort||"");return imgs.find(m=>m.portret&&(pf(m)||!m.soort))||imgs.find(pf)||null}
 function mediaList(p){const a=Array.isArray(p.media)?p.media:[];return a.map(m=>typeof m==="string"?{bestand:m}:m).filter(m=>m&&m.bestand)}
 function mediaName(m){return m.titel||decodeURIComponent(String(m.bestand).split(/[\/\\]/).pop().replace(/\.[^.]+$/,"")).slice(0,80)}
 function mediaView(items,k){

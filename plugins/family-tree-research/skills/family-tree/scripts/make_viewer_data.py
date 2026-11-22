@@ -202,6 +202,8 @@ def media_of(indi, objs):
                     if t: m["titel"] = t.strip()
                     srt = SOORT_GED.get(typ.strip().lower())
                     if srt: m["soort"] = srt
+                    prim = (sub(n, "_PRIM") or sub(o, "_PRIM") or {}).get("v", "").strip().upper()
+                    if prim in ("Y", "YES", "1"): m["portret"] = True  # the main photo (Ancestry, FTM, RootsMagic; media.csv "portrait")
                     if m not in out: out.append(m)
             continue
         stack.extend(n["c"])
