@@ -5,7 +5,7 @@
 You usually have more than one way onto the internet. If one route doesn't work, **don't stop: try the next one yourself**, without waiting for the user to suggest it. A route can fail because a tool is missing or switched off (for example the Chrome extension disabled by the user's organisation, or no browser at all), not because the archive refuses you. Try them in this order:
 
 1. **Fetch/search tools** (WebFetch, WebSearch, or whatever fetch tool you have). They don't need Chrome. Good for record pages, the Open Archives API and Wikipedia.
-2. **A shell, if you have one** (Cowork's sandbox, Claude Code's terminal): call public APIs directly, e.g. `curl -s "https://api.openarchieven.nl/1.1/records/search.json?name=..."` or Python `urllib`. Its network can be different from the fetch tools', so a site that failed in one may work in the other. A cloud sandbox often only reaches domains on an allowed list; a blocked domain there says nothing about the archive itself.
+2. **A shell, if you have one** (Cowork's sandbox, Claude Code's terminal): use `scripts/archives.py` for the archives it knows (see "Searching archives with `scripts/archives.py`" below), or call public APIs directly, e.g. `curl -s "https://api.openarchieven.nl/1.1/records/search.json?name=..."` or Python `urllib`. Its network can be different from the fetch tools', so a site that failed in one may work in the other. A cloud sandbox often only reaches domains on an allowed list; a blocked domain there says nothing about the archive itself.
 3. **A browser**: the Chrome extension (Claude in Chrome), or the **browser built into the Claude desktop app** if you have one. The built-in browser runs on the user's own computer, separate from their Chrome, so it often works when Chrome is blocked by their organisation or a site is blocked from the cloud. It only works while the desktop app is open. Use a browser for sites that only work with JavaScript and for scan viewers (e.g. Riksarkivet).
 4. **The user**: tell them exactly what to look up (archive, place, period, name) and ask for a screenshot or photo (see research.md).
 
@@ -21,7 +21,10 @@ Using another tool is fine. Getting around a site's own barrier is not: if a sit
 
 | source | what | how |
 |---|---|---|
-| **Open Archieven** (openarchieven.nl, "Open Archives") | Millions of records from dozens of archives: civil registration (BS) births/marriages/deaths, church registers (DTB), population registers, notarial deeds | Free API, see below. First choice. |
+| **Open Archieven** (openarchieven.nl, "Open Archives") | Millions of records from dozens of archives: civil registration (BS) births/marriages/deaths, church registers (DTB), population registers, notarial deeds | Free API: `scripts/archives.py oa`, see below. First choice. |
+| **Stadsarchief Amsterdam** (Amsterdam City Archives) | 36 open indexes (CC0) with scans: civil records, population registers, family cards, passport applications and police reports 1940–45, militia registers, notarial deeds, banns before 1811 | `scripts/archives.py saa` and `transkribus`, see below. |
+| **SchiedamGEN** (sgen.schiedam.nl) | Schiedam, Kethel, Mathenesse, Nieuwland: births, marriages, deaths, divorces, recognitions | `scripts/archives.py schiedam`, see below. |
+| **Erfgoed Leiden** (erfgoedleiden.nl) | Leiden region: archive descriptions, a person index of church records before 1811, scans (e.g. all Katwijk church books, archive 0440) | `scripts/archives.py leiden`, see below. |
 | **WieWasWie** (wiewaswie.nl) | National index of civil and church records | Website; search by name, role, place, period. |
 | **Archieven.nl** | Search portal of many regional archives, often with scans | Website. May be blocked; then via the user. |
 | **Delpher** (delpher.nl) | Newspapers (family announcements, adverts, auctions, news) | Search name + place or address; useful after 1850. Works without a key via SRU: `scripts/delpher.py`, see below. |
@@ -29,7 +32,25 @@ Using another tool is fine. Getting around a site's own barrier is not: if a sit
 | **Genealogie Online** | Other people's trees | Only as a lead, never as proof. |
 | **FamilySearch** | Worldwide indexes and scans | Free account needed; often via the user. |
 
-### Open Archives API
+### Searching archives with `scripts/archives.py`
+
+One script with a subcommand per source, so you don't need a browser for these archives. Python standard library only; it waits politely between requests and slows down when a site says "too many requests". Run it in the foreground (background tasks often have no network) and use `--help` on any subcommand. Dutch names work too (`oa zoek`, `toon`, `schiedam persoon`/`akte`, `transkribus pagina`, `--van`/`--tot`, `--uit`).
+
+| source | what's in it | command | known gaps |
+|---|---|---|---|
+| **Open Archives** | Index of dozens of archives: civil records, church registers, population registers | `archives.py oa search "Jan Jansen" [--from 1820 --to 1850] [--place] [--type "BS Huwelijk"] [--archive saa]`; `oa show <archive:id>` (everyone with their role, the source); `oa scans <archive:id> --out scans/` | Amsterdam births after c. 1880 (use Transkribus); Schiedam births after 1916 and marriages after c. 1945 (use SchiedamGEN); Katwijk aan Zee baptisms before 1714 (use Erfgoed Leiden); Maassluis is missing. Schiedam records rarely give an occupation |
+| **Scans via Open Archives** | Scans of Amsterdam records (Stadsarchief), Noord-Hollands Archief, BHIC (Brabant) | `oa scans`: takes the scan links from the record and asks for the big version (`images.memorix.nl/…/thumb/640x480/` → `1920x1080`; NHA via `proxy.archieven.nl/download/…`) | Utrecht (HUA), Gelderland and The Hague (HGA) don't hand out their scans this way: the user opens them on the archive's site |
+| **Stadsarchief Amsterdam, open data** | All 36 public indexes, with scans | Find the record via `oa search … --archive saa`, then `archives.py saa <uuid or archief.amsterdam/indexen/deeds/… link> --out scans/` (record + scans through the archive's own OAI-PMH service) | Records with restricted access are not there. No name search at the service itself: search via Open Archives |
+| **Transkribus, Stadsarchief Amsterdam** | Machine-read full text + scan of Amsterdam civil records, also after 1880 | `archives.py transkribus search "Landtman Geel"` (all words on one page; two surnames find a couple), then `transkribus page <doc/page> --out scans/` (text file + scan) | Not complete: births from c. 1924, marriages after 1940 and deaths after c. 1963 not seen |
+| **SchiedamGEN** | Schiedam records, also beyond Open Archives' years: c. 121,000 births, 100,000 marriages, 165,000 deaths | `archives.py schiedam search "Jan Groen"` (first name + surname: a surname alone finds nothing), `schiedam person <id>`, `schiedam deed <id>` | Only the first page of hits. Scans need a login: the user downloads them. Link to a record: `https://sgen.schiedam.nl/?type=CERT&id=<id>` |
+| **Riksarkivet** (Sweden), open API | Indexed birth and marriage registers of Skåne, Blekinge and Halland (DDSS; e.g. Åhus births 1706–1894), with godparents, the father's occupation and home, volume and page; plus the archive catalogue | `archives.py riksarkivet --name Hans --place Åhus --from 1750 --to 1753`, or `--text "Åhus kyrkoarkiv"` for the catalogue. No key; [terms of use](https://sok.riksarkivet.se/en/data-api/api/anvandarvillkor-api); only data older than 110 years | No deaths (the death register is only on the search site). Karlshamn not indexed. Church-book scans of e.g. Åhus give 403 |
+| **Erfgoed Leiden** | Archive descriptions, a person index (e.g. baptisms before 1811 with child, parents, witnesses) and scans (IIIF) | `archives.py leiden "Maartje Hijg" --scans 1 --out scans/`; `leiden "DTB Katwijk" --filter 0440` for the Katwijk church books | The person index lists names without dates per person: open the record and its scan |
+
+**Read every scan in full yourself.** The machine-read text (Transkribus, OCR) is messy: names come out misspelled, lines in the wrong order, words missing. Use the search text only to find the record; then read the whole scan, all of it (a witness, an occupation or a note in the margin is easy to miss) and transcribe what matters in `data/worklog.md`.
+
+**Closed for scripts** (the user looks these up, or use another route above): the Riksarkivet search site (captcha; births and marriages go via its open API), Matricula scans, FamilySearch, gedbas, the website of the Haags Gemeentearchief, scans of HUA/Gelders Archief/HGA, the SchiedamGEN scans. Don't try to get around a login or captcha.
+
+### Open Archives API by hand
 
 - Search: `https://api.openarchieven.nl/1.1/records/search.json?name=<name>&number_show=50&lang=en`
   - `name` may include a period: `Jan Jansen 1820-1850`.
@@ -67,7 +88,7 @@ Delpher's website can be awkward for a script, but the KB's SRU service answers 
 - FamilySearch has many German indexes.
 
 ## Scandinavia
-- **Sweden**: Riksarkivet (free, scans and censuses) and ArkivDigital (paid, best scans). Household examination rolls (husförhörslängder) follow families year by year: ideal. Patronymics (-son/-dotter) until c. 1900. May be blocked; then via the user.
+- **Sweden**: Riksarkivet (free, scans and censuses; births and marriages of Skåne, Blekinge and Halland via its open API: `scripts/archives.py riksarkivet`, see above) and ArkivDigital (paid, best scans). Household examination rolls (husförhörslängder) follow families year by year: ideal. Patronymics (-son/-dotter) until c. 1900. May be blocked; then via the user.
 - **Norway**: Digitalarkivet (free, well searchable, censuses 1801/1865/1875/1900/1910).
 - **Denmark**: Danish Family Search (censuses), Arkivalieronline/Sa.dk (church books, scans).
 

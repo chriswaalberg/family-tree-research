@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.47"
+  version: "0.9.48"
 ---
 
 # Family-tree research, hand in hand
@@ -68,6 +68,7 @@ The core:
 - Work upwards generation by generation, **direct ancestors first**. Siblings only as a by-catch or when they help prove a parent.
 - **No parent without a source.** A new ancestor only enters the tree with a concrete source (record, registration, with link or location). In doubt = *probable* or *possible*, never quietly *certain*.
 - Don't actively search archives for **living people** (their records are usually not public anyway). What the user tells you about them simply goes into the tree and the viewer.
+- **Search archives with `scripts/archives.py` first** where it covers the place: Open Archives (`oa search/show/scans`), Amsterdam City Archives open data (`saa`) and full text (`transkribus`, also Amsterdam births after 1880), SchiedamGEN (`schiedam`), Erfgoed Leiden (`leiden`) and Sweden's Riksarkivet (`riksarkivet`). It needs no browser, so it works where Chrome is blocked. Known gaps per source are in `references/sources.md`. Search text is machine-read and messy: always read the whole scan yourself before you use a record.
 - Record everything: `data/relations.csv` (status + source per parent-child relation), `data/worklog.md` (what you searched, what you found, and what you did *not* find), `reports/questions.md` (open questions and contradictions).
 - **One route failing isn't the end.** If the Chrome extension is missing or blocked (often by the user's organisation), switch yourself to your fetch tools, then a shell (`curl` to public APIs), then the browser built into the Claude desktop app; and if an API fails, try the website itself. See "How to reach the archives" in `references/sources.md`. Don't wait for the user to suggest it.
 - Can't get in somewhere because of a login, paywall or captcha? Don't work around it. Say so honestly, tell the user exactly what to look up (archive, place, period, name) and ask for a screenshot or photo. Then read it yourself.
@@ -169,7 +170,7 @@ Users may add photos, scans of records and other documents per person. They're s
 | `references/onboarding.md` | Question order for new users, intake.json format |
 | `references/gedcom-export.md` | Downloading a GEDCOM per platform (Ancestry, MyHeritage, FamilySearch…) |
 | `references/research.md` | Method, rules of evidence, statuses, plausibility, privacy |
-| `references/sources.md` | Archives per country, Open Archives API, what's often blocked, where to find free images |
+| `references/sources.md` | Archives per country, `archives.py` per source with its gaps, what's often blocked, where to find free images |
 | `references/gedcom-tool.md` | Adding people to the GEDCOM, check report, media |
 | `references/viewer.md` | Building data.json, publishing, updating, stories, zeitgeist |
 | `references/folders-and-files.md` | Folder layout (English/Dutch), progress template, where scripts run |
@@ -177,6 +178,7 @@ Users may add photos, scans of records and other documents per person. They're s
 | `scripts/make_viewer_data.py` | GEDCOM (+CSV, +regions, +stories, +zeitgeist, +coordinates, +media) → data.json |
 | `scripts/geocode_places.py` | GEDCOM (+stories) → coordinates per place (Nominatim, cached, manual fixes stay) for the maps |
 | `scripts/standalone_viewer.py` | Viewer + data (+ media) in one standalone HTML file |
+| `scripts/archives.py` | Archives without a browser: Open Archives (search, show, scans), Amsterdam open data and Transkribus, SchiedamGEN, Erfgoed Leiden, Riksarkivet |
 | `scripts/delpher.py` | Delpher newspapers: `search`, `text`, `locate` (crop with ruler) and `cut` (the clipping) |
 | `viewer/index.html`, `viewer/DATA-FORMAT.md` | The viewer and the data format |
 | `examples/` | Mini family tree (7 people) and `regions-basic.json` |
