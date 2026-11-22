@@ -31,8 +31,8 @@ Say in one sentence what it is: "Next to our conversation you can now watch your
 While a Workshop runs, these send what they do without anything extra:
 
 - `archives.py` (every search, record and scan download; the number of hits for Open Archives) and `delpher.py` (search, text, clipping);
-- `gedcom_tool.py check` (the scanner sweeps the whole fan, every person gets a ✓, then each "worth a look" lights up amber on that person) and `rebuild` (round processed);
-- **every new data.json**: the page compares it with the previous one and animates the difference (new people, links added or removed, certainty changed, names, dates, occupations, own stories, photos). This is the heart of it: what you see is always the real tree.
+- `gedcom_tool.py check` (the scanner sweeps the whole fan, every person gets a ✓, then each "worth a look" lights up amber on that person) and `rebuild` (round processed, plus every **new** step of the last round that data.json can't show: notes, also "searched, nothing found", events such as a baptism or burial, removed events, other names, place names; steps it has shown before are not repeated);
+- **every new data.json**: the page compares it with the previous one and animates the difference (new people, links added or removed, certainty changed, a source or reason added to a link, names, dates, occupations, new or updated stories, photos, life and times per place). Many changes at once (a round of 200 reasons) become one line and light up together. A bar under the counters shows how many links are certain, probable, possible and not checked, so verification shows as progress too. This is the heart of it: what you see is always the real tree.
 
 When no Workshop runs, all of this does nothing (one quick file check).
 
@@ -49,7 +49,7 @@ python3 -I scripts/live.py note "Reading the baptism register of Leiden, 1802" -
 python3 -I scripts/live.py note "Is this Jan your great-grandfather? See the question in the chat" --kind ask --person I87
 ```
 
-Kinds: `note` (default), `read`, `found`, `ask` (a red callout on that person: use it when you ask the user something). `--person` is a GEDCOM id or a name; the beam turns there. Write the text in the user's language. Don't narrate every step: one line per real step is enough.
+Kinds: `note` (default), `read`, `found`, `nothing` (searched and found nothing: say where and which years, e.g. "Burial registers Göteborg 1760-1777 read in full: no Lindqvist"; the person's slot greys out briefly; a negative result is research too), `ask` (a red callout on that person: use it when you ask the user something). `--person` is a GEDCOM id or a name; the beam turns there. Write the text in the user's language. Don't narrate every step: one line per real step is enough.
 
 **A long script of your own** (checking 123 families, harvesting an index) shows a progress bar with time left. Send the progress every step, with the person or family being checked:
 
@@ -66,7 +66,7 @@ live = importlib.util.module_from_spec(spec); spec.loader.exec_module(live)
 live.emit("progress", task="side branches", done=42, total=123, person="I87")
 ```
 
-Only the start and the end of a task go into the log; the bar follows every step.
+Only the start and the end of a task go into the log; the bar follows every step. Reading scans page by page (a burial register, a parish book, alone or with reading helpers) is such a task too: `progress "Göteborg burials 1752-1767" 23 50 --person <whose parents you look for>`.
 
 ## Helpers (subagents)
 

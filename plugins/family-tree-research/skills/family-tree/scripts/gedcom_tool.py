@@ -605,6 +605,30 @@ RB = {
            "none": "- Nog geen."},
 }
 
+def live_step(op, s, msg):
+    """One round step, short, for the Workshop (live.py): what it is, about whom, and the words that matter."""
+    out = {"op": op}
+    pid = g(s, "person", "persoon", "child", "kind", "keep", "houd")
+    if pid:
+        out["person"] = str(pid).strip("@")
+    m = re.search(r" for (.+?)(?: \(\d{4}\))?$", str(msg))
+    if m:
+        out["name"] = m.group(1)
+    if op == "note":
+        out["text"] = str(g(s, "text", "tekst", "note", "notitie", default=""))[:320]
+    elif op in ("event", "drop_event"):
+        for k, keys in (("type", ("type", "soort")), ("date", ("date", "datum")), ("place", ("place", "plaats")),
+                        ("text", ("note", "notitie", "reason", "reden", "description", "beschrijving"))):
+            v = g(s, *keys)
+            if v:
+                out[k] = str(v)[:200]
+    elif op == "aka":
+        out["text"] = str(g(s, "name", "naam", default=""))[:80]
+    elif op == "places":
+        out["n"] = len(g(s, "map", "kaart", "plaatsen", default={}) or {})
+    return out
+
+
 # step names (English, Dutch) -> canonical
 OPS = {"add": "add", "new": "add", "nieuw": "add", "person": "add", "persoon": "add",
        "parents": "parents", "ouders": "parents",
@@ -1356,6 +1380,7 @@ class Rebuild:
     # --- one round
     def apply(self, n, path, data):
         self.n, self.refs, self.round_src, self.n_fam = n, {}, None, 0
+        self.live_steps = []
         if isinstance(data, list):
             data = {"steps": data}
         title = g(data, "title", "titel", default="")
@@ -1373,6 +1398,7 @@ class Rebuild:
             except RoundError as e:
                 raise SystemExit(f"{path}, step {i} ({op}): {e}")
             self.log.append(f"  {n}.{i} {msg}")
+            self.live_steps.append(live_step(op, s, msg))
         return len(steps)
 
     # --- end
@@ -1482,7 +1508,7 @@ def cmd_rebuild(a):
     files = round_files(a.rounds) if os.path.isdir(a.rounds) else []
     if not os.path.isdir(a.rounds):
         print(f"(no rounds folder {a.rounds} yet: output = original)")
-    total, title = 0, ""
+    total, title, steps_last, last_path = 0, "", [], ""
     for n, path in files:
         try:
             data = json.load(open(path, encoding="utf-8"))
@@ -1491,6 +1517,7 @@ def cmd_rebuild(a):
         total += rb.apply(n, path, data)
         if isinstance(data, dict):
             title = data.get("title") or data.get("titel") or os.path.splitext(os.path.basename(path))[0]
+        steps_last, last_path = rb.live_steps, path
     changed, rest = rb.finish_places()
     last = os.path.basename(files[-1][1]) if files else "-"
     note = rb.t["built"].format(o=os.path.basename(a.original), k=len(files), last=last) if files else ""
@@ -1500,6 +1527,8 @@ def cmd_rebuild(a):
     n_indi = sum(1 for r in rb.recs if r[1] == "INDI")
     print(f"rebuild: {len(files)} round(s), {total} step(s) -> {a.output} ({n_indi} people)")
     live("rebuild", rounds=len(files), steps=total, people=n_indi, title=title)
+    if steps_last:
+        live("steps", round=os.path.basename(last_path), title=title, steps=steps_last[-400:])
     if rb.places:
         print(f"places: {changed} place name(s) changed")
     if a.places_report or rb.places:

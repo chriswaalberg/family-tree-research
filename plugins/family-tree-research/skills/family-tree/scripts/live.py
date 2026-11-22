@@ -3,7 +3,7 @@
 
   serve [--config family-tree.json | --data data.json]   start the local Workshop page (viewer/live.html)
         [--port 8790] [--lan] [--media DIR ...]
-  note "<text>" [--person I4] [--kind note|read|found|ask]
+  note "<text>" [--person I4] [--kind note|read|found|nothing|ask]
                                                         tell the Workshop what you are doing (one line)
   progress "<task>" <done> <total> [--person I4] [--text ...]
                                                         a progress bar for a long script; send it every step
@@ -72,8 +72,19 @@ class Hub:
         self.clients, self.lock = [], threading.Lock()
         self.history = deque(maxlen=80)
         self.tasks = {}  # latest progress per task, so a page opened halfway sees the bars
+        self.seen = set()  # round steps already shown (rebuild sends the whole last round every time)
 
     def send(self, ev, keep=True):
+        if ev.get("kind") == "steps":
+            rnd, new = str(ev.get("round") or ""), []
+            for st in ev.get("steps") or []:
+                k = rnd + json.dumps(st, sort_keys=True, ensure_ascii=False)
+                if k not in self.seen:
+                    self.seen.add(k)
+                    new.append(st)
+            if not new:
+                return
+            ev = dict(ev, steps=new)
         if ev.get("kind") == "progress":
             name = str(ev.get("task") or "")
             first, done = name not in self.tasks, ev.get("done") == ev.get("total")
@@ -194,7 +205,7 @@ def make_handler(cfg, hub):
                 return self.body(403, b"only this computer can send events", "text/plain")
             try:
                 n = int(self.headers.get("Content-Length") or 0)
-                ev = json.loads(self.rfile.read(min(n, 20000)).decode("utf-8"))
+                ev = json.loads(self.rfile.read(min(n, 1000000)).decode("utf-8"))
                 if not isinstance(ev, dict) or not ev.get("kind"):
                     raise ValueError
             except (ValueError, UnicodeDecodeError):
@@ -336,7 +347,8 @@ def main():
     n = sp.add_parser("note", aliases=["notitie"], help="show one line in the Workshop")
     n.add_argument("text")
     n.add_argument("--person", "--persoon", help="GEDCOM id (I4 or @I4@) or name: the scanner points there")
-    n.add_argument("--kind", "--soort", default="note", choices=["note", "read", "found", "ask", "notitie", "lees", "gevonden", "vraag"])
+    n.add_argument("--kind", "--soort", default="note",
+                   choices=["note", "read", "found", "nothing", "ask", "notitie", "lees", "gevonden", "niets", "vraag"])
     n.set_defaults(func=cmd_note)
     g = sp.add_parser("progress", aliases=["voortgang"], help="a progress bar for a long script (send it every step)")
     g.add_argument("task", help="short name of the task, e.g. 'side branches'")
@@ -347,7 +359,7 @@ def main():
     g.set_defaults(func=cmd_progress)
     a = ap.parse_args()
     if getattr(a, "kind", None):
-        a.kind = {"notitie": "note", "lees": "read", "gevonden": "found", "vraag": "ask"}.get(a.kind, a.kind)
+        a.kind = {"notitie": "note", "lees": "read", "gevonden": "found", "niets": "nothing", "vraag": "ask"}.get(a.kind, a.kind)
     a.func(a)
 
 
