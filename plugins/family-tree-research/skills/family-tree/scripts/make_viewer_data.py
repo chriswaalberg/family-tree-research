@@ -102,6 +102,27 @@ def name_parts(indi):
     display = " ".join(" ".join(x for x in (given, surn, suffix) if x).split()) or "?"
     return display, given, surn
 
+def aka_names(indi, display, given, surn):
+    """Other names someone was known by: a NICK under any NAME, and every NAME after the first (aka, married name, …).
+    Same surname: only the first names ("Jopie"); another surname: the whole name."""
+    out = []
+    for k, nm in enumerate(subs(indi, "NAME")):
+        out += [c["v"].strip() for c in subs(nm, "NICK") if c["v"].strip()]
+        if k == 0:
+            continue
+        full = nm["v"] or ""
+        m = re.match(r"^(.*?)/(.*?)/(.*)$", full)
+        g2 = ((sub(nm, "GIVN") or {}).get("v", "") or (m.group(1) if m else full)).strip()
+        s2 = ((sub(nm, "SURN") or {}).get("v", "") or (m.group(2) if m else "")).strip()
+        v = " ".join((g2 if not s2 or s2 == surn else g2 + " " + s2).split())
+        if v:
+            out.append(v)
+    seen, res = {display.lower(), given.lower()}, []
+    for v in out:
+        if v.lower() not in seen:
+            seen.add(v.lower()); res.append(v)
+    return res
+
 # ---------------------------------------------------------------- regions
 COUNTRIES = {  # code: (names as they appear in place names, nl label, en label, colour)
     "NL": (["nederland", "netherlands", "the netherlands", "holland", "niederlande"], "Nederland", "Netherlands", "#e07a2f"),
@@ -793,8 +814,8 @@ def main():
     ap.add_argument("--hide-living", "--levenden-verbergen", dest="levenden_verbergen", action="store_true", help="leave out dates and places of living people")
     ap.add_argument("--zeitgeist", "--tijdgeest", dest="tijdgeest", help="life and times per place as JSON (optional, for the Story view)")
     ap.add_argument("--stories", "--verhalen", dest="verhalen", help="own stories per person as JSON (optional, for the Story view)")
-    ap.add_argument("--updated", "--bijgewerkt", dest="bijgewerkt", help="'last updated' date shown in the viewer's footer, "
-                    "YYYY-MM-DD (default: today; 'none' leaves it out)")
+    ap.add_argument("--updated", "--bijgewerkt", dest="bijgewerkt", help="'last updated' moment shown in the viewer's footer, "
+                    "YYYY-MM-DD or YYYY-MM-DDTHH:MM (default: now; 'none' leaves it out)")
     ap.add_argument("--living-years", "--levend-grens", dest="levend_grens", type=int, default=100, help="years (default 100)")
     ap.add_argument("--coords", "--coordinaten", dest="coordinaten", help="coordinates per place as JSON, from geocode_places.py (optional, for the maps)")
     ap.add_argument("--media-dir", "--media-map", dest="media_map", help="copy local photos/documents into this folder (as media/<name>)")
@@ -819,6 +840,8 @@ def main():
         ddate, dplac = event(r, ("DEAT", "BURI", "CREM"))
         sex = (sub(r, "SEX") or {}).get("v", "").strip().upper()[:1]
         p = {"id": r["x"].strip("@"), "n": n, "g": g, "s": s}
+        aka = aka_names(r, n, g, s)
+        if aka: p["aka"] = aka
         if sex in ("M", "F"):
             p["x"] = sex
         for k, v in (("bdate", bdate), ("bplac", bplac), ("ddate", ddate), ("dplac", dplac)):
@@ -1079,10 +1102,13 @@ def main():
     for p in people: p.pop("_media_orig", None)
     fam = a.familienaam or surn0[starts[0]["persoon"]] or ""
     out = {"versie": 2, "taal": a.taal}
-    upd = a.bijgewerkt or datetime.date.today().isoformat()
+    upd = a.bijgewerkt or datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")
     if upd.lower() not in ("none", "geen"):
-        try: datetime.datetime.strptime(upd, "%Y-%m-%d")
-        except ValueError: sys.exit(f"--updated: expected a date like 2026-11-22, got {upd!r}")
+        upd = upd.replace(" ", "T")
+        for fmt in ("%Y-%m-%d", "%Y-%m-%dT%H:%M"):
+            try: datetime.datetime.strptime(upd, fmt); break
+            except ValueError: pass
+        else: sys.exit(f"--updated: expected a date like 2026-11-22 or 2026-11-22T14:35, got {upd!r}")
         out["bijgewerkt"] = upd
     if a.titel: out["titel"] = a.titel
     if fam: out["familienaam"] = fam

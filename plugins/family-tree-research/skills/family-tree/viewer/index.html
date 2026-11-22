@@ -326,6 +326,8 @@ main{padding-top:6px}
 .stage{background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 12px 34px rgba(70,45,20,.09)}
 .hint{color:#8a7865;font-style:italic}
 .made{text-align:center;font-size:12px;color:#9a8670;padding:28px 16px calc(24px + env(safe-area-inset-bottom,0px))}.made a{color:#8a5a1c;text-underline-offset:2px}
+.vh-mcap{display:block;font-style:italic;color:#4b3a2a;margin:0 0 3px;font-size:1.05em}
+.aka{font-weight:400;font-style:italic;color:#8a7865;font-size:.82em}
 /* ===== LIJN: the Story trail shown in the tree views (button in the route bar, bar above the tree, the rest dimmed) */
 .vh-tree{margin-left:auto;position:sticky;right:-10px;flex:none;display:flex;align-items:center;border:0;cursor:pointer;padding:0 10px 0 26px;align-self:stretch;
   background:linear-gradient(90deg,rgba(239,229,211,0),rgba(239,229,211,.98) 20px)}
@@ -779,7 +781,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.43",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.44",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1207,6 +1209,8 @@ function slDrawer(){
     else if(onBack&&e.target===dlg)dlg.close();onBack=false};
   dlg.addEventListener("pointerup",end);dlg.addEventListener("pointercancel",end);
   return dlg}
+/* other names someone was known by (data.json "aka", from a second NAME or NICK in the GEDCOM): "(Jopie)" after the name */
+function akaHtml(p){return p&&p.aka&&p.aka.length?` <span class="aka">(${p.aka.map(slEsc).join(", ")})</span>`:""}
 function slSheet(i,child,code,base,act){
   const dlg=slDrawer();navPush({sheet:1});
   const p=P[i],hasChild=child!=null&&child>=0;
@@ -1215,7 +1219,7 @@ function slSheet(i,child,code,base,act){
   const c=hasChild?certOf(child,i):null;
   const line=(sym,d,pl)=>d||pl?`<div class="ln">${sym} ${[d,pl].filter(Boolean).map(slEsc).join(" · ")}</div>`:"";
   dlg.innerHTML=`<div class="sheet"><div class="grab" aria-hidden="true"></div>
-    <header><p class="rel">${rel}${code?_t("genKw",{g:code.length,k:num}):""}</p><h2 id="slsheet-t">${slEsc(p.n)}</h2></header>
+    <header><p class="rel">${rel}${code?_t("genKw",{g:code.length,k:num}):""}</p><h2 id="slsheet-t">${slEsc(p.n)}${akaHtml(p)}</h2></header>
     <section>${line("°",p.bdate,p.bplac)}${line("†",p.ddate,p.dplac)}${jobLine(p)}
     ${c?`<div class="ct"><b style="color:${CERT[c[0]]||"#7a7068"}">${slEsc(certLabel(c[0]))}</b>${_t("relWith",{name:slEsc(short(P[child]))})}${c[3]&&!/^(biologisch|biological)$/i.test(c[3])?`<br><b style="color:#9c7633">♥ ${slEsc(_t("vh_adopt_par",Object.assign({child:vhFn(P[child])},vhPro(p))))}</b>`:""}${c[1]?`<br>${_t("source")}${slLink(c[1])}`:""}${c[2]?`<br>${slLink(c[2])}`:""}</div>`:hasChild?`<div class="ct">${_t("notAssessedRel",{name:slEsc(short(P[child]))})}</div>`:""}</section>
     <footer>${vhBtn(i)}${act?`<button type="button" class="btn" data-a="act">${act.label}</button>`:""}${i!==base?`<button type="button" class="btn" data-variant="outline" data-a="root">${_t("makeRoot")}</button>`:""}<button type="button" class="btn" data-variant="ghost" data-a="x">${_t("close")}</button></footer></div>`;
@@ -1626,7 +1630,7 @@ function vhTijdgeest(i,seen){const T=vhTG();if(!T)return"";const p=P[i];if(p.liv
     html+=`<div class="vh-k">${_t("vh_tg_events")}</div><ul class="vh-ev">${pick.map(({ev,lok})=>`<li data-y="${ev.jaar||ev.van||""}"${lok?' data-lok="1"':""}${ev.gewicht!=null&&isFinite(+ev.gewicht)?` data-w="${+ev.gewicht}"`:""}><b>${ev.van&&ev.tot&&ev.van!==ev.tot?ev.van+"–"+String(ev.tot).slice(-2):ev.jaar}</b><span>${slEsc(lab(ev.tekst))}${ev.bron?` <a href="${slEsc(ev.bron[1])}" target="_blank" rel="noopener" title="${slEsc(ev.bron[0])}">${_t("vh_src1")}</a>`:""}${ev.links&&ev.links.length?`<span class="vh-evl">${slEsc(lab(ev.links_label)||"")} ${ev.links.map(l=>`<a href="${slEsc(l[1])}" target="_blank" rel="noopener">${slEsc(lab(l[0]))}</a>`).join(" · ")}</span>`:""}</span></li>`).join("")}</ul>`}
   return html?`<section class="vh-tg">${html}</section>`:""}
 /* Story: a map at each moment from mapEvents, with its caption and the note about present-day coastlines */
-function vhMapEl(e){const c=mapCap(e);return `<figure class="vh-map">${mapOf(e)}<figcaption><b>${slEsc(c.name)}</b>${c.sub?" · "+slEsc(c.sub):""}${c.line?" · "+slEsc(c.line):""}<small>${slEsc(_t("map_note"))}</small></figcaption></figure>`}
+function vhMapEl(e){const c=mapCap(e),cap=mapCapText(e);return `<figure class="vh-map">${mapOf(e)}<figcaption>${cap?`<span class="vh-mcap">${slEsc(cap)}</span>`:""}<b>${slEsc(c.name)}</b>${c.sub?" · "+slEsc(c.sub):""}${c.line?" · "+slEsc(c.line):""}<small>${slEsc(_t("map_note"))}</small></figcaption></figure>`}
 function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
   const S=vhState(),path=S.path,root=P[path[0]],rfn=vhFn(root),flags={dtb:false},tgSeen=new Set(),mapMS={seen:[],here:null};tgSeen.assign=vhAssignImages(path);
   const w=document.createElement("div");w.className="vh";
@@ -1662,7 +1666,7 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
       /* maps: right after the paragraph that names the new place (mapPara), else at the year of that moment */
       const mj=mev.map(e=>mapPara(e,paras,p));
       const items=paras.map((x,j)=>({type:"p",y:py[j],html:`<p>${vhMd(x)}</p>`+mev.filter((e,k)=>mj[k]===j).map(vhMapEl).join("")+pimgs.filter((b,k)=>slot[k]===j).map(vhFig).join("")}))
-        .concat(mev.filter((e,k)=>mj[k]<0).map(e=>({type:"p",y:e.y,html:`<p class="vh-mw">${slEsc(mapWhy(p,e))}</p>`+vhMapEl(e)})),vhTgPieces(tgHtml));
+        .concat(mev.filter((e,k)=>mj[k]<0).map(e=>({type:"p",y:e.y,html:(mapCapText(e)?"":`<p class="vh-mw">${slEsc(mapWhy(p,e))}</p>`)+vhMapEl(e)})),vhTgPieces(tgHtml));
       body="";let run=[],tg=[];const flush=()=>{if(run.length){body+=`<div class="vh-txt">${run.join("")}</div>`;run=[]}if(tg.length){body+=vhTgBox(tg);tg=[]}};
       for(const it of vhSortByYear(items)){if(it.type==="p"){if(tg.length)flush();run.push(it.html)}else{if(run.length){body+=`<div class="vh-txt">${run.join("")}</div>`;run=[]}tg.push(it)}}
       flush();body+=`<div class="vh-txt">${vhSources(p)}</div>`}
@@ -1670,7 +1674,7 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
       /* every map right after a sentence that names its place and says why: the birthplace map after the birth text (which names it),
          the place of death after the death sentence, every other place (homes from "woon") with a sentence of its own (mapWhy) */
       const bc=mapCo(p.bplac),born=e=>(e.y==null||p.by==null||e.y<=p.by)&&bc&&mapSame(bc,e.t)&&NORM(tpl.g1.join(" ")).includes(NORM(mapName(e.t.n))),died=e=>!born(e)&&p.dplac&&tpl.nd&&mapDeathOnly(p,e);
-      const why=e=>`<div class="vh-txt"><p class="vh-mw">${slEsc(mapWhy(p,e))}</p></div>`+vhMapEl(e);
+      const why=e=>(mapCapText(e)?"":`<div class="vh-txt"><p class="vh-mw">${slEsc(mapWhy(p,e))}</p></div>`)+vhMapEl(e);
       const g2a=tpl.g2.slice(0,tpl.nd),g2b=tpl.g2.slice(tpl.nd),dm=mev.filter(died).map(vhMapEl).join(""),note=tpl.note.map(n=>`<p class="vh-note">${slEsc(n)}</p>`).join("");
       body=`<div class="vh-txt">${P1(tpl.g1)}</div>${mev.filter(born).map(vhMapEl).join("")}${tgHtml}${mev.filter(e=>!born(e)&&!died(e)).map(why).join("")}`
         +(dm?`<div class="vh-txt">${P1(g2a)}</div>${dm}<div class="vh-txt">${P1(g2b)}${note}</div>`:`<div class="vh-txt">${P1(tpl.g2)}${note}</div>`)}
@@ -1704,7 +1708,7 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     const ch=document.createElement("section");ch.className="vh-ch"+(last&&k?" vh-new":"");ch.dataset.k=k;ch.style.setProperty("--lc",lc);
     ch.innerHTML=`<div class="vh-dot" aria-hidden="true">${p.living&&!p.by?"":slEsc(String(yr))}</div>
       <article class="vh-card"><div class="vh-k">${relLabel}</div>
-      <h3><button type="button" class="vh-nm" data-i="${i}" title="${_t("vh_details")}">${slEsc(p.n)}</button>${p.living?"":`<button type="button" class="vh-lnk" data-lnk="${i}" title="${slEsc(_t("vh_link",{name:p.n}))}" aria-label="${slEsc(_t("vh_link",{name:p.n}))}"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></button>`}</h3>
+      <h3><button type="button" class="vh-nm" data-i="${i}" title="${_t("vh_details")}">${slEsc(p.n)}</button>${akaHtml(p)}${p.living?"":`<button type="button" class="vh-lnk" data-lnk="${i}" title="${slEsc(_t("vh_link",{name:p.n}))}" aria-label="${slEsc(_t("vh_link",{name:p.n}))}"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></button>`}</h3>
       ${facts?`<div class="vh-facts">${facts}</div>`:""}${imgs.length?`<div class="vh-media">${imgs.slice(0,4).map((m,j)=>`<button type="button" class="vh-mt" data-mj="${j}" title="${slEsc(mediaName(m))}"><img loading="lazy" src="${slEsc(m.bestand)}" alt=""></button>`).join("")}${imgs.length>4?`<button type="button" class="vh-mt more" data-mj="4">+${imgs.length-4}</button>`:""}</div>`:""}${cert}${body}${sib}${fork}</article>`;
     ch.querySelector(`.vh-nm[data-i]`).onclick=()=>slSheet(i,child,code,path[0]);
     ch.querySelectorAll(".vh-mt").forEach(b=>b.onclick=()=>mediaView(imgs,+b.dataset.mj));
@@ -1734,7 +1738,7 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
 const NORM=x=>String(x||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 function initSearch(){
   const dlg=$("searchDlg"),inp=$("sq"),menu=$("sres");let idx=null,items=[],cur=-1;
-  const open=()=>{if(!idx)idx=P.map((p,i)=>({i,t:NORM([p.n,p.by,p.dy,p.bplac,p.dplac].filter(Boolean).join(" "))}));inp.value="";run();dlg.showModal();setTimeout(()=>inp.focus(),20)};
+  const open=()=>{if(!idx)idx=P.map((p,i)=>({i,t:NORM([p.n,...(p.aka||[]),p.by,p.dy,p.bplac,p.dplac].filter(Boolean).join(" "))}));inp.value="";run();dlg.showModal();setTimeout(()=>inp.focus(),20)};
   const mark=k=>{items.forEach((e,j)=>e.dataset.selected=j===k?"true":"false");cur=k;if(items[k])items[k].scrollIntoView({block:"nearest"})};
   const pick=i=>{const r=SEARCH_ROOT;SEARCH_ROOT=false;dlg.close();r?setRootHard(i):state.view==="verhaal"?vhOpen(i,true):setRoot(i)}; /* Story: open the trail to them, like Interesting people */
   function run(){
@@ -1745,7 +1749,7 @@ function initSearch(){
     const hits=idx.filter(x=>toks.every(t=>x.t.includes(t))).map(x=>x.i);
     const anc=hits.filter(i=>st.gen.has(i)&&i!==state.root).sort((a,b)=>st.gen.get(a)-st.gen.get(b)||(P[a].by||0)-(P[b].by||0)).slice(0,40);
     const rest=hits.filter(i=>!st.gen.has(i)||i===state.root).sort((a,b)=>P[a].n.localeCompare(P[b].n)).slice(0,25);
-    const it=(i,badge)=>{const p=P[i];return `<div role="menuitem" data-i="${i}"><div><div class="nm">${slEsc(p.n)}</div><small>${yrs(p)}${p.bplac?" · "+slEsc(p.bplac.split(",")[0]):""}</small></div>${badge?`<span class="badge" data-variant="secondary">${badge}</span>`:""}</div>`};
+    const it=(i,badge)=>{const p=P[i];return `<div role="menuitem" data-i="${i}"><div><div class="nm">${slEsc(p.n)}${akaHtml(p)}</div><small>${yrs(p)}${p.bplac?" · "+slEsc(p.bplac.split(",")[0]):""}</small></div>${badge?`<span class="badge" data-variant="secondary">${badge}</span>`:""}</div>`};
     const grp=(t,arr,f)=>arr.length?`<div role="group"><span role="heading">${t}</span>${arr.map(f).join("")}</div>`:"";
     menu.innerHTML=grp(_t("searchAnc",{name:slEsc(short(P[state.root]))}),anc,i=>it(i,_t("genShort",{n:st.gen.get(i)})))+grp(anc.length?_t("searchOthers"):_t("searchPeople"),rest,i=>it(i,""));
     items=[...menu.querySelectorAll("[role=menuitem]")];mark(items.length?0:-1);
@@ -1905,7 +1909,7 @@ function famSheet(i,info){
   if((info.line||i===r)&&ns)btns.push(`<button type="button" class="btn" data-variant="outline" data-a="sib">${F.sib.has(i)?(ns===1?_t("hideSib1"):_t("hideSibs")):(ns===1?_t("showSib1"):_t("showSibs",{n:ns}))}</button>`);
   if(i!==r)btns.push(`<button type="button" class="btn" data-variant="outline" data-a="root">${_t("makeRoot")}</button>`);
   btns.push(`<button type="button" class="btn" data-variant="ghost" data-a="x">${_t("close")}</button>`);
-  dlg.innerHTML=`<div class="sheet"><div class="grab" aria-hidden="true"></div><header><p class="rel">${rel}</p><h2 id="slsheet-t">${slEsc(p.n)}</h2></header>
+  dlg.innerHTML=`<div class="sheet"><div class="grab" aria-hidden="true"></div><header><p class="rel">${rel}</p><h2 id="slsheet-t">${slEsc(p.n)}${akaHtml(p)}</h2></header>
     <section>${line("°",p.bdate,p.bplac)}${line("†",p.ddate,p.dplac)}${jobLine(p)}${hasPar?`<div class="ct">${crow(_t("Father"),p.f,cf)}${crow(_t("Mother"),p.m,cm)}</div>`:""}</section><footer>${btns.join("")}</footer></div>`;
   const go=fn=>{dlg.close();setTimeout(fn,60)};
   dlg.querySelector('[data-a="x"]').onclick=()=>dlg.close();
@@ -2237,7 +2241,7 @@ function mapMention(paras,pl,home){const t=NORM(mapName(pl)),last=a=>NORM(String
 /* a person's places in the order of their life: birth, homes ("woon", by year), death; story places with a year join in */
 function mapStops(p){const out=[],add=(pl,y,k)=>{const c=mapCo(pl);if(!c)return;const l=out[out.length-1];if(l&&l.n===c.n)return;out.push(Object.assign(c,{y,k}))};
   const w=(p.woon||[]).slice().sort((a,b)=>(a[1]||0)-(b[1]||0));add(p.bplac,p.by,"b");w.forEach(x=>add(x[0],x[1],"w"));
-  (p.verhaal_plekken||[]).filter(x=>x.jaar!=null).forEach(x=>{const c=mapCo(x.plaats);if(!c)return;const j=out.findIndex(o=>(o.y||0)>x.jaar);c.y=x.jaar;c.k="s";if(j<0)out.push(c);else out.splice(j,0,c)});
+  (p.verhaal_plekken||[]).filter(x=>x.jaar!=null).forEach(x=>{const c=mapCo(x.plaats);if(!c)return;const j=out.findIndex(o=>(o.y||0)>x.jaar);c.y=x.jaar;c.k="s";c.cap=x.bijschrift;if(j<0)out.push(c);else out.splice(j,0,c)});
   if(p.dplac)add(p.dplac,p.dy,"d");return out}
 
 /* ===== SWIPE (experimental Swipe Stories: full-screen cards that play by themselves, built from the Story view) ===== */
@@ -2375,7 +2379,7 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
    of the person before), every place that is new on the trail (MS.seen; the same place = mapSame: same core name or within MAP.SAME_KM) and every move of MAP.FAR_KM
    or more gets a map, each at its own moment. A country or region alone ("Australie") gives way to a town in that country later in life (and gives it its year). */
 function mapEvents(p,MS){if(!mapHas()||p.living)return [];
-  const plk=(p.verhaal_plekken||[]).map(x=>{const c=mapCo(x.plaats);return c&&Object.assign(c,{al:x.alinea,ka:x.kaart,y:x.jaar})}).filter(Boolean);
+  const plk=(p.verhaal_plekken||[]).map(x=>{const c=mapCo(x.plaats);return c&&Object.assign(c,{al:x.alinea,ka:x.kaart,y:x.jaar,k:"s",cap:x.bijschrift})}).filter(Boolean);
   let st=mapStops(p);st=st.concat(plk.filter(q=>!st.some(o=>o.n===q.n)));
   const land=q=>NORM(String(q.n).split(",").pop()).trim();
   st=st.filter((q,i)=>{if(q.prec==="plaats")return true;const nx=st.slice(i+1).find(o=>o.prec==="plaats"&&land(o)===land(q));if(nx&&q.y!=null)nx.y0=Math.min(nx.y0!=null?nx.y0:Infinity,q.y);return !nx});
@@ -2400,7 +2404,9 @@ function mapFacts(p,t){const at=pl=>{const c=mapCo(pl);return !!c&&mapSame(c,t)}
 /* the children in a map sentence always with their relation, so a son with his father's name never reads as the father: "his son Franciscus" */
 function mapKidsRel(pr,ks){if(ks.length===1){const x=P[ks[0]].x;return _t("mw_rel1",{zijn:pr.zijn,rel:_t(x==="M"?"mw_son":x==="F"?"mw_dau":"mw_kid"),name:vhFn(P[ks[0]])})}
   return _t("mw_relN",{zijn:pr.zijn,list:vhNames(ks)})}
-function mapWhy(p,e){const pr=vhPro(p),fn=vhFn(p),place=mapPlace(e.t.n),T=(k,v)=>_t(k,Object.assign({fn,Fn:fn,place},pr,v||{}));
+/* a story place's own caption ("bijschrift": text or {nl, en}) says why better than any template sentence */
+function mapCapText(e){const c=e&&e.t&&e.t.cap;if(!c)return "";return typeof c==="object"?String(c[LANG]||c.en||c.nl||""):String(c)}
+function mapWhy(p,e){const cap=mapCapText(e);if(cap)return cap;const pr=vhPro(p),fn=vhFn(p),place=mapPlace(e.t.n),T=(k,v)=>_t(k,Object.assign({fn,Fn:fn,place},pr,v||{}));
   const F=mapFacts(p,e.t),has=k=>F.filter(f=>f.k===k&&f.y!=null).sort((a,b)=>a.y-b.y);
   if(e.t.k==="b"||(p.by!=null&&e.y!=null&&e.y<=p.by&&F.some(f=>f.k==="b")))return T("mw_born");
   const out=[],kids=has("kid"),mar=has("huwelijk"),ban=has("ondertrouw"),pn=f=>f.sp>=0&&P[f.sp]?vhFn(P[f.sp]):"";
@@ -2414,7 +2420,7 @@ function mapWhy(p,e){const pr=vhPro(p),fn=vhFn(p),place=mapPlace(e.t.n),T=(k,v)=
     if(m&&y1<m.y)out.unshift(kt);else out.push(kt)}
   if(!out.length){const o=F.filter(f=>f.y!=null&&f.k!=="b"&&f.k!=="d").sort((a,b)=>a.y-b.y)[0];
     if(o)out.push(o.k==="emigratie"||/emigr/i.test(o.x)?T("mw_emig",{y:o.y}):o.k==="immigratie"||/immigr/i.test(o.x)?T("mw_immi",{y:o.y}):o.k==="beroep"&&o.x?T("mw_job",{y:o.y,job:o.x}):o.k==="school"?T("mw_school",{y:o.y}):T("mw_lived",{y:o.y}));
-    else if(e.t.k==="s")out.push(e.y!=null?T("mw_story",{y:Math.round(e.y)}):T("mw_story0"));
+    else if(e.t.k==="s")out.push(e.t.y!=null?T("mw_story",{y:Math.round(e.t.y)}):T("mw_story0"));
     else{const d=F.find(f=>f.k==="d");const w=(p.woon||[]).find(x=>{const c=mapCo(x[0]);return c&&mapSame(c,e.t)});
       out.push(d&&!w?T(p.dy?"mw_died":"mw_died0",{y:p.dy}):d&&w&&w[1]>=(p.dy||0)-6?T(p.dy?"mw_died":"mw_died0",{y:p.dy}):w?T("mw_lived",{y:w[1]}):T("mw_lived0"))}}
   return out.join(" ")}
@@ -2636,8 +2642,10 @@ function prepareData(d){
   const ttl=d.titel||(fam?_t("titleFam",{name:fam}):_t("title"));
   META={starts,perView,regios,plaatsen:pl,titel:ttl.charAt(0).toUpperCase()+ttl.slice(1)};
   return people}
-function updatedText(){const s=typeof D!=="undefined"&&D&&(D.bijgewerkt||D.updated),m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||"");
-  if(!m||+m[2]<1||+m[2]>12)return"";return _t("updated",{d:`${+m[3]} ${VH_MN[LANG][+m[2]-1]} ${m[1]}`})}
+function updatedText(){const s=typeof D!=="undefined"&&D&&(D.bijgewerkt||D.updated),m=/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?$/.exec(s||"");
+  if(!m||+m[2]<1||+m[2]>12)return"";let d=`${+m[3]} ${VH_MN[LANG][+m[2]-1]} ${m[1]}`;
+  if(m[4]!=null){const h=+m[4],mi=m[5];d+=", "+(LANG==="nl"?`${h}:${mi}`:`${h%12||12}:${mi} ${h<12?"am":"pm"}`)}
+  return _t("updated",{d})}
 function applyTexts(){const up=updatedText();$("made").innerHTML=_t("madeWith",{link:`<a href="${PLUGIN_URL}" target="_blank" rel="noopener">Family Tree Research</a>`,v:PLUGIN_VERSION})+(up?`<br><span class="made-up">${up}</span>`:"");
   
   document.querySelectorAll("[data-t]").forEach(e=>e.textContent=_t(e.dataset.t));

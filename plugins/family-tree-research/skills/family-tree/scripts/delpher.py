@@ -137,10 +137,12 @@ def alto_lines(a, issue, page):
     return lines, size
 
 
-def ruler_image(im, box, zoom, marks=(), grid=True):
+def ruler_image(im, box, zoom, marks=(), grid=True, cut=None):
     """The crop `box` of `im` (page pixels), scaled by zoom, in a white margin with a ruler in page coordinates.
     Every number sits centred on its tick (read the line, not the side of the number); `grid` adds faint lines every
-    100 px. `marks` (page boxes) are red bars in the top and left margins only, so the print stays clean."""
+    100 px, with their numbers on the print too (read positions off those numbers, never off the image's own pixels: the image
+    has a margin, so its pixels are about MARGIN px off). `marks` (page boxes) are red bars in the top and left margins.
+    `cut` (a page box): everything outside it is veiled and it gets a thin red outline, so you see exactly what a cut takes."""
     from PIL import Image, ImageDraw, ImageFont
     x0, y0, x1, y1 = box
     crop = im.crop(box)
@@ -163,6 +165,14 @@ def ruler_image(im, box, zoom, marks=(), grid=True):
         for x in range((x0 // 100 + 1) * 100, x1, 100): g.line([(sx(x), MARGIN), (sx(x), H - MARGIN)], fill=(0, 120, 255, 90))
         for y in range((y0 // 100 + 1) * 100, y1, 100): g.line([(MARGIN, sy(y)), (W - MARGIN, sy(y))], fill=(0, 120, 255, 90))
         out.paste(Image.alpha_composite(out.convert("RGBA"), over).convert("RGB")); d = ImageDraw.Draw(out)
+        try: small = ImageFont.load_default(size=13)
+        except TypeError: small = font
+        def tag(cx, cy, txt):  # a small number on the print, on a white chip
+            l, t_, r, b = d.textbbox((0, 0), txt, font=small); w, h = r - l, b - t_
+            d.rectangle([cx - w / 2 - 3, cy - h / 2 - 2, cx + w / 2 + 3, cy + h / 2 + 2], fill=(255, 255, 255))
+            d.text((cx - w / 2 - l, cy - h / 2 - t_), txt, fill=(0, 90, 200), font=small)
+        for x in range((x0 // 100 + 1) * 100, x1, 100): tag(sx(x), MARGIN + 10, str(x))
+        for y in range((y0 // 100 + 1) * 100, y1, 100): tag(MARGIN + 18, sy(y), str(y))
     for x in range((x0 // step + 1) * step, x1, step):
         L = 22 if x % 100 == 0 else 12 if x % 50 == 0 else 6
         d.line([(sx(x), MARGIN), (sx(x), MARGIN - L)], fill="black")
@@ -175,6 +185,13 @@ def ruler_image(im, box, zoom, marks=(), grid=True):
         d.line([(W - MARGIN, sy(y)), (W - MARGIN + L, sy(y))], fill="black")
         if y % 100 == 0:
             label(MARGIN - 45, sy(y), str(y)); label(W - MARGIN + 45, sy(y), str(y))
+    if cut:
+        cx0, cy0, cx1, cy1 = sx(cut[0]), sy(cut[1]), sx(cut[2]), sy(cut[3])
+        veil = Image.new("RGBA", out.size, (0, 0, 0, 0)); v = ImageDraw.Draw(veil)
+        for r in ([MARGIN, MARGIN, W - MARGIN, cy0], [MARGIN, cy1, W - MARGIN, H - MARGIN], [MARGIN, cy0, cx0, cy1], [cx1, cy0, W - MARGIN, cy1]):
+            if r[2] > r[0] and r[3] > r[1]: v.rectangle(r, fill=(255, 255, 255, 170))
+        out.paste(Image.alpha_composite(out.convert("RGBA"), veil).convert("RGB")); d = ImageDraw.Draw(out)
+        d.rectangle([cx0, cy0, cx1, cy1], outline="red", width=2)
     for (mx0, my0, mx1, my1) in marks:
         d.line([(sx(max(mx0, x0)), MARGIN - 4), (sx(min(mx1, x1)), MARGIN - 4)], fill="red", width=4)
         d.line([(MARGIN - 4, sy(max(my0, y0))), (MARGIN - 4, sy(min(my1, y1)))], fill="red", width=4)
@@ -223,7 +240,8 @@ def cmd_locate(a):
     out = a.out or os.path.join(cache_dir(a), f"locate-{issue}-{page}.jpg".replace(":", "_"))
     ruler_image(im, box, a.zoom, [h["box"]], grid=not a.no_grid).save(out, quality=90)
     print(f"Wide crop around hit {a.hit} (page box {','.join(map(str, box))}, zoom {a.zoom}), ruler in page pixels:\n  {out}")
-    print("Look at it at true size and read the clipping's edges (heading to last relevant line, column rules) off the ruler.\n"
+    print("Look at it at true size and read the clipping's edges (heading to last relevant line, column rules) off the ruler's\n"
+          f"NUMBERS (also on the print, every 100 px), not off the image's own pixel positions: the image has a {MARGIN} px margin.\n"
           f"Move or widen the view with --at x,y / --width / --height / --zoom 0.5. Then:\n"
           f"  delpher.py cut {issue}:{part or page} x0,y0,x1,y1 --out <file.jpg> --check")
 
@@ -248,8 +266,8 @@ def cmd_cut(a):
         chk = os.path.splitext(a.out)[0] + "-check.jpg"
         pad = 60
         ruler_image(im, (max(0, x0 - pad), max(0, y0 - pad), min(im.width, x1 + pad), min(im.height, y1 + pad)), 1,
-                    [(x0, y0, x1, y1)]).save(chk, quality=85)
-        print(f"  check ({pad} px around the box, red bars = your edges; don't publish this one): {chk}")
+                    [(x0, y0, x1, y1)], cut=(x0, y0, x1, y1)).save(chk, quality=85)
+        print(f"  check (the box in red, the {pad} px around it veiled: only the clear part is cut; don't publish this one): {chk}")
 
 
 def main():
