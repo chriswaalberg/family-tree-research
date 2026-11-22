@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.50"
+  version: "0.9.51"
 ---
 
 # Family-tree research, hand in hand
@@ -67,12 +67,20 @@ The core:
 
 - Work upwards generation by generation, **direct ancestors first**. Siblings only as a by-catch or when they help prove a parent.
 - **No parent without a source.** A new ancestor only enters the tree with a concrete source (record, registration, with link or location). In doubt = *probable* or *possible*, never quietly *certain*.
+- **Certain needs a hard link.** *Certain* only when a record names the parents **and** something ties it hard to the person in the tree: an age that fits, the right partner, or the parent as witness or giving consent. Patronymic + naming pattern + the only candidate = *probable*. A real doubt stays out of the tree and goes into the report.
+- **Big rounds with helpers.** When the user lets you work on your own for long, split the ancestors without parents by region over parallel research helpers (subagents) that only read and report, also what they didn't find; check every find's key record yourself before it goes into the tree; then the next wave on the new parents. See "A big round" in `references/research.md`.
 - Don't actively search archives for **living people** (their records are usually not public anyway). What the user tells you about them simply goes into the tree and the viewer.
 - **Search archives with `scripts/archives.py` first** where it covers the place: Open Archives (`oa search/show/scans`), Amsterdam City Archives open data (`saa`) and full text (`transkribus`, also Amsterdam births after 1880), SchiedamGEN (`schiedam`), Erfgoed Leiden (`leiden`) and Sweden's Riksarkivet (`riksarkivet`). It needs no browser, so it works where Chrome is blocked. Known gaps per source are in `references/sources.md`. Search text is machine-read and messy: always read the whole scan yourself before you use a record.
 - Record everything: `data/relations.csv` (status + source per parent-child relation), `data/worklog.md` (what you searched, what you found, and what you did *not* find), `reports/questions.md` (open questions and contradictions).
 - **One route failing isn't the end.** If the Chrome extension is missing or blocked (often by the user's organisation), switch yourself to your fetch tools, then a shell (`curl` to public APIs), then the browser built into the Claude desktop app; and if an API fails, try the website itself. See "How to reach the archives" in `references/sources.md`. Don't wait for the user to suggest it.
 - Can't get in somewhere because of a login, paywall or captcha? Don't work around it. Say so honestly, tell the user exactly what to look up (archive, place, period, name) and ask for a screenshot or photo. Then read it yourself.
 - After every round: write the round file, run `gedcom_tool.py rebuild`, rebuild data.json, republish the viewer, and tell in a few sentences what's new and what's next.
+
+**Practical (lessons from long research):**
+- **Network work in the foreground.** Archive searches and downloads don't belong in background tasks: there is sometimes no network there, and they hang without an error. Split long harvests into pieces of under ~10 minutes.
+- **Links and to-dos for the user go in your last message**, in full, as real URLs. Text written in between often reaches the user shortened, and the links fall away.
+- **Check that the Python you use has Pillow** (`python3 -c "import PIL"`). Without it the scripts copy scans and photos at full size instead of shrinking them; use a Python that has it.
+- **Scans from the user** go from Downloads to `scans/` in one fixed step: rename, crop, move, link (see "Asking the user for help" in `references/research.md`).
 
 ## Viewer
 
@@ -84,7 +92,7 @@ The viewer has a **Story** view: from the start person step by step back in time
 
 - **Look for stories yourself.** After every research round, scan the tree for remarkable lives: a place of death in a camp or at sea, war, emigration, the Dutch East India Company or the army, a famous event, an unusual occupation, a sibling with a history of their own. Suggest them actively; don't wait for the user to ask.
 - **Ask about family legends** ("we descend from French nobility", "grandpa sailed the seven seas"). Test them against the tree and the archives and tell honestly what holds up, what doesn't, and what's still open.
-- Only write a story with sources (listed under the story), name what's uncertain, and invent nothing. Siblings with a story appear automatically as "Remarkable relative" with the ancestor.
+- Only write a story with sources (listed under the story), name what's uncertain, and invent nothing. Hard things about people long dead (a conviction, a police report, forced labour, a divorce) may go in, factually and with the source; be careful with the living. Siblings with a story appear automatically as "Remarkable relative" with the ancestor.
 - **Two layers: `text` to read, `cards` to swipe.** The Story view shows `text`; it may be rich, with paragraphs like in an article. The Cards view plays the story as full-screen cards on a phone, like Instagram Stories, and people drop off most after the first card. So give every story a short card version too, `cards` (blank line = new card). Rules for cards:
   - **Card 1 is a hook**: the most striking fact, or a question, **without a year or age**. Not "X was born on … as the son of …": the intro card already says that. (The viewer places cards by year; a hook with "December 1943" pulls the whole series to 1943.)
   - **One moment per card**, at most ~200 characters (2–3 short sentences).
