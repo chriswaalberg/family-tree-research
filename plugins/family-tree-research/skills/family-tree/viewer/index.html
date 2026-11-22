@@ -789,7 +789,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.45",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.46",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -895,7 +895,9 @@ function drawFan(){
   const root=state.root,mode=state.color,LN=lineInfo();
   const depthOf=(i,d)=>d>=state.gens?d:Math.max(d,...parentsOf(i).map(q=>depthOf(q,d+1)));
   const G=Math.max(2,Math.min(state.gens,depthOf(root,0)+1));
-  const W=1000,cx=500,cy=540,r0=66,Rmax=492,ring=(Rmax-r0)/G;
+  /* the Story line goes on past the slider's generations (only the line); GR = rings drawn */
+  const GR=LN?Math.max(G,LN.path.length-1):G,lnPts=[];
+  const W=1000,cx=500,cy=540,r0=66,Rmax=492,ring=(Rmax-r0)/GR;
   const svg=el("svg",{viewBox:`0 0 ${W} 570`});
   const AD=adoptSet(root);if(AD.size){const df=el("defs",{},svg),pt=el("pattern",{id:"adoptHatch",width:7,height:7,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"},df);el("rect",{width:7,height:7,fill:"rgba(255,250,241,.18)"},pt);el("line",{x1:0,y1:0,x2:0,y2:7,stroke:"#fffaf1","stroke-width":2.2,"stroke-opacity":.55},pt)}
   const stats=ancestorStats(root);
@@ -930,7 +932,7 @@ function drawFan(){
       const c=certOf(child,i);
       hook(path,i,(c?`<span class="mut">${_t("relChildTip")}</span>${certLabel(c[0])}${c[2]?" — "+c[2]:""}<br>`:"")+((occ.get(i)>1)?`<span style="color:#f2a093">${_t("occursFan",{n:occ.get(i)})}</span><br>`:""));
       // labels
-      const am=(a0+a1)/2,rm=(ri+ro)/2,arc=rm*(a1-a0);
+      const am=(a0+a1)/2,rm=(ri+ro)/2,arc=rm*(a1-a0);if(LN&&LN.pre.has(slot))lnPts.push({am,rm,arc,g});
       const light=isLight(col);const tc=light?"#2a2622":"#fff";
       if(arc>78&&ring>30){
         const fs=Math.min(13,ring/3.4);const maxc=Math.floor(arc/(fs*0.58));
@@ -950,16 +952,20 @@ function drawFan(){
       if(occ.get(i)>1){const [dx,dy]=pol(am,ro-5);el("circle",{cx:dx,cy:dy,r:Math.min(3.2,arc/4),fill:"#c0392b",stroke:"#fff","stroke-width":.8},gTxt)}
     }
     if(LN&&!LN.pre.has(slot)){for(let k=s0;k<gSeg.childNodes.length;k++)gSeg.childNodes[k].classList.add("ln-dim");for(let k=t0;k<gTxt.childNodes.length;k++)gTxt.childNodes[k].classList.add("ln-dim")}
-    if(g>=G)return;
-    const p=P[i],mid=(a0+a1)/2;
-    if(p.f>=0)seg(p.f,g+1,a0,mid,slot+"v",i);else if(g+1<=3)ghost(g+1,a0,mid);
-    if(p.m>=0)seg(p.m,g+1,mid,a1,slot+"m",i);else if(g+1<=3)ghost(g+1,mid,a1);
+    if(g>=GR)return;
+    const p=P[i],mid=(a0+a1)/2,deep=g>=G,on=s=>!deep||(LN&&LN.pre.has(slot+s));
+    if(p.f>=0){if(on("v"))seg(p.f,g+1,a0,mid,slot+"v",i)}else if(g+1<=3)ghost(g+1,a0,mid);
+    if(p.m>=0){if(on("m"))seg(p.m,g+1,mid,a1,slot+"m",i)}else if(g+1<=3)ghost(g+1,mid,a1);
   }
   // empty guide rings
-  for(let g=1;g<=G;g++){const ri=r0+(g-1)*ring,ro=ri+ring;const [x0,y0]=pol(Math.PI,ro),[x1,y1]=pol(2*Math.PI,ro);
+  for(let g=1;g<=GR;g++){const ri=r0+(g-1)*ring,ro=ri+ring;const [x0,y0]=pol(Math.PI,ro),[x1,y1]=pol(2*Math.PI,ro);
     el("path",{d:`M${x0},${y0}A${ro},${ro} 0 0 1 ${x1},${y1}`,fill:"none",stroke:"#efe9df"},gSeg);
     const t=el("text",{x:cx+ri+ring/2,y:cy+18,"text-anchor":"middle",fill:"#a59a8f","font-size":10},svg);t.textContent=g===1?_t("fanParents"):g===2?_t("fanGrand"):_t("fanGen",{n:g});}
   seg(root,0,Math.PI,2*Math.PI,"",null);
+  /* deep in the fan the line's slices get thinner than a pixel: a thin line with dots through them, from the last slice you can still see */
+  {lnPts.sort((a,b)=>a.g-b.g);const k=lnPts.findIndex(q=>q.arc<14);if(k>=0){const pts=lnPts.slice(Math.max(0,k-1)).map(q=>pol(q.am,q.rm));
+    el("polyline",{points:pts.map(q=>q.join(",")).join(" "),fill:"none",stroke:"#2a2622","stroke-width":1.6,"stroke-linejoin":"round",opacity:.85},gTxt);
+    pts.slice(1).forEach(([x,y])=>el("circle",{cx:x,cy:y,r:2.6,fill:"#2a2622",stroke:"#fffdf9","stroke-width":1},gTxt))}}
   function ghost(g,a0,a1){const ri=r0+(g-1)*ring,ro=ri+ring,pad=Math.min(0.004,(a1-a0)*0.08),b0=a0+pad,b1=a1-pad;
     const [x0,y0]=pol(b0,ri+1),[x1,y1]=pol(b1,ri+1),[x2,y2]=pol(b1,ro-1),[x3,y3]=pol(b0,ro-1);
     el("path",{d:`M${x0},${y0}A${ri+1},${ri+1} 0 0 1 ${x1},${y1}L${x2},${y2}A${ro-1},${ro-1} 0 0 0 ${x3},${y3}Z`,fill:"#f6f1ea",stroke:"#d9cfc2","stroke-dasharray":"3 3"},gSeg);
@@ -979,7 +985,7 @@ function isLight(hex){if(!hex||hex[0]!=="#")return true;const n=parseInt(hex.sli
 function drawCosmos(){
   const G=state.gens,root=state.root,mode=state.color,LN=lineInfo();
   const V=new Set(),B=[];
-  function mkB(x,g,ped,code){if(V.has(x)||g>G)return null;V.add(x);const n={x,g,ped,line:code.length>=2?code.slice(0,2):null,bb:true,sp:[],side:[]};B.push(n);
+  function mkB(x,g,ped,code){if(V.has(x)||(g>G&&!(LN&&LN.pairs.has(ped+"-"+x))))return null; /* past the slider: only the Story line */V.add(x);const n={x,g,ped,line:code.length>=2?code.slice(0,2):null,bb:true,sp:[],side:[]};B.push(n);
     const p=P[x];n.fa=p.f>=0?mkB(p.f,g+1,x,code+"v"):null;n.mo=p.m>=0?mkB(p.m,g+1,x,code+"m"):null;return n}
   const R=mkB(root,0,null,"");
   function mkS(x,g,line){V.add(x);const n={x,g,line,sp:[],kids:[]};
@@ -1066,7 +1072,7 @@ function drawTijdlijn(){
   function mk(i,g,child,side,code){seen.add(i);const p=P[i];
     let y=p.by,est=false;if(!y){est=true;y=child?(child.y-(side==="v"?31:28)):rootGuess()}
     const n={i,g,y,est,child,side,code,par:[]};nodes.push(n);
-    if(g<G)[[p.f,"v"],[p.m,"m"]].forEach(([q,s])=>{if(q<0)return;if(seen.has(q)){extra.push([n,q,s]);return}n.par.push(mk(q,g+1,n,s,code+s))});
+    [[p.f,"v"],[p.m,"m"]].forEach(([q,s])=>{if(q<0||(g>=G&&!(LN&&LN.pairs.has(i+"-"+q))))return; /* past the slider: only the Story line */if(seen.has(q)){extra.push([n,q,s]);return}n.par.push(mk(q,g+1,n,s,code+s))});
     n.more=g>=G&&parentsOf(i).length>0;return n}
   function rootGuess(){const ys=parentsOf(base).map(q=>P[q].by).filter(Boolean);if(ys.length)return Math.max(...ys)+29;const gs=[];parentsOf(base).forEach(q=>parentsOf(q).forEach(r=>{if(P[r].by)gs.push(P[r].by)}));if(gs.length)return Math.max(...gs)+58;return new Date().getFullYear()-30}
   const R=mk(base,0,null,null,"");
@@ -1158,7 +1164,13 @@ function drawTijdlijn(){
   body.appendChild(ctl);
   const toRoot=()=>{sc.scrollTop=sc.scrollHeight;sc.scrollLeft=(PAD+R.x)*Z-sc.clientWidth/2};
   ctl.onclick=e=>{const b=e.target.closest("[data-z]");if(!b)return;const a=b.dataset.z;if(a==="in")zoomTo(Z*1.25);else if(a==="out")zoomTo(Z/1.25);else{zoomTo(1);toRoot()}};
-  requestAnimationFrame(toRoot);setTimeout(toRoot,80);
+  /* with the Story line on: zoom so the whole line fits (not smaller than a quarter) and centre it */
+  const toLine=()=>{const ln=LN&&LN.path.map(i=>byI.get(i)).filter(Boolean);if(!ln||ln.length<2)return toRoot();
+    const xs=ln.map(n=>PAD+n.x),ys=ln.map(n=>Y(n.y)),bw=Math.max(...xs)-Math.min(...xs)+260,bh=Math.max(...ys)-Math.min(...ys)+80;
+    zoomTo(Math.min(1,sc.clientWidth/bw,sc.clientHeight/bh));
+    sc.scrollLeft=(Math.min(...xs)+Math.max(...xs))/2*Z-sc.clientWidth/2;sc.scrollTop=(Math.min(...ys)+Math.max(...ys))/2*Z-sc.clientHeight/2;
+    drawAxis();axis.style.transform=`translateY(${-sc.scrollTop}px)`};
+  const toStart=LN?toLine:toRoot;requestAnimationFrame(toStart);setTimeout(toStart,80);
   return wrap;
 }
 
