@@ -95,3 +95,4 @@ The address carries a secret key, because `--lan` opens the Workshop to everyone
 - Cosmos and Fan show as many generations as the start person's tree has, plus one orbit/ring of open questions; they grow one when you get a generation further.
 - Counters: people, links (parent-child), open questions (missing parents up to generation 9, as in `check`), sources (links with a source).
 - "Viewer ↗" opens the normal viewer from the same server.
+- The replay button (⟲) plays the whole session again, from the tree as it was when this Workshop started: every search, note, check and round with the same animations, with pause, 1×/2×/4× and "Back to live". The server keeps it in memory until the Workshop stops (every data.json version, compressed); a new start begins a new session. Point the user to it after a long or overnight round: "press ⟲ to watch what happened while you were away".

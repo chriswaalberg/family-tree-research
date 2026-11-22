@@ -32,7 +32,7 @@ Helpers (subagents) set FTR_WHO=<short name> in front of their commands: each ge
 
 Standard library only. Dutch aliases: serveer/start, notitie (--persoon, --soort, --boom), voortgang (--tekst, --boom).
 """
-import argparse, hashlib, json, os, queue, secrets, signal, socket, sys, tempfile, threading, time, urllib.request
+import argparse, hashlib, json, zlib, os, queue, secrets, signal, socket, sys, tempfile, threading, time, urllib.request
 from collections import deque
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs, unquote
@@ -141,6 +141,19 @@ class Hub:
         self.history = deque(maxlen=80)
         self.tasks = {}  # latest progress per task, so a page opened halfway sees the bars
         self.seen = set()  # round steps already shown (rebuild sends the whole last round every time)
+        # the whole session, for the replay button: every event in order, every data.json version (compressed)
+        self.start = round(time.time(), 2)
+        self.timeline, self.versions = [], []
+
+    def add_version(self, raw):
+        if len(self.versions) >= MAX_VERSIONS:
+            return None
+        self.versions.append(zlib.compress(raw, 6))
+        return len(self.versions) - 1
+
+    def record(self, ev):
+        if len(self.timeline) < MAX_TIMELINE and ev.get("kind") != "hello":
+            self.timeline.append(ev)
 
     def send(self, ev, keep=True):
         if ev.get("kind") == "steps":
@@ -162,6 +175,7 @@ class Hub:
             keep = keep and (first or done)  # the log keeps only the start and the end of a task
         if keep:
             self.history.append(ev)
+        self.record(ev)
         with self.lock:
             for q in list(self.clients):
                 q.put(ev)
@@ -178,8 +192,11 @@ class Hub:
                 self.clients.remove(q)
 
 
+MAX_VERSIONS, MAX_TIMELINE = 600, 60000  # ~150 kB per version of a 1,200-person tree
+
+
 def watch(path, hub, stop):
-    """Tell the pages when data.json changed (and is complete JSON again)."""
+    """Tell the pages when data.json changed (and is complete JSON again); keep every version for the replay."""
     last = None
     while not stop.is_set():
         try:
@@ -189,10 +206,15 @@ def watch(path, hub, stop):
             sig = None
         if sig and sig != last:
             try:
-                with open(path, encoding="utf-8") as fh:
-                    json.load(fh)
+                with open(path, "rb") as fh:
+                    raw = fh.read()
+                json.loads(raw.decode("utf-8"))
+                n = hub.add_version(raw)
                 if last is not None:
-                    hub.send({"kind": "data", "t": round(time.time(), 2), "v": sig[0]}, keep=False)
+                    ev = {"kind": "data", "t": round(time.time(), 2), "v": sig[0]}
+                    if n is not None:
+                        ev["n"] = n
+                    hub.send(ev, keep=False)
                 last = sig
             except (OSError, ValueError):
                 pass  # still being written: try again in a moment
@@ -258,6 +280,14 @@ def make_handler(cfg, hub):
                 return self.file(os.path.join(VIEWER, "index.html"), extra)
             if p == "/events":
                 return self.events()
+            if p == "/session":  # the replay: when it started and everything that happened, in order
+                return self.body(200, json.dumps({"start": hub.start, "events": hub.timeline}).encode("utf-8"), "application/json")
+            if p.startswith("/session/data/"):  # one data.json version of this session (0 = how the tree was at the start)
+                try:
+                    raw = zlib.decompress(hub.versions[int(p.rsplit("/", 1)[1])])
+                except (ValueError, IndexError):
+                    return self.body(404, b"no such version", "text/plain")
+                return self.body(200, raw, "application/json")
             if p == "/phone":  # the phone address with its key, only for the page on this computer (the QR button)
                 if not self.local():
                     return self.body(403, b"only on this computer", "text/plain")

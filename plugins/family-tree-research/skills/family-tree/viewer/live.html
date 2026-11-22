@@ -48,6 +48,11 @@ main{display:grid;grid-template-columns:1fr minmax(300px,370px);min-height:0}
 #fan{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 aside{display:flex;flex-direction:column;gap:10px;padding:6px 18px 14px 0;min-height:0}
 #src:empty,#tasks:empty{display:none}
+#rbar{display:flex;flex-direction:column;gap:7px;padding:10px 12px;border:1px solid var(--accent);border-radius:14px;background:color-mix(in srgb,var(--accent) 12%,var(--panel))}
+#rbar .rb-t{display:flex;justify-content:space-between;gap:10px;align-items:baseline}#rbar .rb-t b{font:700 16px var(--serif)}#rbar .rb-t span{font:600 11px var(--sans);color:var(--mut)}
+#rbar .rb-bar{height:5px;border-radius:99px;background:var(--line);overflow:hidden}#rbar .rb-bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+#rbar .rb-c{display:flex;gap:6px;flex-wrap:wrap}#rbar button{font:600 12px var(--sans);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 9px;cursor:pointer}
+#rbar button.on{background:var(--accent);border-color:var(--accent);color:#1f1e1d}#rbLive{margin-left:auto}
 #now{display:flex;flex-direction:column;gap:6px;padding:10px 12px;border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:14px;background:var(--panel)}
 #now h3{margin:0;font:600 10px var(--sans);letter-spacing:2px;text-transform:uppercase;color:var(--mut)}
 #now .nw{display:flex;gap:9px;align-items:center;min-width:0}#now .nw i{flex:none;width:9px;height:9px;border-radius:50%;box-shadow:0 0 10px currentColor;animation:orbPulse 2s ease-in-out infinite}
@@ -161,7 +166,7 @@ aside{display:flex;flex-direction:column;gap:10px;padding:6px 18px 14px 0;min-he
 #ov .st{display:flex;gap:20px;justify-content:center;margin-top:10px;flex-wrap:wrap}
 #ov .st b{display:block;font:700 30px/1 var(--serif);color:var(--gold)}#ov .st span{font:600 9.5px var(--sans);letter-spacing:1.4px;text-transform:uppercase;color:var(--mut)}
 dialog{background:var(--bg2);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:18px;width:min(420px,92vw);max-height:80vh}
-.qr{background:#fff;padding:12px;border-radius:12px;width:min(250px,70vw);margin:14px auto 10px}.qr svg{display:block;width:100%;height:auto}
+.qr{background:#2a2826;padding:10px;border-radius:16px;width:min(250px,70vw);margin:14px auto 10px;box-shadow:0 0 40px color-mix(in srgb,var(--accent) 35%,transparent)}.qr svg{display:block;width:100%;height:auto}
 #phoneDlg p{margin:6px 0;color:var(--mut)}#phoneDlg code{display:block;margin-top:8px;font-size:11px;color:var(--mut);overflow-wrap:anywhere}
 #phoneDlg .x{float:right;background:none;border:0;color:var(--mut);font-size:20px;cursor:pointer}
 dialog::backdrop{background:rgba(0,0,0,.5)}
@@ -192,7 +197,7 @@ dialog input{width:100%;font:15px var(--sans);padding:9px 12px;border-radius:10p
   <h1><span data-t="title">Workshop</span><span class="pill" id="pill"><i></i><span id="pillT">…</span></span></h1>
   <button type="button" class="rootbtn" id="rootBtn"></button>
  </div>
- <div class="hbtns"><button type="button" class="hbtn" id="phoneBtn" hidden><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg></button><span class="vsw" id="vsw"><button type="button" data-v="cosmos" data-t="v_cos">Cosmos</button><button type="button" data-v="fan" data-t="v_fan">Fan</button></span><a class="hbtn" id="viewerBtn" href="viewer/" target="_blank" rel="noopener"><span data-t="viewer">Viewer</span> ↗</a></div>
+ <div class="hbtns"><button type="button" class="hbtn" id="replayBtn"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M10 9l5 3-5 3z" fill="currentColor"/></svg></button><button type="button" class="hbtn" id="phoneBtn" hidden><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg></button><span class="vsw" id="vsw"><button type="button" data-v="cosmos" data-t="v_cos">Cosmos</button><button type="button" data-v="fan" data-t="v_fan">Fan</button></span><a class="hbtn" id="viewerBtn" href="viewer/" target="_blank" rel="noopener"><span data-t="viewer">Viewer</span> ↗</a></div>
  <div class="counts">
   <div class="cnt" id="c-p"><b>–</b><span data-t="people">people</span></div>
   <div class="cnt" id="c-r"><b>–</b><span data-t="links">links</span></div>
@@ -207,6 +212,8 @@ dialog input{width:100%;font:15px var(--sans);padding:9px 12px;border-radius:10p
   <div id="ov"></div>
  </div>
  <aside>
+  <div id="rbar" hidden><div class="rb-t"><b data-t="replayT">Replay</b><span id="rbTime"></span></div><div class="rb-bar"><i id="rbFill"></i></div>
+   <div class="rb-c"><button type="button" id="rbPause">❚❚</button><button type="button" data-sp="1" class="on">1×</button><button type="button" data-sp="2">2×</button><button type="button" data-sp="4">4×</button><button type="button" id="rbLive" data-t="backLive">Back to live</button></div></div>
   <div id="now" hidden></div>
   <div id="tasks"></div>
   <div id="tray"><h3 data-t="loose">Not in the fan</h3></div>
@@ -230,7 +237,7 @@ en:{title:"Workshop",treeOf:"Family tree of",people:"people",links:"links",open:
  job:"Occupation: {n}",jobD:"{j}",many:"and {n} more",source:"Source",nosource:"No source named yet",fatherOf:"father of {c}",motherOf:"mother of {c}",notInFan:"not in the line of ancestors",
  rejected:"REJECTED",gapsNew:"+{n} open questions",gapsNewD:"Every new ancestor has two parents of their own.",gold:"This link is certain now.",
  s_zeker:"certain",s_waarschijnlijk:"probable",s_mogelijk:"possible",s_fout:"wrong",s_onbekend:"unknown","s_niet gecheckt":"not checked",s_:"no status",
- empty:"Nobody in the tree yet.",phoneBtn:"On your phone",phoneT:"Watch on your phone",phoneP:"Point your phone's camera at this code. It must be on the same Wi-Fi.",
+ empty:"Nobody in the tree yet.",replayBtn:"Replay this session",replayT:"Replay",backLive:"Back to live",replayDone:"End of the session so far",replayEmpty:"Nothing happened in this session yet.",replayWait:"One moment…",phoneBtn:"On your phone",phoneT:"Watch on your phone",phoneP:"Point your phone's camera at this code. It must be on the same Wi-Fi.",
  phoneOnce:"Only once: after that a bookmark works, also after a restart.",phoneOff:"The Workshop only listens on this computer now. Ask Claude: “show the Workshop on my phone”.",phoneNoQR:"No code without internet. Type this address on your phone:",srcMore:"+ {n} more",nowT:"Working on",focusT:"Now: {n}",r_wifeOf:"wife of {n}",r_husbandOf:"husband of {n}",r_partnerOf:"partner of {n}",
  r_motherOf:"mother of {n}",r_fatherOf:"father of {n}",r_parentOf:"parent of {n}",r_daughterOf:"daughter of {n}",r_sonOf:"son of {n}",r_childOf:"child of {n}",
  r_sisterOf:"sister of {n}",r_brotherOf:"brother of {n}",r_siblingOf:"sibling of {n}",v_fan:"Fan",v_cos:"Cosmos",nothing:"Nothing found",why:"Reason or source added: {c} → {p}",whyN:"{n} links got a source or a reason",whyNd:"{names} and others",
@@ -248,7 +255,7 @@ nl:{title:"Werkplaats",treeOf:"Stamboom van",people:"mensen",links:"relaties",op
  job:"Beroep: {n}",jobD:"{j}",many:"en nog {n} anderen",source:"Bron",nosource:"Nog geen bron genoemd",fatherOf:"vader van {c}",motherOf:"moeder van {c}",notInFan:"niet in de voorouderlijn",
  rejected:"AFGEWEZEN",gapsNew:"+{n} open vragen",gapsNewD:"Elke nieuwe voorouder heeft zelf ook weer twee ouders.",gold:"Deze koppeling is nu zeker.",
  s_zeker:"zeker",s_waarschijnlijk:"waarschijnlijk",s_mogelijk:"mogelijk",s_fout:"fout",s_onbekend:"onbekend","s_niet gecheckt":"niet gecheckt",s_:"geen status",
- empty:"Nog niemand in de boom.",phoneBtn:"Op je telefoon",phoneT:"Kijk mee op je telefoon",phoneP:"Richt de camera van je telefoon op deze code. Hij moet op hetzelfde wifi zitten.",
+ empty:"Nog niemand in de boom.",replayBtn:"Deze sessie opnieuw afspelen",replayT:"Terugblik",backLive:"Terug naar live",replayDone:"Einde van de sessie tot nu toe",replayEmpty:"Er is in deze sessie nog niets gebeurd.",replayWait:"Even wachten…",phoneBtn:"Op je telefoon",phoneT:"Kijk mee op je telefoon",phoneP:"Richt de camera van je telefoon op deze code. Hij moet op hetzelfde wifi zitten.",
  phoneOnce:"Eén keer nodig: daarna werkt een bladwijzer, ook na een herstart.",phoneOff:"De Werkplaats luistert nu alleen op deze computer. Vraag Claude: “zet de Werkplaats op mijn telefoon”.",phoneNoQR:"Geen code zonder internet. Tik dit adres over op je telefoon:",srcMore:"+ {n} meer",nowT:"Nu bezig met",focusT:"Nu: {n}",r_wifeOf:"vrouw van {n}",r_husbandOf:"man van {n}",r_partnerOf:"partner van {n}",
  r_motherOf:"moeder van {n}",r_fatherOf:"vader van {n}",r_parentOf:"ouder van {n}",r_daughterOf:"dochter van {n}",r_sonOf:"zoon van {n}",r_childOf:"kind van {n}",
  r_sisterOf:"zus van {n}",r_brotherOf:"broer van {n}",r_siblingOf:"broer of zus van {n}",v_fan:"Waaier",v_cos:"Kosmos",nothing:"Niets gevonden",why:"Bron of reden erbij: {c} → {p}",whyN:"{n} koppelingen kregen een bron of reden",whyNd:"{names} en anderen",
@@ -267,7 +274,7 @@ const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k
 
 /* ===== TUNING (all numbers that shape the Workshop) ===== */
 let VIEW="cosmos";
-const CFG={SRC_MAX:3,FOCUS_MS:120000,SWEEP_BIG:400,TICK_MS:120,TAP_PX:22,COS_R0:40,STEPS_ONE_BY_ONE:8,CERT_ONE_BY_ONE:4,WHY_ANIM_MAX:80,BREATHE_MAX:40,MAX_PARTS:1500,STAR_MS:250,MAXG:14,R0:62,RMAX:490,Q:.8,MIN_DEG:.12,ONE_BY_ONE:10,TRAY:6,BEAM_IDLE:30000,FEED:120,GAPS_TO:9,SWEEP_MS:5200,FLY_MS:1400};
+const CFG={QR_STYLE:2,SRC_MAX:3,FOCUS_MS:120000,SWEEP_BIG:400,TICK_MS:120,TAP_PX:22,COS_R0:40,STEPS_ONE_BY_ONE:8,CERT_ONE_BY_ONE:4,WHY_ANIM_MAX:80,BREATHE_MAX:40,MAX_PARTS:1500,STAR_MS:250,MAXG:14,R0:62,RMAX:490,Q:.8,MIN_DEG:.12,ONE_BY_ONE:10,TRAY:6,BEAM_IDLE:30000,FEED:120,GAPS_TO:9,SWEEP_MS:5200,FLY_MS:1400};
 
 /* ===== DATA ===== */
 let D=null,P=[],ROOT=null,L=null;            // L = current layout
@@ -420,8 +427,8 @@ function loop(now){
  if(parts.length||emitters.length)requestAnimationFrame(loop);else{running=false;ctx.clearRect(0,0,innerWidth,innerHeight)}}
 
 /* ===== EFFECTS ===== */
-const wait=ms=>new Promise(r=>setTimeout(r,ms));
-function tween(ms,f){const t0=performance.now();let done=false,timer=null;return new Promise(res=>{
+let SPEED=1;const wait=ms=>new Promise(r=>setTimeout(r,ms/SPEED));
+function tween(ms,f){ms/=SPEED;const t0=performance.now();let done=false,timer=null;return new Promise(res=>{
   const step=()=>{if(done)return;const k=Math.min(1,(performance.now()-t0)/ms);try{f(k)}catch(e){console.error(e)}
    if(k>=1){done=true;clearTimeout(timer);res();return}
    requestAnimationFrame(step);clearTimeout(timer);timer=setTimeout(step,CFG.TICK_MS)}; /* no frame within TICK_MS (window hidden, busy): the timer moves it on */
@@ -527,7 +534,7 @@ function drawFocus(){$$("#fxG .focus").forEach(e=>e.remove());const now=$("#now"
   if(!s)continue;const[x,y]=centre(s),R=VIEW==="cosmos"?starR(s.g)+7:Math.max(8,Math.min(22,(L.RO(s.g)-L.RI(s.g))/2)),fs=fz(13,12),
    g=document.createElementNS(NS,"g");g.setAttribute("class","focus");
   g.innerHTML=`<circle class="fring" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${R.toFixed(1)}" stroke="${b.col}"/>`
-   +`<text class="flbl" x="${x.toFixed(1)}" y="${(y-R-fs*.6).toFixed(1)}" style="font-size:${fs.toFixed(1)}px">${esc(short(p))}</text>`
+   +(lblEl(s.code)&&!f.r.rel?"":`<text class="flbl" x="${x.toFixed(1)}" y="${(y-R-fs*.6).toFixed(1)}" style="font-size:${fs.toFixed(1)}px">${esc(short(p))}</text>`) /* the star already shows the name */
    +(f.r.rel?`<text class="frel" x="${x.toFixed(1)}" y="${(y+R+fs*1.1).toFixed(1)}" style="font-size:${(fs*.8).toFixed(1)}px">${esc(f.r.rel)}</text>`:"");
   $("#fxG").append(g)}
  now.innerHTML=h?`<h3>${esc(_t("nowT"))}</h3>${h}`:"";now.hidden=!h}
@@ -624,7 +631,7 @@ function diffOf(oP,nP){const oi=new Map(oP.map((p,i)=>[key(p,i),i])),ni=new Map(
 function tgCounts(d){const m=new Map(),pl=(d&&d.tijdgeest&&d.tijdgeest.plaatsen)||[];
  for(const e of pl){const k=e.id||e.naam;if(k)m.set(k,{naam:e.naam||k,e:(e.gebeurtenissen||[]).length,b:(e.beelden||[]).length,l:(e.leven||[]).length})}return m}
 const nameOfK=(Pa,k)=>{const i=idx(Pa,k);return i<0?"?":short(Pa[i])};
-async function dataChanged(){const d=await fetchData();if(!d)return;const oP=P,nP=prep(d),oTG=tgCounts(D);D=d;setLang(d);
+async function dataChanged(given){const d=given||await fetchData();if(!d)return;const oP=P,nP=prep(d),oTG=tgCounts(D);D=d;setLang(d);
  const ch=diffOf(oP,nP),oldL=L,oldFan=new Set(oldL.byId.keys());
  /* phase 1, on the old fan: links that went away crack, people that went away blow away */
  fxClear();
@@ -687,17 +694,47 @@ function rootPick(){const d=$("#rootDlg"),starts=(D.startpersonen||[]).map(s=>ty
  d.querySelector("#pq").oninput=e=>{const q=fold(e.target.value).trim();d.querySelector("#pl2").innerHTML=q.length<2?"":P.map((p,i)=>[p,i]).filter(([p])=>fold(p.n+" "+(p.aka||[]).join(" ")).includes(q)).slice(0,30).map(([,i])=>row(i)).join("");wire()};
  wire();d.addEventListener("click",e=>{if(e.target===d)d.close()});d.showModal()}
 
+/* ===== REPLAY: the whole session again, from the tree as it was when the Workshop started (server keeps it) */
+let REPLAY=false,PAUSED=false;
+const hhmm=t=>{const d=new Date(t*1000);return d.toLocaleTimeString(LANG==="nl"?"nl-NL":"en-GB",{hour:"2-digit",minute:"2-digit"})};
+async function replay(){if(REPLAY)return;let s;try{const r=await fetch("session",{cache:"no-store"});if(!r.ok)return;s=await r.json()}catch(e){return}
+ const evs=s.events.filter(e=>e.kind!=="data"||e.n!=null);
+ if(!evs.length){callout(null,`<b>${esc(_t("replayT"))}</b>${esc(_t("replayEmpty"))}`,"",3000);return}
+ REPLAY=true;PAUSED=false;QUEUE.length=0;const bar=$("#rbar");bar.hidden=false;$("#rbTime").textContent=_t("replayWait");$("#rbFill").style.width="0";
+ for(let k=0;busy&&k<200;k++)await new Promise(r=>setTimeout(r,100)); /* let the animation that is playing finish first */
+ let d0;try{d0=await(await fetch("session/data/0",{cache:"no-store"})).json()}catch(e){REPLAY=false;return}
+ D=d0;P=prep(d0);checked.clear();warned.clear();trayIds.length=0;for(const f of FOCUS.values())clearTimeout(f.timer);FOCUS.clear();
+ for(const t of TASKS.values())t.el.remove();TASKS.clear();$("#feed").innerHTML="";$("#src").innerHTML="";fxClear();lastCounts=null;lastCert=null;render();
+ $("#rbPause").textContent="❚❚";$("#rbLive").classList.remove("on");
+ const t0=s.start,t1=evs[evs.length-1].t||t0;
+ for(let k=0;k<evs.length&&REPLAY;k++){const ev=evs[k];
+  $("#rbTime").textContent=`${hhmm(ev.t||t0)} · ${hhmm(t0)} – ${hhmm(t1)}`;$("#rbFill").style.width=(100*(k+1)/evs.length).toFixed(1)+"%";
+  try{if(ev.kind==="data"){const dd=await(await fetch("session/data/"+ev.n,{cache:"no-store"})).json();await dataChanged(dd)}
+   else if(ev.kind==="progress"){progress(ev);await wait(60)}
+   else await handle(ev)}catch(e){console.error(e)}
+  while(PAUSED&&REPLAY)await new Promise(r=>setTimeout(r,150))}
+ if(!REPLAY)return;$("#rbTime").textContent=_t("replayDone");$("#rbLive").classList.add("on")}
+function replayWire(){const b=$("#replayBtn");b.title=b.ariaLabel=_t("replayBtn");b.onclick=replay;
+ $("#rbPause").onclick=()=>{PAUSED=!PAUSED;$("#rbPause").textContent=PAUSED?"▶":"❚❚"};
+ $$("#rbar [data-sp]").forEach(x=>x.onclick=()=>{SPEED=+x.dataset.sp;$$("#rbar [data-sp]").forEach(y=>y.classList.toggle("on",y===x))});
+ $("#rbLive").onclick=()=>{REPLAY=false;location.reload()}}  /* back to live: the page starts fresh from the server (log, tree, bars) */
 /* ===== PHONE: a QR code of the phone address (only on the computer that runs the Workshop; /phone refuses others) */
 let PHONE=undefined;
 async function phoneInit(){try{const r=await fetch("phone",{cache:"no-store"});if(!r.ok)return;PHONE=(await r.json()).url||null;
  const b=$("#phoneBtn");b.hidden=false;b.title=b.ariaLabel=_t("phoneBtn");b.onclick=phoneShow}catch(e){}}
+/* the QR code in the Workshop's own look: round dots, rounded finder eyes in clay; styles for the choice sheet */
+const QR_STYLES={2:{bg:"#2a2826",dot:"#f6e7dc",eye:"#e08a68",card:"#2a2826"}}; /* dark card, light dots, clay eyes (chosen from three) */
+function qrSvg(q,st){const n=q.getModuleCount(),m=2,W=n+2*m,eye=(r,c)=>(r<7&&c<7)||(r<7&&c>=n-7)||(r>=n-7&&c<7);let d="";
+ for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(!eye(r,c)&&q.isDark(r,c))d+=`<circle cx="${c+m+.5}" cy="${r+m+.5}" r=".42"/>`;
+ const e=(x,y)=>`<rect x="${x+.5}" y="${y+.5}" width="6" height="6" rx="1.8" fill="none" stroke="${st.eye}" stroke-width="1"/><rect x="${x+2}" y="${y+2}" width="3" height="3" rx=".9" fill="${st.eye}"/>`;
+ return`<svg viewBox="0 0 ${W} ${W}" xmlns="http://www.w3.org/2000/svg"><rect width="${W}" height="${W}" rx="2" fill="${st.bg}"/><g fill="${st.dot}">${d}</g>${e(m,m)}${e(m+n-7,m)}${e(m,m+n-7)}</svg>`}
 function qrLib(){return window.qrcode?Promise.resolve(true):new Promise(res=>{const s=document.createElement("script");
  s.src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js";s.onload=()=>res(!!window.qrcode);s.onerror=()=>res(false);document.head.append(s)})}
 async function phoneShow(){const d=$("#phoneDlg");d.innerHTML=`<button type="button" class="x" aria-label="×">×</button><h2>${esc(_t("phoneT"))}</h2>`;
  d.querySelector(".x").onclick=()=>d.close();d.addEventListener("click",e=>{if(e.target===d)d.close()});
  if(!PHONE){d.insertAdjacentHTML("beforeend",`<p>${esc(_t("phoneOff"))}</p>`);d.showModal();return}
  d.insertAdjacentHTML("beforeend",`<p>${esc(_t("phoneP"))}</p><div class="qr"></div><p>${esc(_t("phoneOnce"))}</p><code>${esc(PHONE)}</code>`);d.showModal();
- if(await qrLib()){const q=qrcode(0,"M");q.addData(PHONE);q.make();d.querySelector(".qr").innerHTML=q.createSvgTag({cellSize:6,margin:2,scalable:true})}
+ if(await qrLib()){const q=qrcode(0,"M");q.addData(PHONE);q.make();const st=QR_STYLES[CFG.QR_STYLE],box=d.querySelector(".qr");box.style.background=st.card;box.innerHTML=qrSvg(q,st)}
  else{d.querySelector(".qr").remove();d.querySelector("code").insertAdjacentHTML("beforebegin",`<p>${esc(_t("phoneNoQR"))}</p>`)}}
 /* ===== START ===== */
 function setLang(d){let l=null;try{l=new URLSearchParams(location.search).get("lang")}catch(e){}const nl=(l==="nl"||l==="en")?l:((d.taal||d.lang)==="nl"?"nl":"en");
@@ -709,13 +746,13 @@ async function start(){const d=await fetchData();if(!d){$("#feed").innerHTML=`<l
  $$("#vsw button").forEach(b=>{b.setAttribute("aria-pressed",b.dataset.v===VIEW?"true":"false");b.onclick=()=>setView(b.dataset.v)});wireTap();
  applyTexts();render();
  if(!P.length)feed("note",_t("empty"),"");
- $("#rootBtn").onclick=rootPick;phoneInit();
+ $("#rootBtn").onclick=rootPick;phoneInit();replayWire();
  connect()}
 function connect(){const pill=$("#pill"),pt=$("#pillT");let es;
  try{es=new EventSource("events")}catch(e){pt.textContent=_t("offline");return}
  es.onopen=()=>{pill.classList.add("on");pt.textContent=_t("live")};
  es.onerror=()=>{pill.classList.remove("on");pt.textContent=_t("offline")};
- let first=true;es.onmessage=m=>{let ev;try{ev=JSON.parse(m.data)}catch(e){return}
+ let first=true;es.onmessage=m=>{if(REPLAY)return;let ev;try{ev=JSON.parse(m.data)}catch(e){return}
   if(ev.kind==="hello"&&!first){enqueue({kind:"data"});return} /* reconnected: catch up on the data, not the old log */
   first=false;enqueue(ev)}}
 start();
