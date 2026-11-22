@@ -2,6 +2,7 @@
 
 One line per version from 0.9.38 on; older versions are in the git history (`git log --oneline`).
 
+- **0.9.68** — Fix: with the Wi-Fi on by default, a second tree's Workshop could slip onto the same port as the first (on 127.0.0.1 next to 0.0.0.0) and the laptop then talked to the wrong tree. A taken port now always means the next port; `launch` checks ports for the Wi-Fi too.
 - **0.9.67** — The phone can always watch: the Workshop listens on the Wi-Fi by default (with the tree's key), so the phone button shows its QR code without asking Claude for a restart; the address is worked out on every tap (another network, still right). `--local` keeps it to this computer; the old `--lan` is ignored, so existing launch entries still start.
 - **0.9.66** — Workshop: an EN/NL switch like the viewer's, sharing the reader's choice with it (switch in one, the other opens in that language too); without a choice it follows the tree's language. Header buttons stay on one line on a 375 px phone.
 - **0.9.65** — Workshop: a replay button plays the whole session again from the tree as it was at the start (every search, note, check and round, same animations), with pause, 1×/2×/4× and back to live; the server keeps every event and data.json version of the session in memory. The QR code is in the Workshop's own style: a dark card with light round dots and clay eyes. A star that already shows its name gets only the "working on" ring.

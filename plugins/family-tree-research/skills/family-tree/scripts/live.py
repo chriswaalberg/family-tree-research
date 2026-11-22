@@ -32,7 +32,7 @@ Helpers (subagents) set FTR_WHO=<short name> in front of their commands: each ge
 
 Standard library only. Dutch aliases: serveer/start, notitie (--persoon, --soort, --boom), voortgang (--tekst, --boom).
 """
-import argparse, hashlib, json, zlib, os, queue, secrets, signal, socket, sys, tempfile, threading, time, urllib.request
+import argparse, errno, hashlib, json, zlib, os, queue, secrets, signal, socket, sys, tempfile, threading, time, urllib.request
 from collections import deque
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs, unquote
@@ -405,7 +405,7 @@ def free_port(start, n=40):
     for port in range(start, start + n):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            s.bind(("127.0.0.1", port))
+            s.bind(("0.0.0.0", port))  # free for the Wi-Fi as well as for this computer
             return port
         except OSError:
             continue
@@ -428,7 +428,9 @@ def cmd_serve(a):
             try:
                 srv = ThreadingHTTPServer((host, port), make_handler(cfg, hub))
                 break
-            except OSError:
+            except OSError as e:
+                if e.errno == errno.EADDRINUSE:
+                    break  # the port is taken (perhaps by another tree on 0.0.0.0): never sneak in on 127.0.0.1, next port
                 continue
         if srv:
             break
