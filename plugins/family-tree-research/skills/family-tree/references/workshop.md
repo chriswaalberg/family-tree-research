@@ -39,6 +39,18 @@ When no Workshop runs, all of this does nothing (one quick file check).
 
 The fan only moves when data.json changes. With the Workshop open, don't wait for the end of a round: as soon as a find is confirmed (you read the record yourself), add its steps to the round file, run `rebuild` and `make_viewer_data.py --config family-tree.json`. Both take a second. The round file grows during the round; that's fine, `rebuild` replays it.
 
+## Say who you are working on: `focus`
+
+The user reads names in the chat ("Now Jan de Vries: first I check who Griet Bakker is"); the Workshop should show the same. **Every time you turn to a person**, before you search for them:
+
+```
+python3 -I scripts/live.py focus "Jan de Vries" "his marriage around 1946"
+```
+
+A GEDCOM id (`I87`) is surest; a name works too. It puts a ring and the name at that person's star (in the helper's colour, one per helper) and a line "Working on" above the log; it stays until your next focus or two minutes. Someone without a star of their own (a wife, a brother, a child who is not an ancestor) shows at their nearest relative in the fan, with the relation: "Griet Bakker · wife of Jan de Vries".
+
+Searches with a name (`archives.py`, `delpher.py`, `note --person`, `progress --person`) do this by themselves. Names are recognised the way genealogists search them: spelling variants (Marritje = Maritje = Marretje, IJ = Y, double letters), a surname with a first name, two given names or a patronymic ("Grietje Jans"), or a surname that only one person in the fan has; years in the search pick between namesakes. A name nobody in the tree has (yet) just shows in the log.
+
 ## Tell what you do: `note` and `progress`
 
 For work the scripts don't see (reading a web page, a screenshot from the user, thinking about a candidate), one line:

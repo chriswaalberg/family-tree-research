@@ -8,6 +8,7 @@
                                                         run it before every preview_start
   note "<text>" [--person I4] [--kind note|read|found|nothing|ask]
                                                         tell the Workshop what you are doing (one line)
+  focus <I4 or name> ["what you look for"]            who you are working on now: ring + name at their star
   progress "<task>" <done> <total> [--person I4] [--text ...]
                                                         a progress bar for a long script; send it every step
 
@@ -435,6 +436,13 @@ def cmd_launch(a):
           + f". Open it with preview_start name \"{a.name}\".")
 
 
+def cmd_focus(a):
+    if a.tree:
+        os.environ["FTR_TREE"] = a.tree
+    if not emit("focus", person=a.person, text=a.text):
+        print("(no Workshop for this tree: focus not shown)")
+
+
 def cmd_progress(a):
     if a.tree:
         os.environ["FTR_TREE"] = a.tree
@@ -479,6 +487,11 @@ def main():
                    choices=["note", "read", "found", "nothing", "ask", "notitie", "lees", "gevonden", "niets", "vraag"])
     n.add_argument("--tree", "--boom", help="the tree's folder, when you run this from somewhere else")
     n.set_defaults(func=cmd_note)
+    f = sp.add_parser("focus", aliases=["bezig"], help="show who you are working on now (a ring + name at their star)")
+    f.add_argument("person", help="GEDCOM id (I4) or name; someone outside the fan shows at their nearest relative")
+    f.add_argument("text", nargs="?", help="what you are looking for, e.g. 'parents'")
+    f.add_argument("--tree", "--boom", help="the tree's folder, when you run this from somewhere else")
+    f.set_defaults(func=cmd_focus)
     g = sp.add_parser("progress", aliases=["voortgang"], help="a progress bar for a long script (send it every step)")
     g.add_argument("task", help="short name of the task, e.g. 'side branches'")
     g.add_argument("done", type=int)
