@@ -46,14 +46,14 @@ python3 -I scripts/gedcom_tool.py rebuild source/original-ancestry-2026-11-19.ge
 
 Dutch: `titel`, `datum`, `bron`, `stappen`, and the Dutch step names and keys below. The round's `source` is the default for every step without its own `source`. A source is text with an optional link (`"... https://..."`), or `{"text": "...", "url": "..."}`, or a list of those. In the GEDCOM it becomes a citation (`SOUR` / `PAGE` / `WWW`) of a source record for the round.
 
-**Who is who.** A person is a GEDCOM id (`@I4@` or `I4`) or a `ref` from an `add` earlier in the same round. A new person gets the id `@I<round>_<ref>@` (`@I52_jacob@`): it never shifts when an earlier round changes, so stories and links that use it keep working. Later rounds use that id. After a `merge`, the dropped id keeps working and points to the kept person.
+**Who is who.** A person is a GEDCOM id (`@I4@` or `I4`) or a `ref` from an `add` earlier in the same round. A new person gets the id `@I<round>_<ref>@` (`@I52_jacob@`): it never shifts when an earlier round changes, so stories and links that use it keep working. Later rounds use that id. A person who already had an id elsewhere (from an older script, in stories, media lists or shared links) can keep it: give the `add` step `"id": "@I90012@"` (or `I90012`); the `ref` still works within the round. In the same way a `parents` step (or an `event` with `person` + `partner`) that makes a new family can get `"family_id": "@F90039@"` (`gezin_id`). An id that exists in the original or an earlier round, or that was removed or merged away, stops the rebuild with file and step. After a `merge`, the dropped id keeps working and points to the kept person.
 
 ### Steps
 
 | op (en / nl) | keys | what it does |
 |---|---|---|
-| `add` / `nieuw` | `ref`, `given_names`, `surname`, `sex`, `birth`, `baptism`, `death`, `burial` (each `{date, place}` or a date), `occupation`, `aka`, `notes` | a new person, with the step's source |
-| `parents` / `ouders` | `child`, `father`, `mother`, `marriage`, `status`, `note`, `type`; per parent `status_father`, `source_mother`, … | links parents to a child. Joins the couple's existing family if there is one; adds a missing parent to the child's family. Stops if the child already has *another* father/mother (remove that link first with `drop_link`) or if the link is in the rejected register (see below) |
+| `add` / `nieuw` | `ref`, `id` (optional fixed id), `given_names`, `surname`, `sex`, `birth`, `baptism`, `death`, `burial` (each `{date, place}` or a date), `occupation`, `aka`, `notes` | a new person, with the step's source |
+| `parents` / `ouders` | `child`, `father`, `mother`, `family_id` (`gezin_id`, optional, only for a new family), `marriage`, `status`, `note`, `type`; per parent `status_father`, `source_mother`, … | links parents to a child. Joins the couple's existing family if there is one; adds a missing parent to the child's family. Stops if the child already has *another* father/mother (remove that link first with `drop_link`) or if the link is in the rejected register (see below) |
 | `status` / `zekerheid` | `child`, `father`/`mother`/`parent`, `status`, `source`, `note`, `type` | only the status and source of an existing link (e.g. after checking an imported tree, or the user's own knowledge) |
 | `event` / `gebeurtenis` | `person` (or `family`, or `person` + `partner`), `type`, `date`, `place`, `note`, `age`, `description`; `if_empty`, `separate` | birth, baptism, death, burial, marriage, divorce, banns (`ondertrouw`), residence, emigration, census, … or your own kind (`"type": "Award"` becomes `EVEN` + `TYPE Award`). Birth, baptism, death, burial, marriage and divorce exist once: a new date/place replaces the old one, which stays in a note ("Earlier value: …"). `if_empty` only fills what's empty; `separate` adds a second one. Residences and other events are always added |
 | `occupation` / `beroep` | `person`, `occupation`, `date`, `place`, `note` | `OCCU` with only the occupation itself; explanation in `note` (the viewer shows OCCU literally) |
@@ -80,7 +80,8 @@ Someone who has worked on the tree in place, or with their own scripts (like a l
 2. Make the current, edited tree the starting point for the rebuild: `source/original-<date>-edited.ged` (a copy; it doesn't change any more).
 3. Turn the current `relations.csv` into the base: `--base-csv data/relations-<date>.csv` (rows by GEDCOM id), or write it into a first round with `status` steps.
 4. Links removed before the switch are already out of the starting point, so the generated register doesn't know them. Keep the old list as `reports/rejected-before-<date>.md` and read it together with the new register.
-5. From now on, every new finding is a round file.
+5. Turning the old script's changes into round files? Give every person and family it created its old id (`"id": "@I90012@"` on `add`, `"family_id": "@F90039@"` on `parents`), so stories, media lists, zeitgeist files and shared links (`#story/I90012`) keep working. Without `id` a new person gets `@I<round>_<ref>@`.
+6. From now on, every new finding is a round file.
 
 ## add — adding ancestors (in place; older way)
 

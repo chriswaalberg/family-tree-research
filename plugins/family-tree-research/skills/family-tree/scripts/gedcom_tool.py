@@ -671,6 +671,7 @@ class Rebuild:
         self.trailer = [r for r in recs if r[1] == "TRLR"]
         self.recs = [r for r in recs if r[1] != "TRLR"]
         self.idx = {r[0]: r for r in self.recs if r[0]}
+        self.ever = set(self.idx)  # every id that ever existed, so a fixed id is never reused
         self.alias = {}            # dropped/merged id -> kept id
         self.rel = {}              # (child, parent) -> [status, source, note, type]
         self.rejected, self.gone_people, self.gone_events = [], [], []
@@ -688,6 +689,7 @@ class Rebuild:
         r = [x, tag, [f"0 {x} {tag}"] + body]
         self.recs.append(r)
         self.idx[x] = r
+        self.ever.add(x)
         return r[2]
 
     def delete(self, x):
@@ -732,9 +734,25 @@ class Rebuild:
         r = self.L(x)
         r[:] = [l for l in r if not (lvl(l) == 1 and tag_of(l) == tag and l.split(" ", 2)[2:] == [ref])]
 
-    def new_fam(self, husb=None, wife=None, children=()):
-        self.n_fam += 1
-        f = f"@F{self.n}_{self.n_fam}@"
+    def fixed_id(self, s, kind, *keys):
+        """Optional fixed id from a step ("@I90012@" or "I90012"); refuses one that exists or existed."""
+        v = g(s, *keys)
+        if v in (None, ""):
+            return None
+        v = str(v).strip()
+        x = f"@{v.strip('@')}@"
+        if not re.fullmatch(r"@[A-Za-z0-9_]+@", x):
+            raise RoundError(f"{keys[0]} '{v}' is not a valid id (letters, digits and _ only, like @{kind}90012@)")
+        if x in self.ever or x in self.alias:
+            raise RoundError(f"{keys[0]} {x} already exists (in the original or an earlier round)")
+        return x
+
+    def new_fam(self, husb=None, wife=None, children=(), fid=None):
+        if fid:
+            f = fid
+        else:
+            self.n_fam += 1
+            f = f"@F{self.n}_{self.n_fam}@"
         body = ([f"1 HUSB {husb}"] if husb else []) + ([f"1 WIFE {wife}"] if wife else []) + [f"1 CHIL {c}" for c in children]
         self.add_rec(f, "FAM", body)
         for p in (husb, wife):
@@ -744,18 +762,20 @@ class Rebuild:
             self.L(c).append(f"1 FAMC {f}")
         return f
 
-    def couple_fam(self, a, b, create=True):
-        """Family with exactly these spouses (either may be None), else a new one."""
+    def couple_fam(self, a, b, create=True, fid=None):
+        """Family with exactly these spouses (either may be None), else a new one (with fixed id fid if given)."""
         for f in self.fams_of(a or b, "FAMS"):
             sp = set(self.refs_in_fam(f, "HUSB") + self.refs_in_fam(f, "WIFE"))
             if sp == {p for p in (a, b) if p}:
+                if fid:
+                    raise RoundError(f"family_id {fid}: this couple already has a family, {f}")
                 return f
         if not create:
             return None
         h, w = a, b
         if (a and self.sex(a) == "F") or (b and self.sex(b) == "M"):
             h, w = b, a
-        return self.new_fam(h, w)
+        return self.new_fam(h, w, fid=fid)
 
     def sex(self, x):
         s = values(self.idx[x], "SEX")
@@ -867,7 +887,7 @@ class Rebuild:
         ref = str(g(s, "ref", default="") or "").strip()
         k = len(self.refs) + 1
         key = re.sub(r"[^A-Za-z0-9_]", "_", ref) if ref else str(k)
-        x = f"@I{self.n}_{key}@"
+        x = self.fixed_id(s, "I", "id") or f"@I{self.n}_{key}@"
         if ref in self.refs:
             raise RoundError(f"ref '{ref}' used twice in this round")
         self.add_rec(x, "INDI", self.person_body(s, src))
@@ -895,6 +915,7 @@ class Rebuild:
         for p in (fa, mo):
             if p:
                 self.check_rejected(child, p, s)
+        fid = self.fixed_id(s, "F", "family_id", "gezin_id")
         fc = self.fams_of(child, "FAMC")
         f = None
         for c in fc:
@@ -903,6 +924,8 @@ class Rebuild:
                 raise RoundError(f"{self.label(child)} already has other parents in {c} ({self.label(h) if h else '-'} / "
                                  f"{self.label(w) if w else '-'}); remove the wrong link first with drop_link")
             f = c
+        if f and fid:
+            raise RoundError(f"family_id {fid}: {self.label(child)} already has a family, {f}")
         if f:
             for role, x in (("HUSB", fa), ("WIFE", mo)):
                 if x and not self.refs_in_fam(f, role):
@@ -911,7 +934,7 @@ class Rebuild:
                     self.merge_dup_families(x)
                     f = self.alias.get(f, f)
         else:
-            f = self.couple_fam(fa, mo) if (fa or mo) else None
+            f = self.couple_fam(fa, mo, fid=fid)
             self.L(f).append(f"1 CHIL {child}")
             self.L(child).append(f"1 FAMC {f}")
         marr = g(s, "marriage", "huwelijk")
@@ -962,7 +985,7 @@ class Rebuild:
             return self.resolve(g(s, "family", "gezin"), "family")
         x = self.resolve(g(s, "person", "persoon"))
         if g(s, "partner"):
-            return self.couple_fam(x, self.resolve(g(s, "partner")))
+            return self.couple_fam(x, self.resolve(g(s, "partner")), fid=self.fixed_id(s, "F", "family_id", "gezin_id"))
         return x
 
     def set_event(self, x, tag, e, src, keep=False, separate=False):
