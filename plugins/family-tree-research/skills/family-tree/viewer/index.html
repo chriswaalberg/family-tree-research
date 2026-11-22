@@ -763,7 +763,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.40",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.41",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1104,7 +1104,7 @@ function drawTijdlijn(){
       <div class="btns">${vhBtn(n.i,"sm")}${n.i!==base?`<button class="btn" data-variant="outline" data-size="sm" data-a="root">${_t("makeRoot")}</button>`:""}${n.i!==base?`<button class="btn" data-variant="outline" data-size="sm" data-a="kw">${_t("openLine")}</button>`:""}</div>`;
     pop.style.display="";placePop(n);
     pop.querySelector(".x").onclick=e=>{e.stopPropagation();close()};
-    pop.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const a=b.dataset.a;if(a==="story"){close();setTimeout(()=>vhOpen(n.i),60)}else if(a==="root")setRoot(n.i);else{slOpen(n.i)}})}
+    pop.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const a=b.dataset.a;if(a==="story"){close();setTimeout(()=>vhOpen(n.i),60)}else if(a==="root"){setRoot(n.i);if(state.root===n.i)startSave(n.i)}else{slOpen(n.i)}})}
   function placePop(n){const x=(PAD+n.x)*Z,y=Y(n.y)*Z,WW=W*Z,HH=H*Z;let L=x+14,T=y-10;if(L+300>WW)L=x-314;if(T+pop.offsetHeight>HH)T=HH-pop.offsetHeight-6;const pw=pop.offsetWidth,ph=pop.offsetHeight;L=Math.min(Math.max(L,sc.scrollLeft+50),sc.scrollLeft+sc.clientWidth-pw-8);T=Math.min(Math.max(T,sc.scrollTop+6),sc.scrollTop+sc.clientHeight-ph-6);pop.style.left=L+"px";pop.style.top=T+"px"}
   function close(){pop.style.display="none";hl.innerHTML="";openN=null}
   svg.addEventListener("click",close);
@@ -1203,7 +1203,7 @@ function slSheet(i,child,code,base,act){
     <footer>${vhBtn(i)}${act?`<button type="button" class="btn" data-a="act">${act.label}</button>`:""}${i!==base?`<button type="button" class="btn" data-variant="outline" data-a="root">${_t("makeRoot")}</button>`:""}<button type="button" class="btn" data-variant="ghost" data-a="x">${_t("close")}</button></footer></div>`;
   const go=fn=>{dlg.close();setTimeout(fn,60)};
   dlg.querySelector('[data-a="x"]').onclick=()=>dlg.close();
-  const rb=dlg.querySelector('[data-a="root"]');if(rb)rb.onclick=()=>go(()=>{setRoot(i);scrollTo(0,0)});
+  const rb=dlg.querySelector('[data-a="root"]');if(rb)rb.onclick=()=>go(()=>{setRoot(i);if(state.root===i)startSave(i);scrollTo(0,0)});
   const ab=dlg.querySelector('[data-a="act"]');if(ab)ab.onclick=()=>go(act.fn);
   vhBtnWire(dlg,i,go);mediaAdd(dlg,p);if(!dlg.open)dlg.showModal();
 }
@@ -1900,7 +1900,12 @@ function famSheet(i,info){
 function famAnchor(i,dir){const F=famState(),sc=document.querySelector(".famsc");F.anchor=null;if(!sc)return;
   const e=sc.querySelector(`.fc[data-i="${i}"]:not(.sib)`)||sc.querySelector(`.fc[data-i="${i}"]`);if(!e)return;
   const r=e.getBoundingClientRect(),b=sc.getBoundingClientRect();F.anchor={i,x:r.left-b.left,y:r.top-b.top,dir}}
-function setRootHard(i){if(i===state.root)return;state.hist.push(state.root);state.root=i;render()}
+function setRootHard(i){startSave(i);if(i===state.root)return;state.hist.push(state.root);state.root=i;render()}
+/* the start person the reader chose (name in the title, search, "Make start person") is remembered per browser and per tree:
+   the key holds the first start person of the data, so two trees opened from the same place don't mix; stored by GEDCOM id */
+function startKey(){const s=P[META.starts[0].persoon];return "stamboomStart:"+(s&&s.id!=null?s.id:"")+"|"+(s?s.n||"":"")}
+function startSave(i){if(!P[i]||P[i].id==null)return;try{localStorage.setItem(startKey(),String(P[i].id))}catch(e){}}
+function startLoad(){let v=null;try{v=localStorage.getItem(startKey())}catch(e){}return v?P.findIndex(p=>p.id!=null&&String(p.id)===v):-1}
 function drawFamilie(){
   const F=famState(),r=state.root,{CW,CH,GAP,ROWGAP}=FAM,SLOT=CW+GAP,ROWH=CH+ROWGAP;
   const stats=ancestorStats(r);
@@ -2688,7 +2693,8 @@ document.querySelector("#stage #loading")&&($("loading").textContent=_t("loading
 fetch("data.json").then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(d=>{D=d;P=prepareData(d);langInit();
   if(!P.length){applyTexts();$("stage").innerHTML=`<div class="empty"><div class="et">${_t("emptyTitle")}</div><p>${_t("emptyPeople")}</p></div>`;return}
   const h=location.hash.slice(1),budget=/^(kaartbudget|cardbudget)$/.test(h),linked=vhHashPerson(h);if(VIEWS.includes(h))state.view=h;
-  state.root=META.perView[state.view]!=null&&P[META.perView[state.view]]?META.perView[state.view]:META.starts[0].persoon;
+  const saved=startLoad();
+  state.root=saved>=0?saved:META.perView[state.view]!=null&&P[META.perView[state.view]]?META.perView[state.view]:META.starts[0].persoon;
   applyTexts();initSearch();
   $("back").onclick=()=>{if(state.hist.length){state.root=state.hist.pop();render()}};
   initGenSlider();
