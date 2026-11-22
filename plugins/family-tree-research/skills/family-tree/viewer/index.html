@@ -326,6 +326,21 @@ main{padding-top:6px}
 .stage{background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 12px 34px rgba(70,45,20,.09)}
 .hint{color:#8a7865;font-style:italic}
 .made{text-align:center;font-size:12px;color:#9a8670;padding:28px 16px calc(24px + env(safe-area-inset-bottom,0px))}.made a{color:#8a5a1c;text-underline-offset:2px}
+/* ===== LIJN: the Story trail shown in the tree views (button in the route bar, bar above the tree, the rest dimmed) */
+.vh-tree{margin-left:auto;position:sticky;right:-10px;flex:none;display:flex;align-items:center;border:0;cursor:pointer;padding:0 10px 0 26px;align-self:stretch;
+  background:linear-gradient(90deg,rgba(239,229,211,0),rgba(239,229,211,.98) 20px)}
+.vh-tree span{display:inline-flex;align-items:center;gap:6px;font:600 12.5px/1 Inter,system-ui,sans-serif;color:#f8eedb;background:#3b2a20;border-radius:999px;padding:7px 12px;white-space:nowrap;transition:background .15s}
+.vh-tree:hover span{background:#21170f}.vh-tree:focus-visible{outline:none}.vh-tree:focus-visible span{outline:2px solid #c9a04a;outline-offset:2px}
+.linebar{display:flex;align-items:center;flex-wrap:wrap;gap:10px 12px;margin:0 0 10px;padding:10px 12px 10px 16px;border-radius:14px;background:#f6e7c4;border:1px solid #dcc08a;color:#4b3a2a;font:500 13px/1.35 Inter,system-ui,sans-serif}
+.linebar .lb-t{flex:1 1 260px;min-width:0}.linebar .lb-t b{display:block;font-weight:600}
+.linebar .lb-n{font-size:12.5px;color:#6b5a48}.linebar .lb-n i{font-style:normal;color:#b49a77;margin:0 3px}
+.linebar .lb-b{display:flex;gap:8px;flex-wrap:wrap}
+.linebar button{display:inline-flex;align-items:center;gap:6px;border-radius:999px;font:600 12.5px/1 Inter,system-ui,sans-serif;cursor:pointer;padding:8px 13px;white-space:nowrap}
+.linebar .lb-s{border:0;background:#3b2a20;color:#f8eedb}.linebar .lb-s:hover{background:#21170f}
+.linebar .lb-x{border:1px solid #cdb78f;background:#fffaf1;color:#5b4632}.linebar .lb-x:hover{background:#fff}
+.linebar button:focus-visible{outline:2px solid #c9a04a;outline-offset:2px}
+@media (max-width:560px){.linebar{padding:10px 12px}.linebar .lb-b{width:100%}.linebar .lb-b button{flex:1;justify-content:center}}
+.ln-dim{opacity:.22;transition:opacity .25s}svg.ln-dim{opacity:.32}.slc.ln-dim,.fc.ln-dim{opacity:.35}
 /* kaarten */
 .fc,.slc{background:var(--paper);border-left-color:#e0d0b6;border-right-color:#e0d0b6;border-bottom-color:#e0d0b6;box-shadow:var(--shadow-card);border-radius:10px}
 .fc .g,.slc .g{font-family:Fraunces,Georgia,serif;font-size:13.5px;font-weight:600;letter-spacing:.005em}
@@ -693,6 +708,7 @@ main{padding-top:6px}
 <div class="legwrap" id="setbar"><div class="setctl"><div id="genWrap" class="ctlgrp"><span class="ctllab" data-t="gens"></span><div id="gens" class="gsl" role="slider" tabindex="0" aria-valuemin="3" aria-valuemax="12" aria-valuenow="7"><div class="gsl-track"><div class="gsl-fill"></div></div><div class="gsl-ticks"></div><div class="gsl-thumb"><span>7</span></div></div></div>
   <div id="colorWrap" class="ctlgrp"><span class="ctllab" data-t="color"></span><select id="color" class="select" data-t-aria="color"></select></div></div><div id="legend"></div></div>
 <main>
+  <div class="linebar" id="lineBar" hidden></div>
   <div class="stage" id="stage"><div id="loading">…</div></div>
   <p class="hint" id="hint"></p>
 </main>
@@ -708,7 +724,7 @@ main{padding-top:6px}
 /* ================= TEKSTEN (NL / EN) ================= */
 const I18N={
 nl:{loading:"Stamboom laden…",loadError:"Kon de stamboom niet laden ({msg}).",title:"Stamboom",titleFam:"Stamboom {name}",titleOf:"Stamboom van {name}",
- v_familie:"Familie",v_stamlijn:"Stamlijn",madeWith:"Gemaakt met {link} v{v}",updated:"Laatst bijgewerkt: {d}",v_tree:"Stamboom",modes:"Wat wil je zien?",rp_title:"Begin bij…",rp_sub:"Het verhaal, de kaarten en de stamboom beginnen allemaal bij deze persoon.",rp_other:"Iemand anders zoeken…",rp_btn:"Andere startpersoon kiezen",v_tijdlijn:"Tijdlijn",v_waaier:"Waaier",v_kosmos:"Kosmos",tabs:"Weergave",startPeople:"Startpersoon",
+ v_familie:"Familie",v_stamlijn:"Stamlijn",madeWith:"Gemaakt met {link} v{v}",ln_btn:"In de stamboom",ln_btn_t:"Bekijk deze lijn in de stamboom",ln_title:"Je ziet de lijn uit het verhaal",ln_story:"Terug naar het verhaal",ln_hide:"Lijn verbergen",updated:"Laatst bijgewerkt: {d}",v_tree:"Stamboom",modes:"Wat wil je zien?",rp_title:"Begin bij…",rp_sub:"Het verhaal, de kaarten en de stamboom beginnen allemaal bij deze persoon.",rp_other:"Iemand anders zoeken…",rp_btn:"Andere startpersoon kiezen",v_tijdlijn:"Tijdlijn",v_waaier:"Waaier",v_kosmos:"Kosmos",tabs:"Weergave",startPeople:"Startpersoon",
  search:"Zoek een persoon",searchPh:"Naam, jaartal of plaats",searchEmpty:"Typ een naam, jaartal of plaats",searchNone:"Niemand gevonden",searchAnc:"Voorouders van {name}",searchOthers:"Anderen",searchPeople:"Personen",genShort:"gen. {n}",
  back:"Terug",backTitle:"Vorige startpersoon",gens:"Generaties",color:"Kleur",
  c_lijn:"Grootouderlijn",c_land:"Land van geboorte",c_zek_v:"Zekerheid (verificatie)",c_zek_d:"Zekerheid (directe lijn)",
@@ -735,7 +751,7 @@ nl:{loading:"Stamboom laden…",loadError:"Kon de stamboom niet laden ({msg}).",
  zoomIn:"Inzoomen",zoomOut:"Uitzoomen",home:"Naar startpersoon",living:"Levend",
  notFound:"Nog niet gevonden",emptyTitle:"Nog niet gevonden",emptyBody:"Voor {name} zijn nog geen ouders gevonden. Zodra er ouders in de stamboom staan, zie je hier meer.",emptyPeople:"Deze stamboom bevat nog geen personen."},
 en:{loading:"Loading family tree…",loadError:"Could not load the family tree ({msg}).",title:"Family tree",titleFam:"{name} family tree",titleOf:"Family tree of {name}",
- v_familie:"Family",v_stamlijn:"Line",madeWith:"Made with {link} v{v}",updated:"Last updated: {d}",v_tree:"Family tree",modes:"What do you want to see?",rp_title:"Start with…",rp_sub:"The story, the cards and the family tree all start with this person.",rp_other:"Find someone else…",rp_btn:"Choose another start person",v_tijdlijn:"Timeline",v_waaier:"Fan",v_kosmos:"Cosmos",tabs:"View",startPeople:"Start person",
+ v_familie:"Family",v_stamlijn:"Line",madeWith:"Made with {link} v{v}",ln_btn:"In the tree",ln_btn_t:"Show this line in the family tree",ln_title:"You're looking at the line from the story",ln_story:"Back to the story",ln_hide:"Hide line",updated:"Last updated: {d}",v_tree:"Family tree",modes:"What do you want to see?",rp_title:"Start with…",rp_sub:"The story, the cards and the family tree all start with this person.",rp_other:"Find someone else…",rp_btn:"Choose another start person",v_tijdlijn:"Timeline",v_waaier:"Fan",v_kosmos:"Cosmos",tabs:"View",startPeople:"Start person",
  search:"Find a person",searchPh:"Name, year or place",searchEmpty:"Type a name, year or place",searchNone:"No one found",searchAnc:"Ancestors of {name}",searchOthers:"Others",searchPeople:"People",genShort:"gen. {n}",
  back:"Back",backTitle:"Previous start person",gens:"Generations",color:"Colour",
  c_lijn:"Grandparent line",c_land:"Country of birth",c_zek_v:"Certainty (verification)",c_zek_d:"Certainty (direct line)",
@@ -763,7 +779,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.42",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.43",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -866,7 +882,7 @@ function colorLegend(mode){
 
 /* ================= WAAIER ================= */
 function drawFan(){
-  const root=state.root,mode=state.color;
+  const root=state.root,mode=state.color,LN=lineInfo();
   const depthOf=(i,d)=>d>=state.gens?d:Math.max(d,...parentsOf(i).map(q=>depthOf(q,d+1)));
   const G=Math.max(2,Math.min(state.gens,depthOf(root,0)+1));
   const W=1000,cx=500,cy=540,r0=66,Rmax=492,ring=(Rmax-r0)/G;
@@ -885,7 +901,7 @@ function drawFan(){
     if(mode==="zekerheid"){if(child==null)return"#4a423b";const c=certOf(child,i);return c?(CERT[c[0]]||NONE):NONE}
   }
   function seg(i,g,a0,a1,slot,child){
-    const ri=r0+(g-1)*ring,ro=ri+ring;
+    const ri=r0+(g-1)*ring,ro=ri+ring,s0=gSeg.childNodes.length,t0=gTxt.childNodes.length;
     if(g===0){
       const rr=r0-3;const c=el("path",{d:`M${cx-rr},${cy}A${rr},${rr} 0 0 1 ${cx+rr},${cy}Z`,fill:"#2a2622",class:"seg"},gSeg);
       hook(c,i,null);
@@ -923,6 +939,7 @@ function drawFan(){
       }
       if(occ.get(i)>1){const [dx,dy]=pol(am,ro-5);el("circle",{cx:dx,cy:dy,r:Math.min(3.2,arc/4),fill:"#c0392b",stroke:"#fff","stroke-width":.8},gTxt)}
     }
+    if(LN&&!LN.pre.has(slot)){for(let k=s0;k<gSeg.childNodes.length;k++)gSeg.childNodes[k].classList.add("ln-dim");for(let k=t0;k<gTxt.childNodes.length;k++)gTxt.childNodes[k].classList.add("ln-dim")}
     if(g>=G)return;
     const p=P[i],mid=(a0+a1)/2;
     if(p.f>=0)seg(p.f,g+1,a0,mid,slot+"v",i);else if(g+1<=3)ghost(g+1,a0,mid);
@@ -950,7 +967,7 @@ function isLight(hex){if(!hex||hex[0]!=="#")return true;const n=parseInt(hex.sli
 
 /* ================= KOSMOS ================= */
 function drawCosmos(){
-  const G=state.gens,root=state.root,mode=state.color;
+  const G=state.gens,root=state.root,mode=state.color,LN=lineInfo();
   const V=new Set(),B=[];
   function mkB(x,g,ped,code){if(V.has(x)||g>G)return null;V.add(x);const n={x,g,ped,line:code.length>=2?code.slice(0,2):null,bb:true,sp:[],side:[]};B.push(n);
     const p=P[x];n.fa=p.f>=0?mkB(p.f,g+1,x,code+"v"):null;n.mo=p.m>=0?mkB(p.m,g+1,x,code+"m"):null;return n}
@@ -997,14 +1014,15 @@ function drawCosmos(){
   const edges=[];
   nodes.forEach(n=>{for(const q of parentsOf(n.x)){const p=byX.get(q);if(!p)continue;
       const rm=(p.r+n.r)/2;const c1=[cx+rm*Math.cos(p.a),cy+rm*Math.sin(p.a)],c2=[cx+rm*Math.cos(n.a),cy+rm*Math.sin(n.a)];
-      const e=el("path",{d:`M${p.px},${p.py}C${c1} ${c2} ${n.px},${n.py}`,stroke:col(n.bb&&n.x!==root?n:(n.line?n:p)),"stroke-opacity":n.bb?0.75:0.4,"stroke-width":n.bb?1.8:1},gE);if(isAdopt(n.x,q)){e.setAttribute("stroke",ADOPT_COL);e.setAttribute("stroke-width",3.2);e.setAttribute("stroke-opacity",1)}edges.push([e,n.x,q])}
-    if(n.spouse&&n.of){const o=n.of;const e=el("path",{d:`M${o.px},${o.py}A${o.r},${o.r} 0 0 ${n.a>o.a?1:0} ${n.px},${n.py}`,stroke:"#8d7f6e","stroke-opacity":.6,"stroke-width":2},gE);edges.push([e,n.x,o.x])}});
+      const e=el("path",{d:`M${p.px},${p.py}C${c1} ${c2} ${n.px},${n.py}`,stroke:col(n.bb&&n.x!==root?n:(n.line?n:p)),"stroke-opacity":n.bb?0.75:0.4,"stroke-width":n.bb?1.8:1},gE);if(isAdopt(n.x,q)){e.setAttribute("stroke",ADOPT_COL);e.setAttribute("stroke-width",3.2);e.setAttribute("stroke-opacity",1)}
+      if(LN){if(LN.pairs.has(n.x+"-"+q)){e.setAttribute("stroke-opacity",1);e.setAttribute("stroke-width",2.8)}else e.classList.add("ln-dim")}edges.push([e,n.x,q])}
+    if(n.spouse&&n.of){const o=n.of;const e=el("path",{d:`M${o.px},${o.py}A${o.r},${o.r} 0 0 ${n.a>o.a?1:0} ${n.px},${n.py}`,stroke:"#8d7f6e","stroke-opacity":.6,"stroke-width":2},gE);if(LN)e.classList.add("ln-dim");edges.push([e,n.x,o.x])}});
   nodes.sort((a,b)=>(a.bb?1:0)-(b.bb?1:0));
   const nodeEls=new Map();
   nodes.forEach(n=>{const isRoot=n.x===root;const r=isRoot?10:n.bb?Math.max(3.5,7-n.g*0.4):n.spouse?3:3.6;
     const c=el("circle",{cx:n.px,cy:n.py,r,fill:n.spouse?"#fffdf9":col(n),stroke:n.spouse?col(n):"#fffdf9","stroke-width":n.spouse?1.6:1.2,class:"node"},gN);
     if(AD.has(n.x)||(n.ad&&!n.spouse)){c.setAttribute("stroke",ADOPT_COL);c.setAttribute("stroke-width",1.8)}
-    nodeEls.set(n.x,c);
+    nodeEls.set(n.x,c);if(LN&&!LN.set.has(n.x))c.classList.add("ln-dim");
     c.addEventListener("mouseenter",e=>{const rel=n.bb?(n.x===root?_t("ks_root"):AD.has(n.x)?_t("ks_direct_adopt",{n:n.g}):_t("ks_direct",{n:n.g})):n.spouse?_t("ks_inlaw"):n.ad?_t("ks_fam_adopt"):_t("ks_blood");
         showTip(e,n.x,`<span class="mut">${rel}</span><br>`);
         const keep=new Set([n.x,...parentsOf(n.x),...P[n.x].ch,...P[n.x].sp]);
@@ -1030,7 +1048,7 @@ function pathTo(base,target){ // shortest parent-path base -> target
 function codeOf(path){return path.slice(1).map((x,k)=>P[path[k]].f===x?"v":"m").join("")}
 /* ================= TIJDLIJN (voorouders op een tijd-as) ================= */
 function drawTijdlijn(){
-  const base=state.root,G=state.tlGens||5,stats=ancestorStats(base);
+  const base=state.root,G=state.tlGens||5,stats=ancestorStats(base),LN=lineInfo();
   const mobile=($("stage").clientWidth||1000)<760;
   const LG=mobile?50:60,PPY=mobile?3.2:3.6,PAD=mobile?150:175;
   /* ---- tree (first occurrence) with estimated years ---- */
@@ -1074,15 +1092,15 @@ function drawTijdlijn(){
   nodes.forEach(n=>n.par.forEach(q=>{const c=certOf(n.i,q.i),s=c?c[0]:null;
     const e=el("path",{d:curve(n,q),stroke:q.side==="v"?FC:MC,"stroke-width":mobile?2.4:3,"stroke-dasharray":s==="zeker"?"":s==="fout"?"":"6 5",opacity:s==="fout"?1:.9},gL);
     if(isAdopt(n.i,q.i)){e.setAttribute("stroke",ADOPT_COL);e.setAttribute("stroke-dasharray","");e.setAttribute("stroke-width",mobile?4:5);el("path",{d:curve(n,q),stroke:"#fffaf1","stroke-width":1.6},gL)}
-    if(s==="fout")e.setAttribute("stroke","#c0392b");edges.push({e,a:n,b:q})}));
-  extra.forEach(([n,q,s])=>{const t=byI.get(q);if(t)el("path",{d:curve(n,t),stroke:"#c0392b","stroke-width":1.3,"stroke-dasharray":"2 4",opacity:.7},gL)});
+    if(s==="fout")e.setAttribute("stroke","#c0392b");if(LN&&!LN.pairs.has(n.i+"-"+q.i))e.classList.add("ln-dim");edges.push({e,a:n,b:q})}));
+  extra.forEach(([n,q,s])=>{const t=byI.get(q);if(t){const x=el("path",{d:curve(n,t),stroke:"#c0392b","stroke-width":1.3,"stroke-dasharray":"2 4",opacity:.7},gL);if(LN&&!LN.pairs.has(n.i+"-"+q))x.classList.add("ln-dim")}});
   // labels
   const gN=el("g",{},svg);
   nodes.forEach(n=>{const p=P[n.i],x=PAD+n.x,y=Y(n.y);const code=n.code,lc=code.length>=2?LINE_COL[code.slice(0,2)]:"#4a423b";
-    el("circle",{cx:x,cy:y,r:n===R?6:4,fill:n.side==="v"?FC:n.side==="m"?MC:"#2a2622",stroke:"#fff","stroke-width":1.5},gN);
+    const dot=el("circle",{cx:x,cy:y,r:n===R?6:4,fill:n.side==="v"?FC:n.side==="m"?MC:"#2a2622",stroke:"#fff","stroke-width":1.5},gN);
     const nm0=(n.est?"~ ":"")+short(p),cw=mobile?5.6:6.2,maxc=Math.floor((mobile?92:118)/cw),nm=nm0.length>maxc?nm0.slice(0,maxc-1)+"…":nm0,tw=nm.length*cw+12;
     const ax=n===R?-tw/2:n.side==="v"?-tw-5:5;
-    const g=el("g",{class:"tln",transform:`translate(${x+ax+tw/2},${y-(n===R?-12:-8.5)})`},gN);
+    const g=el("g",{class:"tln",transform:`translate(${x+ax+tw/2},${y-(n===R?-12:-8.5)})`},gN);if(LN&&!LN.set.has(n.i)){dot.classList.add("ln-dim");g.classList.add("ln-dim")}
     el("rect",{x:-tw/2,y:n===R?0:-17,width:tw,height:17,rx:4,fill:n===R?"#2a2622":"#fffdf9",stroke:n===R?"#2a2622":lc,"stroke-width":1.2,"stroke-dasharray":n.est?"3 2":""},g);
     const t=el("text",{x:0,y:n===R?12.5:-4.5,"text-anchor":"middle","font-size":mobile?10:11,fill:n===R?"#fff":"#2a2622"},g);
     t.textContent=nm;
@@ -1158,8 +1176,8 @@ function slOpen(i){const pth=pathTo(state.root,i);if(!pth||pth.length<2)return f
    still opens that view; #kaartbudget / #cardbudget still opens the card budget. */
 const NAV={restoring:false,pop:false};
 function navUrl(){return location.pathname+location.search}
-function navSnap(){return {nav:1,view:state.view,root:state.root,vh:state.vh&&state.vh.root===state.root?state.vh.path.slice():null,lastTree:state.lastTree||null}}
-function navSame(a,b){return !!a&&!!b&&a.view===b.view&&a.root===b.root&&JSON.stringify(a.vh||null)===JSON.stringify(b.vh||null)&&!!a.sw===!!b.sw&&!!a.sheet===!!b.sheet}
+function navSnap(){return {nav:1,view:state.view,root:state.root,vh:state.vh&&state.vh.root===state.root?state.vh.path.slice():null,lastTree:state.lastTree||null,line:!!state.line}}
+function navSame(a,b){return !!a&&!!b&&a.view===b.view&&a.root===b.root&&!!a.line===!!b.line&&JSON.stringify(a.vh||null)===JSON.stringify(b.vh||null)&&!!a.sw===!!b.sw&&!!a.sheet===!!b.sheet}
 function navPush(extra){if(NAV.restoring||NAV.pop)return;const s=Object.assign(navSnap(),extra||{}),cur=history.state;
   if(!cur||!cur.nav){history.replaceState(s,"",/^#(kaartbudget|cardbudget)$/.test(location.hash)?location.href:navUrl());return}
   if(!navSame(cur,s))history.pushState(s,"",navUrl())}
@@ -1168,8 +1186,8 @@ function navUnwind(key){if(!NAV.pop&&history.state&&history.state[key])history.b
 function navPop(e){const s=e.state;if(!s||!s.nav||!P||!P.length)return;NAV.pop=true;
   try{if(!s.sw&&typeof SW!=="undefined"&&SW)swClose();
     const dl=$("slsheet");if(!s.sheet&&dl&&dl.open)dl.close();
-    const now=navSnap();if(now.view!==s.view||now.root!==s.root||JSON.stringify(now.vh||null)!==JSON.stringify(s.vh||null)){
-      state.view=s.view;state.root=s.root;if(s.lastTree)state.lastTree=s.lastTree;if(s.vh)state.vh={root:s.root,path:s.vh.slice()};render()}
+    const now=navSnap();if(now.view!==s.view||now.root!==s.root||!!now.line!==!!s.line||JSON.stringify(now.vh||null)!==JSON.stringify(s.vh||null)){
+      state.line=!!s.line;state.view=s.view;state.root=s.root;if(s.lastTree)state.lastTree=s.lastTree;if(s.vh)state.vh={root:s.root,path:s.vh.slice()};if(state.line)lineFit(false);else lineRestore();render()}
     if(s.sw&&!SW)swOpen(state.root)}
   finally{NAV.pop=false}}
 function slDrawer(){
@@ -1615,7 +1633,7 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
   const route=path.map((i,k)=>`<button type="button" class="vh-rc" data-k="${k}">${slEsc(vhFn(P[i]))}</button>`).join('<span class="vh-ra">›</span>');
   w.innerHTML=`<div class="vh-head"><h2>${slEsc(_t("vh_title",{name:rfn}))}</h2><p>${_t("vh_intro")}</p>
     <div class="vh-acts"><button type="button" class="btn" data-size="sm" data-a="auto">★ ${_t("vh_auto")}</button>${path.length>1?`<button type="button" class="btn" data-size="sm" data-variant="outline" data-a="restart">${_t("vh_restart")}</button>`:""}</div></div>
-    ${path.length>1?`<nav class="vh-route" aria-label="${_t("vh_route")}">${route}</nav>`:""}`;
+    ${path.length>1?`<nav class="vh-route" aria-label="${_t("vh_route")}">${route}<button type="button" class="vh-tree" data-a="tree" title="${_t("ln_btn_t")}"><span><svg aria-hidden="true" width="14" height="14" viewBox="0 0 48 48"><path d="M24 40V22M24 31l-8-7M24 27l8-7M16 24l-5-4M32 20l5-4M24 22v-8" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg>${_t("ln_btn")}</span></button></nav>`:""}`;
   let prevRank=5;
   path.forEach((i,k)=>{const p=P[i],child=k?path[k-1]:null,code=vhCode(path,k),last=k===path.length-1;
     const lc=k===0?"var(--gold)":(LINE_COL[code.length>=2?code.slice(0,2):(code==="v"?"vv":"mv")]||"var(--gold)");
@@ -1700,6 +1718,7 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     else if(b.dataset.sib!=null){const [j,a]=b.dataset.sib.split(":").map(Number);slSheet(j,null,"",a)}
     else if(b.dataset.k!=null&&b.classList.contains("vh-rc")){const e2=w.querySelector(`.vh-ch[data-k="${b.dataset.k}"]`);if(e2)vhScrollTo(e2)}
     else if(b.dataset.a==="restart"){vhGo([path[0]],0)}
+    else if(b.dataset.a==="tree"){lineShow()}
     else if(b.dataset.a==="auto"){const np=path.slice(),seen=new Set(np);let cur=np[np.length-1],n=0;
       while(n++<60){const q=vhBest(cur);if(q<0||seen.has(q))break;np.push(q);seen.add(q);cur=q}
       vhGo(np,Math.min(path.length,np.length-1))}});
@@ -1740,7 +1759,7 @@ function initSearch(){
   addEventListener("keydown",e=>{if(e.key==="/"&&!dlg.open&&!/input|textarea|select/i.test(document.activeElement.tagName)){e.preventDefault();open()}});
 }
 function drawStamlijn(){
-  const base=state.root;
+  const base=state.root,LN=lineInfo();
   if(state.slRoot!==base){state.slRoot=base;state.slSel=[]}
   const sel=state.slSel,stats=ancestorStats(base);
   const stage=$("stage"),cs=getComputedStyle(stage);
@@ -1761,7 +1780,7 @@ function drawStamlijn(){
     if(i==null||i<0){d.className="slc empty";d.textContent=role==="vader"?_t("fatherUnknown"):_t("motherUnknown");return d}
     const p=P[i],parts=short(p).split(" "),g=parts[0],s=p.s||parts.slice(1).join(" ");
     const n=stats.paths.get(i)||0;
-    d.className="slc"+(n>1?" hasb":"")+(i===base?" root":"");d.dataset.i=i;
+    d.className="slc"+(n>1?" hasb":"")+(i===base?" root":"")+(LN&&!LN.set.has(i)?" ln-dim":"");d.dataset.i=i;
     d.setAttribute("role","button");d.setAttribute("aria-label",_t("detailsOf",{name:p.n}));
     d.style.setProperty("--st",code.length>=2?LINE_COL[code.slice(0,2)]:"#4a423b");
     d.innerHTML=`<div class="g">${slEsc(g)}</div><div class="s">${s&&s!==g?slEsc(s):""}</div><div class="y">${yrs(p)}</div>`+
@@ -1907,7 +1926,7 @@ function startKey(){const s=P[META.starts[0].persoon];return "stamboomStart:"+(s
 function startSave(i){if(!P[i]||P[i].id==null)return;try{localStorage.setItem(startKey(),String(P[i].id))}catch(e){}}
 function startLoad(){let v=null;try{v=localStorage.getItem(startKey())}catch(e){}return v?P.findIndex(p=>p.id!=null&&String(p.id)===v):-1}
 function drawFamilie(){
-  const F=famState(),r=state.root,{CW,CH,GAP,ROWGAP}=FAM,SLOT=CW+GAP,ROWH=CH+ROWGAP;
+  const F=famState(),r=state.root,LN=lineInfo(),{CW,CH,GAP,ROWGAP}=FAM,SLOT=CW+GAP,ROWH=CH+ROWGAP;
   const stats=ancestorStats(r);
   const dmemo=new Map(),depthUp=i=>{if(i==null||i<0)return 0;if(dmemo.has(i))return dmemo.get(i);dmemo.set(i,0);const ps=parentsOf(i),v=ps.length?1+Math.max(...ps.map(depthUp)):0;dmemo.set(i,v);return v};
   const cards=[],fams=[],btns=[],labs=[];
@@ -1930,7 +1949,7 @@ function drawFamilie(){
   let fw=0,mw=0;const ropen=F.up.has(r)&&parentsOf(r).length>0;
   if(ropen){fw=measure(P[r].f,"f","f");mw=measure(P[r].m,"m","m")}
   const dw=dmeasure(r)-(.5);
-  const W=Math.max(rootSeg.length,fw+mw,dw)+1;
+  let W=Math.max(rootSeg.length,fw+mw,dw)+1;
   let gTop=0;(function depth(key,g){const m=M.get(key);if(!m)return;gTop=Math.max(gTop,g);if(m.open){depth(key+"f",g+1);depth(key+"m",g+1)}})("f",1);
   (function(){const m=M.get("m");if(m)(function depth(key,g){const m=M.get(key);if(!m)return;gTop=Math.max(gTop,g);if(m.open){depth(key+"f",g+1);depth(key+"m",g+1)}})("m",1)})();
   let gBot=0;(function dd(p,g){const m=DM.get(p);if(m&&m.kids.length){gBot=Math.max(gBot,g+1);m.kids.forEach(c=>dd(c,g+1))}})(r,0);
@@ -1966,6 +1985,11 @@ function drawFamilie(){
     btns.push({c:pc,type:"downx"})}
   if(F.down.has(r)&&(P[r].ch||[]).length){const m=DM.get(r);dplace(r,rootCard,(W-m.w)/2,0)}
   else if((P[r].ch||[]).length)btns.push({c:rootCard,type:"down"});
+  /* Story line with only the line open: a narrow staircase, every couple of the line straight above its child (partners 1.5 places apart, as in the normal layout) */
+  if(LN&&!F.sib.size&&[...F.up].every(i=>LN.set.has(i))){let kid=rootCard;
+    for(let n=0;n<60;n++){const fm=fams.find(f=>!f.sibOnly&&!f.down&&f.line===kid);if(!fm)break;fm.f.x=kid.x-.75;fm.m.x=kid.x+.75;
+      const nx=[fm.f,fm.m].find(c=>c.i>=0&&c.kind==="line"&&LN.set.has(c.i));if(!nx)break;kid=nx}
+    const mn=Math.min(...cards.map(c=>c.x));cards.forEach(c=>c.x-=mn);W=Math.max(...cards.map(c=>c.x))+1}
   /* ---------- DOM ---------- */
   const z=F.z,PW=W*SLOT+40,PH=Y(-gBot)+CH+60,PADX=Math.round(Math.max(320,innerWidth*.6)),PADY=Math.round(Math.max(260,innerHeight*.5));
   const wrap=document.createElement("div");wrap.className="fam";
@@ -1986,13 +2010,19 @@ function drawFamilie(){
     path(`M${mx},${fm.m!==fm.f?Y(top)+CH/2:yb}V${ybar}`,{stroke:"#8d8174",w:1.6});
     path(`M${lo},${ybar}H${hi}`,{stroke:"#a69b8f",w:1.4});
     for(const k of fm.kids){const ls=fm.line===k&&k.i>=0?worst(k.i):{stroke:"#bdb2a5",w:1.4};path(`M${cx(k)},${ybar}V${Y(k.g)}`,ls)}}
+  /* the Story line: its own connectors on top of the dimmed ones, the cards off the line dimmed */
+  const fpre=new Set(LN?[...LN.pre].filter(Boolean).map(k=>k.replace(/v/g,"f")):[]),onL=c=>!!LN&&c.i>=0&&(c.kind==="root"||c.kind==="line"&&fpre.has(c.key));
+  if(LN){svg.classList.add("ln-dim");const svgL=el("svg",{width:PW,height:PH,style:"position:absolute;left:0;top:0;pointer-events:none"},inn);
+    for(const fm of fams){if(fm.sibOnly||fm.down||!fm.line||!onL(fm.line))continue;const par=[fm.f,fm.m].find(q=>q&&onL(q));if(!par)continue;
+      const k=fm.line,top=fm.f.g,ybar=Y(top-1)-ROWGAP/2+4,mx=(cx(fm.f)+cx(fm.m))/2,ls=nz(slLine(k.i,par.i));
+      el("path",{d:`M${cx(k)},${Y(k.g)}V${ybar}H${mx}V${Y(top)+CH/2}H${par===fm.f?X(fm.f)+CW:X(fm.m)}`,fill:"none",stroke:ls.stroke==="#c0392b"?ls.stroke:"#5b4f45","stroke-width":2.4,"stroke-dasharray":ls.dash||"","stroke-linejoin":"round"},svgL)}}
   const seen=new Map();
   for(const c of cards){const d=document.createElement("div");
     d.style.cssText=`left:${X(c)}px;top:${Y(c.g)}px;width:${CW}px;height:${CH}px`;
-    if(c.i<0){d.className="fc ghost";d.textContent=c.txt||(c.side==="f"?_t("fatherUnknown"):_t("motherUnknown"));inn.appendChild(d);continue}
+    if(c.i<0){d.className="fc ghost"+(LN?" ln-dim":"");d.textContent=c.txt||(c.side==="f"?_t("fatherUnknown"):_t("motherUnknown"));inn.appendChild(d);continue}
     const p=P[c.i],parts=short(p).split(" "),g=parts[0],s=p.s||parts.slice(1).join(" ");
     const n=stats.paths.get(c.i)||0;
-    d.className="fc"+(c.kind==="root"?" root":c.kind==="sib"||c.kind==="sp"?" sib":"");d.dataset.i=c.i;
+    d.className="fc"+(c.kind==="root"?" root":c.kind==="sib"||c.kind==="sp"?" sib":"")+(LN&&!onL(c)?" ln-dim":"");d.dataset.i=c.i;
     if(c.kind==="line"&&c.key)d.style.setProperty("--st",c.key.length>=2?LINE_COL[c.key.slice(0,2).replace(/f/g,"v")]:"#4a423b");
     if(c.kind==="kid")d.style.setProperty("--st","#4a423b");
     d.innerHTML=`<div class="g">${slEsc(g)}</div><div class="s">${s&&s!==g?slEsc(s):""}</div><div class="y">${yrs(p)}</div>`+(n>1&&c.kind==="line"?`<span class="bdg">${n}×</span>`:"");
@@ -2000,10 +2030,10 @@ function drawFamilie(){
     inn.appendChild(d)}
   /* relationship labels above couples */
   for(const fm of fams){if(fm.sibOnly||fm.down||fm.f.i<0&&fm.m.i<0)continue;const g=fm.f.g;const mx=(cx(fm.f)+cx(fm.m))/2;
-    const l=document.createElement("div");l.className="flab";l.textContent=genName(g,{lower:true});
+    const l=document.createElement("div");l.className="flab"+(LN&&!(onL(fm.f)||onL(fm.m))?" ln-dim":"");l.textContent=genName(g,{lower:true});
     l.style.cssText=`left:${mx-SLOT/2+6}px;width:${SLOT-12}px;top:${Y(g)-15}px`;if(F.up.has(fm.f.i)||F.up.has(fm.m.i)){l.style.top=Y(g)-15+"px"}inn.appendChild(l)}
   /* buttons */
-  for(const b of btns){const c=b.c;if(!c||c.i<0)continue;const e=document.createElement("button");e.type="button";e.className="fbt";
+  for(const b of btns){const c=b.c;if(!c||c.i<0)continue;const e=document.createElement("button");e.type="button";e.className="fbt";if(LN&&!onL(c))e.classList.add("ln-dim");
     if(b.type==="up"){const gu=depthUp(c.i);e.classList.add("up");e.innerHTML=`<span class="tri">▲</span>${gu}`;e.title=_t("genAboveTitle",{gens:slGenWord(gu)});e.setAttribute("aria-label",e.title);e.style.cssText=`left:${cx(c)}px;top:${Y(c.g)-27}px;transform:translateX(-50%)`;e.onclick=ev=>{ev.stopPropagation();famAnchor(c.i,"up");F.up.add(c.i);F.focus=c.i;render()}}
     else if(b.type==="sib"){e.className="fbt lt";e.innerHTML=b.side==="m"?`${b.n} ›`:`‹ ${b.n}`;e.title=b.n===1?_t("showSib1"):_t("showSibs",{n:b.n});e.setAttribute("aria-label",e.title);
       e.style.cssText=b.side==="m"?`left:${X(c)+CW-14}px;top:${Y(c.g)+CH-16}px`:`left:${X(c)-12}px;top:${Y(c.g)+CH-16}px`;
@@ -2042,6 +2072,10 @@ function drawFamilie(){
   sc.addEventListener("click",e=>{if(sup){e.stopPropagation();e.preventDefault();sup=false}},true);
   requestAnimationFrame(()=>{const f=cards.find(c=>c.i===F.focus&&c.kind!=="sib")||cards.find(c=>c.i===F.focus)||rootCard;
     const A=F.anchor;F.anchor=null;
+    if(F.lineFit&&LN){F.lineFit=false;const lc=cards.filter(onL);if(lc.length){
+      const x0=Math.min(...lc.map(X)),x1=Math.max(...lc.map(c=>X(c)+CW)),y0=Math.min(...lc.map(c=>Y(c.g))),y1=Math.max(...lc.map(c=>Y(c.g)+CH));
+      zoomTo(Math.min(1,(sc.clientWidth-48)/(x1-x0),(sc.clientHeight-48)/(y1-y0)));
+      sc.scrollLeft=PADX+(x0+x1)/2*F.z-sc.clientWidth/2;sc.scrollTop=PADY+(y0+y1)/2*F.z-sc.clientHeight/2;drawMap();return}}
     if(A&&A.i===f.i){/* zelfde kaart, zelfde plek */
       sc.scrollLeft=PADX+X(f)*F.z-A.x;sc.scrollTop=PADY+Y(f.g)*F.z-A.y;drawMap();
       /* nieuwe ouders/kinderen net buiten beeld? rustig bijschuiven, zonder de kaart zelf uit beeld te duwen */
@@ -2618,6 +2652,26 @@ function emptyState(view){const d=document.createElement("div");d.className="emp
 
 /* ================= shell ================= */
 const VIEWS=["familie","stamlijn","verhaal","tijdlijn","waaier","kosmos"];
+/* ===== LIJN: "In the tree" in Story's route bar shows the Story trail (state.vh.path) in every tree view; the rest dims (ln-dim).
+   state.line is only the on/off switch: the line itself is always the current Story trail, so it follows Story and ends when the start person changes. */
+function lineInfo(){const v=state.vh;if(!state.line||!v||v.root!==state.root||v.path.length<2)return null;
+  const path=v.path,code=codeOf(path),pre=new Set([""]),pairs=new Set();for(let k=1;k<=code.length;k++)pre.add(code.slice(0,k));
+  for(let k=0;k<path.length-1;k++){pairs.add(path[k]+"-"+path[k+1]);pairs.add(path[k+1]+"-"+path[k])}
+  return {path,code,set:new Set(path),pre,pairs,last:path[path.length-1]}}
+/* make the whole line visible in the view about to be shown: enough generations, Family opened along it, Line on its branch */
+function lineFit(fam){const L=lineInfo();if(!L)return;const need=L.path.length-1;
+  if(state.gens<need)state.gens=Math.min(12,need);if((state.tlGens||5)<need)state.tlGens=Math.min(14,need);
+  /* Family: only the line open (no side branches, no brothers and sisters), so it stands compact; the reader's own tree comes back on "Hide line" */
+  const F=famState();if(!F.saved){F.saved={up:new Set(F.up),sib:new Set(F.sib)};F.up=new Set();F.sib=new Set()}L.path.slice(0,-1).forEach(i=>F.up.add(i));if(fam){F.focus=L.last;F.lineFit=true}
+  const s=[];for(let k=2;k<L.path.length;k++)s[k]=L.path[k-1]===P[L.path[k-2]].f?0:1;state.slRoot=state.root;state.slSel=s}
+function lineShow(){state.line=true;state.view=state.lastTree||"familie";lineFit(true);render();scrollTo(0,0)}
+function lineBar(){const b=$("lineBar"),L=state.view!=="verhaal"&&lineInfo();if(!L){b.hidden=true;b.innerHTML="";return}
+  b.innerHTML=`<div class="lb-t"><b>${_t("ln_title")}</b><span class="lb-n">${L.path.map(i=>slEsc(vhFn(P[i]))).join("<i>›</i>")}</span></div>
+    <div class="lb-b"><button type="button" class="lb-s">✦ ${_t("ln_story")}</button><button type="button" class="lb-x">${_t("ln_hide")} <span aria-hidden="true">×</span></button></div>`;
+  b.hidden=false;
+  b.querySelector(".lb-s").onclick=()=>{const k=L.path.length-1;state.view="verhaal";render();vhRedraw(k)};
+  b.querySelector(".lb-x").onclick=()=>{state.line=false;lineRestore();render()}}
+function lineRestore(){const F=state.fam;if(F&&F.saved){F.up=F.saved.up;F.sib=F.saved.sib;F.saved=null}}
 function setRoot(i){if(state.view==="stamlijn"&&i!==state.root&&slOpen(i))return;if(state.view==="familie"&&i!==state.root&&famReveal(i))return;
   if(i===state.root)return;state.hist.push(state.root);state.root=i;render()}
 window.__render=()=>render();
@@ -2667,6 +2721,7 @@ function render(){
   if(v==="kosmos"){stage.appendChild(drawCosmos());legend(colorLegend(state.color).concat([[_t("lg_inlaw"),"#8d7f6e","ring"]],adoptSet(state.root).size?[[_t("lg_adopt_k"),ADOPT_COL,"ring"]]:[]));$("hint").textContent=_t("hint_kosmos")}
   }
   $("setbar").hidden=$("legend").style.display==="none"&&$("genWrap").style.display==="none";
+  lineBar();
   navPush();
 }
 /* startpersoon kiezen: de startpersonen uit de data, de huidige, of iemand zoeken */
@@ -2702,9 +2757,9 @@ fetch("data.json").then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.
   $("back").onclick=()=>{if(state.hist.length){state.root=state.hist.pop();render()}};
   initGenSlider();
   $("color").onchange=e=>{state.color=e.target.value;render()};
-  document.querySelectorAll("#tabs button,#storyBtn").forEach(b=>b.onclick=()=>{state.view=b.dataset.v;render()});
+  document.querySelectorAll("#tabs button,#storyBtn").forEach(b=>b.onclick=()=>{state.view=b.dataset.v;lineFit(b.dataset.v==="familie");render()});
   $("swBtn").onclick=()=>swOpen(state.root);
-  $("treeBtn").onclick=()=>{state.view=state.lastTree||"familie";render()};
+  $("treeBtn").onclick=()=>{state.view=state.lastTree||"familie";lineFit(state.view==="familie");render()};
   addEventListener("popstate",navPop);
   addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(/^(kaartbudget|cardbudget)$/.test(h)){swBudgetShow();return}const k=vhHashPerson(h);if(k>=0){vhOpen(k);return}if(VIEWS.includes(h)&&h!==state.view){state.view=h;render()}});
   if(linked>=0)vhOpen(linked);else render();if(budget)swBudgetShow();

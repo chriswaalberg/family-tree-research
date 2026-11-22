@@ -73,7 +73,7 @@ python3 -I scripts/standalone_viewer.py viewer/index.html data/data.json family-
 
 - Click a person for details: dates, places, source, how certain the relation is, and photos and documents if there are any.
 - Lines: solid = certain, dashed = probable/possible, dotted = not checked yet, red = wrong, double gold = raised as their own child.
-- Story: start at the start person and choose father or mother each time; the gold star marks the richest trail. When it gets uncertain, the story says so.
+- Story: start at the start person and choose father or mother each time; the gold star marks the richest trail. When it gets uncertain, the story says so. "In the tree" (right in the route bar) shows that trail in the tree views: the rest of the tree fades, a bar above the tree leads back to the story or hides the line.
 - ▶ Cards (nice for children): the same story as full-screen cards that play by themselves. Tap right/left for next/back, hold to pause, swipe up for the next generation.
 - The name in the title ("Family tree of Sanne ▾") is the start person: click it to start the story, the cards and the tree with someone else. Under "Family tree" you switch between the tree views; the bar below the header holds the generations slider, the colour choice and the legend. The EN/NL switch changes the language (handy when sharing with family abroad).
 
