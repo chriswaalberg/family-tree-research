@@ -2,8 +2,8 @@
 """live.py — the Workshop: watch the family tree grow while Claude researches (Claude Code only).
 
   serve [--config family-tree.json | --data data.json]   start the local Workshop page (viewer/live.html); one per tree:
-        [--port 8790] [--lan] [--media DIR ...]           if this tree's Workshop already runs, it says where and stops (0)
-  launch [--config ... | --data ...] [--lan]            desktop app: write the `workshop` entry in the tree's
+        [--port 8790] [--local] [--media DIR ...]         if this tree's Workshop already runs, it says where and stops (0)
+  launch [--config ... | --data ...] [--local]          desktop app: write the `workshop` entry in the tree's
                                                         .claude/launch.json (this live.py, this tree's own port);
                                                         run it before every preview_start
   note "<text>" [--person I4] [--kind note|read|found|nothing|ask]
@@ -20,9 +20,9 @@ and make_viewer_data.py) it compares the old and the new tree and animates the d
 rejected links crack, links that became certain turn gold. archives.py, delpher.py and gedcom_tool.py check/
 rebuild report what they do by themselves while a Workshop is running; for anything else use `note`.
 
-By default only this computer can open the page (127.0.0.1). With --lan it also listens on the local network
-and prints an address with a secret key (?k=...) for a phone; without the key nobody else sees anything, and
-only this computer can send events.
+The page also listens on the local network, so a phone on the same Wi-Fi can watch: its address carries the tree's
+secret key (?k=..., fixed per tree; the phone button in the page shows it as a QR code). Without the key nobody else
+on the network sees anything, and only this computer can send events. --local: only this computer.
 
 A long script of your own can also call emit() directly instead of starting live.py for every step:
     spec = importlib.util.spec_from_file_location("ftr_live", "<skill>/scripts/live.py")
@@ -291,7 +291,11 @@ def make_handler(cfg, hub):
             if p == "/phone":  # the phone address with its key, only for the page on this computer (the QR button)
                 if not self.local():
                     return self.body(403, b"only on this computer", "text/plain")
-                return self.body(200, json.dumps({"url": cfg.get("phone")}).encode("utf-8"), "application/json")
+                if cfg["local"]:
+                    return self.body(200, b'{"url": null, "why": "local"}', "application/json")
+                ip = lan_ip()  # asked on every tap: a laptop changes networks
+                body = {"url": f"http://{ip}:{cfg['port']}/?k={cfg['token']}"} if ip else {"url": None, "why": "nonet"}
+                return self.body(200, json.dumps(body).encode("utf-8"), "application/json")
             if p == "/ping":  # which tree this Workshop shows (live.py serve/launch use it to reuse a running one)
                 return self.body(200, json.dumps({"data": cfg["data"], "pid": os.getpid()}).encode("utf-8"), "application/json")
             if p.startswith("/viewer/"):  # media next to the viewer: media/x.jpg
@@ -416,21 +420,25 @@ def cmd_serve(a):
     if old:  # this tree already has a Workshop: use that one (exit 0, so the desktop app's preview_start doesn't fail)
         print(f"Workshop for this tree is already running: http://127.0.0.1:{old['port']}/")
         return
-    host = "0.0.0.0" if a.lan else "127.0.0.1"
     hub = Hub()
-    cfg = {"data": data, "media": media, "token": tree_key(data) if a.lan else secrets.token_urlsafe(9)}
+    cfg = {"data": data, "media": media, "local": a.local, "token": secrets.token_urlsafe(9) if a.local else tree_key(data)}
     srv = None
     for port in ([a.port] if a.exact else range(a.port, a.port + 40)):  # another tree may have the first port
-        try:
-            srv = ThreadingHTTPServer((host, port), make_handler(cfg, hub))
+        for host in (["127.0.0.1"] if a.local else ["0.0.0.0", "127.0.0.1"]):  # the Wi-Fi too, unless that isn't possible here
+            try:
+                srv = ThreadingHTTPServer((host, port), make_handler(cfg, hub))
+                break
+            except OSError:
+                continue
+        if srv:
             break
-        except OSError:
-            continue
+    if srv and srv.server_address[0] == "127.0.0.1":
+        cfg["local"] = True
     if not srv:
         sys.exit(f"Port {a.port} is taken by something else: run `live.py launch` again (it picks a free port)" if a.exact
                  else f"No free port between {a.port} and {a.port + 39}")
     srv.daemon_threads = True
-    port = srv.server_address[1]
+    port = cfg["port"] = srv.server_address[1]
     os.makedirs(POINTERS, exist_ok=True)
     POINTER = os.path.join(POINTERS, _key(data) + ".json")
     with open(POINTER, "w", encoding="utf-8") as fh:
@@ -441,9 +449,8 @@ def cmd_serve(a):
     threading.Thread(target=watch, args=(data, hub, stop), daemon=True).start()
     print(f"Workshop: http://127.0.0.1:{port}/   (viewer: http://127.0.0.1:{port}/viewer/)")
     print(f"watching {data}")
-    if a.lan:
+    if not cfg["local"]:
         ip = lan_ip()
-        cfg["phone"] = f"http://{ip}:{port}/?k={cfg['token']}" if ip else None
         print(f"phone on the same Wi-Fi: http://{ip or '<this computer>'}:{port}/?k={cfg['token']}  (or tap the phone button in the Workshop for a QR code)")
         print("(only with that key; if macOS asks whether Python may accept incoming connections, allow it)")
     sys.stdout.flush()
@@ -484,7 +491,7 @@ def cmd_launch(a):
     src = ["--config", os.path.abspath(a.config or next(n for n in CONFIG_NAMES if os.path.isfile(n)))] if not a.data else ["--data", data]
     entry = {"name": a.name, "runtimeExecutable": sys.executable or "python3",
              "runtimeArgs": ["-I", os.path.abspath(__file__), "serve", *src, "--root", root, "--port", str(port), "--exact"]
-             + (["--lan"] if a.lan else []),
+             + (["--local"] if a.local else []),
              "port": port}
     confs = [c for c in conf.get("configurations", []) if c.get("name") != a.name]  # other entries stay
     conf["configurations"] = confs + [entry]
@@ -526,7 +533,8 @@ def main():
     s.add_argument("--config", "--instellingen", help="settings file (family-tree.json / stamboom.json)")
     s.add_argument("--data", help="data.json (instead of --config)")
     s.add_argument("--port", "--poort", type=int, default=8790)
-    s.add_argument("--lan", "--wifi", action="store_true", help="also listen on the local network (address with a key)")
+    s.add_argument("--local", "--lokaal", action="store_true", help="only this computer (by default a phone on the same Wi-Fi can watch, with the key)")
+    s.add_argument("--lan", "--wifi", action="store_true", help=argparse.SUPPRESS)  # the default since 0.9.67; kept so old entries still start
     s.add_argument("--media", action="append", help="extra folder to serve viewer media from (repeatable)")
     s.add_argument("--root", help="the tree's folder (default: where the settings file is, else above data/)")
     s.add_argument("--exact", action="store_true", help="only this port (launch.json entries use it)")
@@ -535,7 +543,8 @@ def main():
     la.add_argument("--config", "--instellingen")
     la.add_argument("--data")
     la.add_argument("--port", "--poort", type=int, default=8790)
-    la.add_argument("--lan", "--wifi", action="store_true")
+    la.add_argument("--local", "--lokaal", action="store_true")
+    la.add_argument("--lan", "--wifi", action="store_true", help=argparse.SUPPRESS)
     la.add_argument("--root")
     la.add_argument("--media", action="append")
     la.add_argument("--name", default="workshop")

@@ -239,7 +239,7 @@ en:{title:"Workshop",treeOf:"Family tree of",people:"people",links:"links",open:
  rejected:"REJECTED",gapsNew:"+{n} open questions",gapsNewD:"Every new ancestor has two parents of their own.",gold:"This link is certain now.",
  s_zeker:"certain",s_waarschijnlijk:"probable",s_mogelijk:"possible",s_fout:"wrong",s_onbekend:"unknown","s_niet gecheckt":"not checked",s_:"no status",
  empty:"Nobody in the tree yet.",replayBtn:"Replay this session",replayT:"Replay",backLive:"Back to live",replayDone:"End of the session so far",replayEmpty:"Nothing happened in this session yet.",replayWait:"One moment…",phoneBtn:"On your phone",phoneT:"Watch on your phone",phoneP:"Point your phone's camera at this code. It must be on the same Wi-Fi.",
- phoneOnce:"Only once: after that a bookmark works, also after a restart.",phoneOff:"The Workshop only listens on this computer now. Ask Claude: “show the Workshop on my phone”.",phoneNoQR:"No code without internet. Type this address on your phone:",srcMore:"+ {n} more",nowT:"Working on",focusT:"Now: {n}",r_wifeOf:"wife of {n}",r_husbandOf:"husband of {n}",r_partnerOf:"partner of {n}",
+ phoneOnce:"Only once: after that a bookmark works, also after a restart.",phoneOff:"This Workshop was started for this computer only (--local). Ask Claude to start it without --local.",phoneNoNet:"This computer is not on a network now. Connect to Wi-Fi and tap the button again.",phoneNoQR:"No code without internet. Type this address on your phone:",srcMore:"+ {n} more",nowT:"Working on",focusT:"Now: {n}",r_wifeOf:"wife of {n}",r_husbandOf:"husband of {n}",r_partnerOf:"partner of {n}",
  r_motherOf:"mother of {n}",r_fatherOf:"father of {n}",r_parentOf:"parent of {n}",r_daughterOf:"daughter of {n}",r_sonOf:"son of {n}",r_childOf:"child of {n}",
  r_sisterOf:"sister of {n}",r_brotherOf:"brother of {n}",r_siblingOf:"sibling of {n}",v_fan:"Fan",v_cos:"Cosmos",nothing:"Nothing found",why:"Reason or source added: {c} → {p}",whyN:"{n} links got a source or a reason",whyNd:"{names} and others",
  storyEdit:"Story updated: {n}",tg:"Life and times of {p}",tgD:"{e} events · {b} images · {l} periods",tgNew:"new place",certN:"{n} links changed certainty",
@@ -257,7 +257,7 @@ nl:{title:"Werkplaats",treeOf:"Stamboom van",people:"mensen",links:"relaties",op
  rejected:"AFGEWEZEN",gapsNew:"+{n} open vragen",gapsNewD:"Elke nieuwe voorouder heeft zelf ook weer twee ouders.",gold:"Deze koppeling is nu zeker.",
  s_zeker:"zeker",s_waarschijnlijk:"waarschijnlijk",s_mogelijk:"mogelijk",s_fout:"fout",s_onbekend:"onbekend","s_niet gecheckt":"niet gecheckt",s_:"geen status",
  empty:"Nog niemand in de boom.",replayBtn:"Deze sessie opnieuw afspelen",replayT:"Terugblik",backLive:"Terug naar live",replayDone:"Einde van de sessie tot nu toe",replayEmpty:"Er is in deze sessie nog niets gebeurd.",replayWait:"Even wachten…",phoneBtn:"Op je telefoon",phoneT:"Kijk mee op je telefoon",phoneP:"Richt de camera van je telefoon op deze code. Hij moet op hetzelfde wifi zitten.",
- phoneOnce:"Eén keer nodig: daarna werkt een bladwijzer, ook na een herstart.",phoneOff:"De Werkplaats luistert nu alleen op deze computer. Vraag Claude: “zet de Werkplaats op mijn telefoon”.",phoneNoQR:"Geen code zonder internet. Tik dit adres over op je telefoon:",srcMore:"+ {n} meer",nowT:"Nu bezig met",focusT:"Nu: {n}",r_wifeOf:"vrouw van {n}",r_husbandOf:"man van {n}",r_partnerOf:"partner van {n}",
+ phoneOnce:"Eén keer nodig: daarna werkt een bladwijzer, ook na een herstart.",phoneOff:"Deze Werkplaats is gestart voor alleen deze computer (--local). Vraag Claude hem zonder --local te starten.",phoneNoNet:"Deze computer zit nu niet op een netwerk. Maak verbinding met wifi en tik opnieuw op de knop.",phoneNoQR:"Geen code zonder internet. Tik dit adres over op je telefoon:",srcMore:"+ {n} meer",nowT:"Nu bezig met",focusT:"Nu: {n}",r_wifeOf:"vrouw van {n}",r_husbandOf:"man van {n}",r_partnerOf:"partner van {n}",
  r_motherOf:"moeder van {n}",r_fatherOf:"vader van {n}",r_parentOf:"ouder van {n}",r_daughterOf:"dochter van {n}",r_sonOf:"zoon van {n}",r_childOf:"kind van {n}",
  r_sisterOf:"zus van {n}",r_brotherOf:"broer van {n}",r_siblingOf:"broer of zus van {n}",v_fan:"Waaier",v_cos:"Kosmos",nothing:"Niets gevonden",why:"Bron of reden erbij: {c} → {p}",whyN:"{n} koppelingen kregen een bron of reden",whyNd:"{names} en anderen",
  storyEdit:"Verhaal bijgewerkt: {n}",tg:"Tijdgeest van {p}",tgD:"{e} gebeurtenissen · {b} beelden · {l} periodes",tgNew:"nieuwe plaats",certN:"{n} koppelingen veranderden van zekerheid",
@@ -723,8 +723,8 @@ function replayWire(){const b=$("#replayBtn");b.title=b.ariaLabel=_t("replayBtn"
  $("#rbLive").onclick=()=>{REPLAY=false;location.reload()}}  /* back to live: the page starts fresh from the server (log, tree, bars) */
 /* ===== PHONE: a QR code of the phone address (only on the computer that runs the Workshop; /phone refuses others) */
 let PHONE=undefined;
-async function phoneInit(){try{const r=await fetch("phone",{cache:"no-store"});if(!r.ok)return;PHONE=(await r.json()).url||null;
- const b=$("#phoneBtn");b.hidden=false;b.title=b.ariaLabel=_t("phoneBtn");b.onclick=phoneShow}catch(e){}}
+async function phoneAsk(){try{const r=await fetch("phone",{cache:"no-store"});if(!r.ok)return null;const j=await r.json();PHONE=j.url||null;return j}catch(e){return null}}
+async function phoneInit(){if(!await phoneAsk())return;const b=$("#phoneBtn");b.hidden=false;b.title=b.ariaLabel=_t("phoneBtn");b.onclick=phoneShow}
 /* the QR code in the Workshop's own look: round dots, rounded finder eyes in clay; styles for the choice sheet */
 const QR_STYLES={2:{bg:"#2a2826",dot:"#f6e7dc",eye:"#e08a68",card:"#2a2826"}}; /* dark card, light dots, clay eyes (chosen from three) */
 function qrSvg(q,st){const n=q.getModuleCount(),m=2,W=n+2*m,eye=(r,c)=>(r<7&&c<7)||(r<7&&c>=n-7)||(r>=n-7&&c<7);let d="";
@@ -733,9 +733,9 @@ function qrSvg(q,st){const n=q.getModuleCount(),m=2,W=n+2*m,eye=(r,c)=>(r<7&&c<7
  return`<svg viewBox="0 0 ${W} ${W}" xmlns="http://www.w3.org/2000/svg"><rect width="${W}" height="${W}" rx="2" fill="${st.bg}"/><g fill="${st.dot}">${d}</g>${e(m,m)}${e(m+n-7,m)}${e(m,m+n-7)}</svg>`}
 function qrLib(){return window.qrcode?Promise.resolve(true):new Promise(res=>{const s=document.createElement("script");
  s.src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js";s.onload=()=>res(!!window.qrcode);s.onerror=()=>res(false);document.head.append(s)})}
-async function phoneShow(){const d=$("#phoneDlg");d.innerHTML=`<button type="button" class="x" aria-label="×">×</button><h2>${esc(_t("phoneT"))}</h2>`;
+async function phoneShow(){const j=await phoneAsk()||{};const d=$("#phoneDlg");d.innerHTML=`<button type="button" class="x" aria-label="×">×</button><h2>${esc(_t("phoneT"))}</h2>`;
  d.querySelector(".x").onclick=()=>d.close();d.addEventListener("click",e=>{if(e.target===d)d.close()});
- if(!PHONE){d.insertAdjacentHTML("beforeend",`<p>${esc(_t("phoneOff"))}</p>`);d.showModal();return}
+ if(!PHONE){d.insertAdjacentHTML("beforeend",`<p>${esc(_t(j.why==="nonet"?"phoneNoNet":"phoneOff"))}</p>`);d.showModal();return}
  d.insertAdjacentHTML("beforeend",`<p>${esc(_t("phoneP"))}</p><div class="qr"></div><p>${esc(_t("phoneOnce"))}</p><code>${esc(PHONE)}</code>`);d.showModal();
  if(await qrLib()){const q=qrcode(0,"M");q.addData(PHONE);q.make();const st=QR_STYLES[CFG.QR_STYLE],box=d.querySelector(".qr");box.style.background=st.card;box.innerHTML=qrSvg(q,st)}
  else{d.querySelector(".qr").remove();d.querySelector("code").insertAdjacentHTML("beforebegin",`<p>${esc(_t("phoneNoQR"))}</p>`)}}
