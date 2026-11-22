@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.49"
+  version: "0.9.50"
 ---
 
 # Family-tree research, hand in hand
@@ -32,7 +32,7 @@ Guide someone who is probably neither a genealogist nor technical. Goal: from a 
 - Celebrate finds: a new generation, a record found, a surprising place. It should stay fun.
 - Use the task list (TaskCreate/TaskUpdate) so the user can see where you are.
 - **Don't ask what they want to end up with.** The result is always the interactive viewer. Don't offer a choice between a document, a GEDCOM file or a visual tree.
-- **Always keep a GEDCOM, silently.** As soon as there are a few names and no GEDCOM yet, make `source/tree.ged` with `gedcom_tool.py new` and keep it up to date; it's the working file behind the viewer. Don't ask about it. Only bring up GEDCOM export (e.g. to import into Ancestry) when the user asks for it; then point to the file in `source/`.
+- **Always keep a GEDCOM, silently.** As soon as there are a few names and no GEDCOM yet, make `source/original.ged` with `gedcom_tool.py new`. The original (made or imported) never changes: every finding is a round file in `rounds/`, and `gedcom_tool.py rebuild` makes `source/tree.ged`, the working file behind the viewer, from the original plus all rounds (see `references/gedcom-tool.md`). Don't ask about it. Only bring up GEDCOM export (e.g. to import into Ancestry) when the user asks for it; then point to the file in `source/`.
 
 ## First: where are we?
 
@@ -72,7 +72,7 @@ The core:
 - Record everything: `data/relations.csv` (status + source per parent-child relation), `data/worklog.md` (what you searched, what you found, and what you did *not* find), `reports/questions.md` (open questions and contradictions).
 - **One route failing isn't the end.** If the Chrome extension is missing or blocked (often by the user's organisation), switch yourself to your fetch tools, then a shell (`curl` to public APIs), then the browser built into the Claude desktop app; and if an API fails, try the website itself. See "How to reach the archives" in `references/sources.md`. Don't wait for the user to suggest it.
 - Can't get in somewhere because of a login, paywall or captcha? Don't work around it. Say so honestly, tell the user exactly what to look up (archive, place, period, name) and ask for a screenshot or photo. Then read it yourself.
-- After every round: update the GEDCOM, rebuild data.json, republish the viewer, and tell in a few sentences what's new and what's next.
+- After every round: write the round file, run `gedcom_tool.py rebuild`, rebuild data.json, republish the viewer, and tell in a few sentences what's new and what's next.
 
 ## Viewer
 
@@ -171,10 +171,10 @@ Users may add photos, scans of records and other documents per person. They're s
 | `references/gedcom-export.md` | Downloading a GEDCOM per platform (Ancestry, MyHeritage, FamilySearch…) |
 | `references/research.md` | Method, rules of evidence, statuses, plausibility, privacy |
 | `references/sources.md` | Archives per country, `archives.py` per source with its gaps, what's often blocked, where to find free images |
-| `references/gedcom-tool.md` | Adding people to the GEDCOM, check report, media |
+| `references/gedcom-tool.md` | Round files and `rebuild` (adding, correcting, removing wrong links, merging), check report, media |
 | `references/viewer.md` | Building data.json, publishing, updating, stories, zeitgeist |
 | `references/folders-and-files.md` | Folder layout (English/Dutch), progress template, where scripts run |
-| `scripts/gedcom_tool.py` | `new` / `add` / `check` / `media` |
+| `scripts/gedcom_tool.py` | `new` / `rebuild` / `add` / `check` / `media` |
 | `scripts/make_viewer_data.py` | GEDCOM (+CSV, +regions, +stories, +zeitgeist, +coordinates, +media) → data.json |
 | `scripts/geocode_places.py` | GEDCOM (+stories) → coordinates per place (Nominatim, cached, manual fixes stay) for the maps |
 | `scripts/standalone_viewer.py` | Viewer + data (+ media) in one standalone HTML file |

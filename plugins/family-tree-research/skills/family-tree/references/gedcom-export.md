@@ -32,6 +32,6 @@ Sign in and look in the management of your tree for the option to download the t
 Almost always **File → Export → GEDCOM** (Gramps, Family Tree Maker, RootsMagic, Legacy, MacFamilyTree, Heredis, Aldfaer). If asked, choose GEDCOM 5.5.1 and "all people".
 
 ## Afterwards
-Ask them to drop the file in the chat or put it in the connected family-tree folder. Keep the original unchanged in `source/` (e.g. `source/original-ancestry-2026-11-19.ged`) and work on a copy.
+Ask them to drop the file in the chat or put it in the connected family-tree folder. Keep the original unchanged in `source/` (e.g. `source/original-ancestry-2026-11-19.ged`): `gedcom_tool.py rebuild` builds the working version `source/tree.ged` from it plus the research rounds (see gedcom-tool.md).
 
 GEDCOM 7 files (e.g. from FamilySearch): the scripts read the basics (INDI, FAM, NAME, SEX, BIRT, DEAT, FAMC, FAMS) fine. Compare the number of people read with what the user expects.

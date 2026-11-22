@@ -9,11 +9,12 @@ Family tree/                    (Stamboom/)
 ├── PROGRESS.md                 (VOORTGANG.md)        ← always read first; always update at the end
 ├── README.md                   (LEESMIJ.md)          ← short explanation for the user: what is where
 ├── source/                     (bron/)               ← GEDCOMs: original unchanged + working version
-│   ├── original-<platform>-<date>.ged
-│   └── tree.ged                (stamboom.ged)        ← working version (copy with date before every round)
+│   ├── original-<platform>-<date>.ged                ← the import (or original.ged from `new`): never changed
+│   └── tree.ged                (stamboom.ged)        ← working version: made by `gedcom_tool.py rebuild`, never edited by hand
+├── rounds/                     (rondes/)             ← one JSON file per research round: 001-….json, 002-….json, …
 ├── data/
 │   ├── intake.json             (invoer.json)         ← what the user told you (onboarding)
-│   ├── relations.csv           (relaties-zekerheid.csv) ← status + source per parent-child relation
+│   ├── relations.csv           (relaties-zekerheid.csv) ← status + source per parent-child relation (made by rebuild)
 │   ├── regions.json            (regios.json)         ← place → country/region (start from the plugin's basic version)
 │   ├── media.csv                                     ← which photo/scan belongs to which person
 │   ├── stories.json            (verhalen.json)       ← own stories per person, with sources (Story view)
@@ -23,6 +24,7 @@ Family tree/                    (Stamboom/)
 ├── reports/                    (rapporten/)
 │   ├── check.md                (controle.md)         ← output of gedcom_tool.py check
 │   ├── new.md                  (nieuw.md)            ← new ancestors per round, with source
+│   ├── rejected.md             (afgewezen.md)        ← removed links, people and events with the reason (made by rebuild; read before adding a parent)
 │   └── questions.md            (vragen.md)           ← open questions, contradictions, requests for help
 ├── zeitgeist/                  (tijdgeest/)          ← zeitgeist.json (tijdgeest.json) + media/tijdgeest/ (old prints per place)
 ├── scans/                                            ← photos and screenshots of records, logically renamed

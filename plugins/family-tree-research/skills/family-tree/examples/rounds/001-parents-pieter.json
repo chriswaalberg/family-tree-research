@@ -1,0 +1,16 @@
+{"title": "Parents of Pieter", "date": "2026-11-22",
+ "steps": [
+  {"op": "add", "ref": "jan", "given_names": "Jan", "surname": "de Vries", "sex": "M",
+   "birth": {"date": "c. 1920", "place": "Den Helder"}, "occupation": "sailor",
+   "source": "Marriage record Den Helder 1946, no. 12, https://example.org/marriage-1946-12"},
+  {"op": "add", "ref": "griet", "given_names": "Griet", "surname": "Bakker", "sex": "F"},
+  {"op": "parents", "child": "@I4@", "father": "jan", "mother": "griet", "marriage": {"date": "1946", "place": "Den Helder"},
+   "status_mother": "probable", "source": "Birth record Pieter de Vries, Den Helder 1948, no. 3 https://example.org/birth-1948-3"},
+  {"op": "event", "person": "@I4@", "type": "residence", "date": "1970", "place": "Amersfoort", "note": "moved for work"},
+  {"op": "event", "person": "@I4@", "type": "birth", "date": "4-1-1948", "source": "Birth record Den Helder 1948, no. 3"},
+  {"op": "event", "person": "@I4@", "type": "Award", "date": "1999", "place": "Amersfoort", "description": "Royal decoration"},
+  {"op": "occupation", "person": "@I4@", "occupation": "harbour pilot", "date": "1975", "note": "according to a newspaper article"},
+  {"op": "aka", "person": "@I4@", "name": "Piet /de Vries/"},
+  {"op": "note", "person": "I4", "text": "Told by Thomas, 2026."},
+  {"op": "places", "map": {"Den Helder": "Den Helder, Noord-Holland, Nederland", "Amersfoort": "Amersfoort, Utrecht, Nederland"}}
+ ]}

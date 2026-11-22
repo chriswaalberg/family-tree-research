@@ -13,7 +13,9 @@
 
 ## Rules of evidence
 
-- **No new parent without a source.** Source = archive + kind of record + date + place + link (or inventory/record number). Put the source in the CSV and as `SOUR`/`NOTE` in the GEDCOM.
+- **No new parent without a source.** Source = archive + kind of record + date + place + link (or inventory/record number). Give it as `source` in the round's step; `rebuild` puts it in the GEDCOM and the CSV.
+- **Read the rejected register first.** Before adding a parent, look in `reports/rejected.md` (Dutch: `rapporten/afgewezen.md`). If the link is there, don't add it again, unless a new source refutes the reason (then say so with `despite`, see gedcom-tool.md).
+- **A wrong link goes out.** Does a source contradict a parent in the tree? Remove the link with `drop_link` and a reason (and where it came from, e.g. "Ancestry export" or a hint from someone else's tree). Don't keep it with status `error`. The reason goes into the register, so the link doesn't come back in a later round.
 - A found record only fits if at least two of these three match: name (including spelling variants), age/year (±3 years), place or region. Plus: the parents in the record must fit what's already known (e.g. the partner).
 - **Two candidates** that both fit? Don't choose. Note both in `reports/questions.md` and look for a record that settles it (marriage, death with partner's name, witnesses).
 - Data from an imported GEDCOM is a hypothesis, not proof. Confirm it with a source before calling it *certain*.
@@ -29,14 +31,14 @@ Write the status in the user's language; both are accepted.
 | `probable` / `waarschijnlijk` | Strong indications (e.g. baptism with only the father's name + a matching marriage), but no record that says it directly. |
 | `possible` / `mogelijk` | Plausible candidate, but there are alternatives or too little data. |
 | `unknown` / `onbekend` | Searched, nothing found yet. |
-| `error` / `fout` | A source contradicts the relation. Keep it, mark it red, explain in questions.md. |
+| `error` / `fout` | Only for a doubt you can't settle yet (two sources disagree): explain in questions.md. If a source clearly contradicts the relation, remove it with `drop_link` instead. |
 | `not checked` / `niet gecheckt` | Not yet researched (default on import) or a living/recent person. |
 
 **The user's own knowledge** of recent relations ("John really was my father") is a valid source: status `certain`, source "<name> (own knowledge, confirmed <date>)". At the first viewer, ask whether the user wants to confirm their own parents and grandparents this way.
 
 **Kind of relation** (optional column `type`): `biological` (default), `raised` (raised as their own child), `adopted` or `foster` (Dutch: `biologisch`, `aangenomen`, `adoptie`, `pleeg`). Status and type are independent: a father who raised the child can be *certain*.
 
-Format of `data/relations.csv` (UTF-8, commas, quotes `"`; Dutch column names also work, see `viewer/DATA-FORMAT.md`):
+`data/relations.csv` is made by `rebuild` from the rounds (`parents` and `status` steps); don't edit it by hand. Format (UTF-8, commas, quotes `"`; Dutch column names also work, see `viewer/DATA-FORMAT.md`; `rebuild` adds the names in `child_name`/`parent_name` for reading):
 
 ```
 child_id,parent_id,status,source,note,type
@@ -60,9 +62,10 @@ child_id,parent_id,status,source,note,type
 
 ## Working in rounds
 
-A round = one generation (or ±10 people). After every round:
-1. Update the GEDCOM (new INDI/FAM records with sources; work on a copy and keep the previous version with a date in `source/`).
-2. Update `relations.csv`.
+A round = one generation (or ±10 people). The original GEDCOM in `source/` is never changed; every round is a block of its own, and the working version is rebuilt from the original plus all rounds every time. That way a mistake in an old round can be fixed in that round, and nothing gets lost.
+
+1. Write what you found as one round file: `rounds/<number>-<short name>.json` (Dutch: `rondes/`), with a title, the date and a source per step (format and steps in gedcom-tool.md). New people, parents, events, occupations, notes, other names, wrong links out (`drop_link` with a reason), duplicates merged, place names made uniform ("Place, Province, Country").
+2. Rebuild: `gedcom_tool.py rebuild <original> rounds source/tree.ged --csv data/relations.csv --rejected reports/rejected.md --media data/media.csv --lang <user language>`. It stops with the round and step if something doesn't fit; fix the round and run again. Look at what changed (a diff of `tree.ged`, or the list it prints): only what you meant?
 3. Build the viewer data and publish (see viewer.md).
 4. Add to `reports/new.md` (who, what, source) and regenerate the gaps (`gedcom_tool.py check`).
 5. Short report to the user in plain words: "This round I found 6 new ancestors. Your oldest known ancestor is now … (born c. 1742 in …). I got stuck at …; could you have a look there?" Follow the agreement from onboarding step 4 on how independently you continue.

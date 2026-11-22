@@ -12,7 +12,7 @@ plugins/family-tree-research/
   skills/family-tree/
     SKILL.md                         instructions Claude follows (English, with a language rule)
     references/*.md                  onboarding, gedcom-export, research, sources, gedcom-tool, viewer, folders-and-files
-    scripts/gedcom_tool.py           new / add / check / media   (Dutch aliases: nieuw / toevoegen / controleer)
+    scripts/gedcom_tool.py           new / rebuild / add / check / media   (Dutch aliases: nieuw / opbouwen / toevoegen / controleer)
     scripts/make_viewer_data.py      GEDCOM (+csv, regions, stories, zeitgeist, media) → data.json
     scripts/standalone_viewer.py     index.html + data.json → one HTML file
     scripts/geocode_places.py        GEDCOM (+stories) → coordinates per place (Nominatim, cached; manual fixes stay)
@@ -24,7 +24,8 @@ plugins/family-tree-research/
     viewer/DATA-FORMAT.md            data.json format (field names are Dutch, documented in English)
     examples/                        7-person example family + regions-basic.json, example-coords.json, example-stories.json and
                                      example-zeitgeist.json (fictional, to test the Story view) and one real CC0 photo in
-                                     examples/media/tijdgeest/ (Den Helder, 1955, Anefo)
+                                     examples/media/tijdgeest/ (Den Helder, 1955, Anefo); examples/rounds/ = two fictional
+                                     rounds (English and Dutch keys) for `rebuild`
 docs/screenshots/                    screenshots for the README (example family only, never real data)
 docs/demo/make_demo.py, demo.ged     larger fictional demo family (133 people) for the fan screenshot
 README.md, LICENSE (MIT)
@@ -54,9 +55,10 @@ python3 -I $S/scripts/make_viewer_data.py $S/examples/example.ged /tmp/ex.json \
 python3 -I $S/scripts/gedcom_tool.py check $S/examples/example.ged /tmp/check.md --start @I1@
 python3 -I $S/scripts/gedcom_tool.py check $S/examples/example.ged /tmp/check-nl.md --start @I1@ --lang nl
 python3 -I $S/scripts/standalone_viewer.py $S/viewer/index.html /tmp/ex.json /tmp/ex.html --media $S/examples
+python3 -I $S/scripts/gedcom_tool.py rebuild $S/examples/example.ged $S/examples/rounds /tmp/rb.ged --csv /tmp/rb.csv --rejected /tmp/rb.md --lang nl
 ```
 
-Then open `/tmp/ex.html` (or screenshot it with Playwright, desktop + mobile) and click through all tabs: Family, Line, Story, Timeline, Fan, Cosmos, and open ▶ Cards (tap through Femke → Thomas → Pieter; the Den Helder photo card must show). Maps: in Story and in Cards, Femke (Utrecht), Thomas (Amersfoort) and Pieter (Den Helder, after the paragraph that names it) each get one map (Pieter: "Den Helder, 97 km from Amersfoort"); via Thomas → Anna a route Amersfoort → Göteborg with the distance. Click the name in the title and pick Thomas: title, Story and Cards must follow. The footer must say "Made with Family Tree Research v<version>" with the version from plugin.json. In the Story view, follow Femke → Thomas → Pieter: Pieter must show his own (example) story, a "Life in Den Helder" block with the 1955 photo, and the 1963 example event with a source link and an "Example links" line; Anna's template text must say she lived through the Second World War "roughly from age 15 to 20". In English, no Dutch words may appear (e.g. "bron"). Check the browser console for errors. Also test with `--lang nl`. If you touched `gedcom_tool.py new/add`, test them with both English and Dutch JSON keys (formats in references/onboarding.md and references/gedcom-tool.md).
+Then open `/tmp/ex.html` (or screenshot it with Playwright, desktop + mobile) and click through all tabs: Family, Line, Story, Timeline, Fan, Cosmos, and open ▶ Cards (tap through Femke → Thomas → Pieter; the Den Helder photo card must show). Maps: in Story and in Cards, Femke (Utrecht), Thomas (Amersfoort) and Pieter (Den Helder, after the paragraph that names it) each get one map (Pieter: "Den Helder, 97 km from Amersfoort"); via Thomas → Anna a route Amersfoort → Göteborg with the distance. Click the name in the title and pick Thomas: title, Story and Cards must follow. The footer must say "Made with Family Tree Research v<version>" with the version from plugin.json. In the Story view, follow Femke → Thomas → Pieter: Pieter must show his own (example) story, a "Life in Den Helder" block with the 1955 photo, and the 1963 example event with a source link and an "Example links" line; Anna's template text must say she lived through the Second World War "roughly from age 15 to 20". In English, no Dutch words may appear (e.g. "bron"). Check the browser console for errors. Also test with `--lang nl`. The rebuild must end with 17 steps, 9 people, 7 relations and 1 rejected link; running it twice must give identical files (`cmp`). If you touched `rebuild`, also test that it stops with file + step on an unknown id, on a `drop_link` without reason and on re-adding the rejected Griet Bakker as Pieter's mother. If you touched `gedcom_tool.py new/add`, test them with both English and Dutch JSON keys (formats in references/onboarding.md and references/gedcom-tool.md).
 
 If `examples/example-data.json` should change, regenerate it with the first command (output to `$S/examples/example-data.json`).
 

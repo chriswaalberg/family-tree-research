@@ -22,7 +22,7 @@ AskUserQuestion, one question:
   - No, I'm starting from scratch
   - I only have loose papers/notes
 
-**Yes** → `gedcom-export.md`: give the steps for their platform. Ask them to drop the file in the chat or put it in the connected folder. Keep the original unchanged in `source/` and always work on a copy. Then go to "Checking an import".
+**Yes** → `gedcom-export.md`: give the steps for their platform. Ask them to drop the file in the chat or put it in the connected folder. Keep the original unchanged in `source/`: it's the starting point of `gedcom_tool.py rebuild`, and every change is a round on top of it. Then go to "Checking an import".
 
 **No / loose papers** → Step 2. With papers: ask whether they'd like to share photos of important documents (marriage booklet, memorial cards, certificates, family announcements); those are a gold mine. Read them and record them as sources.
 
@@ -69,7 +69,7 @@ Write the answers in the progress file under "Agreements". Don't add a question 
 
 ## Step 5 – First tree and viewer
 
-1. No GEDCOM? Make one without asking (it's the working file behind the viewer): `python3 -I scripts/gedcom_tool.py new data/intake.json source/tree.ged` (see gedcom-tool.md).
+1. No GEDCOM? Make one without asking (it's the starting point behind the viewer): `python3 -I scripts/gedcom_tool.py new data/intake.json source/original.ged`, then `gedcom_tool.py rebuild source/original.ged rounds source/tree.ged --csv data/relations.csv --lang <user language>` (no rounds yet: `tree.ged` is a copy). From now on every change is a round (see gedcom-tool.md).
 2. Build the viewer data and publish (see `viewer.md`), with `--lang` in the user's language.
 3. Share the link: "Here's your family tree. Still small, but it's going to grow." Explain in two sentences how to click and search.
 

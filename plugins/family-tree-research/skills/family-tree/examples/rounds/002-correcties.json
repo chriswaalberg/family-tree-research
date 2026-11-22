@@ -1,0 +1,10 @@
+{"titel": "Correcties", "datum": "2026-11-23", "bron": "Bevolkingsregister Den Helder 1950, blad 7",
+ "stappen": [
+  {"op": "nieuw", "ref": "jan2", "voornamen": "Johannes", "achternaam": "de Vries", "geslacht": "M", "geboren": {"datum": "1919", "plaats": "Den Helder"}, "beroep": "visser"},
+  {"op": "samenvoegen", "houd": "I1_jan", "weg": "I2_jan2", "reden": "dezelfde man, Jan is zijn roepnaam"},
+  {"op": "koppeling_weg", "kind": "@I4@", "ouder": "I1_griet", "reden": "Griet was zijn stiefmoeder", "herkomst": "Ancestry-hint"},
+  {"op": "gebeurtenis_weg", "persoon": "I4", "soort": "Award", "reden": "Hoort bij zijn neef"},
+  {"op": "zekerheid", "kind": "I2", "vader": "I4", "status": "zeker", "bron": "Thomas (eigen kennis, 23-11-2026)"},
+  {"op": "naam", "persoon": "I5", "voornamen": "Anna Maria", "achternaam": "Lindqvist"},
+  {"op": "gebeurtenis", "persoon": "I1_jan", "partner": "I1_griet", "soort": "scheiding", "datum": "1947"}
+ ]}
