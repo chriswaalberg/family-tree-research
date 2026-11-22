@@ -91,9 +91,11 @@ The address carries a secret key, because the Workshop is reachable for everyone
 
 ## In the page
 
-- The name in the title picks the start person (from the start people, or search by name); every browser remembers its own choice.
+- At the top: the start person (tap to choose another), one line of counts (people, links, open questions, sources) and a thin certainty bar. Everything else is behind the menu (☰): Cosmos | Fan, EN | NL (shared with the viewer), replay this session, on your phone (QR code), choose the start person, the viewer.
+- Under the sky (on a wide screen: the right column) three tabs, each remembered per browser:
+  - **Workers**: one row per agent (Claude and every helper with `FTR_WHO`), in its own colour: who it is on (with the relation for someone outside the fan, or "outside the fan"), and its last step. A row greys out after three quiet minutes.
+  - **Log**: everything in order, each line with the colour and name of its worker; archive ids show as "2 records · Het Utrechts Archief". A dot on the tab means something new.
+  - **Outside the fan**: people added who aren't ancestors of the start person, newest first, with a count on the tab; a rejected link shows crossed out.
+- The beams: one per worker, labelled with its name, in the same colour as its row. A beam points at the person its worker is on and stays there; it only turns a full circle for a check of the whole tree (`check`). A step without a known person leaves it where it is. It fades when its worker has been quiet for three minutes, together with its ring and row.
 - Cosmos and Fan show as many generations as the start person's tree has, plus one orbit/ring of open questions; they grow one when you get a generation further.
-- Counters: people, links (parent-child), open questions (missing parents up to generation 9, as in `check`), sources (links with a source).
-- "Viewer ↗" opens the normal viewer from the same server.
-- EN/NL switches the language, like in the viewer, and the choice is shared with it (same browser, same key `stamboomLang`). Without a choice it opens in the tree's language (`taal` in data.json, set from the language the user talks in); `?lang=en`/`?lang=nl` in the address wins.
-- The replay button (⟲) plays the whole session again, from the tree as it was when this Workshop started: every search, note, check and round with the same animations, with pause, 1×/2×/4× and "Back to live". The server keeps it in memory until the Workshop stops (every data.json version, compressed); a new start begins a new session. Point the user to it after a long or overnight round: "press ⟲ to watch what happened while you were away".
+- The replay plays the whole session again, from the tree as it was when this Workshop started, with pause, 1×/2×/4× and "Back to live". Point the user to it after a long or overnight round.
