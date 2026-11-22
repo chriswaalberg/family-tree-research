@@ -10,7 +10,7 @@
  --teal:#7fc8b4;--red:#e5594f;--amber:#e8a24a;--blue:#9db4e0;
  --slot:rgba(255,255,255,.04);--slotS:rgba(255,255,255,.13);--ghost:rgba(255,255,255,.10);--panel:rgba(38,37,35,.88);--line:rgba(255,255,255,.08);
  --fa:rgba(255,255,255,.055);--mo:rgba(217,119,87,.07);--serif:"Cormorant Garamond",Georgia,serif;--sans:Inter,system-ui,-apple-system,sans-serif;color-scheme:dark}
-*{box-sizing:border-box}
+*{box-sizing:border-box}[hidden]{display:none!important} /* a display rule must never show a hidden box (the empty 'Working on' bar) */
 html,body{margin:0;height:100%}
 body{background:radial-gradient(ellipse 80% 70% at 38% 48%,var(--bg2),var(--bg) 72%) fixed;color:var(--ink);font:14px/1.45 var(--sans);
  display:grid;grid-template-rows:auto 1fr;overflow:hidden;padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)}
@@ -69,6 +69,10 @@ aside{display:flex;flex-direction:column;gap:10px;padding:6px 18px 14px 0;min-he
  box-shadow:0 0 34px color-mix(in srgb,var(--gold) 14%,transparent),inset 0 1px 0 color-mix(in srgb,var(--gold2) 15%,transparent);transform-origin:top center;animation:unfold .9s cubic-bezier(.2,.9,.3,1.2)}
 .card small{display:block;font:700 10px var(--sans);letter-spacing:2px;color:var(--gold);text-transform:uppercase}
 .card div{font:600 italic 18px/1.25 var(--serif);margin-top:3px;overflow-wrap:anywhere;color:var(--gold2)}
+.card .srcl{display:flex;flex-direction:column;gap:2px}
+.card .srcl a,.card .srcl .sl{color:var(--gold2);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .srcl a span{font:600 12px var(--sans);color:var(--gold);opacity:.8}.card .srcl a:hover{text-decoration:underline}
+.card .srcl em{font:600 11px var(--sans);font-style:normal;color:var(--mut);margin-top:2px}
 .card .seal{position:absolute;right:14px;top:50%;margin-top:-16px;width:32px;height:32px;border-radius:50%;border:1px solid var(--gold);display:grid;place-items:center;
  color:var(--gold2);font:700 13px var(--serif);box-shadow:0 0 16px color-mix(in srgb,var(--gold) 50%,transparent),inset 0 0 10px color-mix(in srgb,var(--gold) 35%,transparent);animation:seal 2.6s ease-in-out infinite}
 @keyframes seal{50%{box-shadow:0 0 26px color-mix(in srgb,var(--gold) 80%,transparent),inset 0 0 14px color-mix(in srgb,var(--gold) 50%,transparent)}}
@@ -222,7 +226,7 @@ en:{title:"Workshop",treeOf:"Family tree of",people:"people",links:"links",open:
  job:"Occupation: {n}",jobD:"{j}",many:"and {n} more",source:"Source",nosource:"No source named yet",fatherOf:"father of {c}",motherOf:"mother of {c}",notInFan:"not in the line of ancestors",
  rejected:"REJECTED",gapsNew:"+{n} open questions",gapsNewD:"Every new ancestor has two parents of their own.",gold:"This link is certain now.",
  s_zeker:"certain",s_waarschijnlijk:"probable",s_mogelijk:"possible",s_fout:"wrong",s_onbekend:"unknown","s_niet gecheckt":"not checked",s_:"no status",
- empty:"Nobody in the tree yet.",nowT:"Working on",focusT:"Now: {n}",r_wifeOf:"wife of {n}",r_husbandOf:"husband of {n}",r_partnerOf:"partner of {n}",
+ empty:"Nobody in the tree yet.",srcMore:"+ {n} more",nowT:"Working on",focusT:"Now: {n}",r_wifeOf:"wife of {n}",r_husbandOf:"husband of {n}",r_partnerOf:"partner of {n}",
  r_motherOf:"mother of {n}",r_fatherOf:"father of {n}",r_parentOf:"parent of {n}",r_daughterOf:"daughter of {n}",r_sonOf:"son of {n}",r_childOf:"child of {n}",
  r_sisterOf:"sister of {n}",r_brotherOf:"brother of {n}",r_siblingOf:"sibling of {n}",v_fan:"Fan",v_cos:"Cosmos",nothing:"Nothing found",why:"Reason or source added: {c} → {p}",whyN:"{n} links got a source or a reason",whyNd:"{names} and others",
  storyEdit:"Story updated: {n}",tg:"Life and times of {p}",tgD:"{e} events · {b} images · {l} periods",tgNew:"new place",certN:"{n} links changed certainty",
@@ -239,7 +243,7 @@ nl:{title:"Werkplaats",treeOf:"Stamboom van",people:"mensen",links:"relaties",op
  job:"Beroep: {n}",jobD:"{j}",many:"en nog {n} anderen",source:"Bron",nosource:"Nog geen bron genoemd",fatherOf:"vader van {c}",motherOf:"moeder van {c}",notInFan:"niet in de voorouderlijn",
  rejected:"AFGEWEZEN",gapsNew:"+{n} open vragen",gapsNewD:"Elke nieuwe voorouder heeft zelf ook weer twee ouders.",gold:"Deze koppeling is nu zeker.",
  s_zeker:"zeker",s_waarschijnlijk:"waarschijnlijk",s_mogelijk:"mogelijk",s_fout:"fout",s_onbekend:"onbekend","s_niet gecheckt":"niet gecheckt",s_:"geen status",
- empty:"Nog niemand in de boom.",nowT:"Nu bezig met",focusT:"Nu: {n}",r_wifeOf:"vrouw van {n}",r_husbandOf:"man van {n}",r_partnerOf:"partner van {n}",
+ empty:"Nog niemand in de boom.",srcMore:"+ {n} meer",nowT:"Nu bezig met",focusT:"Nu: {n}",r_wifeOf:"vrouw van {n}",r_husbandOf:"man van {n}",r_partnerOf:"partner van {n}",
  r_motherOf:"moeder van {n}",r_fatherOf:"vader van {n}",r_parentOf:"ouder van {n}",r_daughterOf:"dochter van {n}",r_sonOf:"zoon van {n}",r_childOf:"kind van {n}",
  r_sisterOf:"zus van {n}",r_brotherOf:"broer van {n}",r_siblingOf:"broer of zus van {n}",v_fan:"Waaier",v_cos:"Kosmos",nothing:"Niets gevonden",why:"Bron of reden erbij: {c} → {p}",whyN:"{n} koppelingen kregen een bron of reden",whyNd:"{names} en anderen",
  storyEdit:"Verhaal bijgewerkt: {n}",tg:"Tijdgeest van {p}",tgD:"{e} gebeurtenissen · {b} beelden · {l} periodes",tgNew:"nieuwe plaats",certN:"{n} koppelingen veranderden van zekerheid",
@@ -257,7 +261,7 @@ const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k
 
 /* ===== TUNING (all numbers that shape the Workshop) ===== */
 let VIEW="cosmos";
-const CFG={FOCUS_MS:120000,SWEEP_BIG:400,TICK_MS:120,TAP_PX:22,COS_R0:40,STEPS_ONE_BY_ONE:8,CERT_ONE_BY_ONE:4,WHY_ANIM_MAX:80,BREATHE_MAX:40,MAX_PARTS:1500,STAR_MS:250,MAXG:14,R0:62,RMAX:490,Q:.8,MIN_DEG:.12,ONE_BY_ONE:10,TRAY:6,BEAM_IDLE:30000,FEED:120,GAPS_TO:9,SWEEP_MS:5200,FLY_MS:1400};
+const CFG={SRC_MAX:3,FOCUS_MS:120000,SWEEP_BIG:400,TICK_MS:120,TAP_PX:22,COS_R0:40,STEPS_ONE_BY_ONE:8,CERT_ONE_BY_ONE:4,WHY_ANIM_MAX:80,BREATHE_MAX:40,MAX_PARTS:1500,STAR_MS:250,MAXG:14,R0:62,RMAX:490,Q:.8,MIN_DEG:.12,ONE_BY_ONE:10,TRAY:6,BEAM_IDLE:30000,FEED:120,GAPS_TO:9,SWEEP_MS:5200,FLY_MS:1400};
 
 /* ===== DATA ===== */
 let D=null,P=[],ROOT=null,L=null;            // L = current layout
@@ -425,7 +429,16 @@ function callout(c,html,kind="",ms=4200){const stg=$("#stage"),r=stg.getBounding
  d.style.left=Math.max(6,Math.min(r.width-w-6,left))+"px";d.style.top=Math.max(6,Math.min(r.height-h-6,top))+"px";
  setTimeout(()=>d.classList.add("bye"),ms);setTimeout(()=>d.remove(),ms+700)}
 async function overlay(html,ms){const o=$("#ov");o.innerHTML=`<div class="box">${html}</div>`;o.classList.add("on");await wait(ms);o.classList.remove("on")}
-function showSource(text){$("#src").innerHTML=text?`<div class="card"><small>${esc(_t("source"))}</small><div>${esc(text)}</div><span class="seal">✦</span></div>`
+/* a source as people read it: one short line per record, the description is the link, no long addresses */
+const URL_RE=/https?:\/\/[^\s;,)]+/g;
+const siteOf=u=>{try{return new URL(u).hostname.replace(/^www\./,"")}catch(e){return u}};
+function srcParts(text){return String(text||"").split(/\s*;\s*/).map(t=>{const u=(t.match(URL_RE)||[])[0]||"",label=t.replace(URL_RE,"").replace(/\s{2,}/g," ").replace(/[\s:·,–-]+$/,"").trim();
+ return{label:label||(u?siteOf(u):""),u}}).filter(x=>x.label)}
+function srcHtml(text){const ps=srcParts(text),show=ps.slice(0,CFG.SRC_MAX);
+ return show.map(x=>x.u?`<a href="${esc(x.u)}" target="_blank" rel="noopener">${esc(x.label)} <span>↗</span></a>`:`<span class="sl">${esc(x.label)}</span>`).join("")
+  +(ps.length>show.length?`<em>${esc(_t("srcMore",{n:ps.length-show.length}))}</em>`:"")}
+const shortUrls=t=>String(t||"").replace(URL_RE,u=>siteOf(u)+" ↗");
+function showSource(text){$("#src").innerHTML=text?`<div class="card"><small>${esc(_t("source"))}</small><div class="srcl">${srcHtml(text)}</div><span class="seal">✦</span></div>`
  :`<div class="card none"><small>${esc(_t("source"))}</small><div>${esc(_t("nosource"))}</div></div>`}
 function srcPt(){const c=$("#src .card");if(!c)return null;const r=c.getBoundingClientRect();return inView(r.left,r.top)?[r.left+r.width*.3,r.top+r.height/2]:null}
 function wave(c,col){const s=slotAt(c);if(!s)return;const[x,y]=centre(s),e=document.createElementNS(NS,"circle");e.setAttribute("class","wave");e.setAttribute("cx",x);e.setAttribute("cy",y);e.setAttribute("r",Math.max(60,(L.RO(s.g)-L.RI(s.g))*1.6));if(col)e.style.stroke=col;$("#fxG").append(e);setTimeout(()=>e.remove(),1500)}
@@ -516,7 +529,7 @@ function drawFocus(){$$("#fxG .focus").forEach(e=>e.remove());const now=$("#now"
 /* ===== FEED ===== */
 function feed(kind,title,detail,who,quiet){const f=$("#feed");f.querySelector(".empty")?.remove();const li=document.createElement("li");li.className="k-"+kind+(quiet?" q":"");
  const ic={focus:"◎",nothing:"∅",why:"❝",search:"⌕",read:"❐",scan:"▤",clip:"✂",result:"↳",check:"✓",warn:"!",add:"✦",del:"✕",cert:"◆",fix:"✎",note:"✎",ask:"?",found:"★",rebuild:"⟳"}[kind]||"·";
- li.innerHTML=`<span class="ic">${ic}</span><div><b>${esc(title)}${who?`<span class="who">${esc(who)}</span>`:""}</b>${detail?`<small>${esc(detail)}</small>`:""}</div>`;
+ li.innerHTML=`<span class="ic">${ic}</span><div><b>${esc(shortUrls(title))}${who?`<span class="who">${esc(who)}</span>`:""}</b>${detail?`<small>${esc(shortUrls(detail))}</small>`:""}</div>`;
  f.append(li);while(f.children.length>CFG.FEED)f.firstChild.remove();f.scrollTop=f.scrollHeight}
 function feedEmpty(){const f=$("#feed");if(!f.children.length)f.innerHTML=`<li class="empty">${esc(_t("waiting"))}</li>`}
 function describe(ev){const src=ev.source||"";
