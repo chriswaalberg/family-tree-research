@@ -2,6 +2,7 @@
 
 One line per version from 0.9.38 on; older versions are in the git history (`git log --oneline`).
 
+- **0.9.66** — Workshop: an EN/NL switch like the viewer's, sharing the reader's choice with it (switch in one, the other opens in that language too); without a choice it follows the tree's language. Header buttons stay on one line on a 375 px phone.
 - **0.9.65** — Workshop: a replay button plays the whole session again from the tree as it was at the start (every search, note, check and round, same animations), with pause, 1×/2×/4× and back to live; the server keeps every event and data.json version of the session in memory. The QR code is in the Workshop's own style: a dark card with light round dots and clay eyes. A star that already shows its name gets only the "working on" ring.
 - **0.9.64** — The Workshop on a phone without typing: a phone button at the top shows a QR code of the phone address (only on the computer that runs it). The key in that address is now fixed per tree (kept in `~/.config/family-tree-research/`, never in the tree's folder) and the phone remembers it for 30 days, so a bookmark keeps working after a restart. Without `--lan` the button says what to ask Claude.
 - **0.9.63** — Workshop: the source card shows one short line per record (the description is the link, no long addresses; "+ n more" after three), addresses in the log become the site name; the empty "Working on" bar no longer shows when nobody is being worked on.
