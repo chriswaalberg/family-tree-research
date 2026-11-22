@@ -2,6 +2,8 @@
 
 One line per version from 0.9.38 on; older versions are in the git history (`git log --oneline`).
 
+- **0.9.55** — The Fan is round: the start person in the middle, father's side left, mother's side right, every ring 0.8 × the one inside it, text in the lower half turned upright. On a phone the segments are two to three times as wide as in the half fan, on a desktop about 1.3 to 1.5 times. The README screenshot shows the round fan.
+- **0.9.48–0.9.54** — Research tools from another session: `archives.py` (open archives without a browser, OA scans), rebuilding the tree from the original plus round files with fixed ids, stricter evidence rules; see `git log`.
 - **0.9.47** — The generations slider goes as far as the start person's tree is deep (no fixed 12/14 any more), for Fan, Cosmos and Timeline. Fix: with the line off, an empty bar stood above every tree view since 0.9.43.
 - **0.9.46** — The Story line is shown whole in every tree view, also when it is longer than the generations slider allows (Timeline 14, Fan/Cosmos 12): past the slider only the line goes on. In Fan a thin line with dots follows the line where its slices get thinner than a pixel; Timeline zooms and scrolls so the whole line fits.
 - **0.9.45** — A person's portrait stands as a polaroid at the top right of their block in Story (square corners, wide white bottom with the photo's title, a slight tilt; above the name on phones); other photos and documents stay small. Which photo: `_PRIM Y` in the GEDCOM (from Ancestry/FTM/RootsMagic, or the new `portrait` column of media.csv via `gedcom_tool.py media`), else the first photo. Cards uses the same portrait.

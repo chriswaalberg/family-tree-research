@@ -74,7 +74,7 @@ The viewer is one file (~1,700 lines, CSS + HTML + JS). Find your way by these m
 
 - `/* ===== TEKSTEN (NL / EN) ===== */` → `const I18N = {nl:{…}, en:{…}}`. More keys are added later with `Object.assign(I18N.nl,…)` / `Object.assign(I18N.en,…)` (Story texts: `vh_*`, events `e_*`). Every user-visible string lives here, in both languages.
 - `function certOf`, `isAdopt`, `hasAdopt`, `adoptSet`: certainty of a parent link and raised/adopted/foster lines (gold double line, hatching, "family by adoption"). On the parent's card and sheet the label is `vh_adopt_par` ("nam {child} aan als eigen kind"), never `vh_adopt`.
-- `/* ===== WAAIER` (Fan), `KOSMOS` (Cosmos), `TIJDLIJN` (Timeline), `STAMLIJN` (Line), `function drawFamilie` (Family).
+- `/* ===== WAAIER` (Fan, round: `seg(root,0,π/2,5π/2)`, father's side left; ring g runs from `RI(g)` to `RO(g)`, each ring 0.8 × the one inside it; text in the lower half is turned (`fl`); `svg.fanr` is at most 82vh high), `KOSMOS` (Cosmos), `TIJDLIJN` (Timeline), `STAMLIJN` (Line), `function drawFamilie` (Family).
 - `/* ===== VERHAAL` (Story view):
   - `vhRich`, `vhBest`, `vhDepth`, `vhStories`: scoring of the "richest trail" (gold star).
   - `vhYMD`, `vhAge`: exact ages from GEDCOM dates; "about" only when a date is estimated.

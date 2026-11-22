@@ -343,6 +343,7 @@ main{padding-top:6px}
 .linebar .lb-x{border:1px solid #cdb78f;background:#fffaf1;color:#5b4632}.linebar .lb-x:hover{background:#fff}
 .linebar button:focus-visible{outline:2px solid #c9a04a;outline-offset:2px}
 @media (max-width:560px){.linebar{padding:10px 12px}.linebar .lb-b{width:100%}.linebar .lb-b button{flex:1;justify-content:center}}
+.fanr{display:block;margin:0 auto;max-width:100%;max-height:82vh}
 .ln-dim{opacity:.22;transition:opacity .25s}svg.ln-dim{opacity:.32}.slc.ln-dim,.fc.ln-dim{opacity:.35}
 /* kaarten */
 .fc,.slc{background:var(--paper);border-left-color:#e0d0b6;border-right-color:#e0d0b6;border-bottom-color:#e0d0b6;box-shadow:var(--shadow-card);border-radius:10px}
@@ -743,7 +744,7 @@ nl:{loading:"Stamboom laden…",loadError:"Kon de stamboom niet laden ({msg}).",
  l_vv:"vaders vader",l_vm:"vaders moeder",l_mv:"moeders vader",l_mm:"moeders moeder",unknown:"Onbekend",unknownL:"onbekend",notAssessed:"Geen beoordeling",
  cert_zeker:"Zeker",cert_waarschijnlijk:"Waarschijnlijk",cert_mogelijk:"Mogelijk",cert_onbekend:"Onbekend / niet onderzocht",cert_fout:"Fout gevonden",cert_niet:"Niet gecheckt",
  before1600:"vóór 1600",tipClick:"Klik voor meer over deze persoon",readStory:"Lees het verhaal",relChildTip:"Relatie met kind: ",occursFan:"Komt {n}× voor in deze waaier",
- fanParents:"ouders",fanGrand:"grootouders",fanGen:"{n}e gen.",lg_dup:"komt vaker voor (kwartierverlies)",lg_inlaw:"aangetrouwd",lg_missing:"nog niet gevonden",
+ lg_dup:"komt vaker voor (kwartierverlies)",lg_inlaw:"aangetrouwd",lg_missing:"nog niet gevonden",
  hint_waaier:"Beweeg over een vak voor details, klik om die persoon in het midden te zetten. Een rood stipje betekent dat deze voorouder meerdere keren in de waaier staat.",
  hint_kosmos:"Grote stippen zijn directe voorouders, kleine stippen hun andere nakomelingen (ooms, tantes, neven, nichten). Beweeg over een stip om de directe familie te zien.",
  hint_tijdlijn:"Iedereen staat op de hoogte van zijn of haar geboortejaar. Scrollen = zoomen, slepen = verplaatsen; klik op een naam voor details, het pad naar de startpersoon en de telling per generatie.",genAboveTitle:"{gens} erboven — toon ouders",
@@ -770,7 +771,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  l_vv:"father's father",l_vm:"father's mother",l_mv:"mother's father",l_mm:"mother's mother",unknown:"Unknown",unknownL:"unknown",notAssessed:"Not assessed",
  cert_zeker:"Certain",cert_waarschijnlijk:"Probable",cert_mogelijk:"Possible",cert_onbekend:"Unknown / not researched",cert_fout:"Error found",cert_niet:"Not checked",
  before1600:"before 1600",tipClick:"Click for more about this person",readStory:"Read the story",relChildTip:"Relation to child: ",occursFan:"Appears {n}× in this fan",
- fanParents:"parents",fanGrand:"grandparents",fanGen:"gen. {n}",lg_dup:"appears more than once (pedigree collapse)",lg_inlaw:"related by marriage",lg_missing:"not found yet",
+ lg_dup:"appears more than once (pedigree collapse)",lg_inlaw:"related by marriage",lg_missing:"not found yet",
  hint_waaier:"Hover over a segment for details, click to put that person in the centre. A red dot means this ancestor appears more than once in the fan.",
  hint_kosmos:"Large dots are direct ancestors, small dots their other descendants (uncles, aunts, cousins). Hover over a dot to see the immediate family.",
  hint_tijdlijn:"Everyone is placed at the height of their birth year. Scroll to zoom, drag to move; click a name for details, the path to the start person and counts per generation.",genAboveTitle:"{gens} above — show parents",
@@ -790,7 +791,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.54",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.55",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -898,8 +899,11 @@ function drawFan(){
   const G=Math.max(2,Math.min(state.gens,depthOf(root,0)+1));
   /* the Story line goes on past the slider's generations (only the line); GR = rings drawn */
   const GR=LN?Math.max(G,LN.path.length-1):G,lnPts=[];
-  const W=1000,cx=500,cy=540,r0=66,Rmax=492,ring=(Rmax-r0)/GR;
-  const svg=el("svg",{viewBox:`0 0 ${W} 570`});
+  /* a round fan: the start person in the middle, father's side left, mother's side right; every ring 0.8 × the one inside it,
+     so the inner generations (the names you read most) get the most room and deep ones still fit */
+  const cx=500,cy=500,r0=62,Rmax=490,Q=.8,w0=(Rmax-r0)*(1-Q)/(1-Math.pow(Q,GR));
+  const RI=g=>r0+w0*(1-Math.pow(Q,g-1))/(1-Q),RO=g=>RI(g)+w0*Math.pow(Q,g-1);
+  const svg=el("svg",{viewBox:"0 0 1000 1000",class:"fanr"});
   const AD=adoptSet(root);if(AD.size){const df=el("defs",{},svg),pt=el("pattern",{id:"adoptHatch",width:7,height:7,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"},df);el("rect",{width:7,height:7,fill:"rgba(255,250,241,.18)"},pt);el("line",{x1:0,y1:0,x2:0,y2:7,stroke:"#fffaf1","stroke-width":2.2,"stroke-opacity":.55},pt)}
   const stats=ancestorStats(root);
   // count occurrences within G gens
@@ -914,12 +918,12 @@ function drawFan(){
     if(mode==="zekerheid"){if(child==null)return"#4a423b";const c=certOf(child,i);return c?(CERT[c[0]]||NONE):NONE}
   }
   function seg(i,g,a0,a1,slot,child){
-    const ri=r0+(g-1)*ring,ro=ri+ring,s0=gSeg.childNodes.length,t0=gTxt.childNodes.length;
+    const ri=RI(g),ro=RO(g),rw=ro-ri,s0=gSeg.childNodes.length,t0=gTxt.childNodes.length;
     if(g===0){
-      const rr=r0-3;const c=el("path",{d:`M${cx-rr},${cy}A${rr},${rr} 0 0 1 ${cx+rr},${cy}Z`,fill:"#2a2622",class:"seg"},gSeg);
+      const c=el("circle",{cx,cy,r:r0-3,fill:"#2a2622",class:"seg"},gSeg);
       hook(c,i,null);
-      const t=el("text",{x:cx,y:cy-30,"text-anchor":"middle",fill:"#fff","font-size":11.5,"font-weight":600},gTxt);t.textContent=short(P[i]);
-      const t2=el("text",{x:cx,y:cy-13,"text-anchor":"middle",fill:"#cfc6bc","font-size":11},gTxt);t2.textContent=yrs(P[i]);
+      const t=el("text",{x:cx,y:cy-3,"text-anchor":"middle",fill:"#fff","font-size":11.5,"font-weight":600},gTxt);t.textContent=short(P[i]);
+      const t2=el("text",{x:cx,y:cy+14,"text-anchor":"middle",fill:"#cfc6bc","font-size":11},gTxt);t2.textContent=yrs(P[i]);
     }else{
       const pad=Math.min(0.004,(a1-a0)*0.08);const b0=a0+pad,b1=a1-pad;
       const [x0,y0]=pol(b0,ri+1),[x1,y1]=pol(b1,ri+1),[x2,y2]=pol(b1,ro-1),[x3,y3]=pol(b0,ro-1);
@@ -935,16 +939,17 @@ function drawFan(){
       // labels
       const am=(a0+a1)/2,rm=(ri+ro)/2,arc=rm*(a1-a0);if(LN&&LN.pre.has(slot))lnPts.push({am,rm,arc,g});
       const light=isLight(col);const tc=light?"#2a2622":"#fff";
-      if(arc>78&&ring>30){
-        const fs=Math.min(13,ring/3.4);const maxc=Math.floor(arc/(fs*0.58));
-        const rot=am*180/Math.PI+90;
+      const fl=Math.sin(am)>0.05; /* lower half: turn the text so it never stands on its head */
+      if(arc>78&&rw>30){
+        const fs=Math.min(13,rw/3.4);const maxc=Math.floor(arc/(fs*0.58));
+        const rot=am*180/Math.PI+90+(fl?180:0);
         [[short(P[i]),-fs*0.25,600],[yrs(P[i]),fs*1.0,400]].forEach(([s,dy,w])=>{
-          const [tx,ty]=pol(am,rm-dy);
+          const [tx,ty]=pol(am,rm-(fl?-dy:dy));
           const t=el("text",{x:tx,y:ty,"text-anchor":"middle","dominant-baseline":"middle",transform:`rotate(${rot} ${tx} ${ty})`,fill:tc,"font-size":w===600?fs:fs*0.85,"font-weight":w},gTxt);
           t.textContent=s.length>maxc?s.slice(0,maxc-1)+"…":s;});
-      }else if(arc>7.5&&ring>26){
-        const fs=Math.min(11,arc*0.62);const maxc=Math.floor((ring-8)/(fs*0.58));
-        let deg=am*180/Math.PI;const flip=am<1.5*Math.PI;if(flip)deg+=180;
+      }else if(arc>7.5&&rw>26){
+        const fs=Math.min(11,arc*0.62);const maxc=Math.floor((rw-8)/(fs*0.58));
+        let deg=am*180/Math.PI;const flip=Math.cos(am)<0;if(flip)deg+=180;
         const [tx,ty]=pol(am,rm);
         const s=short(P[i]);
         const t=el("text",{x:tx,y:ty,"text-anchor":"middle","dominant-baseline":"middle",transform:`rotate(${deg} ${tx} ${ty})`,fill:tc,"font-size":fs,"font-weight":500},gTxt);
@@ -959,15 +964,13 @@ function drawFan(){
     if(p.m>=0){if(on("m"))seg(p.m,g+1,mid,a1,slot+"m",i)}else if(g+1<=3)ghost(g+1,mid,a1);
   }
   // empty guide rings
-  for(let g=1;g<=GR;g++){const ri=r0+(g-1)*ring,ro=ri+ring;const [x0,y0]=pol(Math.PI,ro),[x1,y1]=pol(2*Math.PI,ro);
-    el("path",{d:`M${x0},${y0}A${ro},${ro} 0 0 1 ${x1},${y1}`,fill:"none",stroke:"#efe9df"},gSeg);
-    const t=el("text",{x:cx+ri+ring/2,y:cy+18,"text-anchor":"middle",fill:"#a59a8f","font-size":10},svg);t.textContent=g===1?_t("fanParents"):g===2?_t("fanGrand"):_t("fanGen",{n:g});}
-  seg(root,0,Math.PI,2*Math.PI,"",null);
+  for(let g=1;g<=GR;g++)el("circle",{cx,cy,r:RO(g),fill:"none",stroke:"#efe9df"},gSeg);
+  seg(root,0,Math.PI/2,Math.PI*2.5,"",null); /* father: from the bottom via the left to the top; mother: the right half */
   /* deep in the fan the line's slices get thinner than a pixel: a thin line with dots through them, from the last slice you can still see */
   {lnPts.sort((a,b)=>a.g-b.g);const k=lnPts.findIndex(q=>q.arc<14);if(k>=0){const pts=lnPts.slice(Math.max(0,k-1)).map(q=>pol(q.am,q.rm));
     el("polyline",{points:pts.map(q=>q.join(",")).join(" "),fill:"none",stroke:"#2a2622","stroke-width":1.6,"stroke-linejoin":"round",opacity:.85},gTxt);
     pts.slice(1).forEach(([x,y])=>el("circle",{cx:x,cy:y,r:2.6,fill:"#2a2622",stroke:"#fffdf9","stroke-width":1},gTxt))}}
-  function ghost(g,a0,a1){const ri=r0+(g-1)*ring,ro=ri+ring,pad=Math.min(0.004,(a1-a0)*0.08),b0=a0+pad,b1=a1-pad;
+  function ghost(g,a0,a1){const ri=RI(g),ro=RO(g),ring=ro-ri,pad=Math.min(0.004,(a1-a0)*0.08),b0=a0+pad,b1=a1-pad;
     const [x0,y0]=pol(b0,ri+1),[x1,y1]=pol(b1,ri+1),[x2,y2]=pol(b1,ro-1),[x3,y3]=pol(b0,ro-1);
     el("path",{d:`M${x0},${y0}A${ri+1},${ri+1} 0 0 1 ${x1},${y1}L${x2},${y2}A${ro-1},${ro-1} 0 0 0 ${x3},${y3}Z`,fill:"#f6f1ea",stroke:"#d9cfc2","stroke-dasharray":"3 3"},gSeg);
     const am=(a0+a1)/2,rm=(ri+ro)/2,arc=rm*(a1-a0);if(arc>70&&ring>26){const [tx,ty]=pol(am,rm);const tt=el("text",{x:tx,y:ty,"text-anchor":"middle","dominant-baseline":"middle",transform:`rotate(${am*180/Math.PI+90} ${tx} ${ty})`,fill:"#b3a89c","font-size":Math.min(12,ring/3.4)},gTxt);tt.textContent=_t("notFound")}}
