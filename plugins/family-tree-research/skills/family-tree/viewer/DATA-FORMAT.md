@@ -47,7 +47,7 @@ Without a region code the viewer also recognises the country from the last part 
 | `by`, `dy` | number | no | Birth and death year (for the timeline and sorting). |
 | `r` | text | no | Region code (key in `regios`). If missing, the viewer looks the place up in `plaatsen`. |
 | `levend` | yes/no | no | Living person. Informational only; with `"levenden_tonen": false` the viewer shows the name with "Living", without dates and places. |
-| `c` | object | no | Certainty of the relation to the parents: `{"f": [status, source, note], "m": [...]}`. An optional fourth element gives the kind of relation: `"aangenomen"` (raised as their own child), `"adoptie"` (adoption) or `"pleeg"` (foster); default is biological. The viewer then shows e.g. "raised as their own child" and the Story view explains that this parent was not the biological parent. |
+| `c` | object | no | Certainty of the relation to the parents: `{"f": [status, source, note], "m": [...]}`. The note is the reason the status holds: for `zeker`, `waarschijnlijk`, `mogelijk` and `fout` the person cards show it under a heading ("Why certain:" / "Waarom zeker:"), with the source as a link below; for the other statuses source and note are shown plainly. An optional fourth element gives the kind of relation: `"aangenomen"` (raised as their own child), `"adoptie"` (adoption) or `"pleeg"` (foster); default is biological. The viewer then shows e.g. "raised as their own child" and the Story view explains that this parent was not the biological parent. |
 | `id` | text | no | Original GEDCOM id (e.g. `I12`), informational only. |
 | `beroep` | list of text | no | Occupations, literally from the GEDCOM (`1 OCCU`), in GEDCOM order: `["timmerman", "bewaker"]`. Shown in the person's details and in the Story text: "He worked as timmerman, later bewaker." / "Hij was timmerman, later bewaker." Left out for living people with `--hide-living`. |
 | `woon` | list | no | Where and when the person provably lived: `[["Rotterdam, Zuid-Holland, Nederland", 1859, 1864], ["Amsterdam, Noord-Holland, Nederland", 1874, 1911]]` (place, from, to). Made by `make_viewer_data.py` from every dated place: birth/baptism, `RESI` and other own events, marriages, the births of their children, death. Records in a row in the same place form one period, widened by 5 years but never past halfway to a record elsewhere, never before birth or after death. A 4th element marks a period abroad: `["Toronto, Ontario, Canada", 1958, 1963, "CA"]`. The zeitgeist uses it (see "Zeitgeist"). Left out for living people with `--hide-living`. |
@@ -96,7 +96,7 @@ Delimiter `,` `;` or tab. Column names may be English or Dutch:
 | `parent_id` / `ouder_id` (or `parent` / `ouder`) | same, for the father or mother |
 | `status` / `certainty` / `zekerheid` | one of the statuses above |
 | `source` / `bron` | free text; links become clickable |
-| `note` / `notes` / `opmerking` | free text |
+| `note` / `notes` / `opmerking` (or `why` / `waarom`, which wins when both are there) | why the status holds, in one plain sentence: which record, place and year, who is named as parent; for probable/possible also what's missing. The script warns about certain/probable/possible links without a source or with a reason under 25 characters |
 | `type` / `relation` / `soort` | optional: `biological` (default), `raised` (raised as their own child), `adopted`, `foster` — or the Dutch `biologisch`, `aangenomen`, `adoptie`, `pleeg` |
 
 Relations not in the CSV, or all relations when there is no CSV, get `not checked`.

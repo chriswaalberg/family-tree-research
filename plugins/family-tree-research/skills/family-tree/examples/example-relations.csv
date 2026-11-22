@@ -1,6 +1,6 @@
 child_id,parent_id,status,source,note
-@I1@,@I2@,certain,"Birth certificate Utrecht 2015",
-@I1@,@I3@,certain,"Birth certificate Utrecht 2015",
-@I2@,@I4@,probable,,"Family story only"
-@I2@,@I5@,possible,,"Name matches, date not yet"
+@I1@,@I2@,certain,"Birth certificate Utrecht 2015","Femke's birth certificate (Utrecht, 2015) names Thomas de Vries as her father; he reported the birth himself."
+@I1@,@I3@,certain,"Birth certificate Utrecht 2015","The same birth certificate names Sanne Peeters as the mother, and she is Thomas's wife."
+@I2@,@I4@,probable,"Thomas de Vries (own knowledge, 2026)","Family story: Thomas grew up with Pieter as his father. No birth record found yet to confirm it."
+@I2@,@I5@,possible,"Family story, told by Thomas (2026)","Anna Lindqvist from Göteborg fits by name and age, but no record names her as Thomas's mother yet."
 @I3@,@I6@,unknown,,

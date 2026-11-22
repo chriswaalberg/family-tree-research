@@ -230,6 +230,7 @@ svg text{font-family:Inter,sans-serif}
 .sheet .ln{font-size:13.5px;color:#4a423b;line-height:1.6}
 .sheet .ct{margin:12px 0 4px;padding:10px 12px;background:var(--secondary);border-radius:calc(var(--radius) - 2px);font-size:13px;line-height:1.5;word-break:break-word}
 .sheet .ct a{color:var(--foreground)}
+.ct .cw{margin-top:6px}.ct>div+div{margin-top:10px}.cw b{font-weight:600}.cw .cw-src{opacity:.8}
 .sheet>footer{flex-direction:row!important;flex-wrap:wrap;padding:16px 22px 18px!important}
 .btn.vhgo{background:var(--gold2);color:var(--walnut);border-color:var(--gold2)}.btn.vhgo:hover{background:#e6c27c;border-color:#e6c27c}
 .sbtn{justify-content:flex-start!important;min-width:250px;color:var(--muted-foreground)!important;font-weight:400!important;gap:8px!important}
@@ -754,7 +755,7 @@ nl:{loading:"Stamboom laden…",loadError:"Kon de stamboom niet laden ({msg}).",
  estBorn:"° geschat ca. {y}",age:"({n} jaar)",relToChild:"relatie met kind: ",th_exp:"verwacht",th_found:"gevonden",th_dup:"dubbel",th_miss:"ontbreekt",genN:"generatie {n}",
  makeRoot:"Maak startpersoon",openLine:"Open in stamlijn",close:"Sluiten",
  rel_start:"startpersoon",rel_fatherOf:"vader van {name}",rel_motherOf:"moeder van {name}",rel_sibOf:"broer of zus van {name}",rel_brotherOf:"broer van {name}",rel_sisterOf:"zus van {name}",rel_partnerOf:"partner van {name}",rel_childOf:"kind van {name}",rel_ancOf:"{rel} van {name}",
- genKw:" · generatie {g} · kwartiernummer {k}",relWith:" · relatie met {name}",source:"Bron: ",notAssessedRel:"Relatie met {name} nog niet beoordeeld",
+ genKw:" · generatie {g} · kwartiernummer {k}",relWith:" · relatie met {name}",source:"Bron: ",why_zeker:"Waarom zeker:",why_waarschijnlijk:"Waarom waarschijnlijk:",why_mogelijk:"Waarom mogelijk:",why_fout:"Waarom fout:",notAssessedRel:"Relatie met {name} nog niet beoordeeld",
  collapseParents:"▼ Ouders inklappen",showParentsCouple:"▲ Toon ouders van dit paar",father:"vader",mother:"moeder",Father:"Vader",Mother:"Moeder",
  fatherUnknown:"vader onbekend",motherUnknown:"moeder onbekend",noParentsBecause:"{role} onbekend, dus ook geen ouders",parentsUnknown:"ouders onbekend",
  collapse:"▼ Inklappen",noParentsKnown:"geen ouders bekend",genAbove:"▲ {gens} erboven",gen1:"1 generatie",genPl:"{n} generaties",inView:"{n} generaties in beeld",inView1:"1 generatie in beeld",allClosed:"Alles dicht",
@@ -781,7 +782,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  estBorn:"° estimated c. {y}",age:"(aged {n})",relToChild:"relation to child: ",th_exp:"expected",th_found:"found",th_dup:"duplicate",th_miss:"missing",genN:"generation {n}",
  makeRoot:"Make start person",openLine:"Open in line view",close:"Close",
  rel_start:"start person",rel_fatherOf:"father of {name}",rel_motherOf:"mother of {name}",rel_sibOf:"sibling of {name}",rel_brotherOf:"brother of {name}",rel_sisterOf:"sister of {name}",rel_partnerOf:"partner of {name}",rel_childOf:"child of {name}",rel_ancOf:"{rel} of {name}",
- genKw:" · generation {g} · Ahnentafel number {k}",relWith:" · relation to {name}",source:"Source: ",notAssessedRel:"Relation to {name} not yet assessed",
+ genKw:" · generation {g} · Ahnentafel number {k}",relWith:" · relation to {name}",source:"Source: ",why_zeker:"Why certain:",why_waarschijnlijk:"Why probable:",why_mogelijk:"Why possible:",why_fout:"Why wrong:",notAssessedRel:"Relation to {name} not yet assessed",
  collapseParents:"▼ Hide parents",showParentsCouple:"▲ Show this couple's parents",father:"father",mother:"mother",Father:"Father",Mother:"Mother",
  fatherUnknown:"father unknown",motherUnknown:"mother unknown",noParentsBecause:"{role} unknown, so no parents either",parentsUnknown:"parents unknown",
  collapse:"▼ Collapse",noParentsKnown:"no known parents",genAbove:"▲ {gens} above",gen1:"1 generation",genPl:"{n} generations",inView:"{n} generations shown",inView1:"1 generation shown",allClosed:"Collapse all",
@@ -791,7 +792,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.56",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.57",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -809,6 +810,11 @@ let D,P,state={view:"familie",exZoom:1,root:0,gens:7,color:"lijn",hist:[]};
 const LINE_COL={vv:"#2f5f8f",vm:"#3f7d52",mv:"#c4652b",mm:"#9e3d5f"};
 const LEGACY_REG={ZH:{naam:"Zuid-Holland",kleur:"#e07a2f"},NH:{naam:"Noord-Holland",kleur:"#3b6ea5"},UT:{naam:"Utrecht",kleur:"#b0486a"},GE:{naam:"Gelderland",kleur:"#5a9a6e"},ZE:{naam:"Zeeland",kleur:"#c9a227"},NL:{naam:"Overig Nederland",kleur:"#8d7f6e"},SE:{naam:"Zweden",kleur:"#1f9bb5"},US:{naam:"Verenigde Staten",kleur:"#7a5195"},FR:{naam:"Overig buitenland",kleur:"#9a8fb8"},DE:{naam:"Overig buitenland",kleur:"#9a8fb8"},XX:{naam:"Overig buitenland",kleur:"#9a8fb8"}}; /* alleen voor data zonder "regios" (formaat v1) */
 const CERT={"zeker":"#4c9a5f","waarschijnlijk":"#d9a429","mogelijk":"#e8873a","onbekend":"#bfb6a8","fout":"#c0392b","niet gecheckt":"#8fb3d9"};
+/* why a parent link has its status (data.json c = [status, source, note, type]): for certain/probable/possible/error the note
+   gets a heading ("Why certain:") and the source follows as a link below it; for not checked/unknown just source + note */
+function certWhy(c){if(!c)return"";const h=/^(zeker|waarschijnlijk|mogelijk|fout)$/.test(c[0])&&c[2]?_t("why_"+c[0]):"";
+  const src=c[1]?`<span class="cw-src">${_t("source")}${slLink(c[1])}</span>`:"";
+  return h?`<div class="cw"><b>${h}</b> ${slLink(c[2])}${src?"<br>"+src:""}</div>`:[src,c[2]?slLink(c[2]):""].filter(Boolean).join("<br>")}
 function certLabel(s){return {"zeker":_t("cert_zeker"),"waarschijnlijk":_t("cert_waarschijnlijk"),"mogelijk":_t("cert_mogelijk"),"onbekend":_t("cert_onbekend"),"fout":_t("cert_fout"),"niet gecheckt":_t("cert_niet")}[s]||s}
 /* landen: code → [naam, kleur, namen zoals ze in plaatsnamen voorkomen, (optioneel) naam midden in een zin] */
 const COUNTRY={
@@ -1245,7 +1251,7 @@ function slSheet(i,child,code,base,act){
   dlg.innerHTML=`<div class="sheet"><div class="grab" aria-hidden="true"></div>
     <header><p class="rel">${rel}${code?_t("genKw",{g:code.length,k:num}):""}</p><h2 id="slsheet-t">${slEsc(p.n)}${akaHtml(p)}</h2></header>
     <section>${line("°",p.bdate,p.bplac)}${line("†",p.ddate,p.dplac)}${jobLine(p)}
-    ${c?`<div class="ct"><b style="color:${CERT[c[0]]||"#7a7068"}">${slEsc(certLabel(c[0]))}</b>${_t("relWith",{name:slEsc(short(P[child]))})}${c[3]&&!/^(biologisch|biological)$/i.test(c[3])?`<br><b style="color:#9c7633">♥ ${slEsc(_t("vh_adopt_par",Object.assign({child:vhFn(P[child])},vhPro(p))))}</b>`:""}${c[1]?`<br>${_t("source")}${slLink(c[1])}`:""}${c[2]?`<br>${slLink(c[2])}`:""}</div>`:hasChild?`<div class="ct">${_t("notAssessedRel",{name:slEsc(short(P[child]))})}</div>`:""}</section>
+    ${c?`<div class="ct"><b style="color:${CERT[c[0]]||"#7a7068"}">${slEsc(certLabel(c[0]))}</b>${_t("relWith",{name:slEsc(short(P[child]))})}${c[3]&&!/^(biologisch|biological)$/i.test(c[3])?`<br><b style="color:#9c7633">♥ ${slEsc(_t("vh_adopt_par",Object.assign({child:vhFn(P[child])},vhPro(p))))}</b>`:""}${(w=>w?(/^<div/.test(w)?w:"<br>"+w):"")(certWhy(c))}</div>`:hasChild?`<div class="ct">${_t("notAssessedRel",{name:slEsc(short(P[child]))})}</div>`:""}</section>
     <footer>${vhBtn(i)}${act?`<button type="button" class="btn" data-a="act">${act.label}</button>`:""}${i!==base?`<button type="button" class="btn" data-variant="outline" data-a="root">${_t("makeRoot")}</button>`:""}<button type="button" class="btn" data-variant="ghost" data-a="x">${_t("close")}</button></footer></div>`;
   const go=fn=>{dlg.close();setTimeout(fn,60)};
   dlg.querySelector('[data-a="x"]').onclick=()=>dlg.close();
@@ -1672,7 +1678,7 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     if(child!=null){const st=vhStatus(child,i),c=certOf(child,i),rk=VH_RANK[st]!=null?VH_RANK[st]:1;
       const key=st==="zeker"?"zeker":st==="waarschijnlijk"?"waarschijnlijk":st==="mogelijk"?"mogelijk":st==="fout"?"fout":"open";
       const rel=P[child].f===i?_t("father"):_t("mother");
-      const extra=c?[c[1]?`${_t("source")}${slLink(c[1])}`:"",c[2]?slLink(c[2]):""].filter(Boolean).join("<br>"):"";
+      const extra=certWhy(c);
       const adopt=c&&c[3]&&!/^(biologisch|biological)$/i.test(c[3]);
       if(adopt){const pp=Object.assign({fn:slEsc(vhFn(p)),rel,child:slEsc(vhFn(P[child])),papa:_t(P[child].f===i?"vh_papa_v":"vh_papa_m"),czijn:vhPro(P[child]).zijn},vhPro(p)); /* czijn: the child's "his/her" ("was his mum") */
         cert=`<div class="vh-warn adopt" style="--cc:#b48a3c"><b>♥</b><div><p>${_t("vh_adopt_big",pp)}</p>${extra?`<div class="vh-cx">${extra}</div>`:""}</div></div>`}
@@ -1927,7 +1933,7 @@ function famSheet(i,info){
     :info.kind==="sib"?(p.x==="M"?_t("rel_brotherOf",{name:nm(info.of)}):p.x==="F"?_t("rel_sisterOf",{name:nm(info.of)}):_t("rel_sibOf",{name:nm(info.of)})):info.kind==="sp"?_t("rel_partnerOf",{name:nm(info.of)}):info.kind==="kid"?_t("rel_childOf",{name:nm(info.of)}):"";
   const line=(sym,d,pl)=>d||pl?`<div class="ln">${sym} ${[d,pl].filter(Boolean).map(slEsc).join(" · ")}</div>`:"";
   const cf=p.f>=0?certOf(i,p.f):null,cm=p.m>=0?certOf(i,p.m):null;
-  const crow=(lab,q,c)=>q>=0?`<div>${lab}: ${slEsc(short(P[q]))}${c?` · <b style="color:${CERT[c[0]]||"#7a7068"}">${slEsc(certLabel(c[0]))}</b>${c[1]?` · ${slLink(c[1])}`:""}`:""}</div>`:"";
+  const crow=(lab,q,c)=>q>=0?`<div>${lab}: ${slEsc(short(P[q]))}${c?` · <b style="color:${CERT[c[0]]||"#7a7068"}">${slEsc(certLabel(c[0]))}</b>${(w=>/^<div/.test(w)?w:c[1]?` · ${slLink(c[1])}`:"")(certWhy(c))}`:""}</div>`:"";
   const hasPar=parentsOf(i).length>0,ns=famSibs(i).length;
   const btns=[vhBtn(i)];
   if(info.line&&hasPar)btns.push(`<button type="button" class="btn" data-a="up">${F.up.has(i)?_t("hideParents"):_t("showParents")}</button>`);

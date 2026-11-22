@@ -168,6 +168,7 @@ STATUS = {"zeker": "zeker", "certain": "zeker", "waarschijnlijk": "waarschijnlij
           "mogelijk": "mogelijk", "possible": "mogelijk", "onbekend": "onbekend", "unknown": "onbekend", "fout": "fout", "error": "fout",
           "wrong": "fout", "niet gecheckt": "niet gecheckt", "not checked": "niet gecheckt"}
 # relation type (CSV column type/soort): the viewer uses the Dutch values internally
+WHY_MIN = 25  # a certain/probable/possible link with a shorter reason gets a warning
 REL_TYPE = {"raised": "aangenomen", "accepted": "aangenomen", "raised as own": "aangenomen", "social": "aangenomen",
             "adopted": "adoptie", "adoption": "adoptie", "foster": "pleeg", "biological": "biologisch"}
 
@@ -1094,14 +1095,33 @@ def main():
                 role = "f" if people[ci]["f"] == pi else "m" if people[ci]["m"] == pi else None
                 if role is None:
                     n_bad += 1; continue
+                # the note says *why* the status holds; "why"/"waarom" is an alias that wins over "note"
                 people[ci].setdefault("c", {})[role] = [norm_status(col(row, "status", "zekerheid", "certainty")),
-                                                        col(row, "bron", "source"), col(row, "opmerking", "opm", "note", "notes")]
+                                                        col(row, "bron", "source"),
+                                                        col(row, "waarom", "why") or col(row, "opmerking", "opm", "note", "notes")]
                 soort = (col(row, "soort", "relatie", "relation", "type", "kind") or "").strip().lower()
                 soort = REL_TYPE.get(soort, soort)
                 if soort and soort not in ("biologisch", "biological"):
                     people[ci]["c"][role].append(soort)
                 n_ok += 1
         print(f"CSV: {n_ok} relations read, {n_bad} rows skipped (person not found or not a parent-child relation)")
+        # every certain/probable/possible link needs a source and one plain sentence why (the viewer shows it as "Why certain:")
+        weak = []
+        for p in people:
+            for role, c in (p.get("c") or {}).items():
+                if c[0] not in ("zeker", "waarschijnlijk", "mogelijk"): continue
+                miss = [w for w, bad in (("no source", not (c[1] or "").strip()),
+                                         ("no reason" if not (c[2] or "").strip() else f"short reason ({len(c[2].strip())} chars)",
+                                          len((c[2] or "").strip()) < WHY_MIN)) if bad]
+                if miss:
+                    par = people[p["f" if role == "f" else "m"]]["n"]
+                    weak.append(f"{p['n']} → {par} ({c[0]}): {', '.join(miss)}")
+        if weak:
+            print(f"  warning: {len(weak)} certain/probable/possible link(s) without a source or with a reason under {WHY_MIN} characters"
+                  f" (say in one sentence which record, place and year, who is named as parent; for probable/possible also what is missing):",
+                  file=sys.stderr)
+            for w in weak[:5]: print(f"    {w}", file=sys.stderr)
+            if len(weak) > 5: print(f"    … and {len(weak) - 5} more", file=sys.stderr)
 
     # ---- regions
     regios, table = {}, {}

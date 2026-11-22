@@ -104,14 +104,15 @@ Per round, make a `data/additions.json`:
      "marriage": {"date": "1922", "place": "Zwolle"},
      "status": "certain",
      "source": "Birth record Hendrik Jansen, Zwolle 1925, no. 301, https://...",
-     "note": "father 27, carpenter"}
+     "note": "Hendrik's birth record (Zwolle, 1925) names Jan Jansen, 27, carpenter, and Geesje Smit as parents; they married in Zwolle in 1922."}
   ]
 }
 ```
 
 - `child`, `father`, `mother`: an existing GEDCOM id (`@I4@` or `I4`) or a `ref` from `new`. That way you can add several generations at once.
-- A separate status, source or type per parent? Use `status_father`, `status_mother`, `source_father`, `source_mother`, `type_father`, `type_mother`.
-- Dutch keys also work: `nieuw`, `ouders`, `kind`, `vader`, `moeder`, `huwelijk`, `bron`, `opmerking`, `soort`, `status_vader`, `bron_moeder` and so on, and in persons the keys from onboarding.md.
+- `note` is the reason the status holds, shown in the viewer as "Why certain:": one plain sentence with the record, place and year and who is named as parent; for probable/possible also what's missing. `why` (Dutch `waarom`) is an alias. A `status` step takes it too.
+- A separate status, source, reason or type per parent? Use `status_father`, `status_mother`, `source_father`, `source_mother`, `note_father`/`why_father`, `note_mother`/`why_mother`, `type_father`, `type_mother`.
+- Dutch keys also work: `nieuw`, `ouders`, `kind`, `vader`, `moeder`, `huwelijk`, `bron`, `opmerking` (or `waarom`), `soort`, `status_vader`, `bron_moeder` and so on, and in persons the keys from onboarding.md.
 - If the child already has a family with one parent, the script adds the missing parent. If the child already has **different** parents, the script stops: resolve that first and explain it in questions.md.
 - With `--csv data/relations.csv` the relations with status and source are appended immediately. `--lang nl` uses `zeker` as default status and a Dutch header for a new CSV; default is English (`certain`). When appending to an existing CSV the columns are written in the order child, parent, status, source, note, type — matching both the English and the Dutch header.
 

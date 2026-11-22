@@ -35,6 +35,8 @@ Write the status in the user's language; both are accepted.
 | `error` / `fout` | Only for a doubt you can't settle yet (two sources disagree): explain in questions.md. If a source clearly contradicts the relation, remove it with `drop_link` instead. |
 | `not checked` / `niet gecheckt` | Not yet researched (default on import) or a living/recent person. |
 
+**Every link gets a source and a reason.** Each certain, probable or possible link gets a `source` (record with link or location) **and** a `note`: one sentence in plain words saying why the status holds: which record, which place and year, who is named as parent, and what ties it to the person in the tree. For probable and possible, also say what is missing ("no baptism found yet", "the mother's name only from a burial"). The viewer shows it on every person card as "Why certain:" with the source below, so readers who aren't genealogists see the reasoning. Someone else's family tree (Geneanet, MyHeritage, a website) is a signpost to the records, never the only reason for *certain*. `make_viewer_data.py` warns about certain/probable/possible links without a source or with a reason under 25 characters.
+
 **A real doubt doesn't go into the tree.** If even `possible` would be a guess, leave the link out and describe it in the work log or round report (what fits, what doesn't, which record would settle it).
 
 **The user's own knowledge** of recent relations ("John really was my father") is a valid source: status `certain`, source "<name> (own knowledge, confirmed <date>)". At the first viewer, ask whether the user wants to confirm their own parents and grandparents this way.
@@ -45,8 +47,8 @@ Write the status in the user's language; both are accepted.
 
 ```
 child_id,parent_id,status,source,note,type
-@I12@,@I15@,certain,"Marriage record Leiden 1902, no. 112, https://www.openarchieven.nl/...","father 54, carpenter",
-@I20@,@I22@,certain,"Sanne (own knowledge, confirmed 2026-11-19)","not the biological father, but her dad",raised
+@I12@,@I15@,certain,"Marriage record Leiden 1902, no. 112, https://www.openarchieven.nl/...","The marriage record (Leiden, 1902) names Jan de Wit, 54, carpenter, as the groom's father; same age and trade as in the 1880 census.",
+@I20@,@I22@,certain,"Sanne (own knowledge, confirmed 2026-11-19)","Sanne confirmed it herself: not her biological father, but the dad who raised her.",raised
 ```
 
 ## Plausibility checks (do them for every new person)

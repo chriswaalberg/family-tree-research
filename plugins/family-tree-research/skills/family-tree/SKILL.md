@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.56"
+  version: "0.9.57"
 ---
 
 # Family-tree research, hand in hand
@@ -67,6 +67,7 @@ The core:
 
 - Work upwards generation by generation, **direct ancestors first**. Siblings only as a by-catch or when they help prove a parent.
 - **No parent without a source.** A new ancestor only enters the tree with a concrete source (record, registration, with link or location). In doubt = *probable* or *possible*, never quietly *certain*.
+- **Every link gets a source and a reason.** A source (record with link or location) and one sentence in plain words why the status holds: which record, which place and year, who is named as parent; for *probable* or *possible* also what's missing. It goes in `note` (Dutch `opmerking`; `why`/`waarom` also work) of the `parents`/`status` step, and the viewer shows it as "Why certain:" on the person card. Not "marriage 1840", but "The marriage record (Leiden, 1840) names Jan Bakker, 54, as the groom's father; he was a witness at the baptism too." Someone else's family tree is a signpost to the records, never the only reason for *certain*. `make_viewer_data.py` warns about links without a source or with a short reason; fix a few of those every round.
 - **Certain needs a hard link.** *Certain* only when a record names the parents **and** something ties it hard to the person in the tree: an age that fits, the right partner, or the parent as witness or giving consent. Patronymic + naming pattern + the only candidate = *probable*. A real doubt stays out of the tree and goes into the report.
 - **Big rounds with helpers.** When the user lets you work on your own for long, split the ancestors without parents by region over parallel research helpers (subagents) that only read and report, also what they didn't find; check every find's key record yourself before it goes into the tree; then the next wave on the new parents. See "A big round" in `references/research.md`.
 - Don't actively search archives for **living people** (their records are usually not public anyway). What the user tells you about them simply goes into the tree and the viewer.

@@ -322,7 +322,7 @@ def cmd_add(a):
                 csv_rows.append([child, x,
                                  g(o, f"status_{role}", f"status_{nl}", "status", default=STATUS_DEFAULT[a.lang]),
                                  g(o, f"source_{role}", f"bron_{nl}", "source", "bron", default=""),
-                                 g(o, "note", "opmerking", default=""),
+                                 g(o, f"why_{role}", f"waarom_{nl}", "why", "waarom", "note", "opmerking", default=""),
                                  g(o, f"type_{role}", "type", "soort", default="")])
 
     out = []
@@ -954,7 +954,7 @@ class Rebuild:
                 self.rel[(child, x)] = [
                     g(s, f"status_{role}", f"status_{nl}", "status", default=self.t["certain"]),
                     self.src_text(g(s, f"source_{role}", f"bron_{nl}") or src) or g(s, "despite", "ondanks", default=""),
-                    g(s, f"note_{role}", f"opmerking_{nl}", "note", "opmerking", default=""),
+                    g(s, f"why_{role}", f"waarom_{nl}", f"note_{role}", f"opmerking_{nl}", "why", "waarom", "note", "opmerking", default=""),
                     g(s, f"type_{role}", f"soort_{nl}", "type", "soort", default="")]
         return f"parents of {self.label(child)}: " + " + ".join(self.label(x) for x in (fa, mo) if x)
 
@@ -972,7 +972,8 @@ class Rebuild:
                 raise RoundError("missing status")
             self.rel[(child, x)] = [st,
                                     self.src_text(g(s, *([f"source_{role}", f"bron_{nl}"] if role else []), "source", "bron") or src),
-                                    g(s, *([f"note_{role}", f"opmerking_{nl}"] if role else []), "note", "opmerking", default=""),
+                                    g(s, *([f"why_{role}", f"waarom_{nl}", f"note_{role}", f"opmerking_{nl}"] if role else []),
+                                      "why", "waarom", "note", "opmerking", default=""),
                                     g(s, *([f"type_{role}", f"soort_{nl}"] if role else []), "type", "soort", default="")]
             done.append(f"{self.label(x)}: {st}")
         if not done:
@@ -1446,7 +1447,7 @@ def read_base_csv(path):
             p = row.get("parent_id") or row.get("ouder_id")
             if c and p:
                 base[(c, p)] = [row.get("status") or row.get("zekerheid", ""), row.get("source") or row.get("bron", ""),
-                                row.get("note") or row.get("opmerking", ""), row.get("type") or row.get("soort", "")]
+                                row.get("why") or row.get("waarom") or row.get("note") or row.get("opmerking", ""), row.get("type") or row.get("soort", "")]
     return base
 
 
