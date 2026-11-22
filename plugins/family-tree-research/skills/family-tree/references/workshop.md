@@ -1,6 +1,6 @@
 # The Workshop: watch the tree grow while you research (Claude Code only)
 
-The Workshop is a local page (`viewer/live.html`, served by `scripts/live.py`) that shows the start person's round Fan as a night sky and plays every change live: a scanner beam turns to the person being searched, new ancestors fly in from their source, a rejected link cracks, a link that became certain turns gold, open questions (`?`) breathe in the empty slots, and a log says in plain words what you are doing.
+The Workshop is a local page (`viewer/live.html`, served by `scripts/live.py`) that shows the start person's ancestors as a night sky and plays every change live. It opens in the **Cosmos**: every ancestor a star in a fixed place (father's side left, one orbit per generation), constellation lines from child to parent in the colour of their certainty, missing parents as hollow ghost stars; names up to the great-grandparents, a tap on any star shows who it is. A switch at the top shows the same as a **Fan** (slices with names, open questions as empty slices); every browser remembers its choice. In both: a scanner beam turns to the person being searched, new ancestors fly in from their source, a rejected link cracks, a link that became certain turns gold, open questions (`?`) breathe in the empty slots, and a log says in plain words what you are doing.
 
 **Only in Claude Code**, where scripts run on the user's own computer. Never offer it in Cowork or claude.ai: the published viewer is an artifact and can't reach the user's computer. Don't mention it there at all.
 
@@ -79,6 +79,6 @@ Only when the user asks for it (the tree contains living people): restart the Wo
 ## In the page
 
 - The name in the title picks the start person (from the start people, or search by name); every browser remembers its own choice.
-- The fan shows as many generations as the start person's tree has, plus one ring of open questions; it grows a ring when you get a generation further.
+- Cosmos and Fan show as many generations as the start person's tree has, plus one orbit/ring of open questions; they grow one when you get a generation further.
 - Counters: people, links (parent-child), open questions (missing parents up to generation 9, as in `check`), sources (links with a source).
 - "Viewer ↗" opens the normal viewer from the same server.

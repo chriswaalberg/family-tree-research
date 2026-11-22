@@ -83,6 +83,14 @@ aside{display:flex;flex-direction:column;gap:10px;padding:6px 18px 14px 0;min-he
 @keyframes slide{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
 /* fan */
 .slot{fill:var(--slot);stroke:var(--slotS);stroke-width:1;transition:fill .8s,stroke .8s;cursor:pointer}
+.cos .slot.star{fill:#f3e9df;stroke:none}.cos .slot.star.root{fill:#ffe9d6;stroke:var(--gold);stroke-width:2;stroke-opacity:.8}
+.cos .slot.gap{fill:none;stroke:var(--gold);stroke-opacity:.45;stroke-dasharray:1.6 2.4;stroke-width:1}.cos .slot.gap.far{stroke-opacity:.18}
+.cos .guide{stroke-opacity:.6}
+.cos .lk{stroke-width:1.1;stroke-opacity:.5}.cos .lk.z{stroke:var(--gold);stroke-width:1.5;stroke-opacity:.6}.cos .lk.w{stroke-width:1.3;stroke-opacity:.5}
+.cos .halo{pointer-events:none}.cos .lbl text{dominant-baseline:auto}
+.vsw{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.vsw button{font:600 12px var(--sans);color:var(--mut);background:var(--panel);border:0;padding:6px 10px;cursor:pointer}
+.vsw button[aria-pressed=true]{color:var(--ink);background:color-mix(in srgb,var(--gold) 28%,var(--panel))}
 .slot.fa{fill:var(--fa)}.slot.mo{fill:var(--mo)}
 .slot.root{fill:color-mix(in srgb,var(--gold) 12%,transparent);stroke:var(--gold);stroke-opacity:.6}
 .slot.gap{fill:none;stroke:var(--gold);stroke-opacity:.35;stroke-dasharray:3 5;cursor:default}
@@ -166,7 +174,7 @@ dialog input{width:100%;font:15px var(--sans);padding:9px 12px;border-radius:10p
   <h1><span data-t="title">Workshop</span><span class="pill" id="pill"><i></i><span id="pillT">…</span></span></h1>
   <button type="button" class="rootbtn" id="rootBtn"></button>
  </div>
- <div class="hbtns"><a class="hbtn" id="viewerBtn" href="viewer/" target="_blank" rel="noopener"><span data-t="viewer">Viewer</span> ↗</a></div>
+ <div class="hbtns"><span class="vsw" id="vsw"><button type="button" data-v="cosmos" data-t="v_cos">Cosmos</button><button type="button" data-v="fan" data-t="v_fan">Fan</button></span><a class="hbtn" id="viewerBtn" href="viewer/" target="_blank" rel="noopener"><span data-t="viewer">Viewer</span> ↗</a></div>
  <div class="counts">
   <div class="cnt" id="c-p"><b>–</b><span data-t="people">people</span></div>
   <div class="cnt" id="c-r"><b>–</b><span data-t="links">links</span></div>
@@ -202,11 +210,11 @@ en:{title:"Workshop",treeOf:"Family tree of",people:"people",links:"links",open:
  job:"Occupation: {n}",jobD:"{j}",many:"and {n} more",source:"Source",nosource:"No source named yet",fatherOf:"father of {c}",motherOf:"mother of {c}",notInFan:"not in the line of ancestors",
  rejected:"REJECTED",gapsNew:"+{n} open questions",gapsNewD:"Every new ancestor has two parents of their own.",gold:"This link is certain now.",
  s_zeker:"certain",s_waarschijnlijk:"probable",s_mogelijk:"possible",s_fout:"wrong",s_onbekend:"unknown","s_niet gecheckt":"not checked",s_:"no status",
- empty:"Nobody in the tree yet.",nothing:"Nothing found",why:"Reason or source added: {c} → {p}",whyN:"{n} links got a source or a reason",whyNd:"{names} and others",
+ empty:"Nobody in the tree yet.",v_fan:"Fan",v_cos:"Cosmos",nothing:"Nothing found",why:"Reason or source added: {c} → {p}",whyN:"{n} links got a source or a reason",whyNd:"{names} and others",
  storyEdit:"Story updated: {n}",tg:"Life and times of {p}",tgD:"{e} events · {b} images · {l} periods",tgNew:"new place",certN:"{n} links changed certainty",
  st_note:"Note on {n}",st_event:"{t}: {n}",st_drop_event:"Removed: {t} of {n}",st_aka:"Also known as: {t}",st_places:"{n} place names made uniform",stN:"{t}: {n} new steps",
  c_z:"certain",c_w:"probable",c_p:"possible",c_n:"not checked",c_x:"wrong",
- ev_baptism:"Baptism",ev_burial:"Burial",ev_birth:"Birth",ev_death:"Death",ev_marriage:"Marriage",ev_residence:"Residence",ev_divorce:"Divorce",ev_census:"Census",ev_emigration:"Emigration",taskStart:"Started: {t}",taskDone:"Finished: {t}",eta:"about {m} min to go",etaS:"almost done",ring:"A generation further back",ringD:"The fan grows a ring."},
+ ev_baptism:"Baptism",ev_burial:"Burial",ev_birth:"Birth",ev_death:"Death",ev_marriage:"Marriage",ev_residence:"Residence",ev_divorce:"Divorce",ev_census:"Census",ev_emigration:"Emigration",taskStart:"Started: {t}",taskDone:"Finished: {t}",eta:"about {m} min to go",etaS:"almost done",ring:"A generation further back",ringD:"Your tree grows by a generation."},
 nl:{title:"Werkplaats",treeOf:"Stamboom van",people:"mensen",links:"relaties",open:"open vragen",sources:"bronnen",now:"Wat Claude nu doet",
  waiting:"Wacht op Claude…",live:"live",offline:"verbinding kwijt",viewer:"Viewer",loose:"Niet in de waaier",pick:"Wie staat in het midden?",find:"Zoek iemand…",
  search:"Zoekt in {src}",read:"Leest in {src}",scan:"Haalt scans op uit {src}",clip:"Knipt een krantenbericht uit {src}",
@@ -217,11 +225,11 @@ nl:{title:"Werkplaats",treeOf:"Stamboom van",people:"mensen",links:"relaties",op
  job:"Beroep: {n}",jobD:"{j}",many:"en nog {n} anderen",source:"Bron",nosource:"Nog geen bron genoemd",fatherOf:"vader van {c}",motherOf:"moeder van {c}",notInFan:"niet in de voorouderlijn",
  rejected:"AFGEWEZEN",gapsNew:"+{n} open vragen",gapsNewD:"Elke nieuwe voorouder heeft zelf ook weer twee ouders.",gold:"Deze koppeling is nu zeker.",
  s_zeker:"zeker",s_waarschijnlijk:"waarschijnlijk",s_mogelijk:"mogelijk",s_fout:"fout",s_onbekend:"onbekend","s_niet gecheckt":"niet gecheckt",s_:"geen status",
- empty:"Nog niemand in de boom.",nothing:"Niets gevonden",why:"Bron of reden erbij: {c} → {p}",whyN:"{n} koppelingen kregen een bron of reden",whyNd:"{names} en anderen",
+ empty:"Nog niemand in de boom.",v_fan:"Waaier",v_cos:"Kosmos",nothing:"Niets gevonden",why:"Bron of reden erbij: {c} → {p}",whyN:"{n} koppelingen kregen een bron of reden",whyNd:"{names} en anderen",
  storyEdit:"Verhaal bijgewerkt: {n}",tg:"Tijdgeest van {p}",tgD:"{e} gebeurtenissen · {b} beelden · {l} periodes",tgNew:"nieuwe plaats",certN:"{n} koppelingen veranderden van zekerheid",
  st_note:"Notitie bij {n}",st_event:"{t}: {n}",st_drop_event:"Weggehaald: {t} van {n}",st_aka:"Ook bekend als: {t}",st_places:"{n} plaatsnamen gelijkgetrokken",stN:"{t}: {n} nieuwe stappen",
  c_z:"zeker",c_w:"waarschijnlijk",c_p:"mogelijk",c_n:"niet gecheckt",c_x:"fout",
- ev_baptism:"Doop",ev_burial:"Begrafenis",ev_birth:"Geboorte",ev_death:"Overlijden",ev_marriage:"Huwelijk",ev_residence:"Woonplaats",ev_divorce:"Scheiding",ev_census:"Volkstelling",ev_emigration:"Emigratie",taskStart:"Gestart: {t}",taskDone:"Klaar: {t}",eta:"nog ±{m} min",etaS:"bijna klaar",ring:"Een generatie verder terug",ringD:"De waaier krijgt er een ring bij."}};
+ ev_baptism:"Doop",ev_burial:"Begrafenis",ev_birth:"Geboorte",ev_death:"Overlijden",ev_marriage:"Huwelijk",ev_residence:"Woonplaats",ev_divorce:"Scheiding",ev_census:"Volkstelling",ev_emigration:"Emigratie",taskStart:"Gestart: {t}",taskDone:"Klaar: {t}",eta:"nog ±{m} min",etaS:"bijna klaar",ring:"Een generatie verder terug",ringD:"Je boom groeit een generatie."}};
 let LANG="en";
 const _t=(k,v)=>{let s=(I18N[LANG][k]??I18N.en[k]??k);for(const x in v||{})s=s.split("{"+x+"}").join(v[x]);return s;};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
@@ -232,7 +240,8 @@ const NS="http://www.w3.org/2000/svg";
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 
 /* ===== TUNING (all numbers that shape the Workshop) ===== */
-const CFG={STEPS_ONE_BY_ONE:8,CERT_ONE_BY_ONE:4,WHY_ANIM_MAX:80,BREATHE_MAX:40,MAX_PARTS:1500,STAR_MS:250,MAXG:14,R0:62,RMAX:490,Q:.8,MIN_DEG:.12,ONE_BY_ONE:10,TRAY:6,BEAM_IDLE:30000,FEED:120,GAPS_TO:9,SWEEP_MS:5200,FLY_MS:1400};
+let VIEW="cosmos";
+const CFG={TAP_PX:22,COS_R0:40,STEPS_ONE_BY_ONE:8,CERT_ONE_BY_ONE:4,WHY_ANIM_MAX:80,BREATHE_MAX:40,MAX_PARTS:1500,STAR_MS:250,MAXG:14,R0:62,RMAX:490,Q:.8,MIN_DEG:.12,ONE_BY_ONE:10,TRAY:6,BEAM_IDLE:30000,FEED:120,GAPS_TO:9,SWEEP_MS:5200,FLY_MS:1400};
 
 /* ===== DATA ===== */
 let D=null,P=[],ROOT=null,L=null;            // L = current layout
@@ -255,8 +264,9 @@ function layout(Pa,rootK){const ri=idx(Pa,rootK),slots=new Map(),byId=new Map();
  (function rec(i,code,g,a,b){const lo=Math.min(a,b),hi=Math.max(a,b),k=key(Pa[i],i);slots.set(code,{code,i,k,g,lo,hi});if(!byId.has(k))byId.set(k,[]);byId.get(k).push(code);depth=Math.max(depth,g);
   if(g>=CFG.MAXG||(g>0&&hi-lo<CFG.MIN_DEG*2))return;const p=Pa[i],m=(a+b)/2,F=code===""?[360,180]:[a,m],M=code===""?[0,180]:[m,b];
   if(p.f>=0)rec(p.f,code+"f",g+1,...F);if(p.m>=0)rec(p.m,code+"m",g+1,...M);})(ri,"",0,0,360);
- const GR=Math.max(1,Math.min(CFG.MAXG,depth+1)),Q=CFG.Q,w0=(CFG.RMAX-CFG.R0)*(1-Q)/(1-Math.pow(Q,GR));
- const RI=g=>g===0?0:CFG.R0+w0*(1-Math.pow(Q,g-1))/(1-Q),RO=g=>g===0?CFG.R0:RI(g)+w0*Math.pow(Q,g-1);
+ const GR=Math.max(1,Math.min(CFG.MAXG,depth+1)),Q=CFG.Q,w0=(CFG.RMAX-CFG.R0)*(1-Q)/(1-Math.pow(Q,GR)),st=(CFG.RMAX-CFG.COS_R0)/GR;
+ const RI=VIEW==="cosmos"?(g=>g===0?0:CFG.COS_R0+(g-1)*st):(g=>g===0?0:CFG.R0+w0*(1-Math.pow(Q,g-1))/(1-Q)),
+       RO=VIEW==="cosmos"?(g=>g===0?CFG.COS_R0:CFG.COS_R0+g*st):(g=>g===0?CFG.R0:RI(g)+w0*Math.pow(Q,g-1));
  const gaps=[];for(const s of slots.values()){if(s.g>=GR)continue;const p=Pa[s.i],m=(s.code===""?null:(s.code[0]==="f"?[s.lo,s.hi]:[s.lo,s.hi]));
   for(const x of["f","m"]){if(p[x]>=0)continue;let lo,hi;if(s.code===""){[lo,hi]=x==="f"?[180,360]:[0,180]}else{const [a,b]=dirOf(s);const mm=(a+b)/2;const r=x==="f"?[a,mm]:[mm,b];lo=Math.min(...r);hi=Math.max(...r)}
    if(hi-lo>=CFG.MIN_DEG)gaps.push({code:s.code+x,g:s.g+1,lo,hi});}}
@@ -276,7 +286,8 @@ const segEl=c=>svg.querySelector(`.slot[data-c="${c}"]`),lblEl=c=>svg.querySelec
 
 /* ===== RENDER ===== */
 let lastCounts=null;
-function render(pending){pending=pending||new Set();measure();L=layout(P,ROOT);const G=$("#fanG");let h="";
+function render(pending){pending=pending||new Set();measure();L=layout(P,ROOT);const G=$("#fanG");let h="";G.classList.toggle("cos",VIEW==="cosmos");
+ if(VIEW==="cosmos"){G.innerHTML=cosmosHtml(pending);G.classList.toggle("calm",L.gaps.length<=CFG.BREATHE_MAX);renderTray();renderCounts();renderCert();renderTitle();return}
  for(let g=1;g<=L.GR;g++)h+=`<circle class="guide" r="${L.RO(g).toFixed(1)}"/>`;
  for(const q of L.gaps){h+=`<path class="slot gap" data-c="${q.code}" d="${sector(L.RI(q.g)+1,L.RO(q.g)-1,q.lo,q.hi)}"/>`;
   const [x,y]=centre(q),arcL=(L.RI(q.g)+L.RO(q.g))/2*rad(q.hi-q.lo);if(arcL>26&&L.RO(q.g)-L.RI(q.g)>20)h+=`<text class="qm" x="${x.toFixed(1)}" y="${y.toFixed(1)}" style="font-size:${fz(Math.min(17,arcL/2.5),11).toFixed(1)}px">?</text>`}
@@ -289,6 +300,38 @@ function render(pending){pending=pending||new Set();measure();L=layout(P,ROOT);c
  for(const s of L.slots.values())h+=label(s,pending.has(s.k));
  G.innerHTML=h;G.classList.toggle("calm",L.gaps.length<=CFG.BREATHE_MAX);
  renderTray();renderCounts();renderCert();renderTitle()}
+/* ===== KOSMOS: every ancestor a star in the place of their fan slot (father left), one orbit per generation,
+   constellation lines from child to parent in the colour of their certainty, missing parents as hollow ghost stars */
+const starR=g=>g===0?11:Math.max(2.4,8.5-g*.75);
+function cosmosHtml(pending){let h=`<defs><radialGradient id="halo"><stop offset="0" stop-color="#ffe9d6" stop-opacity=".5"/><stop offset=".35" stop-color="#d97757" stop-opacity=".16"/><stop offset="1" stop-color="#d97757" stop-opacity="0"/></radialGradient></defs>`;
+ for(let g=1;g<=L.GR;g++)h+=`<circle class="guide" r="${((L.RI(g)+L.RO(g))/2).toFixed(1)}"/>`;
+ for(const s of L.slots.values()){if(s.code==="")continue;const ch=L.slots.get(s.code.slice(0,-1)),c=P[ch.i].c&&P[ch.i].c[s.code.slice(-1)],st=normS(c&&c[0]);
+  const cls=st==="zeker"?"z":st==="waarschijnlijk"?"w":st==="mogelijk"?"p":st==="fout"?"x":"";
+  const rp=(L.RI(s.g)+L.RO(s.g))/2,rc=ch.code===""?0:(L.RI(ch.g)+L.RO(ch.g))/2,ap=(s.lo+s.hi)/2,ac=ch.code===""?ap:(ch.lo+ch.hi)/2,rm=(rp+rc)/2;
+  const [x1,y1]=pt(rc,ac),[x2,y2]=pt(rp,ap),[c1x,c1y]=pt(rm,ac),[c2x,c2y]=pt(rm,ap);
+  h+=`<path class="lk cl ${cls}${pending.has(s.k)?" pending":""}" data-c="${s.code}" d="M${x1.toFixed(1)} ${y1.toFixed(1)}C${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}"/>`}
+ for(const q of L.gaps){const[x,y]=centre(q),r=Math.max(1.8,starR(q.g)*.75);h+=`<circle class="slot gap${q.g>6?" far":""}" data-c="${q.code}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}"/>`;
+  if(q.g<=3)h+=`<text class="qm" x="${x.toFixed(1)}" y="${(y-r-fz(8,7)).toFixed(1)}" style="font-size:${fz(13,10).toFixed(1)}px">?</text>`}
+ for(const s of L.slots.values()){const[x,y]=centre(s),r=starR(s.g),pc=pending.has(s.k)?" pending":"";
+  if(s.g<=5)h+=`<circle class="halo${pc}" data-c="${s.code}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(r*(s.g===0?5:3.6)).toFixed(1)}" fill="url(#halo)"/>`;
+  h+=`<circle class="slot star${s.code===""?" root":""}${pc}" data-c="${s.code}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}"/>`}
+ for(const s of L.slots.values())h+=starLabel(s,pending.has(s.k));
+ return h}
+function starLabel(s,pend){const p=P[s.i],[x,y]=centre(s),a=(s.lo+s.hi)/2,r=starR(s.g),cls=`lbl${pend?" pending":""}`;
+ if(s.code==="")return`<g class="${cls}" data-c=""><text class="nm" y="${(-r-fz(14,12)).toFixed(1)}" style="font-size:${fz(18,13).toFixed(1)}px">${esc(first(p))}</text></g>`;
+ const rc=(L.RI(s.g)+L.RO(s.g))/2,room=rc*rad(s.hi-s.lo),fs=fz(s.g<=1?15:s.g<=3?12.5:11,s.g<=2?11:9.5);
+ if(s.g>3||room<(s.g<=2?fs*1.5:fs*7))return""; /* horizontal names collide past the great-grandparents: tap a star instead */
+ const out=r+fs*.5,[dx,dy]=pt(out,a),right=Math.sin(rad(a))>.15,left=Math.sin(rad(a))<-.15,anchor=right?"start":left?"end":"middle";
+ const ty=Math.abs(dy)>Math.abs(dx)?(dy<0?-fs*.2:fs*.9):fs*.35,mx=Math.max(6,Math.floor((s.g<=2?140:90)*UPX/fs*1.7));
+ const nm=s.g<=1?first(p):short(p),t=nm.length>mx?nm.slice(0,mx-1)+"…":nm,y2=s.g<=3?yrs(p):"";
+ return`<g class="${cls}" data-c="${s.code}" transform="translate(${(x+dx).toFixed(1)} ${(y+dy).toFixed(1)})"><text class="nm" text-anchor="${anchor}" y="${ty.toFixed(1)}" style="font-size:${fs.toFixed(1)}px;text-anchor:${anchor}">${esc(t)}</text>${y2?`<text class="yr" y="${(ty+fs*1.05).toFixed(1)}" style="font-size:${(fs*.72).toFixed(1)}px;text-anchor:${anchor}">${esc(y2)}</text>`:""}</g>`}
+/* tap a star or a slot: who is that */
+/* a tap finds the slot under the finger, else the nearest star within CFG.TAP_PX (stars are only a few pixels on a phone) */
+function wireTap(){svg.addEventListener("click",e=>{let s=null;const t=e.target.closest&&e.target.closest(".slot");if(t&&!t.classList.contains("gap"))s=slotAt(t.dataset.c);
+ if(!s){let best=CFG.TAP_PX;for(const q of L.slots.values()){const[x,y]=scr(...centre(q)),d=Math.hypot(x-e.clientX,y-e.clientY);if(d<best){best=d;s=q}}}
+ if(!s)return;
+ const p=P[s.i];$$(".co.tap").forEach(x=>x.remove());callout(s.code,`<b>${esc(p.n)}</b>${esc(yrs(p))}`,"tap",3200)})}
+function setView(v){VIEW=v==="fan"?"fan":"cosmos";LS.set("ftrLiveView",VIEW);$$("#vsw button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===VIEW?"true":"false"));fxClear();render();beamsReattach()}
 /* SVG units per screen pixel: on a phone the whole fan is ~400 px wide, so text gets a minimum size on screen */
 let UPX=1;function measure(){const r=svg.getBoundingClientRect(),px=Math.min(r.width,r.height)||1020;UPX=1020/px}
 const fz=(units,minPx)=>Math.max(units,minPx*UPX);
@@ -558,6 +601,8 @@ function setLang(d){let l=null;try{l=new URLSearchParams(location.search).get("l
 async function start(){const d=await fetchData();if(!d){$("#feed").innerHTML=`<li class="empty">data.json?</li>`;return}
  D=d;P=prep(d);let l=null;try{l=new URLSearchParams(location.search).get("lang")}catch(e){}LANG=(l==="nl"||l==="en")?l:((d.taal||d.lang)==="nl"?"nl":"en");document.documentElement.lang=LANG;
  const saved=LS.get("ftrLiveRoot:"+(startKey(P,D)||""));ROOT=saved&&idx(P,saved)>=0?saved:startKey(P,D);
+ {let v=null;try{v=new URLSearchParams(location.search).get("view")}catch(e){}VIEW=(v||LS.get("ftrLiveView"))==="fan"?"fan":"cosmos";}
+ $$("#vsw button").forEach(b=>{b.setAttribute("aria-pressed",b.dataset.v===VIEW?"true":"false");b.onclick=()=>setView(b.dataset.v)});wireTap();
  applyTexts();render();
  if(!P.length)feed("note",_t("empty"),"");
  $("#rootBtn").onclick=rootPick;
