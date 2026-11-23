@@ -13,7 +13,7 @@
 
 ## Rules of evidence
 
-- **No new parent without a source.** Source = archive + kind of record + date + place + link (or inventory/record number). Give it as `source` in the round's step; `rebuild` puts it in the GEDCOM and the CSV.
+- **No new parent without a source.** Source = archive + kind of record + date + place + link (or inventory/record number). Give it as `source` in the round's step; `rebuild` puts it in the GEDCOM and the CSV. The viewer shows a person's own sources (GEDCOM `SOUR` on the person and their events) under their name, so a parent known only from a child's record gets that record too; `make_viewer_data.py` warns about direct ancestors without any source of their own.
 - **Read the rejected register first.** Before adding a parent, look in `reports/rejected.md` (Dutch: `rapporten/afgewezen.md`). If the link is there, don't add it again, unless a new source refutes the reason (then say so with `despite`, see gedcom-tool.md).
 - **A wrong link goes out.** Does a source contradict a parent in the tree? Remove the link with `drop_link` and a reason (and where it came from, e.g. "Ancestry export" or a hint from someone else's tree). Don't keep it with status `error`. The reason goes into the register, so the link doesn't come back in a later round.
 - **Has the record a scan link? Read the scan first.** The index gives names; the hard link (age, partner, a parent as witness or giving consent) is often only on the scan. Read the whole record, not just the search snippet: machine-read text is messy (see sources.md).

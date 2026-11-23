@@ -38,6 +38,10 @@
 1 DEAT
 2 DATE 17 AUG 2019
 2 PLAC Amersfoort, Utrecht, Nederland
+1 SOUR @S1@
+2 PAGE Birth register Den Helder 1948, record 12 (example)
+2 DATA
+3 WWW https://example.org/den-helder/1948/12
 1 FAMS @F2@
 0 @I5@ INDI
 1 NAME Anna /Lindqvist/
@@ -45,9 +49,13 @@
 1 BIRT
 2 DATE ABT 1925
 2 PLAC Göteborg, Västra Götaland, Sverige
+2 SOUR @S1@
+3 PAGE Marriage record Amersfoort 1947 names her as born in Göteborg (example)
 1 DEAT
 2 DATE 2 FEB 2011
 2 PLAC Amersfoort, Utrecht, Nederland
+2 SOUR @S2@
+3 _APID 1,61287::1234567
 1 FAMS @F2@
 0 @I6@ INDI
 1 NAME Jozef /Peeters/
@@ -77,4 +85,8 @@
 1 HUSB @I6@
 1 WIFE @I7@
 1 CHIL @I3@
+0 @S1@ SOUR
+1 TITL Example records
+0 @S2@ SOUR
+1 TITL Netherlands, Death Index (example)
 0 TRLR

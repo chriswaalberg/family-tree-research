@@ -483,6 +483,9 @@ main{padding-top:6px}
 .vh-sib h4 small{font-size:12.5px;color:#7d6b59;white-space:nowrap}
 .vh-src{font-size:12px;color:#7d6b59;margin:8px 0 4px;line-height:1.5}
 .vh-src>span{font-weight:600}
+.own-src{font-size:12px;color:#7d6b59;margin:8px 0 4px;line-height:1.5;overflow-wrap:anywhere}.own-src>b,.own-src summary{font-weight:600}
+.own-src summary{cursor:pointer;width:max-content;max-width:100%}.own-src ul{margin:4px 0 0;padding-left:18px}.own-src li+li{margin-top:3px}
+.own-src a{color:#8a5a1c;text-decoration:underline;text-underline-offset:2px}
 .vh-fork{margin-top:18px;padding-top:16px;border-top:1px dashed #dcc9a8}
 .vh-fork .q{font-family:Fraunces,Georgia,serif;font-style:italic;font-size:18px;margin:0 0 12px;color:var(--walnut)}
 .vh-fork.one .q{font-size:16px}
@@ -819,7 +822,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.76",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.77",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -900,6 +903,8 @@ function adoptSet(root){if(ADOPT_CACHE&&ADOPT_CACHE.root===root)return ADOPT_CAC
   if(hasAdopt()){const walk=(bioOnly)=>{const r=new Set([root]),q=[root];while(q.length){const i=q.pop();for(const p of parentsOf(i))if((!bioOnly||!isAdopt(i,p))&&!r.has(p)){r.add(p);q.push(p)}}return r};
     const bio=walk(true);s=new Set([...walk(false)].filter(x=>!bio.has(x)))}
   ADOPT_CACHE={root,set:s};return s}
+Object.assign(I18N.nl,{src_one:"Bron:",src_n:"Bronnen ({n})"});
+Object.assign(I18N.en,{src_one:"Source:",src_n:"Sources ({n})"});
 Object.assign(I18N.nl,{lg_adopt_line:"dubbele gouden lijn = aangenomen als eigen kind",lg_adopt:"familie via aanneming (gearceerd)",lg_adopt_k:"gouden rand = familie via aanneming",ks_direct_adopt:"voorouder via aanneming, {n}e generatie",ks_fam_adopt:"familie via aanneming",sumAdopt:" · waarvan {k} via aanneming"});
 Object.assign(I18N.en,{lg_adopt_line:"double gold line = raised as own child",lg_adopt:"family by adoption (hatched)",lg_adopt_k:"gold ring = family by adoption",ks_direct_adopt:"ancestor by adoption, generation {n}",ks_fam_adopt:"family by adoption",sumAdopt:" · {k} of them by adoption"});
 function ancestorStats(root){ // unique ancestors, path counts, min gen
@@ -1215,6 +1220,13 @@ function drawTijdlijn(){
 const SL_GEN_UNUSED=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
 let slResizeBound=false;
 function slEsc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c])}
+/* a person's own sources (data.json "bronnen": [[text, url]] from the GEDCOM's SOUR citations): one shows as "Source: …",
+   more fold under "Sources (n)"; in Story under the person block and on the person cards (famSheet, slSheet) */
+function ownSrcHtml(p){const b=Array.isArray(p&&p.bronnen)?p.bronnen.filter(x=>Array.isArray(x)&&(x[0]||x[1])):[];if(!b.length)return"";
+  const host=u=>{try{return new URL(u).hostname.replace(/^www\./,"")}catch(e){return u}};
+  const it=x=>x[1]?`<a href="${slEsc(x[1])}" target="_blank" rel="noopener">${slEsc(x[0]||host(x[1]))}</a>`:slEsc(x[0]);
+  if(b.length===1)return `<div class="own-src"><b>${_t("src_one")}</b> ${it(b[0])}</div>`;
+  return `<details class="own-src"><summary>${_t("src_n",{n:b.length})}</summary><ul>${b.map(x=>`<li>${it(x)}</li>`).join("")}</ul></details>`}
 function slLink(s){return slEsc(s).replace(/https?:\/\/[^\s<]+/g,u=>`<a href="${u}" target="_blank" rel="noopener">link</a>`)}
 function slLine(child,parent){if(parent==null||parent<0)return{stroke:"#ddd4c7",w:1.4,dash:"3 4"};
   if(isAdopt(child,parent))return{stroke:ADOPT_COL,w:4.6,dash:"",inner:"#fffaf1"};
@@ -1277,7 +1289,7 @@ function slSheet(i,child,code,base,act){
   const line=(sym,d,pl)=>d||pl?`<div class="ln">${sym} ${[d,pl].filter(Boolean).map(slEsc).join(" · ")}</div>`:"";
   dlg.innerHTML=`<div class="sheet"><div class="grab" aria-hidden="true"></div>
     <header><p class="rel">${rel}${code?_t("genKw",{g:code.length,k:num}):""}</p><h2 id="slsheet-t">${slEsc(p.n)}${akaHtml(p)}</h2></header>
-    <section>${line("°",p.bdate,p.bplac)}${line("†",p.ddate,p.dplac)}${jobLine(p)}
+    <section>${line("°",p.bdate,p.bplac)}${line("†",p.ddate,p.dplac)}${jobLine(p)}${ownSrcHtml(p)}
     ${c?`<div class="ct"><b style="color:${CERT[c[0]]||"#7a7068"}">${slEsc(certLabel(c[0]))}</b>${_t("relWith",{name:slEsc(short(P[child]))})}${c[3]&&!/^(biologisch|biological)$/i.test(c[3])?`<br><b style="color:#9c7633">♥ ${slEsc(_t("vh_adopt_par",Object.assign({child:vhFn(P[child])},vhPro(p))))}</b>`:""}${(w=>w?(/^<div/.test(w)?w:"<br>"+w):"")(certWhy(c))}</div>`:hasChild?`<div class="ct">${_t("notAssessedRel",{name:slEsc(short(P[child]))})}</div>`:""}</section>
     <footer>${vhBtn(i)}${act?`<button type="button" class="btn" data-a="act">${act.label}</button>`:""}${i!==base?`<button type="button" class="btn" data-variant="outline" data-a="root">${_t("makeRoot")}</button>`:""}<button type="button" class="btn" data-variant="ghost" data-a="x">${_t("close")}</button></footer></div>`;
   const go=fn=>{dlg.close();setTimeout(fn,60)};
@@ -1773,7 +1785,7 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     ch.innerHTML=`<div class="vh-dot" aria-hidden="true">${p.living&&!p.by?"":slEsc(String(yr))}</div>
       <article class="vh-card">${por?`<button type="button" class="vh-por" data-mj="${imgs.indexOf(por)}" title="${slEsc(mediaName(por))}"><img src="${slEsc(por.bestand)}" alt="${slEsc(mediaName(por))}"><span class="vh-por-c">${por.titel?slEsc(por.titel):""}</span></button>`:""}<div class="vh-k">${relLabel}</div>
       <h3><button type="button" class="vh-nm" data-i="${i}" title="${_t("vh_details")}">${slEsc(p.n)}</button>${akaHtml(p)}${p.living?"":`<button type="button" class="vh-lnk" data-lnk="${i}" title="${slEsc(_t("vh_link",{name:p.n}))}" aria-label="${slEsc(_t("vh_link",{name:p.n}))}"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></button>`}</h3>
-      ${facts?`<div class="vh-facts">${facts}</div>`:""}${thumbs.length?`<div class="vh-media">${thumbs.slice(0,4).map(m=>`<button type="button" class="vh-mt" data-mj="${imgs.indexOf(m)}" title="${slEsc(mediaName(m))}"><img loading="lazy" src="${slEsc(m.bestand)}" alt=""></button>`).join("")}${thumbs.length>4?`<button type="button" class="vh-mt more" data-mj="${imgs.indexOf(thumbs[4])}">+${thumbs.length-4}</button>`:""}</div>`:""}${cert}${body}${sib}${fork}</article>`;
+      ${facts?`<div class="vh-facts">${facts}</div>`:""}${thumbs.length?`<div class="vh-media">${thumbs.slice(0,4).map(m=>`<button type="button" class="vh-mt" data-mj="${imgs.indexOf(m)}" title="${slEsc(mediaName(m))}"><img loading="lazy" src="${slEsc(m.bestand)}" alt=""></button>`).join("")}${thumbs.length>4?`<button type="button" class="vh-mt more" data-mj="${imgs.indexOf(thumbs[4])}">+${thumbs.length-4}</button>`:""}</div>`:""}${ownSrcHtml(p)}${cert}${body}${sib}${fork}</article>`;
     ch.querySelector(`.vh-nm[data-i]`).onclick=()=>slSheet(i,child,code,path[0]);
     ch.querySelectorAll(".vh-mt,.vh-por").forEach(b=>b.onclick=()=>mediaView(imgs,+b.dataset.mj));
     ch.querySelectorAll(".vh-fimg").forEach(b=>b.onclick=()=>mediaView(vhScanItems(b.dataset.tgimg,b.dataset.scan,b.dataset.tgt),0));
@@ -1974,7 +1986,7 @@ function famSheet(i,info){
   if(i!==r)btns.push(`<button type="button" class="btn" data-variant="outline" data-a="root">${_t("makeRoot")}</button>`);
   btns.push(`<button type="button" class="btn" data-variant="ghost" data-a="x">${_t("close")}</button>`);
   dlg.innerHTML=`<div class="sheet"><div class="grab" aria-hidden="true"></div><header><p class="rel">${rel}</p><h2 id="slsheet-t">${slEsc(p.n)}${akaHtml(p)}</h2></header>
-    <section>${line("°",p.bdate,p.bplac)}${line("†",p.ddate,p.dplac)}${jobLine(p)}${hasPar?`<div class="ct">${crow(_t("Father"),p.f,cf)}${crow(_t("Mother"),p.m,cm)}</div>`:""}</section><footer>${btns.join("")}</footer></div>`;
+    <section>${line("°",p.bdate,p.bplac)}${line("†",p.ddate,p.dplac)}${jobLine(p)}${ownSrcHtml(p)}${hasPar?`<div class="ct">${crow(_t("Father"),p.f,cf)}${crow(_t("Mother"),p.m,cm)}</div>`:""}</section><footer>${btns.join("")}</footer></div>`;
   const go=fn=>{dlg.close();setTimeout(fn,60)};
   dlg.querySelector('[data-a="x"]').onclick=()=>dlg.close();
   const b=a=>dlg.querySelector(`[data-a="${a}"]`);

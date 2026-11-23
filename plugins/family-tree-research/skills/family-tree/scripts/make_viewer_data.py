@@ -240,6 +240,33 @@ def stamp_of(indi, tags):
 SOORT_GED = {"photo": "foto", "foto": "foto", "document": "document", "scan": "scan", "certificate": "scan",
              "akte": "scan", "book": "document", "card": "document", "newspaper": "document"}
 
+ROUND_SRC = re.compile(r"^@S\d+_R@$")  # the source record `rebuild` makes per round: its title is the round, not a record
+APID = re.compile(r"^\s*\d+,(\d+)::(\d+)\s*$")
+
+def sources_of(indi, srcs):
+    """The person's own source citations, on the person (1 SOUR) and on their events (2 SOUR): [[text, url], …].
+    Text: the citation's PAGE, after the source's title unless that is a round title; url: WWW, else an Ancestry
+    record link made from _APID (1,<database>::<record>). Without text or url, or twice: left out."""
+    out, seen = [], set()
+    cites = subs(indi, "SOUR") + [c for e in indi["c"] for c in subs(e, "SOUR")]
+    for c in cites:
+        ref = c["v"].strip()
+        rec = srcs.get(ref) if ref.startswith("@") else None
+        title = "" if not rec or ROUND_SRC.match(ref) else (sub(rec, "TITL") or {}).get("v", "").strip()
+        if not ref.startswith("@"): title = ref  # an inline source: the text is the value
+        page = (sub(c, "PAGE") or {}).get("v", "").strip()
+        www = [w["v"].strip() for w in subs(c, "WWW") + [w for d in subs(c, "DATA") for w in subs(d, "WWW")]] + \
+              ([w["v"].strip() for w in subs(rec, "WWW")] if rec else [])
+        url = next((w for w in www if re.match(r"^https?://", w)), "")
+        m = APID.match((sub(c, "_APID") or {}).get("v", ""))
+        if not url and m: url = f"https://www.ancestry.com/discoveryui-content/view/{m.group(2)}:{m.group(1)}"
+        text = " — ".join(t for t in (title, page) if t)
+        if not text and not url: continue
+        key = url or text
+        if key in seen: continue
+        seen.add(key); out.append([text, url] if url else [text])
+    return out
+
 def media_of(indi, objs):
     """All OBJE under a person (also under events), inline or as a reference @O1@."""
     out, stack = [], list(indi["c"])
@@ -991,6 +1018,7 @@ def main():
     indis = [r for r in recs if r["t"] == "INDI" and r["x"]]
     fams = {r["x"]: r for r in recs if r["t"] == "FAM" and r["x"]}
     objs = {r["x"]: r for r in recs if r["t"] == "OBJE" and r["x"]}
+    srcs = {r["x"]: r for r in recs if r["t"] == "SOUR" and r["x"]}
     idx = {r["x"]: i for i, r in enumerate(indis)}
     if not indis:
         sys.exit("No people (INDI) found in " + a.gedcom)
@@ -1028,6 +1056,8 @@ def main():
         md = media_of(r, objs)
         if md:
             p["media"] = md
+        bs = sources_of(r, srcs)
+        if bs: p["bronnen"] = bs
         st = stamp_of(r, ("_CREA",))
         if st: p["toegevoegd"] = st
         st = stamp_of(r, ("CHAN", "_UPD"))
@@ -1215,7 +1245,7 @@ def main():
         if not dead and y is not None and y >= cutoff:
             p["levend"] = True; n_lev += 1
             if a.levenden_verbergen:
-                for k in ("bdate", "bplac", "ddate", "dplac", "by", "dy", "r", "media", "beroep", "woon", "woon_feiten", "weg"):
+                for k in ("bdate", "bplac", "ddate", "dplac", "by", "dy", "r", "media", "beroep", "woon", "woon_feiten", "weg", "bronnen"):
                     p.pop(k, None)
 
     # ---- start people
@@ -1348,6 +1378,19 @@ def main():
             n_mw = sum(story_map_warnings(p, out["coordinaten"]) for p in people if p.get("verhaal"))
             if n_mw: print(f"  {n_mw} stor{'y' if n_mw == 1 else 'ies'} with map places the text doesn't name: the viewer adds a short sentence"
                            " before those maps; name the place in the story (or give it \"alinea\" in \"plekken\") to place the map yourself")
+    # ---- direct ancestors without any source of their own (no citation in the GEDCOM, no scan or document, no story source)
+    anc, st = set(), [x["persoon"] for x in starts]
+    while st:
+        j = st.pop()
+        for q in (people[j]["f"], people[j]["m"]):
+            if q >= 0 and q not in anc: anc.add(q); st.append(q)
+    bare = [people[j] for j in sorted(anc) if not people[j].get("levend") and not (people[j].get("bronnen") or people[j].get("verhaal_bronnen")
+            or any(m.get("soort") in ("scan", "document", "krant") for m in people[j].get("media", [])))]
+    if bare:
+        print(f"  warning: {len(bare)} direct ancestor(s) without a source of their own (no SOUR in the GEDCOM, no scan or document, "
+              f"no story source); the record that names them (often a child's) belongs on them too:", file=sys.stderr)
+        for p in bare[:5]: print(f"    {p['n']} ({p.get('by') or '?'}, {p['id']})", file=sys.stderr)
+        if len(bare) > 5: print(f"    … and {len(bare) - 5} more", file=sys.stderr)
     out["personen"] = people
     with open(a.uit, "w", encoding="utf-8") as fh:
         json.dump(out, fh, ensure_ascii=False, separators=(",", ":"))
