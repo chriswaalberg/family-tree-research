@@ -20,7 +20,12 @@
 .media .mt:focus-visible img{outline:2px solid #c0392b;outline-offset:2px}
 .media .md{display:flex;flex-direction:column;gap:.3rem;margin-top:.5rem}
 .media .md a{font-size:.85rem}
-#mediaDlg{border:0;padding:0;background:transparent;max-width:96vw;max-height:96vh}
+/* the page never pans sideways (iOS lets a sideways swipe nudge it); wide views scroll inside their own box */
+html,body{overflow-x:clip}
+#mediaDlg{border:0;padding:0;background:transparent;max-width:96vw;max-height:96vh;overflow-x:hidden;overscroll-behavior:contain}
+#mediaDlg:focus{outline:none}
+#mediaDlg.many figure{touch-action:pinch-zoom;user-select:none;-webkit-user-select:none}
+#mediaDlg img{-webkit-user-drag:none;-webkit-touch-callout:none}
 #mediaDlg::backdrop{background:rgba(20,16,12,.82)}
 #mediaDlg figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:.6rem}
 #mediaDlg img{max-width:94vw;max-height:84vh;border-radius:6px;background:#fff}
@@ -815,7 +820,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.71",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.72",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -2670,13 +2675,24 @@ function mediaIsImg(m){return /^data:image\//.test(m.bestand)||MEDIA_IMG.test(m.
 function portraitOf(imgs){const pf=m=>/^(foto|photo)$/i.test(m.soort||"");return imgs.find(m=>m.portret&&(pf(m)||!m.soort))||imgs.find(pf)||null}
 function mediaList(p){const a=Array.isArray(p.media)?p.media:[];return a.map(m=>typeof m==="string"?{bestand:m}:m).filter(m=>m&&m.bestand)}
 function mediaName(m){return m.titel||decodeURIComponent(String(m.bestand).split(/[\/\\]/).pop().replace(/\.[^.]+$/,"")).slice(0,80)}
+const MV_SWIPE=50; /* px a finger must travel sideways in the photo viewer to change photo */
 function mediaView(items,k){
   let dlg=document.getElementById("mediaDlg");
   if(!dlg){dlg=document.createElement("dialog");dlg.id="mediaDlg";document.body.appendChild(dlg);
     dlg.tabIndex=-1;dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close()});
     /* on the document, not the dialog: show() rebuilds the content, so the focused button disappears and focus falls back to body */
-    addEventListener("keydown",e=>{if(!dlg.open||!dlg._go)return;const d={ArrowLeft:-1,ArrowRight:1}[e.key];if(d){e.preventDefault();e.stopPropagation();dlg._go(d)}},true)}
-  const show=j=>{k=(j+items.length)%items.length;const m=items[k];
+    addEventListener("keydown",e=>{if(!dlg.open||!dlg._go)return;const d={ArrowLeft:-1,ArrowRight:1}[e.key];if(d){e.preventDefault();e.stopPropagation();dlg._go(d)}},true);
+    /* swipe left/right on the photo: it follows the finger, past MV_SWIPE px it changes (figure has touch-action:pinch-zoom, so the browser leaves sideways moves to us) */
+    let sw=null,swiped=0;
+    dlg.addEventListener("pointerdown",e=>{const f=e.target.closest("figure");if(e.pointerType==="mouse"||!f||!dlg.classList.contains("many"))return;sw={id:e.pointerId,x:e.clientX,y:e.clientY,f,dx:0}});
+    dlg.addEventListener("pointermove",e=>{if(!sw||e.pointerId!==sw.id)return;sw.dx=e.clientX-sw.x;if(Math.abs(sw.dx)>Math.abs(e.clientY-sw.y))sw.f.style.transform=`translateX(${sw.dx}px)`});
+    const end=e=>{if(!sw||e.pointerId!==sw.id)return;const s=sw;sw=null;
+      if(e.type==="pointerup"&&Math.abs(s.dx)>MV_SWIPE){swiped=performance.now();dlg._go(s.dx<0?1:-1)}
+      else{s.f.style.transition="transform .2s";s.f.style.transform="";setTimeout(()=>s.f.style.transition="",200)}};
+    dlg.addEventListener("pointerup",end);dlg.addEventListener("pointercancel",end);
+    /* the click after a swipe must not close the dialog or press a button */
+    dlg.addEventListener("click",e=>{if(performance.now()-swiped<400){e.stopPropagation();e.preventDefault()}},true)}
+  const show=j=>{k=(j+items.length)%items.length;const m=items[k];dlg.classList.toggle("many",items.length>1);
     dlg.innerHTML=`<button class="mx" aria-label="${LANG==="en"?"Close":"Sluiten"}">×</button>`+
       (items.length>1?`<button class="mnav mprev" aria-label="${LANG==="en"?"Previous":"Vorige"}">‹</button><button class="mnav mnext" aria-label="${LANG==="en"?"Next":"Volgende"}">›</button>`:"")+
       `<figure><img src="${slEsc(m.bestand)}" alt="${slEsc(mediaName(m))}"><figcaption>${slEsc(mediaName(m))}${items.length>1?` · ${k+1}/${items.length}`:""}</figcaption></figure>`;
