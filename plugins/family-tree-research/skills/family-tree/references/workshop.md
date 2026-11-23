@@ -25,6 +25,14 @@ Every tree has its own Workshop. Several can run at once (two family trees, or a
 
 Say in one sentence what it is: "Next to our conversation you can now watch your tree grow while I search."
 
+**Open it before the first step, preparation included.** Reading the gap report, choosing the next round, checking an import, planning helpers: that is work on the tree too, and the user wants to see it. So the Workshop opens before any of it, not when the first archive search starts.
+
+**Then say at once what you are doing.** As soon as it is open, send a note with where the session stands and what comes next ("Reading last night's report: 12 open questions in Katwijk; next the parents of Jan Plokker"). If you already did something before it was open, say that too. From then on, every step gets a `focus`, `note` or `progress`; a Workshop that stays silent while you work looks broken.
+
+**A tree folder reminds you.** The plugin has a hook: in a folder with `family-tree.json`/`stamboom.json` every session starts with the instruction to load this skill and open the Workshop (also when the project's own CLAUDE.md already explains the research), and every request gets one line saying whether the Workshop is open. `archives.py`, `delpher.py` and `gedcom_tool.py` say once an hour, on stderr, when they run in a tree's folder while its Workshop is closed. Act on it: open the Workshop.
+
+**Search through the skill's scripts.** `archives.py` and `delpher.py` report to the Workshop by themselves. A search script of the project's own stays silent there: use the skill's scripts, or let the own script call `live.emit` (see "Tell what you do" below).
+
 ## What reports by itself
 
 While a Workshop runs, these send what they do without anything extra:
@@ -92,9 +100,10 @@ The address carries a secret key, because the Workshop is reachable for everyone
 ## In the page
 
 - At the top: the start person (tap to choose another), one line of counts (people, links, open questions, sources) and a thin certainty bar. Everything else is behind the menu (☰): Cosmos | Fan, EN | NL (shared with the viewer), replay this session, on your phone (QR code), choose the start person, the viewer.
-- Under the sky (on a wide screen: the right column) three tabs, each remembered per browser:
-  - **Workers**: one row per agent (Claude and every helper with `FTR_WHO`), in its own colour: who it is on (with the relation for someone outside the fan, or "outside the fan"), and its last step. A row greys out after three quiet minutes.
+- Under the sky (on a wide screen: the right column) four tabs, each remembered per browser:
+  - **Workers**: one row per agent (Claude and every helper with `FTR_WHO`), in its own colour: who it is on (with the relation for someone outside the fan, or "outside the fan"), and its last step. Rows keep their place (Claude first, helpers in the order they first showed up). A row greys out after three quiet minutes.
   - **Log**: everything in order, each line with the colour and name of its worker; archive ids show as "2 records · Het Utrechts Archief". A dot on the tab means something new.
+  - **Changes**: only what really changed in the tree this session, grouped per update with the time: people added or removed, parent links added or removed, certainty, a source or reason, the kind of link (raised/adopted), names, dates, stories, photos, occupations, and the round steps data.json can't show (events, notes, other names). A summary on top; many of one kind (a round of 200 reasons) fold into one line to open. Scrolling through it lights up the people concerned in the sky (their own star, else their nearest relative); a tap on a line points to that person. The full-screen button shows the list alone, for reading back at the end of a session. The server keeps the list, so a reopened page or a phone sees all of it. Point the user to it after a round.
   - **Outside the fan**: people added who aren't ancestors of the start person, newest first, with a count on the tab; a rejected link shows crossed out.
 - The beams: one per worker, labelled with its name, in the same colour as its row. A beam points at the person its worker is on and stays there; it only turns a full circle for a check of the whole tree (`check`). A step without a known person leaves it where it is. It fades when its worker has been quiet for three minutes, together with its ring and row.
 - Cosmos and Fan show as many generations as the start person's tree has, plus one orbit/ring of open questions; they grow one when you get a generation further.

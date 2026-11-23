@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.69"
+  version: "0.9.70"
 ---
 
 # Family-tree research, hand in hand
@@ -85,7 +85,7 @@ The core:
 
 ## The Workshop (Claude Code only)
 
-In Claude Code, open the Workshop at the start of research, without asking: a local page that shows the fan as a night sky and plays live what you search, check, add and reject (`scripts/live.py`, `viewer/live.html`). In the desktop app it goes in the side panel next to the conversation: `live.py launch` (writes the `workshop` entry with the current path and this tree's port), `preview_start`, show the pane, check it is this tree (`/ping`, tab title); in a terminal give the user the address. Run the scripts from the tree's folder: events only go to that tree's Workshop. With it open, rebuild the tree and data.json after every confirmed find instead of only at the end of a round, say who you turn to with `live.py focus <id or name>` (the names the user reads in the chat then light up in the sky), send a `live.py note` for work the scripts don't see, a `live.py progress` from long scripts of your own, and give helpers `FTR_WHO=<name>`. A phone can always watch: the phone button in the Workshop shows a QR code (`--local` = this computer only). Never offer or mention it in Cowork or claude.ai. All of it: `references/workshop.md`.
+In Claude Code, open the Workshop before the first step of any work on the tree (preparation too: reading reports, planning a round), without asking, and send a note there at once with what you are doing and what comes next. It is: a local page that shows the fan as a night sky and plays live what you search, check, add and reject (`scripts/live.py`, `viewer/live.html`). In the desktop app it goes in the side panel next to the conversation: `live.py launch` (writes the `workshop` entry with the current path and this tree's port), `preview_start`, show the pane, check it is this tree (`/ping`, tab title); in a terminal give the user the address. Run the scripts from the tree's folder: events only go to that tree's Workshop. With it open, rebuild the tree and data.json after every confirmed find instead of only at the end of a round, say who you turn to with `live.py focus <id or name>` (the names the user reads in the chat then light up in the sky), send a `live.py note` for work the scripts don't see, a `live.py progress` from long scripts of your own, and give helpers `FTR_WHO=<name>`. Search with the skill's scripts (`archives.py`, `delpher.py`): a project's own search scripts stay silent in the Workshop unless they call `live.emit`. A plugin hook reminds you in every tree folder; the scripts say when the Workshop is closed. A phone can always watch: the phone button in the Workshop shows a QR code (`--local` = this computer only). Never offer or mention it in Cowork or claude.ai. All of it: `references/workshop.md`.
 
 ## Viewer
 

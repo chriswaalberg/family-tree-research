@@ -1,0 +1,27 @@
+{
+  "description": "In a family tree's folder (family-tree.json / stamboom.json): load the family-tree skill and keep the Workshop open and told what happens, even when the project's own CLAUDE.md already explains the research.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I \"${CLAUDE_PLUGIN_ROOT}/hooks/tree_hint.py\" start",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I \"${CLAUDE_PLUGIN_ROOT}/hooks/tree_hint.py\" prompt",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

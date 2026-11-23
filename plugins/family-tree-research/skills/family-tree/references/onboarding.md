@@ -12,6 +12,15 @@ Example (adapt to the person, keep it short):
 
 Then check the workspace (connected folder, see SKILL.md) and create the folders.
 
+**In Claude Code**, also give the tree's folder a `CLAUDE.md` with these lines at the top (in the user's language; if the folder already has a `CLAUDE.md`, add them there and leave the rest alone). A long CLAUDE.md of the project's own can otherwise make Claude skip the skill, and then the Workshop stays closed:
+
+```
+## Before any work on this tree
+- Load the skill family-tree-research:family-tree first, also when this file already explains the research.
+- Open the Workshop before the first step, preparation included, and tell it right away what you are doing
+  (references/workshop.md). Search with the skill's scripts (archives.py, delpher.py); own scripts must call live.emit.
+```
+
 ## Step 1 – Do you already have a family tree?
 
 AskUserQuestion, one question:

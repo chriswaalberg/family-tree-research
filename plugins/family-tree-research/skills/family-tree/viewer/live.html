@@ -46,9 +46,9 @@ main{display:grid;grid-template-columns:1fr minmax(320px,390px);flex:1 1 auto;mi
 #fan{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 aside{display:flex;flex-direction:column;gap:8px;padding:6px 18px 14px 0;min-height:0}
 .tabs{display:flex;gap:3px;padding:3px;border:1px solid var(--line);border-radius:12px;background:var(--panel);flex:none}
-.tabs button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font:600 12.5px var(--sans);color:var(--mut);background:none;border:0;border-radius:9px;padding:8px 6px;cursor:pointer;white-space:nowrap;min-width:0}
+.tabs button{flex:1 1 auto;display:flex;align-items:center;justify-content:center;gap:6px;font:600 12.5px var(--sans);color:var(--mut);background:none;border:0;border-radius:9px;padding:8px 6px;cursor:pointer;white-space:nowrap;min-width:0}
 .tabs button span{overflow:hidden;text-overflow:ellipsis}.tabs .sm{display:none}
-@media (max-width:440px){.tabs .lg{display:none}.tabs .sm{display:inline}}
+@media (max-width:440px),(min-width:901px){.tabs .lg{display:none}.tabs .sm{display:inline}} /* wide screens: the tabs sit in a narrow right column */
 .tabs button[aria-selected=true]{background:color-mix(in srgb,var(--accent) 28%,var(--panel));color:var(--ink)}
 .tabs i{font:700 10.5px var(--sans);font-style:normal;min-width:18px;padding:1px 6px;border-radius:99px;background:var(--line);color:var(--ink)}.tabs i:empty{display:none}
 .tabs i.bump{animation:bump 1.1s ease-out}
@@ -63,6 +63,34 @@ aside{display:flex;flex-direction:column;gap:8px;padding:6px 18px 14px 0;min-hei
 .wk .wr{display:block;color:var(--mut);font-size:12px}.wk small{display:block;font-size:12.5px;color:var(--ink);opacity:.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .wk.idle{opacity:.45}.panel .empty{padding:18px 14px;color:var(--mut);font-style:italic;text-align:center}
 #src:empty,#tasks:empty{display:none}
+/* Changes: what really changed in the tree, grouped per update; scrolling lights up the people in the sky */
+#pChanges{padding:0;position:relative}
+.chg-top{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:8px;padding:8px 10px 8px 14px;background:var(--panel);border-bottom:1px solid var(--line);backdrop-filter:blur(6px)}
+#chgSum{flex:1;min-width:0;font:600 11px var(--sans);letter-spacing:.3px;color:var(--mut)}#chgSum b{color:var(--ink);font:700 15px var(--serif);letter-spacing:0}
+.chg-btn{flex:none;display:inline-flex;align-items:center;gap:5px;font:600 11.5px var(--sans);color:var(--ink);background:none;border:1px solid var(--line);border-radius:8px;padding:5px 8px;cursor:pointer}
+.chg-btn:hover{border-color:var(--gold)}
+.cg{padding:6px 0 4px}.cg+.cg{border-top:1px solid var(--line)}
+.cg h5{margin:0;padding:6px 14px 2px;font:600 10px var(--sans);letter-spacing:1.3px;text-transform:uppercase;color:var(--mut)}.cg h5 b{color:var(--ink);font-weight:700}
+.cg ul{list-style:none;margin:0;padding:0}
+.chg{display:flex;gap:10px;padding:6px 14px;border-left:3px solid transparent;cursor:pointer;transition:background .3s}
+.chg .ic{width:16px;flex:none;text-align:center;color:var(--mut)}.chg b{display:block;font-weight:600;font-size:13.5px}.chg small{display:block;color:var(--mut);font-size:12px;overflow-wrap:anywhere}
+.chg.lit{background:color-mix(in srgb,var(--gold) 9%,transparent)}
+.chg.o-add,.chg.o-link{border-left-color:var(--gold)}.chg.o-del,.chg.o-unlink,.chg.o-step\:drop_event{border-left-color:var(--red)}
+.chg.o-cert{border-left-color:var(--gold2)}.chg.o-why{border-left-color:color-mix(in srgb,var(--gold) 50%,transparent)}.chg.o-type{border-left-color:var(--gold2)}
+.chg.o-name,.chg.o-dates,.chg.o-step\:aka,.chg.o-step\:places{border-left-color:var(--amber)}.chg.o-story,.chg.o-storyEdit,.chg.o-media,.chg.o-job,.chg.o-step\:event{border-left-color:var(--teal)}.chg.o-step\:note{border-left-color:var(--mut)}
+.chg s{color:var(--mut)}
+details.chg-many>summary{list-style:none;cursor:pointer}details.chg-many>summary::-webkit-details-marker{display:none}
+details.chg-many>summary .chg b::after{content:" ▸";color:var(--mut)}details.chg-many[open]>summary .chg b::after{content:" ▾"}
+details.chg-many ul{padding-left:18px}
+#chgList .empty{padding:18px 14px;color:var(--mut);font-style:italic;text-align:center}
+.hl{pointer-events:none}.hl circle{fill:none;stroke:var(--gold2);stroke-width:2;stroke-dasharray:3 3;animation:hlin .4s ease-out}
+.hl text{font-family:var(--serif);font-weight:700;fill:var(--gold2);text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:4px;stroke-linejoin:round}
+@keyframes hlin{from{opacity:0;transform:scale(1.8)}}.hl circle{transform-box:fill-box;transform-origin:center}
+/* full screen: the list alone, readable width (the Fullscreen API where the browser allows it, else over the whole window) */
+#pChanges.full{position:fixed;inset:0;z-index:80;background:var(--bg);overflow:auto;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+#pChanges.full .chg-top,#pChanges.full #chgList{max-width:760px;margin:0 auto}
+#pChanges.full .chg-top{background:var(--bg)}#pChanges.full .chg b{font-size:15px}#pChanges.full .chg small{font-size:13px}#pChanges.full .cg h5{font-size:11px;padding-top:14px}
+#pChanges.full .chg{cursor:default}
 #rbar{display:flex;flex-direction:column;gap:7px;padding:10px 12px;border:1px solid var(--accent);border-radius:14px;background:color-mix(in srgb,var(--accent) 12%,var(--panel))}
 #rbar .rb-t{display:flex;justify-content:space-between;gap:10px;align-items:baseline}#rbar .rb-t b{font:700 16px var(--serif)}#rbar .rb-t span{font:600 11px var(--sans);color:var(--mut)}
 #rbar .rb-bar{height:5px;border-radius:99px;background:var(--line);overflow:hidden}#rbar .rb-bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
@@ -220,10 +248,11 @@ dialog input{width:100%;font:15px var(--sans);padding:9px 12px;border-radius:10p
  <aside>
   <div id="rbar" hidden><div class="rb-t"><b data-t="replayT">Replay</b><span id="rbTime"></span></div><div class="rb-bar"><i id="rbFill"></i></div>
    <div class="rb-c"><button type="button" id="rbPause">❚❚</button><button type="button" data-sp="1" class="on">1×</button><button type="button" data-sp="2">2×</button><button type="button" data-sp="4">4×</button><button type="button" id="rbLive" data-t="backLive">Back to live</button></div></div>
-  <div class="tabs" role="tablist"><button type="button" role="tab" data-tab="workers"><span data-t="tabWorkers">Workers</span><i id="nW"></i></button><button type="button" role="tab" data-tab="log"><span data-t="tabLog">Log</span><i id="nL" class="new"></i></button><button type="button" role="tab" data-tab="out"><span data-t="tabOut" class="lg">Outside the fan</span><span data-t="tabOutS" class="sm">Outside</span><i id="nO"></i></button></div>
+  <div class="tabs" role="tablist"><button type="button" role="tab" data-tab="workers"><span data-t="tabWorkers">Workers</span><i id="nW"></i></button><button type="button" role="tab" data-tab="log"><span data-t="tabLog">Log</span><i id="nL" class="new"></i></button><button type="button" role="tab" data-tab="changes"><span data-t="tabChg" class="lg">Changes</span><span data-t="tabChgS" class="sm">Changes</span><i id="nC"></i></button><button type="button" role="tab" data-tab="out"><span data-t="tabOut" class="lg">Outside the fan</span><span data-t="tabOutS" class="sm">Outside</span><i id="nO"></i></button></div>
   <div class="panels">
    <section class="panel" id="pWorkers"><div id="workers"></div><div id="tasks"></div><div id="src"></div></section>
    <section class="panel" id="pLog" hidden><ul id="feed"></ul></section>
+   <section class="panel" id="pChanges" hidden><div class="chg-top"><span id="chgSum"></span><button type="button" class="chg-btn" id="chgFull"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span data-t="chgFull">Full screen</span></button><button type="button" class="chg-btn" id="chgClose" hidden>× <span data-t="chgClose">Close</span></button></div><div id="chgList"></div></section>
    <section class="panel" id="pOut" hidden><div id="tray"></div></section>
   </div>
  </aside>
@@ -277,6 +306,19 @@ nl:{title:"Werkplaats",treeOf:"Stamboom van",people:"mensen",links:"relaties",op
  st_note:"Notitie bij {n}",st_event:"{t}: {n}",st_drop_event:"Weggehaald: {t} van {n}",st_aka:"Ook bekend als: {t}",st_places:"{n} plaatsnamen gelijkgetrokken",stN:"{t}: {n} nieuwe stappen",
  c_z:"zeker",c_w:"waarschijnlijk",c_p:"mogelijk",c_n:"niet gecheckt",c_x:"fout",
  ev_baptism:"Doop",ev_burial:"Begrafenis",ev_birth:"Geboorte",ev_death:"Overlijden",ev_marriage:"Huwelijk",ev_residence:"Woonplaats",ev_divorce:"Scheiding",ev_census:"Volkstelling",ev_emigration:"Emigratie",taskStart:"Gestart: {t}",taskDone:"Klaar: {t}",eta:"nog ±{m} min",etaS:"bijna klaar",ring:"Een generatie verder terug",ringD:"Je boom groeit een generatie."}};
+/* the Changes tab */
+Object.assign(I18N.en,{tabChg:"Changes",tabChgS:"Changes",chgFull:"Full screen",chgClose:"Close",chgEmpty:"Nothing in the tree has changed in this session yet.",
+ chgSum:"{n} changes this session",chgSum1:"1 change this session",chgPeople:"{n} new",chgLinks:"{n} links",chgCert:"{n} certainty",chgWhy:"{n} sources/reasons",
+ chgData:"Tree updated",chgRound:"Round {t}",ch_father:"father",ch_mother:"mother",
+ ch_link:"{p} added as {r} of {c}",ch_cert:"{p} as {r} of {c}: {a} → {b}",ch_why:"Source or reason: {p} as {r} of {c}",ch_type:"{p} as {r} of {c}: {b}",
+ ch_unlink:"No longer {r} of {c}: {p}",ch_media:"{n}: {k} new photo(s) or document(s)",
+ t_aangenomen:"raised as own child",t_adoptie:"adopted",t_pleeg:"foster child",t_:"biological",chgMore:"and {n} more like this"});
+Object.assign(I18N.nl,{tabChg:"Wijzigingen",tabChgS:"Wijzigingen",chgFull:"Volledig scherm",chgClose:"Sluiten",chgEmpty:"Er is in deze sessie nog niets in de boom veranderd.",
+ chgSum:"{n} wijzigingen deze sessie",chgSum1:"1 wijziging deze sessie",chgPeople:"{n} nieuw",chgLinks:"{n} koppelingen",chgCert:"{n} zekerheid",chgWhy:"{n} bronnen/redenen",
+ chgData:"Boom bijgewerkt",chgRound:"Ronde {t}",ch_father:"vader",ch_mother:"moeder",
+ ch_link:"{p} toegevoegd als {r} van {c}",ch_cert:"{p} als {r} van {c}: {a} → {b}",ch_why:"Bron of reden: {p} als {r} van {c}",ch_type:"{p} als {r} van {c}: {b}",
+ ch_unlink:"Niet langer {r} van {c}: {p}",ch_media:"{n}: {k} nieuwe foto('s) of document(en)",
+ t_aangenomen:"als eigen kind grootgebracht",t_adoptie:"geadopteerd",t_pleeg:"pleegkind",t_:"biologisch",chgMore:"en nog {n} van deze soort"});
 let LANG="en";
 const _t=(k,v)=>{let s=(I18N[LANG][k]??I18N.en[k]??k);for(const x in v||{})s=s.split("{"+x+"}").join(v[x]);return s;};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
@@ -288,7 +330,7 @@ const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k
 
 /* ===== TUNING (all numbers that shape the Workshop) ===== */
 let VIEW="cosmos";
-const CFG={IDLE_S:180,QR_STYLE:2,SRC_MAX:3,FOCUS_MS:180000,SWEEP_BIG:400,TICK_MS:120,TAP_PX:22,COS_R0:40,STEPS_ONE_BY_ONE:8,CERT_ONE_BY_ONE:4,WHY_ANIM_MAX:80,BREATHE_MAX:40,MAX_PARTS:1500,STAR_MS:250,MAXG:14,R0:62,RMAX:490,Q:.8,MIN_DEG:.12,ONE_BY_ONE:10,TRAY:6,BEAM_IDLE:30000,FEED:120,GAPS_TO:9,SWEEP_MS:5200,FLY_MS:1400};
+const CFG={CHG_OPEN:6,HL_MAX:60,HL_NAMES:6,IDLE_S:180,QR_STYLE:2,SRC_MAX:3,FOCUS_MS:180000,SWEEP_BIG:400,TICK_MS:120,TAP_PX:22,COS_R0:40,STEPS_ONE_BY_ONE:8,CERT_ONE_BY_ONE:4,WHY_ANIM_MAX:80,BREATHE_MAX:40,MAX_PARTS:1500,STAR_MS:250,MAXG:14,R0:62,RMAX:490,Q:.8,MIN_DEG:.12,ONE_BY_ONE:10,TRAY:6,BEAM_IDLE:30000,FEED:120,GAPS_TO:9,SWEEP_MS:5200,FLY_MS:1400};
 
 /* ===== DATA ===== */
 let D=null,P=[],ROOT=null,L=null;            // L = current layout
@@ -334,7 +376,7 @@ const segEl=c=>svg.querySelector(`.slot[data-c="${c}"]`),lblEl=c=>svg.querySelec
 /* ===== RENDER ===== */
 let lastCounts=null;
 function render(pending){pending=pending||new Set();measure();L=layout(P,ROOT);const G=$("#fanG");let h="";G.classList.toggle("cos",VIEW==="cosmos");
- if(VIEW==="cosmos"){G.innerHTML=cosmosHtml(pending);G.classList.toggle("calm",L.gaps.length<=CFG.BREATHE_MAX);renderTray();renderCounts();renderCert();renderTitle();drawFocus();return}
+ if(VIEW==="cosmos"){G.innerHTML=cosmosHtml(pending);G.classList.toggle("calm",L.gaps.length<=CFG.BREATHE_MAX);renderTray();renderCounts();renderCert();renderTitle();drawFocus();hlRedraw();return}
  for(let g=1;g<=L.GR;g++)h+=`<circle class="guide" r="${L.RO(g).toFixed(1)}"/>`;
  for(const q of L.gaps){h+=`<path class="slot gap" data-c="${q.code}" d="${sector(L.RI(q.g)+1,L.RO(q.g)-1,q.lo,q.hi)}"/>`;
   const [x,y]=centre(q),arcL=(L.RI(q.g)+L.RO(q.g))/2*rad(q.hi-q.lo);if(arcL>26&&L.RO(q.g)-L.RI(q.g)>20)h+=`<text class="qm" x="${x.toFixed(1)}" y="${y.toFixed(1)}" style="font-size:${fz(Math.min(17,arcL/2.5),11).toFixed(1)}px">?</text>`}
@@ -346,7 +388,7 @@ function render(pending){pending=pending||new Set();measure();L=layout(P,ROOT);c
   h+=`<path class="lk ${cls}${pending.has(s.k)?" pending":""}" data-c="${s.code}" d="${arc(L.RI(s.g),s.lo+pad,s.hi-pad)}"/>`}
  for(const s of L.slots.values())h+=label(s,pending.has(s.k));
  G.innerHTML=h;G.classList.toggle("calm",L.gaps.length<=CFG.BREATHE_MAX);
- renderTray();renderCounts();renderCert();renderTitle();drawFocus()}
+ renderTray();renderCounts();renderCert();renderTitle();drawFocus();hlRedraw()}
 /* ===== KOSMOS: every ancestor a star in the place of their fan slot (father left), one orbit per generation,
    constellation lines from child to parent in the colour of their certainty, missing parents as hollow ghost stars */
 const starR=g=>g===0?11:Math.max(2.4,8.5-g*.75);
@@ -413,7 +455,7 @@ function renderCert(){const n=certCounts(P),tot=n.z+n.w+n.p+n.n+n.x||1,el=$("#cb
 function renderTitle(){const i=idx(P,ROOT),p=P[i];$("#rootBtn").innerHTML=p?`${esc(_t("treeOf"))} <b>${esc(p.n)}</b> ▾`:"";document.title=`${_t("title")} · ${p?short(p):""}`}
 function applyTexts(){$$("[data-t]").forEach(e=>e.textContent=_t(e.dataset.t));
  for(const[id,k]of[["replayBtn","replayBtn"],["phoneBtn","phoneBtn"],["menuBtn","menu"]]){const b=document.getElementById(id);if(b)b.title=b.ariaLabel=_t(k)}
- if(typeof drawFocus==="function"&&L)drawFocus();renderTitle()}
+ if(typeof drawFocus==="function"&&L)drawFocus();renderTitle();chgRender()}
 
 /* ===== PARTICLES ===== */
 const fx=$("#fx"),ctx=fx.getContext("2d"),st=$("#stars"),sctx=st.getContext("2d");let parts=[],emitters=[],stars=[],dpr=1;
@@ -484,7 +526,7 @@ async function crack(c){const s=slotAt(c);if(!s)return;const g=s.g,a=(s.lo+s.hi)
  if((r2-r1)>26&&(r1+r2)/2*rad(w)>60){const[x,y]=centre(s),gg=document.createElementNS(NS,"g");gg.setAttribute("transform",`translate(${x} ${y}) rotate(${(a>90&&a<270?a+180:a)-14})`);
   const t=document.createElementNS(NS,"text");t.setAttribute("class","stamp");t.textContent=_t("rejected");gg.append(t);fg.append(gg)}
  const[sx,sy]=slotScr(c);burst(sx,sy,40,css("--red"),3.5);await wait(700);ash(sx,sy,90);const l=lblEl(c);if(l)l.classList.add("out");await wait(700)}
-function fxClear(){for(const e of[...$("#fxG").children]){if(e.classList.contains("beam")||e.classList.contains("focus"))continue;e.classList.add("fxfade");setTimeout(()=>e.remove(),700)}}
+function fxClear(){for(const e of[...$("#fxG").children]){if(e.classList.contains("beam")||e.classList.contains("focus")||e.classList.contains("hl"))continue;e.classList.add("fxfade");setTimeout(()=>e.remove(),700)}}
 async function glyphPop(c,g){const el=svg.querySelector(`.lbl[data-c="${c}"] [data-g="${g}"]`),[sx,sy]=slotScr(c);let tx=sx,ty=sy;
  if(el){const r=el.getBoundingClientRect();tx=r.left+r.width/2;ty=r.top+r.height/2;el.style.opacity=0}
  const d=document.createElement("div");d.className="bigg";d.textContent=g;document.body.append(d);const w=d.offsetWidth,h=d.offsetHeight;
@@ -561,13 +603,92 @@ function drawFocus(){$$("#fxG .focus").forEach(e=>e.remove());let h="";
 
 /* ===== TABS: Workers · Log · Outside the fan (one remembered choice per browser) */
 let TAB="workers";
-function showTab(t){TAB=t;LS.set("ftrLiveTab",t);for(const[k,id]of[["workers","pWorkers"],["log","pLog"],["out","pOut"]])document.getElementById(id).hidden=k!==t;
- $$(".tabs [data-tab]").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t?"true":"false"));if(t==="log"){$("#nL").classList.remove("on");const f=$("#pLog");f.scrollTop=f.scrollHeight}}
+const TABS=[["workers","pWorkers"],["log","pLog"],["changes","pChanges"],["out","pOut"]];
+function showTab(t){TAB=t;LS.set("ftrLiveTab",t);for(const[k,id]of TABS)document.getElementById(id).hidden=k!==t;
+ $$(".tabs [data-tab]").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t?"true":"false"));if(t==="log"){$("#nL").classList.remove("on");const f=$("#pLog");f.scrollTop=f.scrollHeight}
+ if(t==="changes"){const f=$("#pChanges");f.scrollTop=f.scrollHeight;chgLight()}else hlDraw([])}
+
+/* ===== CHANGES: every real change to the tree in this session (the server diffs each data.json and keeps the list,
+   plus the round steps data.json can't show). Grouped per update; scrolling lights up the people concerned in the sky. */
+let CHANGES=[];
+const chgIcon={add:"✦",del:"✕",link:"⟡",unlink:"✕",cert:"◆",why:"❝",type:"⚭",name:"✎",dates:"✎",story:"✦",storyEdit:"✦",media:"▣",job:"⚒",
+ "step:event":"★","step:drop_event":"✕","step:aka":"✎","step:places":"✎","step:note":"✎"};
+const stLabel=s=>_t("s_"+normS(s||""));
+const tyLabel=t=>{const k="t_"+String(t||"").toLowerCase().replace(/^raised$/,"aangenomen").replace(/^adopted$/,"adoptie").replace(/^foster$/,"pleeg");return I18N[LANG][k]?_t(k):t};
+const kOf=v=>String(v||"").replace(/@/g,"");
+/* who a round step is about: its name, but a family event names the family (@F1@): then the person it was given for */
+function stepName(x){const n=String(x.name||""),i=idx(P,kOf(x.person));if(n&&!/^@?[A-Za-z]{1,3}\d[\w-]*@?$/.test(n))return n;return i>=0?short(P[i]):(n||kOf(x.person))}
+function chgText(x){const r=x.s?_t(x.s==="f"?"ch_father":"ch_mother"):"",c=x.name||"?",p=x.pname||"?",join=a=>a.filter(Boolean).join(" · ");
+ switch(x.op){
+  case"add":return[_t("added",{n:c}),x.yrs||""];
+  case"del":return[_t("removed",{n:c}),x.yrs||""];
+  case"link":return[_t("ch_link",{p,r,c}),join([x.to?stLabel(x.to):"",x.type?tyLabel(x.type):"",shortUrls(x.why||""),shortUrls(x.src||"")])];
+  case"unlink":return[_t("ch_unlink",{p,r,c}),""];
+  case"cert":return[_t("ch_cert",{p,r,c,a:stLabel(x.from),b:stLabel(x.to)}),join([shortUrls(x.why||""),shortUrls(x.src||"")])];
+  case"why":return[_t("ch_why",{p,r,c}),join([shortUrls(x.why||""),shortUrls(x.src||"")])];
+  case"type":return[_t("ch_type",{p,r,c,b:tyLabel(x.to)}),x.from?_t("certFrom",{s:tyLabel(x.from)}):""];
+  case"name":return[_t("renamed",{a:x.from,b:x.to}),""];
+  case"dates":return[_t("dates",{n:c}),`${x.from||"?"} → ${x.to||"?"}`];
+  case"story":return[_t("story",{n:c}),""];
+  case"storyEdit":return[_t("storyEdit",{n:c}),""];
+  case"media":return[_t("ch_media",{n:c,k:x.n||1}),""];
+  case"job":return[_t("job",{n:c}),x.text||""];
+  case"step:event":return[_t("st_event",{t:evLabel(x.type),n:stepName(x)}),join([x.date,x.place,x.text])];
+  case"step:drop_event":return[_t("st_drop_event",{t:evLabel(x.type),n:stepName(x)}),x.text||""];
+  case"step:aka":return[_t("st_aka",{t:x.text||""}),stepName(x)];
+  case"step:places":return[_t("st_places",{n:x.n||"?"}),""];
+  case"step:note":return[_t("st_note",{n:stepName(x)}),x.text||""];
+ }return[x.op,""]}
+const chgKeys=x=>[kOf(x.k||x.person),kOf(x.p)].filter(Boolean);
+function chgLi(x){const[b,s]=chgText(x);return`<li class="chg o-${esc(x.op)}" data-keys="${esc(chgKeys(x).join(" "))}"><span class="ic">${chgIcon[x.op]||"·"}</span><div><b>${esc(b)}</b>${s?`<small>${esc(s)}</small>`:""}</div></li>`}
+function chgGroup(g){const head=g.title?_t("chgRound",{t:g.title}):_t("chgData"),byOp=new Map();for(const x of g.items){if(!byOp.has(x.op))byOp.set(x.op,[]);byOp.get(x.op).push(x)}
+ let h="";for(const[,xs]of byOp){if(xs.length<=CFG.CHG_OPEN){h+=xs.map(chgLi).join("");continue}  /* many of one kind (200 reasons): one line, open to see them all */
+  const keys=[...new Set(xs.flatMap(chgKeys))].slice(0,CFG.HL_MAX).join(" "),[b]=chgText(xs[0]);
+  h+=`<li><details class="chg-many"><summary><div class="chg o-${esc(xs[0].op)}" data-keys="${esc(keys)}"><span class="ic">${chgIcon[xs[0].op]||"·"}</span><div><b>${esc(b)}</b><small>${esc(_t("chgMore",{n:xs.length-1}))}</small></div></div></summary><ul>${xs.slice(1).map(chgLi).join("")}</ul></details></li>`}
+ return`<div class="cg"><h5><b>${esc(hhmm(g.t))}</b> · ${esc(head)}</h5><ul>${h}</ul></div>`}
+function chgSummary(){const all=CHANGES.flatMap(g=>g.items),n=all.length,c=op=>all.filter(x=>op.includes(x.op)).length;
+ const bits=[[["add"],"chgPeople"],[["link","unlink"],"chgLinks"],[["cert"],"chgCert"],[["why"],"chgWhy"]].map(([o,k])=>[c(o),k]).filter(([v])=>v).map(([v,k])=>_t(k,{n:v}));
+ return`<b>${n}</b> ${esc(n===1?_t("chgSum1").replace(/^1 /,""):_t("chgSum",{n}).replace(/^\d+ /,""))}${bits.length?"<br>"+esc(bits.join(" · ")):""}`}
+function chgRender(){const box=$("#chgList");if(!box)return;const pc=$("#pChanges"),atEnd=pc.scrollHeight-pc.scrollTop-pc.clientHeight<40;
+ box.innerHTML=CHANGES.length?CHANGES.map(chgGroup).join(""):`<p class="empty">${esc(_t("chgEmpty"))}</p>`;$("#chgSum").innerHTML=chgSummary();
+ const n=CHANGES.reduce((a,g)=>a+g.items.length,0);$("#nC").textContent=n||"";if(atEnd)pc.scrollTop=pc.scrollHeight;chgObserve()}
+function chgReset(list){CHANGES=(list||[]).slice();chgRender()}
+function chgAdd(g){if(!g||!g.items||!g.items.length)return;CHANGES.push(g);chgRender();const nc=$("#nC");nc.classList.remove("bump");void nc.offsetWidth;nc.classList.add("bump")}
+/* scrolling: the items in the middle band of the list light up their people (their own star, else the nearest relative) */
+let chgIO=null;const chgVis=new Set();
+function chgObserve(){if(!("IntersectionObserver"in window))return;if(chgIO)chgIO.disconnect();chgVis.clear();
+ chgIO=new IntersectionObserver(es=>{for(const e of es){if(e.isIntersecting)chgVis.add(e.target);else chgVis.delete(e.target)}chgLight()},{root:$("#pChanges"),rootMargin:"-30% 0px -30% 0px"});
+ $$("#chgList [data-keys]").forEach(el=>chgIO.observe(el))}
+function chgLight(){const pc=$("#pChanges");if(TAB!=="changes"||pc.classList.contains("full")){hlDraw([]);return}
+ $$("#chgList .lit").forEach(e=>e.classList.remove("lit"));const keys=new Set();
+ for(const el of chgVis){if(!el.offsetParent)continue;el.classList.add("lit");for(const k of el.dataset.keys.split(" "))if(k)keys.add(k)}
+ hlDraw([...keys].slice(0,CFG.HL_MAX))}
+let HL_LAST="";
+function hlRedraw(){HL_LAST="";$$("#fxG .hl").forEach(e=>e.remove());if($("#pChanges"))chgLight()}
+function hlDraw(keys){const sig=keys.join(" ");if(sig===HL_LAST&&$("#fxG .hl"))return;HL_LAST=sig;$$("#fxG .hl").forEach(e=>e.remove());if(!keys.length||!L)return;
+ const done=new Set(),fs=fz(12,11);let h="";
+ for(const k of keys){const i=idx(P,k);if(i<0)continue;const r=place(i),s=slotAt(r.code);if(!s||done.has(r.code))continue;done.add(r.code);
+  const[x,y]=centre(s),R=VIEW==="cosmos"?starR(s.g)+5:Math.max(7,Math.min(20,(L.RO(s.g)-L.RI(s.g))/2));
+  h+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${R.toFixed(1)}"/>`;if(keys.length>CFG.HL_NAMES)continue;
+  if(r.rel)h+=`<text x="${x.toFixed(1)}" y="${(y+R+fs*1.1).toFixed(1)}" style="font-size:${(fs*.85).toFixed(1)}px">${esc(short(P[r.i])+" · "+r.rel)}</text>`;  /* someone outside the fan: under the relative's star, which keeps its own name */
+  else if(!lblEl(s.code))h+=`<text x="${x.toFixed(1)}" y="${(y-R-fs*.5).toFixed(1)}" style="font-size:${fs.toFixed(1)}px">${esc(short(P[r.i]))}</text>`}
+ if(!h)return;const g=document.createElementNS(NS,"g");g.setAttribute("class","hl");g.innerHTML=h;$("#fxG").append(g)}
+function chgWire(){const pc=$("#pChanges");
+ $("#chgList").addEventListener("click",e=>{if(pc.classList.contains("full"))return;const el=e.target.closest("li.chg,div.chg");if(!el)return;
+  const k=(el.dataset.keys||"").split(" ")[0],i=k?idx(P,k):-1;if(i<0)return;const r=place(i);if(r.code!=null){$$(".co.tap").forEach(x=>x.remove());const p=P[i];callout(r.code,`<b>${esc(p.n)}</b>${esc([yrs(p),r.rel].filter(Boolean).join(" · "))}`,"tap",3200)}});
+ const exitFull=()=>{pc.classList.remove("full");$("#chgFull").hidden=false;$("#chgClose").hidden=true;chgLight()};
+ $("#chgFull").onclick=()=>{pc.classList.add("full");$("#chgFull").hidden=true;$("#chgClose").hidden=false;hlDraw([]);
+  if(pc.requestFullscreen)pc.requestFullscreen().catch(()=>{})};  /* the real full screen where allowed; the class covers the window anyway */
+ $("#chgClose").onclick=()=>{if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});exitFull()};
+ document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&pc.classList.contains("full"))exitFull()});
+ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&pc.classList.contains("full"))$("#chgClose").click()});
+ pc.addEventListener("toggle",()=>{chgObserve();chgLight()},true)}  /* a <details> opened or closed: other items in view */
 /* ===== WORKERS: one row per agent (Claude and every FTR_WHO helper): colour, who they're on, their last step */
-const WORK=new Map();
-function workSeen(who,title,detail,t){who=who||"";const w=WORK.get(who)||{};w.title=title;w.detail=detail;w.t=t||Date.now()/1000;WORK.set(who,w)}
+const WORK=new Map(),WORK_ORDER=[]; /* rows keep their place: Claude first, then every helper in the order it first showed up */
+const workOrder=who=>{if(!WORK_ORDER.includes(who))WORK_ORDER.push(who);return WORK_ORDER.indexOf(who)};
+function workSeen(who,title,detail,t){who=who||"";workOrder(who);const w=WORK.get(who)||{};w.title=title;w.detail=detail;w.t=t||Date.now()/1000;WORK.set(who,w)}
 function renderWorkers(){const box=$("#workers");if(!box)return;const now=Date.now()/1000,whos=new Set([...WORK.keys(),...FOCUS.keys()]);
- const rows=[...whos].map(who=>({who,w:WORK.get(who)||{},f:FOCUS.get(who)})).sort((a,b)=>(a.who===""?-1:b.who===""?1:(b.w.t||0)-(a.w.t||0)));
+ const rows=[...whos].map(who=>({who,w:WORK.get(who)||{},f:FOCUS.get(who)})).sort((a,b)=>(a.who===""?-1:b.who===""?1:workOrder(a.who)-workOrder(b.who)));
  box.innerHTML=rows.length?rows.map(({who,w,f})=>{const col=beamFor(who).col,p=f&&P[f.r.i],rel=f?(f.r.rel||(f.r.code==null?_t("outside"):"")):"",idle=w.t&&now-w.t>CFG.IDLE_S&&!f;
   return`<div class="wk${idle?" idle":""}" style="--c:${col}"><i></i><div><span class="wn"><b>${esc(p?short(p):(who||"Claude"))}</b>${p?`<em>${esc(who||"Claude")}</em>`:""}</span>${rel?`<span class="wr">${esc(rel)}</span>`:""}${p&&w.title?`<small>${esc(shortUrls(w.title+(w.detail?" · "+w.detail:"")))}</small>`:(!p&&w.title?`<small>${esc(shortUrls(w.title+(w.detail?" · "+w.detail:"")))}</small>`:"")}</div></div>`}).join("")
   :`<p class="empty">${esc(_t("workersEmpty"))}</p>`;
@@ -607,7 +728,7 @@ async function stepsEv(ev){const all=ev.steps||[],vis=all.filter(s=>STEP_SHOW.ha
  if(vis.length>CFG.STEPS_ONE_BY_ONE){const cnt={};for(const s of vis)cnt[s.op]=(cnt[s.op]||0)+1;
   feed("rebuild",_t("stN",{t:ev.title||ev.round||"",n:vis.length}),Object.entries(cnt).map(([k,v])=>`${v}× ${k}`).join(" · "),ev.who);
   for(const s of vis.slice(0,40)){const c=findTarget(s.person,s.name);if(c!=null)flash(segEl(c),"scanned")}await wait(900);return}
- for(const s of vis){const pk=String(s.person||"").replace(/@/g,""),pi=pk?idx(P,pk):-1,who=pi>=0?short(P[pi]):(s.name||pk),rr=resolvePerson(s.person,s.name),c=rr?rr.code:null;if(rr)setFocus(ev.who,rr);
+ for(const s of vis){const pk=String(s.person||"").replace(/@/g,""),pi=pk?idx(P,pk):-1,who=stepName(s),rr=resolvePerson(s.person,s.name),c=rr?rr.code:null;if(rr)setFocus(ev.who,rr);
   if(s.op==="note"){feed("note",_t("st_note",{n:who}),s.text||"",ev.who);if(c!=null){beamAim(ev.who,c);await wait(700);callout(c,`<b>✎ ${esc(who)}</b>${esc((s.text||"").slice(0,160))}${(s.text||"").length>160?"…":""}`,"",5200)}}
   else if(s.op==="event"){const t=evLabel(s.type);feed("found",_t("st_event",{t,n:who}),[s.date,s.place,s.text].filter(Boolean).join(" · "),ev.who);
    if(c!=null){beamAim(ev.who,c);await wait(700);const[x,y]=slotScr(c);burst(x,y,40,css("--gold"),2.6);flash(segEl(c),"ignite");callout(c,`<b>${esc(t)}${s.date?" · "+esc(s.date):""}</b>${esc(s.place||"")}`,"",3600)}}
@@ -634,7 +755,7 @@ async function handle(ev){
  if(ev.kind==="hello"){for(const h of ev.history||[]){const d=describe(h);if(d)feed(d[0],d[1],d[2],h.who,true);
    if(["search","read","scan","clip","note","found","ask","nothing","focus"].includes(h.kind)){if(h.kind==="focus")workSeen(h.who,h.text||"","",h.t);
     const r=resolvePerson(h.person,h.q||h.text,h);if(r){setFocus(h.who,r);if(r.code!=null)beamAim(h.who,r.code)}}}  /* a reopened page knows again who is on whom */
-  feedEmpty();for(const t of ev.tasks||[])progress(t,true);return}
+  feedEmpty();for(const t of ev.tasks||[])progress(t,true);if(ev.changes)chgReset(ev.changes);return}
  if(ev.kind==="data")return dataChanged();
  const d=describe(ev);if(!d)return;feed(d[0],d[1],d[2],ev.who);
  if(ev.kind==="steps")return stepsEv(ev);
@@ -748,7 +869,7 @@ async function replay(){if(REPLAY)return;let s;try{const r=await fetch("session"
  REPLAY=true;PAUSED=false;QUEUE.length=0;const bar=$("#rbar");bar.hidden=false;$("#rbTime").textContent=_t("replayWait");$("#rbFill").style.width="0";
  for(let k=0;busy&&k<200;k++)await new Promise(r=>setTimeout(r,100)); /* let the animation that is playing finish first */
  let d0;try{d0=await(await fetch("session/data/0",{cache:"no-store"})).json()}catch(e){REPLAY=false;return}
- D=d0;P=prep(d0);checked.clear();warned.clear();trayIds.length=0;WORK.clear();for(const f of FOCUS.values())clearTimeout(f.timer);FOCUS.clear();
+ D=d0;P=prep(d0);checked.clear();warned.clear();trayIds.length=0;WORK.clear();WORK_ORDER.length=0;chgReset([]);for(const f of FOCUS.values())clearTimeout(f.timer);FOCUS.clear();
  for(const t of TASKS.values())t.el.remove();TASKS.clear();$("#feed").innerHTML="";$("#src").innerHTML="";fxClear();lastCounts=null;lastCert=null;render();
  $("#rbPause").textContent="❚❚";$("#rbLive").classList.remove("on");
  const t0=s.start,t1=evs[evs.length-1].t||t0;
@@ -756,7 +877,7 @@ async function replay(){if(REPLAY)return;let s;try{const r=await fetch("session"
   $("#rbTime").textContent=`${hhmm(ev.t||t0)} · ${hhmm(t0)} – ${hhmm(t1)}`;$("#rbFill").style.width=(100*(k+1)/evs.length).toFixed(1)+"%";
   try{if(ev.kind==="data"){const dd=await(await fetch("session/data/"+ev.n,{cache:"no-store"})).json();await dataChanged(dd)}
    else if(ev.kind==="progress"){progress(ev);await wait(60)}
-   else await handle(ev)}catch(e){console.error(e)}
+   else await handle(ev);if(ev.ch)chgAdd(ev.ch)}catch(e){console.error(e)}
   while(PAUSED&&REPLAY)await new Promise(r=>setTimeout(r,150))}
  if(!REPLAY)return;$("#rbTime").textContent=_t("replayDone");$("#rbLive").classList.add("on")}
 function replayWire(){const b=$("#replayBtn");b.title=b.ariaLabel=_t("replayBtn");b.onclick=replay;
@@ -798,7 +919,7 @@ async function start(){const d=await fetchData();if(!d){$("#feed").innerHTML=`<l
  applyTexts();render();
  if(!P.length)feed("note",_t("empty"),"");
  $("#rootBtn").onclick=rootPick;phoneInit();replayWire();
- $$(".tabs [data-tab]").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));showTab(["workers","log","out"].includes(LS.get("ftrLiveTab"))?LS.get("ftrLiveTab"):"workers");
+ $$(".tabs [data-tab]").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));chgWire();chgRender();showTab(["workers","log","changes","out"].includes(LS.get("ftrLiveTab"))?LS.get("ftrLiveTab"):"workers");
  const md=$("#menuDlg");$("#menuBtn").onclick=()=>md.showModal();md.addEventListener("click",e=>{if(e.target===md||e.target.closest("[data-close]"))md.close()});
  $("#menuRoot").addEventListener("click",()=>setTimeout(rootPick,0));renderWorkers();renderTray();
  connect()}
@@ -807,7 +928,8 @@ function connect(){const pill=$("#pill"),pt=$("#pillT");let es;
  es.onopen=()=>{pill.classList.add("on");pt.textContent=_t("live")};
  es.onerror=()=>{pill.classList.remove("on");pt.textContent=_t("offline")};
  let first=true;es.onmessage=m=>{if(REPLAY)return;let ev;try{ev=JSON.parse(m.data)}catch(e){return}
-  if(ev.kind==="hello"&&!first){enqueue({kind:"data"});return} /* reconnected: catch up on the data, not the old log */
+  if(ev.kind==="hello"&&!first){if(ev.changes)chgReset(ev.changes);enqueue({kind:"data"});return} /* reconnected: catch up on the data, not the old log */
+  if(ev.ch)chgAdd(ev.ch);  /* before the queue: a data event may be merged there, its changes must not be */
   first=false;enqueue(ev)}}
 start();
 </script>

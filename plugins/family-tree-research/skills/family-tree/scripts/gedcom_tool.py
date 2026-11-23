@@ -1018,11 +1018,15 @@ class Rebuild:
             st = g(s, *(pre + ["status", "zekerheid"]))
             if not st:
                 raise RoundError("missing status")
+            old = self.rel.get((child, x)) or ["", "", "", ""]
+            # a status step changes the certainty (and source/reason when given); it never drops the kind of link
+            # (raised/adopted/foster): a round that only set "certain" once wiped an adoption
             self.rel[(child, x)] = [st,
                                     self.src_text(g(s, *([f"source_{role}", f"bron_{nl}"] if role else []), "source", "bron") or src),
                                     g(s, *([f"why_{role}", f"waarom_{nl}", f"note_{role}", f"opmerking_{nl}"] if role else []),
                                       "why", "waarom", "note", "opmerking", default=""),
-                                    g(s, *([f"type_{role}", f"soort_{nl}"] if role else []), "type", "soort", default="")]
+                                    g(s, *([f"type_{role}", f"soort_{nl}"] if role else []), "type", "soort", default="")
+                                    or (old[3] if len(old) > 3 else "")]
             done.append(f"{self.label(x)}: {st}")
         if not done:
             raise RoundError("no parent given (father, mother or parent)")

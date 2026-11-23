@@ -13,7 +13,12 @@
                                                         a progress bar for a long script; send it every step
 
 Events go only to the Workshop of the tree you work in: the one whose folder holds the current folder (or the file
-that rebuild/check writes, or FTR_TREE / --tree). Run scripts from the tree's folder.
+that rebuild/check writes, or FTR_TREE / --tree). Run scripts from the tree's folder. In a tree's folder (one with
+family-tree.json / stamboom.json) with its Workshop closed, emit() says so once an hour on stderr (FTR_QUIET=1: never).
+
+The page has a Changes tab: the server compares every data.json with the one before (tree_changes) and keeps the list
+of real changes for the whole session, plus the round steps data.json can't show; `hello` and every `data` event
+carry it, so a reopened page or a phone sees all of it.
 
 The page shows the start person's ancestors (Cosmos, or the round Fan). Every time data.json changes (after gedcom_tool.py rebuild
 and make_viewer_data.py) it compares the old and the new tree and animates the difference: new people fly in,
@@ -115,10 +120,55 @@ def tree_key(data):
 
 
 # ---------------------------------------------------------------- sending events (used by the other scripts too)
+def tree_root(spot=None):
+    """The tree's folder that holds `spot` (default: the current folder): the nearest folder upwards with a
+    settings file (family-tree.json / stamboom.json). None outside a tree."""
+    d = os.path.abspath(spot or os.getcwd())
+    if os.path.isfile(d):
+        d = os.path.dirname(d)
+    for _ in range(6):
+        if any(os.path.isfile(os.path.join(d, n)) for n in CONFIG_NAMES):
+            return d
+        up = os.path.dirname(d)
+        if up == d:
+            break
+        d = up
+    return None
+
+
+WARN_EVERY = 3600  # seconds: the "Workshop is not open" hint at most once an hour per tree
+
+
+def warn_closed(where=None):
+    """Research in a tree's folder while its Workshop is closed: say so once (on stderr), so Claude opens it.
+    Silent outside a tree, with FTR_QUIET set, and again for an hour after it said it."""
+    if os.environ.get("FTR_QUIET"):
+        return
+    root = tree_root(os.environ.get("FTR_TREE") or where)
+    if not root:
+        return
+    mark = os.path.join(tempfile.gettempdir(), "family-tree-research-warned", _key(root))
+    try:
+        if time.time() - os.path.getmtime(mark) < WARN_EVERY:
+            return
+    except OSError:
+        pass
+    try:
+        os.makedirs(os.path.dirname(mark), exist_ok=True)
+        open(mark, "w").close()
+    except OSError:
+        pass
+    print("Note (Claude Code only, ignore in Cowork): this tree's Workshop is not open, so the user can't watch this "
+          "research. Open it first: live.py launch --config <settings file>, then preview_start \"workshop\", and tell it "
+          "what you are doing (live.py note). See references/workshop.md.", file=sys.stderr)
+
+
 def emit(kind, _where=None, **fields):
-    """Send one event to the Workshop of this tree. Silent and fast when none is running or none belongs here."""
+    """Send one event to the Workshop of this tree. Silent and fast when none is running or none belongs here
+    (inside a tree's folder it says once an hour that the Workshop is closed)."""
     p = workshop_for(_where)
     if not p:
+        warn_closed(_where)
         return False
     ev = {"kind": kind, "t": round(time.time(), 2)}
     who = os.environ.get("FTR_WHO") or os.environ.get("STAMBOOM_WIE")
@@ -134,6 +184,83 @@ def emit(kind, _where=None, **fields):
         return False
 
 
+# ---------------------------------------------------------------- what changed in the tree (the Changes tab)
+def _pkey(p, i):
+    return str(p.get("id") or f"#{i}").replace("@", "")
+
+
+def _yrs(p):
+    if p.get("levend") or p.get("living"):
+        return ""
+    by, dy = p.get("by"), p.get("dy")
+    return f"{by or '?'}{'–' + str(dy) if dy else ''}" if (by or dy) else ""
+
+
+def _cert(p, s):
+    c = (p.get("c") or {}).get(s) or []
+    return (list(c) + ["", "", "", ""])[:4]
+
+
+def tree_changes(old, new):
+    """The real changes between two data.json versions, one item per change, with names so the page needs no
+    lookup: people added/removed, parent links added/removed, certainty, source or reason, kind of link
+    (raised/adopted), name, dates, own story, photos, occupations."""
+    oP, nP = old.get("personen") or [], new.get("personen") or []
+    oi = {_pkey(p, i): i for i, p in enumerate(oP)}
+    ni = {_pkey(p, i): i for i, p in enumerate(nP)}
+    nm = lambda P, i: P[i].get("n") or " ".join(x for x in (P[i].get("g"), P[i].get("s")) if x) or "?"
+    par = lambda P, i, s: _pkey(P[P[i][s]], P[i][s]) if isinstance(P[i].get(s), int) and P[i][s] >= 0 else None
+    out = []
+    for k, i in ni.items():
+        n = nP[i]
+        if k not in oi:
+            out.append({"op": "add", "k": k, "name": nm(nP, i), "yrs": _yrs(n)})
+        else:
+            o = oP[oi[k]]
+            if o.get("n") != n.get("n"):
+                out.append({"op": "name", "k": k, "name": nm(nP, i), "from": o.get("n") or "", "to": n.get("n") or ""})
+            od = " – ".join(x for x in (o.get("bdate"), o.get("ddate")) if x)
+            nd = " – ".join(x for x in (n.get("bdate"), n.get("ddate")) if x)
+            if od != nd:
+                out.append({"op": "dates", "k": k, "name": nm(nP, i), "from": od, "to": nd})
+            if n.get("verhaal") and not o.get("verhaal"):
+                out.append({"op": "story", "k": k, "name": nm(nP, i)})
+            elif n.get("verhaal") and json.dumps(o.get("verhaal"), sort_keys=True) != json.dumps(n.get("verhaal"), sort_keys=True):
+                out.append({"op": "storyEdit", "k": k, "name": nm(nP, i)})
+            if len(n.get("media") or []) > len(o.get("media") or []):
+                out.append({"op": "media", "k": k, "name": nm(nP, i), "n": len(n.get("media") or []) - len(o.get("media") or [])})
+            ob, nb = o.get("beroep") or [], n.get("beroep") or []
+            for j in nb:
+                if j not in ob:
+                    out.append({"op": "job", "k": k, "name": nm(nP, i), "text": j})
+        for s in ("f", "m"):
+            a = par(oP, oi[k], s) if k in oi else None
+            b = par(nP, i, s)
+            nc = _cert(n, s)
+            if a != b:
+                if a:
+                    out.append({"op": "unlink", "k": k, "name": nm(nP, i), "p": a, "pname": nm(oP, oi[a]), "s": s})
+                if b:
+                    out.append({"op": "link", "k": k, "name": nm(nP, i), "p": b, "pname": nm(nP, ni[b]), "s": s,
+                                "to": nc[0], "src": nc[1], "why": nc[2], "type": nc[3]})
+            elif b:
+                oc = _cert(oP[oi[k]], s)
+                base = {"k": k, "name": nm(nP, i), "p": b, "pname": nm(nP, ni[b]), "s": s}
+                if oc[0] != nc[0]:
+                    out.append(dict(base, op="cert", **{"from": oc[0], "to": nc[0], "src": nc[1], "why": nc[2]}))
+                elif oc[1] != nc[1] or oc[2] != nc[2]:
+                    out.append(dict(base, op="why", src=nc[1], why=nc[2]))
+                if oc[3] != nc[3]:
+                    out.append(dict(base, op="type", **{"from": oc[3], "to": nc[3]}))
+    for k, i in oi.items():
+        if k not in ni:
+            out.append({"op": "del", "k": k, "name": nm(oP, i), "yrs": _yrs(oP[i])})
+    return out
+
+
+STEP_CHANGES = ("event", "drop_event", "aka", "places", "note")  # round steps that change the tree but not data.json's people
+
+
 # ---------------------------------------------------------------- the server
 class Hub:
     def __init__(self):
@@ -144,6 +271,18 @@ class Hub:
         # the whole session, for the replay button: every event in order, every data.json version (compressed)
         self.start = round(time.time(), 2)
         self.timeline, self.versions = [], []
+        self.changes = []  # [{t, n?, title?, items}] every real change to the tree in this session, for the Changes tab
+
+    def add_changes(self, t, items, n=None, title=None):
+        if not items:
+            return None
+        g = {"t": t, "items": items}
+        if n is not None:
+            g["n"] = n
+        if title:
+            g["title"] = title
+        self.changes.append(g)
+        return g
 
     def add_version(self, raw):
         if len(self.versions) >= MAX_VERSIONS:
@@ -166,6 +305,10 @@ class Hub:
             if not new:
                 return
             ev = dict(ev, steps=new)
+            ch = [dict(st, op="step:" + str(st.get("op"))) for st in new if st.get("op") in STEP_CHANGES]
+            g = self.add_changes(ev.get("t") or round(time.time(), 2), ch, title=ev.get("title") or ev.get("round"))
+            if g:
+                ev["ch"] = g
         if ev.get("kind") == "progress":
             name = str(ev.get("task") or "")
             first, done = name not in self.tasks, ev.get("done") == ev.get("total")
@@ -197,7 +340,7 @@ MAX_VERSIONS, MAX_TIMELINE = 600, 60000  # ~150 kB per version of a 1,200-person
 
 def watch(path, hub, stop):
     """Tell the pages when data.json changed (and is complete JSON again); keep every version for the replay."""
-    last = None
+    last, doc = None, None
     while not stop.is_set():
         try:
             st = os.stat(path)
@@ -208,14 +351,20 @@ def watch(path, hub, stop):
             try:
                 with open(path, "rb") as fh:
                     raw = fh.read()
-                json.loads(raw.decode("utf-8"))
+                new = json.loads(raw.decode("utf-8"))
                 n = hub.add_version(raw)
                 if last is not None:
                     ev = {"kind": "data", "t": round(time.time(), 2), "v": sig[0]}
                     if n is not None:
                         ev["n"] = n
+                    try:
+                        g = hub.add_changes(ev["t"], tree_changes(doc or {}, new), n=n)
+                    except Exception:  # a change list must never stop the Workshop
+                        g = None
+                    if g:
+                        ev["ch"] = g
                     hub.send(ev, keep=False)
-                last = sig
+                last, doc = sig, new
             except (OSError, ValueError):
                 pass  # still being written: try again in a moment
         stop.wait(0.5)
@@ -329,7 +478,8 @@ def make_handler(cfg, hub):
             self.end_headers()
             q = hub.join()
             try:
-                hello = {"kind": "hello", "history": list(hub.history), "tasks": list(hub.tasks.values())}
+                hello = {"kind": "hello", "history": list(hub.history), "tasks": list(hub.tasks.values()),
+                         "changes": list(hub.changes)}
                 self.wfile.write(f"data: {json.dumps(hello)}\n\n".encode("utf-8"))
                 self.wfile.flush()
                 while True:
