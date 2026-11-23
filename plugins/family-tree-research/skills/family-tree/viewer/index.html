@@ -732,14 +732,13 @@ main{padding-top:6px}
   <div class="tools"><div class="langsw" id="langsw" role="group" aria-label="Language / Taal"><button type="button" data-l="en" lang="en" title="English">EN</button><button type="button" data-l="nl" lang="nl" title="Nederlands">NL</button></div>
     <button type="button" class="btn sbtn" data-variant="outline" id="searchBtn" aria-haspopup="dialog"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><span data-t="search"></span><kbd class="kbd">/</kbd></button></div></div>
   <div class="bar">
-    <div class="modes" role="group" data-t-aria="modes"><button type="button" class="mode m-story" id="storyBtn" data-v="verhaal" aria-pressed="false"><span data-t="v_verhaal"></span></button><button type="button" class="mode m-cards" id="swBtn" data-t-title="sw_btn_t"><span data-t="sw_btn"></span></button><button type="button" class="mode m-tree" id="treeBtn" aria-pressed="false"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 48 48"><path d="M24 40V22M24 31l-8-7M24 27l8-7M16 24l-5-4M32 20l5-4M24 22v-8" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg><span data-t="v_tree"></span></button></div>
+    <div class="modes" role="group" data-t-aria="modes"><button type="button" class="mode m-story" id="storyBtn" data-v="verhaal" aria-pressed="false"><span data-t="v_verhaal"></span></button><button type="button" class="mode m-cards" id="swBtn" data-t-title="sw_btn_t"><span data-t="sw_btn"></span></button><button type="button" class="mode m-tree" id="treeBtn" aria-pressed="false"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 48 48"><path d="M24 40V22M24 31l-8-7M24 27l8-7M16 24l-5-4M32 20l5-4M24 22v-8" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg><span data-t="v_tree"></span></button><button type="button" class="mode m-list" id="listBtn" data-v="lijst" aria-pressed="false"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg><span data-t="v_lijst"></span></button></div>
     <div class="tabs" id="tabs"><nav role="tablist" aria-orientation="horizontal" data-t-aria="tabs">
       <button type="button" role="tab" data-v="familie" data-t="v_familie"></button>
       <button type="button" role="tab" data-v="stamlijn" data-t="v_stamlijn"></button>
       <button type="button" role="tab" data-v="tijdlijn" data-t="v_tijdlijn"></button>
       <button type="button" role="tab" data-v="waaier" data-t="v_waaier"></button>
       <button type="button" role="tab" data-v="kosmos" data-t="v_kosmos"></button>
-      <button type="button" role="tab" data-v="lijst" data-t="v_lijst"></button>
     </nav></div>
     <div id="vhPickWrap" hidden></div>
     <div id="starts" role="group" hidden></div>
@@ -820,7 +819,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.74",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.75",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -2870,7 +2869,7 @@ function initGenSlider(){const sl=$("gens"),MIN=3,ticks=sl.querySelector(".gsl-t
 function render(){
   hideTip(); // the hovered node is removed, so its mouseleave never comes
   const v=state.view;
-  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v?"true":"false"));$("storyBtn").setAttribute("aria-pressed",v==="verhaal"?"true":"false");$("treeBtn").setAttribute("aria-pressed",v!=="verhaal"?"true":"false");$("tabs").hidden=v==="verhaal";{const pw=$("vhPickWrap"),ph=v==="verhaal"?vhPickHtml():"";pw.innerHTML=ph;pw.hidden=!ph;const sel=pw.querySelector("select");if(sel)sel.onchange=()=>{const x=sel.value;sel.value="";sel.blur();if(x!=="")vhOpen(+x,true)}}if(v!=="verhaal")state.lastTree=v;
+  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v?"true":"false"));$("storyBtn").setAttribute("aria-pressed",v==="verhaal"?"true":"false");$("treeBtn").setAttribute("aria-pressed",v!=="verhaal"&&v!=="lijst"?"true":"false");$("listBtn").setAttribute("aria-pressed",v==="lijst"?"true":"false");$("tabs").hidden=v==="verhaal"||v==="lijst";{const pw=$("vhPickWrap"),ph=v==="verhaal"?vhPickHtml():"";pw.innerHTML=ph;pw.hidden=!ph;const sel=pw.querySelector("select");if(sel)sel.onchange=()=>{const x=sel.value;sel.value="";sel.blur();if(x!=="")vhOpen(+x,true)}}if(v!=="verhaal"&&v!=="lijst")state.lastTree=v;
   document.querySelectorAll("#starts [data-p]").forEach(b=>b.dataset.variant=+b.dataset.p===state.root?"primary":"outline");
   const hasP=parentsOf(state.root).length>0,ctl=(v==="waaier"||v==="kosmos")&&hasP;$("genWrap").style.display=ctl||(v==="tijdlijn"&&hasP)?"":"none";$("colorWrap").style.display=ctl?"":"none";if(typeof GSL_SHOW==="function")GSL_SHOW();
   const opts=[["lijn",_t("c_lijn")],["land",_t("c_land")],["zekerheid",v==="waaier"?_t("c_zek_v"):_t("c_zek_d")]];
@@ -2934,7 +2933,7 @@ fetch("data.json").then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.
   $("back").onclick=()=>{if(state.hist.length){state.root=state.hist.pop();render()}};
   initGenSlider();
   $("color").onchange=e=>{state.color=e.target.value;render()};
-  document.querySelectorAll("#tabs button,#storyBtn").forEach(b=>b.onclick=()=>{state.view=b.dataset.v;lineFit(b.dataset.v==="familie");render()});
+  document.querySelectorAll("#tabs button,#storyBtn,#listBtn").forEach(b=>b.onclick=()=>{state.view=b.dataset.v;lineFit(b.dataset.v==="familie");render()});
   $("swBtn").onclick=()=>swOpen(state.root);
   $("treeBtn").onclick=()=>{state.view=state.lastTree||"familie";lineFit(state.view==="familie");render()};
   addEventListener("popstate",navPop);
