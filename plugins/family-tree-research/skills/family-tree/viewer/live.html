@@ -549,7 +549,7 @@ function beamAim(who,c){const b=beamFor(who),s=slotAt(c),target=s?(s.lo+s.hi)/2:
   const t=b.g.querySelector("text");if(t)t.setAttribute("transform",`rotate(${(-b.a).toFixed(2)} 0 ${-(CFG.RMAX+30)})`)}).then(()=>{if(my===b.anim&&s){flash(segEl(c),"scanned")}})}
 function beamsReattach(){for(const b of BEAMS.values())$("#fxG").append(b.g);for(const e of $$("#fxG .focus"))$("#fxG").append(e)}
 /* who is meant: a GEDCOM id, else the person in the fan whose first name and surname both appear in the query */
-const fold=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9 ]+/g," ");
+const fold=s=>String(s||"").toLowerCase().replace(/ß/g,"ss").replace(/æ/g,"ae").replace(/[øœ]/g,"oe").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9 ]+/g," ");
 /* names as genealogists search them: spelling variants (Marritje = Maritje = Marretje, IJ = Y, double letters) share a skeleton */
 const PREFIX=new Set(["van","de","der","den","ter","ten","het","la","le","von","du","di","da","op","in","t","s","vd"]);
 function skel(w){w=fold(w).replace(/ij/g,"y").replace(/ph/g,"f").replace(/ck/g,"k").replace(/c(?=[aou])/g,"k").replace(/th/g,"t").replace(/dt\b/g,"t").replace(/z/g,"s");
@@ -562,7 +562,8 @@ function nameIndex(){if(NAMEIX&&NAMEIX.P===P)return NAMEIX;NAMEIX={P,a:P.map((p,
 function resolvePerson(person,q,ev){
  if(person){const k=String(person).replace(/@/g,""),i=idx(P,k);if(i>=0)return place(i);q=person}  /* a name given as the person is the query; the text is only a note */
  if(!q)return null;
- const sk=new Set(fold(q).split(/\s+/).filter(w=>w&&!PREFIX.has(w)&&!/^\d+$/.test(w)).map(skel).filter(s=>s.length>=2));
+ const sk=new Set(fold(q).split(/\s+/).filter(w=>w&&!PREFIX.has(w)&&!/^\d+$/.test(w)&&/[aeiouy]/.test(w)).map(skel)  /* no vowel = an abbreviation (blz, nr, dd), never a name */
+  .filter(s=>s.length>=2));
  const ys=[...String(q).matchAll(/\b(1[4-9]\d\d|20[0-2]\d)\b/g)].map(m=>+m[1]).concat([ev&&ev.frm,ev&&ev.to].filter(Boolean).map(Number));
  const ylo=ys.length?Math.min(...ys)-60:null,yhi=ys.length?Math.max(...ys)+10:null;
  const qf=new Set(fold(q).split(/\s+/));
