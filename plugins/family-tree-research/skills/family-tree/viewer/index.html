@@ -819,7 +819,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.75",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.76",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1310,6 +1310,7 @@ Object.assign(I18N.nl,{v_verhaal:"Verhaal",
  vh_sameYear:"Dat was hetzelfde jaar waarin {child} werd geboren.",vh_posthum:"{Child} werd dus pas na zijn dood geboren.",vh_odd:"Volgens de stamboom overleed {fn} al vóór de geboorte van {child}. Hier klopt waarschijnlijk iets niet.",vh_died_unknown:"Wanneer {hij} overleed, weten we nog niet.",vh_living:"{Fn} leeft nog, dus meer vertellen we hier niet.",
  vh_moveLand:"{Hij} werd geboren in {l1}, {child} in {l2}. Tussen die twee levens ligt dus een grote verhuizing.",vh_movePlace:"{Hij} kwam uit {p1}; {child} werd geboren in {p2}.",
  vh_era:"{Hij} maakte {list} mee.",vh_src1:"bron",vh_war:"{Hij} maakte {war} mee van {zijn} {a}e tot {zijn} {b}e.",vh_war2:"Ook {war} maakte {hij} mee, van {zijn} {a}e tot {zijn} {b}e.",vh_warC:"{Hij} maakte {war} mee, ongeveer van {zijn} {a}e tot {zijn} {b}e.",vh_war0:"{Hij} maakte {war} mee, van {zijn} eerste levensjaar tot {zijn} {b}e.",vh_warD:"{Hij} maakte {war} mee vanaf {zijn} {a}e.",vh_warDC:"{Hij} maakte {war} mee, vanaf ongeveer {zijn} {a}e.",e_80:"de Tachtigjarige Oorlog",e_leiden:"het beleg van Leiden (1573–1574)",e_fr:"de Franse tijd",e_ww1:"de Eerste Wereldoorlog",e_ww2:"de Tweede Wereldoorlog",listAnd:" en ",
+ vh_dtb_b:"Toen {hij} geboren werd, bestond de burgerlijke stand nog niet; die kwam pas in 1811. {Zijn} doop komt uit het kerkboek.",
  vh_dtb:"Uit deze tijd bestaan nog geen akten van de burgerlijke stand; die kwamen pas in 1811. Wat we weten, komt uit doop-, trouw- en begraafboeken van de kerk.",
  vh_c_zeker:"Bewezen met een bron",
  vh_c_waarschijnlijk_big:"Hier wordt het iets minder zeker. Dat {fn} de {rel} van {child} is, is waarschijnlijk, maar niet hard bewezen.",
@@ -1336,6 +1337,7 @@ Object.assign(I18N.en,{v_verhaal:"Story",
  vh_sameYear:"That was the same year {child} was born.",vh_posthum:"So {child} was born after his death.",vh_odd:"According to the tree, {fn} died before {child} was born. Something is probably wrong here.",vh_died_unknown:"We don't yet know when {hij} died.",vh_living:"{Fn} is still alive, so we say no more here.",
  vh_moveLand:"{Hij} was born in {l1}, {child} in {l2}. Somewhere between those two lives lies a big move.",vh_movePlace:"{Hij} came from {p1}; {child} was born in {p2}.",
  vh_era:"{Hij} lived through {list}.",vh_src1:"source",vh_war:"{Hij} lived through {war} from age {a} to {b}.",vh_war2:"{Hij} also lived through {war}, from age {a} to {b}.",vh_warC:"{Hij} lived through {war}, roughly from age {a} to {b}.",vh_war0:"{Hij} lived through {war}, from {zijn} first year to age {b}.",vh_warD:"{Hij} lived through {war} from age {a}.",vh_warDC:"{Hij} lived through {war}, from about age {a}.",e_80:"the Eighty Years' War",e_leiden:"the siege of Leiden (1573–1574)",e_fr:"the French period",e_ww1:"the First World War",e_ww2:"the Second World War",listAnd:" and ",
+ vh_dtb_b:"When {hij} was born, there was no civil registration yet; it only started in 1811. {Zijn} baptism comes from the church register.",
  vh_dtb:"There were no civil registration records yet; those only started in 1811. What we know comes from church registers of baptisms, marriages and burials.",
  vh_c_zeker:"Proven by a source",
  vh_c_waarschijnlijk_big:"Here it gets a little less certain. That {fn} is the {rel} of {child} is probable, but not firmly proven.",
@@ -1549,7 +1551,11 @@ function vhTemplate(i,child,flags){const p=P[i],fn=vhFn(p),pr=vhPro(p),T=(k,v)=>
         if(!A||(!died&&!B)){out.push(T("vh_era",{list:w}));return}
         const ex=A.exact&&(!B||B.exact);
         out.push(died?T(ex?"vh_warD":"vh_warDC",{war:w,a:A.n}):A.n<1?T("vh_war0",{war:w,b:B.n}):T(ex?(wi?"vh_war2":"vh_war"):"vh_warC",{war:w,a:A.n,b:B.n}))})}}
-  if(flags&&!flags.dtb&&p.by&&p.by<1811&&(landOf(p)==="NL"||!landOf(p))&&(p.bplac||p.bdate)){flags.dtb=true;note.push(_t("vh_dtb"))}
+  /* before 1811 (NL): no civil records. Died in or after 1811: only the birth/baptism is from the church book (vh_dtb_b);
+     the note belongs to the start of the life (intro card in Cards, after the birth text in Story), once per kind per trail;
+     not for someone with an own story (that tells its own sources) */
+  if(flags&&!vhHas(p)&&p.by&&p.by<1811&&(landOf(p)==="NL"||!landOf(p))&&(p.bplac||p.bdate)){const key=p.dy&&p.dy>=1811?"vh_dtb_b":"vh_dtb";
+    if(!flags[key]){flags[key]=true;note.push(T(key,vhPro(p)))}}
   return {paras:[g1,g2].filter(g=>g.length),note,g1,g2,nd}}
 
 function vhCode(path,k){let s="";for(let j=1;j<=k;j++)s+=P[path[j-1]].f===path[j]?"v":"m";return s}
@@ -1733,8 +1739,8 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
       const bc=mapCo(p.bplac),born=e=>(e.y==null||p.by==null||e.y<=p.by)&&bc&&mapSame(bc,e.t)&&NORM(tpl.g1.join(" ")).includes(NORM(mapName(e.t.n))),died=e=>!born(e)&&p.dplac&&tpl.nd&&mapDeathOnly(p,e);
       const why=e=>(mapCapText(e)?"":`<div class="vh-txt"><p class="vh-mw">${slEsc(mapWhy(p,e))}</p></div>`)+vhMapEl(e);
       const g2a=tpl.g2.slice(0,tpl.nd),g2b=tpl.g2.slice(tpl.nd),dm=mev.filter(died).map(vhMapEl).join(""),note=tpl.note.map(n=>`<p class="vh-note">${slEsc(n)}</p>`).join("");
-      body=`<div class="vh-txt">${P1(tpl.g1)}</div>${mev.filter(born).map(vhMapEl).join("")}${tgHtml}${mev.filter(e=>!born(e)&&!died(e)).map(why).join("")}`
-        +(dm?`<div class="vh-txt">${P1(g2a)}</div>${dm}<div class="vh-txt">${P1(g2b)}${note}</div>`:`<div class="vh-txt">${P1(tpl.g2)}${note}</div>`)}
+      body=`<div class="vh-txt">${P1(tpl.g1)}${note}</div>${mev.filter(born).map(vhMapEl).join("")}${tgHtml}${mev.filter(e=>!born(e)&&!died(e)).map(why).join("")}`
+        +(dm?`<div class="vh-txt">${P1(g2a)}</div>${dm}<div class="vh-txt">${P1(g2b)}</div>`:`<div class="vh-txt">${P1(tpl.g2)}</div>`)}
     /* broers/zussen met een eigen verhaal */
     const sib=vhSibs(i).filter(j=>vhHas(P[j])).map(j=>{const q=P[j],ppr=vhPro(p);
       const rl=_t(q.x==="M"?"vh_sib_M":q.x==="F"?"vh_sib_F":"vh_sib_X",ppr);
@@ -2336,7 +2342,7 @@ Object.assign(I18N.en,{sw_btn:"Cards",sw_btn_t:"The story as cards that play by 
 let SW=null;
 const SW_KIND={vh_begin:"b",vh_born_dp:"b",vh_born_d:"b",vh_born_p:"b",vh_born_none:"b",vh_age:"b",vh_ageX:"b",vh_living:"b",
   vh_job:"b",vh_kidsN:"k",vh_kids1:"k",vh_kidsSolo:"k",vh_kidsN_living:"k",vh_kids1_living:"k",vh_kidsSolo_living:"k",vh_other1:"f",vh_otherN:"f",vh_sibs1:"b",vh_sibsN:"b",vh_half1:"b",vh_halfN:"b",vh_moveLand:"f",vh_movePlace:"k",
-  vh_died:"d",vh_diedP:"d",vh_sameYear:"d",vh_posthum:"d",vh_odd:"d",vh_died_unknown:"d",vh_dtb:"n"};
+  vh_died:"d",vh_diedP:"d",vh_sameYear:"d",vh_posthum:"d",vh_odd:"d",vh_died_unknown:"d",vh_dtb:"n",vh_dtb_b:"n"};
 /* vhTemplate's sentences, each tagged with the text key that made it (b = birth, f = family, d = death, e = era, n = note) */
 function swSentences(i,child,flags){const rec=[],orig=_t;let tpl;
   _t=(k,v)=>{const s=orig(k,v);rec.push([k,s]);return s};try{tpl=vhTemplate(i,child,flags)}finally{_t=orig}
@@ -2396,7 +2402,7 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     let introS=S.b.concat(S.f.length?[]:S.k),sibS=[],kidS=[];
     if(lenOf(introS)>SW_MAX){sibS=S.b.filter((s,j)=>isSib(j));introS=S.b.filter((s,j)=>!isSib(j)).concat(S.f.length?[]:S.k);
       if(lenOf(introS)>SW_MAX&&!S.f.length&&S.k.length){kidS=S.k;introS=introS.slice(0,introS.length-S.k.length)}}
-    add("intro",`${por}<div class="sw-k">${slEsc(rel)}${k&&adoptSet(root).has(i)?" · "+_t("ks_fam_adopt"):""}</div><div class="sw-big">${por?"":p.by||""}</div><h2>${slEsc(p.n)}</h2><div class="sw-yy">${slEsc(yrs(p))}</div>${chips?`<div class="sw-chips">${chips}</div>`:""}<div class="sw-t">${T(introS)}</div>${docb}`,{por,foto,docs,len:lenOf(introS)});
+    add("intro",`${por}<div class="sw-k">${slEsc(rel)}${k&&adoptSet(root).has(i)?" · "+_t("ks_fam_adopt"):""}</div><div class="sw-big">${por?"":p.by||""}</div><h2>${slEsc(p.n)}</h2><div class="sw-yy">${slEsc(yrs(p))}</div>${chips?`<div class="sw-chips">${chips}</div>`:""}<div class="sw-t">${T(introS)}</div>${S.n.map(n=>`<div class="sw-note">${slEsc(n)}</div>`).join("")}${docb}`,{por,foto,docs,len:lenOf(introS.concat(S.n))});
     if(sibS.length)add("sibs",`<div class="sw-k">${_t("sw_sibs")}</div><div class="sw-t">${T(sibS)}</div>`,{len:lenOf(sibS),y:p.by||null});
     if(kidS.length)add("family",`<div class="sw-k">${_t("sw_family")}</div><div class="sw-big">${p.ch.length>1?p.ch.length:""}</div><div class="sw-t">${T(kidS)}</div>`,{len:lenOf(kidS),y:Math.min(...p.ch.map(c=>P[c].by||Infinity))});
     if(vhHas(p)){const paras=vhParaList(swCardText(p)),imgs=swCardImgs(p),slot=vhImgSlots(paras,imgs),py=vhParaYears(paras,p);
@@ -2436,7 +2442,7 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
       add("sib",`<div class="sw-k">✦ ${_t("vh_special")}</div><h2>${slEsc(q.n)}</h2><div class="sw-yy">${slEsc(rl)} · ${slEsc(yrs(q))}</div><div class="sw-t">${first}</div>`,{len:first.length,y:q.by||null})});
     /* an own story that already tells the death (death year + "died"/"overleed") keeps its sentence there; the farewell card then shows only the word and the year */
     const dTold=vhHas(p)&&swToldDeath(p),dS=dTold?S.d.filter((s,j)=>!/^vh_died/.test(S.dk[j])):S.d,dShow=S.d.length;
-    if(dShow||S.n.length)add("death",`<div class="sw-k">${dShow?_t("sw_death"):""}</div><div class="sw-big">${dShow&&p.dy?p.dy:""}</div>${dS.length?`<div class="sw-t">${T(dS)}</div>`:""}${S.n.map(n=>`<div class="sw-note">${slEsc(n)}</div>`).join("")}`,{len:dS.join(" ").length});
+    if(dShow)add("death",`<div class="sw-k">${dShow?_t("sw_death"):""}</div><div class="sw-big">${dShow&&p.dy?p.dy:""}</div>${dS.length?`<div class="sw-t">${T(dS)}</div>`:""}`,{len:dS.join(" ").length});
     swMapCard(p,MS,add,cards);
     /* the fork: father or mother; the richest trail plays on by itself */
     const par=parentsOf(i);
