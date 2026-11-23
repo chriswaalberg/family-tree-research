@@ -40,6 +40,10 @@ In Claude Code you can watch the research live in the **Workshop**: helpers sear
 
 [![Claude Code on the left sends three helpers into Swedish archives; on the right the Workshop shows 37 ancestors flying into the tree, links turning gold and one rejected link cracking. Fictional demo family.](docs/screenshots/workshop-demo.gif)](docs/screenshots/workshop-demo.mp4)
 
+You can also watch on your phone, over your own Wi-Fi:
+
+<a href="docs/screenshots/workshop-phone.mp4"><img src="docs/screenshots/workshop-phone.gif" width="300" alt="The same Workshop on an iPhone: helpers searching, ancestors flying into the tree, links turning gold. Fictional demo family."></a>
+
 ## Found something?
 
 A great-great-grandparent, or a bug? [Open an issue](https://github.com/chriswaalberg/family-tree-research/issues). I'd love to hear both.
