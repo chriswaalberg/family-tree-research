@@ -5,7 +5,7 @@
 //   python3 -I docs/demo/video/make_stages.py /tmp/ftr-video
 //   node docs/demo/video/record.mjs /tmp/ftr-video            # needs `npm i playwright` + ffmpeg
 //
-// Writes workshop-demo.mp4 and workshop-demo.gif into the folder. SPEED: the recording is sped up this much.
+// Writes workshop-demo.mp4/.gif (MODE=phone: workshop-phone.mp4/.gif) into the folder. SPEED: the recording is sped up this much.
 import { spawn, execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -16,7 +16,12 @@ const { chromium } = await import(process.env.PW ? pathToFileURL(process.env.PW)
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const LIVE = path.join(HERE, "..", "..", "..", "plugins", "family-tree-research", "skills", "family-tree", "scripts", "live.py");
 const DIR = path.resolve(process.argv[2] || "/tmp/ftr-video");
-const PORT = 8799, W = 2000, H = 1293, DPR = 1, OUT_W = 1920, SPEED = 1.8, GIF_W = 960;
+// MODE=phone: the same timeline on an iPhone (phone.html), cut to start when the Workshop opens
+const PHONE = process.env.MODE === "phone";
+const PORT = 8799, SPEED = 1.8;
+const [W, H, DPR, OUT_W, GIF_W] = PHONE ? [520, 960, 2, 780, 400] : [2000, 1293, 1, 1920, 960];
+const NAME = PHONE ? "workshop-phone" : "workshop-demo";
+let openAt = -1;   // frame index when the Workshop opens
 const TREE = path.join(DIR, "tree"), DATA = path.join(TREE, "data.json");
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const stage = n => fs.copyFileSync(path.join(DIR, `stage${n}.json`), DATA);
@@ -47,7 +52,7 @@ try {
   const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: DPR });
   page = await ctx.newPage();
   page.on("console", m => { if (m.type() === "error") console.log("console:", m.text()); });
-  await page.goto(pathToFileURL(path.join(HERE, "desktop.html")).href);
+  await page.goto(pathToFileURL(path.join(HERE, PHONE ? "phone.html" : "desktop.html")).href);
   cdp = await ctx.newCDPSession(page);
   cdp.on("Page.screencastFrame", f => {
     const file = path.join(RAW, `f${String(frames.length).padStart(5, "0")}.jpg`);
@@ -64,14 +69,17 @@ try {
   await D("say", "On it. I'll open the Workshop first, then send three helpers into the Swedish archives at the same time.");
   await s(300);
   const url = `http://127.0.0.1:${PORT}/`;
+  openAt = frames.length;
   await D("open", url, "Workshop · Femke de Vries");
   await page.waitForFunction(() => document.querySelector("#ws").classList.contains("on"));
   await s(400);
   // the chat card is a still screenshot of the preview, like the app's own
-  const box = await page.locator("#ws").boundingBox();
-  const shot = await page.screenshot({ clip: { x: box.x, y: box.y, width: box.width, height: Math.round(box.width * 208 / 556) } });
-  await D("ran", "Ran 2 commands, started preview, opened browser", "");
-  await D("card", "data:image/png;base64," + shot.toString("base64"));
+  if (!PHONE) {
+    const box = await page.locator("#ws").boundingBox();
+    const shot = await page.screenshot({ clip: { x: box.x, y: box.y, width: box.width, height: Math.round(box.width * 208 / 556) } });
+    await D("ran", "Ran 2 commands, started preview, opened browser", "");
+    await D("card", "data:image/png;base64," + shot.toString("base64"));
+  }
   for (const fr of page.frames().filter(f => f.url().startsWith(url))) {   // the Workshop pane
     await fr.waitForFunction(() => typeof CFG === "object").catch(() => {});
     await fr.evaluate(() => { CFG.ONE_BY_ONE = 4; CFG.CERT_ONE_BY_ONE = 3; }).catch(() => {});   // fewer one-by-one arrivals for a 15 s video
@@ -114,12 +122,13 @@ try {
   if (browser) await browser.close();
   srv.kill();
 }
+if (PHONE && openAt > 0) frames.splice(0, openAt);   // frames last until the next one, so drop the idle one too
 if (frames.length > 10) {
   // frames arrive only when something changes: each one lasts until the next (concat demuxer durations)
   const list = path.join(DIR, "frames.txt");
   fs.writeFileSync(list, frames.map((f, i) => `file '${f.file}'\nduration ${((frames[i + 1] || { t: f.t + 0.5 }).t - f.t).toFixed(4)}`).join("\n")
     + `\nfile '${frames[frames.length - 1].file}'\n`);
-  const mp4 = path.join(DIR, "workshop-demo.mp4"), gif = path.join(DIR, "workshop-demo.gif");
+  const mp4 = path.join(DIR, NAME + ".mp4"), gif = path.join(DIR, NAME + ".gif");
   execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", list, "-vf", `setpts=PTS/${SPEED},fps=30,scale=${OUT_W}:-2:flags=lanczos`, "-an",
     "-c:v", "libx264", "-preset", "slow", "-crf", "22", "-pix_fmt", "yuv420p", "-movflags", "+faststart", mp4]);
   execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", mp4, "-vf",
