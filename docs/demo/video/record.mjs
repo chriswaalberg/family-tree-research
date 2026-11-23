@@ -132,6 +132,6 @@ if (frames.length > 10) {
   execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", list, "-vf", `setpts=PTS/${SPEED},fps=30,scale=${OUT_W}:-2:flags=lanczos`, "-an",
     "-c:v", "libx264", "-preset", "slow", "-crf", "22", "-pix_fmt", "yuv420p", "-movflags", "+faststart", mp4]);
   execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", mp4, "-vf",
-    `fps=12,scale=${GIF_W}:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle`, gif]);
+    `fps=12,scale=${GIF_W}:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=256:stats_mode=full[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle`, gif]);
   console.log("wrote", mp4, "and", gif);
 }
