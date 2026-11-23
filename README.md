@@ -36,6 +36,10 @@ More about what the plugin does: [plugins/family-tree-research/README.md](plugin
 /plugin install family-tree-research@chriswaalberg
 ```
 
+In Claude Code you can watch the research live in the **Workshop**: helpers search the archives side by side, new ancestors fly into the tree, and links turn gold once they're certain.
+
+[![Claude Code on the left sends three helpers into Swedish archives; on the right the Workshop shows 37 ancestors flying into the tree, links turning gold and one rejected link cracking. Fictional demo family.](docs/screenshots/workshop-demo.gif)](docs/screenshots/workshop-demo.mp4)
+
 ## Found something?
 
 A great-great-grandparent, or a bug? [Open an issue](https://github.com/chriswaalberg/family-tree-research/issues). I'd love to hear both.

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Workshop demo</title>
+<!-- A replica of the Claude desktop app (Code tab) at 2000×1293 for the demo video; record.mjs drives it.
+     Made-up projects and fictional people only. Sizes and colours measured from a real screenshot. -->
+<style>
+:root{--side:#232323;--main:#171717;--line:#333;--sideLine:#3a3a3a;--sel:#444;--text:#e1e1e1;--dim:#8d8d8d;--faint:#6a6a6a;--input:#2e2e2e;--bubble:#2a2a2a;--clay:#d97757;--ok:#e1e1e1}
+[hidden]{display:none!important}*{box-sizing:border-box}
+html,body{margin:0;width:2000px;height:1293px;overflow:hidden;background:#000;font:16px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+svg{display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+/* macOS menu bar */
+.mb{position:absolute;left:0;top:0;right:0;height:38px;background:linear-gradient(90deg,#a9d2f3,#b4d9f7 50%,#a6cfec);color:#111;display:flex;align-items:center;font-size:15px;padding:0 0 0 24px}
+.mb .apple{font-size:19px;margin-right:22px;margin-top:-2px}.mb b{font-weight:700;margin-right:23px}.mb span{margin-right:24px}
+.mb .r{margin-left:auto;display:flex;align-items:center;gap:22px;padding-right:22px}.mb .r svg{width:19px;height:19px;stroke-width:2}
+.bat{width:28px;height:13px;border:1.6px solid #333;border-radius:4px;position:relative}.bat:after{content:"";position:absolute;inset:1.5px 8px 1.5px 1.5px;background:#333;border-radius:2px}
+/* window */
+.win{position:absolute;left:0;top:38px;width:2000px;height:1255px;border-radius:12px 12px 0 0;overflow:hidden;display:grid;grid-template-columns:307px 1px 1088px 1px 603px;background:var(--main);box-shadow:inset 0 0 0 1px #2c2c2c}
+.vl{background:var(--sideLine)}.vl2{background:#111}
+/* sidebar */
+.side{background:var(--side);display:flex;flex-direction:column;position:relative}
+.top{height:51px;display:flex;align-items:center;padding:0 0 0 21px;gap:0}
+.tl{display:flex;gap:13px;margin-right:18px}.tl i{width:14px;height:14px;border-radius:50%;background:#ec544f}.tl i:nth-child(2){background:#f5bd00}.tl i:nth-child(3){background:#1abb03}
+.top .ic{width:20px;height:20px;color:#d0d0d0;margin-right:13px}.top .dimic{color:#8a8a8a}
+.seg{margin-left:auto;margin-right:10px;display:flex;background:#3a3a3a;border-radius:8px;padding:2px}.seg span{width:38px;height:30px;display:grid;place-items:center;border-radius:6px;color:#d6d6d6}.seg span.on{background:#555}.seg svg{width:19px;height:19px}
+.nav{padding:4px 9px 0}.nav div{display:flex;align-items:center;gap:12px;height:39px;padding:0 12px;font-size:16px;color:#ececec}.nav svg{width:18px;height:18px}
+.grp{margin-top:20px}.gh{display:flex;align-items:center;height:40px;padding:0 21px;color:#ececec;font-size:15.5px}.gh .chev{width:14px;height:14px;margin-left:6px;color:#bbb}.gh .plus{margin-left:auto;width:18px;height:18px;color:#ddd}
+.ses{margin:0 9px;height:37px;display:flex;align-items:center;padding:0 12px;border-radius:9px;font-size:16px;color:#ececec;white-space:nowrap;overflow:hidden}
+.ses.on{background:var(--sel)}.ses .dots{margin-left:auto;width:18px;height:18px}.ses .spin{width:12px;height:12px;margin-left:auto;border:2px solid #666;border-top-color:var(--clay);border-radius:50%;animation:spin .8s linear infinite}
+.cl .gh{height:42px}
+.me{margin-top:auto;height:52px;border-top:1px solid #2c2c2c;display:flex;align-items:center;padding:0 21px;gap:10px;font-size:16px}
+.me b{width:23px;height:23px;border-radius:50%;background:linear-gradient(135deg,#d98a5f,#b8583c);display:grid;place-items:center;font-size:12px;color:#fff;font-weight:600}.me svg{margin-left:auto;width:14px;height:14px;color:#aaa}
+/* main */
+.main{display:flex;flex-direction:column;min-width:0;position:relative}
+.hdr{height:51px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 0 0 23px;font-size:16px}
+.hdr .chev{width:15px;height:15px;margin-left:12px;color:#ccc}
+.hdr .icons{margin-left:auto;display:flex;gap:17px;padding-right:18px;color:#cfcfcf}.hdr .icons svg{width:20px;height:20px}.hdr .icons .on{color:#fff}
+#log{flex:1;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:0 110px 18px 122px;gap:0}
+.p{font-size:17px;line-height:24.5px;color:var(--text);margin:0 0 14px;max-width:800px}.p b{font-weight:600}
+.p code{font:15px ui-monospace,"SF Mono",Menlo,monospace;background:#262626;border-radius:4px;padding:1px 4px}
+.ran{font-size:17px;color:var(--dim);margin:6px 0 14px;display:flex;align-items:center;gap:6px}.ran svg{width:13px;height:13px}
+.ran .fn{color:var(--text)}
+.u{align-self:flex-end;background:var(--bubble);border-radius:14px;padding:12px 18px;font-size:17px;line-height:24.5px;max-width:640px;margin:26px 0 30px}
+.card{width:556px;border:1px solid #262626;border-radius:12px;overflow:hidden;margin:0 0 14px;background:#141414}
+.card .shot{height:208px;overflow:hidden;position:relative}.card iframe{border:0;width:556px;height:620px;pointer-events:none}
+.card .ft{height:72px;border-top:1px solid #262626;display:flex;align-items:center;padding:0 16px;gap:10px;background:#171717}
+.card .ft div{flex:1;font-size:15.5px;line-height:21px}.card .ft small{display:block;color:var(--dim);font-size:14.5px}
+.card .open{background:#333;border-radius:8px;padding:5px 11px;font-size:16px}.card .ft svg{width:18px;height:18px;color:#ccc}
+.todo{border:1px solid #262626;border-radius:12px;padding:12px 18px 12px;margin:0 0 18px;background:#171717}
+.todo div{display:flex;align-items:center;gap:8px;height:32.5px;font-size:16.5px;color:var(--dim)}
+.todo .ck{width:16px;height:16px;border-radius:50%;border:1.5px dashed #777;flex:none;position:relative}
+.todo .now{color:var(--text)}.todo .now .ck{border:2px solid #3a3a3a;border-left-color:#ddd;border-style:solid;animation:spin 1s linear infinite}
+.todo .done{color:var(--dim)}.todo .done .ck{border:none;background:#d8d8d8}.todo .done .ck:after{content:"";position:absolute;left:5px;top:2.5px;width:4px;height:8px;border:solid #171717;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.think{display:flex;align-items:center;gap:16px;font-size:17px;color:var(--dim);margin:6px 0 4px;height:30px}.think svg{width:13px;height:13px}
+.spark{width:22px;height:22px;position:relative}.spark i{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--clay);animation:spark 1.2s infinite}
+.spark i:nth-child(1){left:9px;top:2px}.spark i:nth-child(2){left:15px;top:9px;animation-delay:.3s}.spark i:nth-child(3){left:9px;top:16px;animation-delay:.6s}.spark i:nth-child(4){left:3px;top:9px;animation-delay:.9s}
+.inp{margin:0 100px 0 99px;height:50px;border-radius:14px;background:var(--input);display:flex;align-items:center;padding:0 14px 0 16px;gap:14px;font-size:17px}
+.inp svg{width:19px;height:19px;color:#ddd}.inp #q{flex:1;white-space:nowrap;overflow:hidden;color:var(--text)}
+#q:empty:after{content:attr(data-ph);color:#7b7b7b}#q.typing:after,#q:empty:before{content:"";display:inline-block;width:1.5px;height:19px;background:#ddd;vertical-align:-4px;margin-left:1px;animation:blink 1s steps(1) infinite}
+.inp .stop{width:15px;height:15px;border-radius:3px;background:#e8e8e8}
+.stat{height:47px;display:flex;align-items:center;justify-content:flex-end;gap:9px;padding-right:118px;font-size:15.5px;color:#e6e6e6}
+.stat .m{color:var(--dim)}.stat .ring{width:18px;height:18px;border-radius:50%;border:2.5px solid #f0b400;margin-left:14px}.stat .ring.busy{border-color:#5a4a1a;border-top-color:#f0b400;animation:spin 1s linear infinite}
+/* browser pane */
+.pane{display:flex;flex-direction:column;background:#171717;min-width:0}
+.tabs{height:51px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 10px}
+.tab{width:238px;height:36px;background:#3a3a3a;border-radius:9px;display:flex;align-items:center;gap:10px;padding:0 11px 0 13px;font-size:16px;white-space:nowrap;overflow:hidden}
+.tab span{flex:1;overflow:hidden;text-overflow:clip;-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent)}.tab svg{width:18px;height:18px;flex:none}
+.tabs .add{width:19px;height:19px;margin-left:13px;color:#ddd}.tabs .icons{margin-left:auto;display:flex;gap:18px;color:#ddd;padding-right:6px}.tabs .icons svg{width:19px;height:19px}
+.url{height:52px;display:flex;align-items:center;padding:0 12px 0 15px;gap:17px;color:#9a9a9a}.url svg{width:19px;height:19px}.url .rl{color:#ddd}
+.url .box{flex:1;height:34px;border-radius:9px;background:#222;display:grid;place-items:center;font-size:16.5px;color:#e6e6e6}
+.view{flex:1;position:relative;background:#1e1e1e}#ws{position:absolute;inset:0;border:0;width:100%;height:100%;opacity:0;transition:opacity .5s}#ws.on{opacity:1}
+.enter{animation:in .3s ease-out}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes blink{50%{opacity:0}}@keyframes in{from{opacity:0;transform:translateY(5px)}}@keyframes spark{0%,100%{opacity:.25}40%{opacity:1}}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><defs>
+ <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+ <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+ <symbol id="i-bag" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8 7V5.5A1.5 1.5 0 0 1 9.5 4h5A1.5 1.5 0 0 1 16 5.5V7"/></symbol>
+ <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="19" cy="12" r="1.2" fill="currentColor"/></symbol>
+ <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+ <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+ <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+ <symbol id="i-side" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M9 5v14"/></symbol>
+ <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-11 6.6L4 19l1-4.2A7.5 7.5 0 1 1 20 11.5Z"/><circle cx="16.5" cy="16.5" r="3.5"/></symbol>
+ <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M13.5 6l-3 12"/></symbol>
+ <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+ <symbol id="i-term" viewBox="0 0 24 24"><path d="m5 7 5 5-5 5M12 18h7"/></symbol>
+ <symbol id="i-diff" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M12 8v6M9 11h6M9 17h6"/></symbol>
+ <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3Z"/></symbol>
+ <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.6l2 2.2h7.4A2.5 2.5 0 0 1 21 9.7v7.8a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5Z"/></symbol>
+ <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+ <symbol id="i-layout" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 12h16M12 12v8"/></symbol>
+ <symbol id="i-pip" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="12" y="12" width="6" height="4" rx="1"/></symbol>
+ <symbol id="i-expand" viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></symbol>
+ <symbol id="i-reload" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7M20 4v5h-5"/></symbol>
+ <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 4l16 7-7 2-2 7Z"/></symbol>
+ <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></symbol>
+ <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/></symbol>
+ <symbol id="i-ctl" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="6" rx="3"/><rect x="3" y="13" width="18" height="6" rx="3"/><circle cx="16" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="16" r="1.6" fill="currentColor"/></symbol>
+ <symbol id="i-bars" viewBox="0 0 24 24"><path d="M5 20V8M9.5 20V4M14 20v-9M18.5 20V6"/></symbol>
+</defs></svg>
+
+<div class="mb"><span class="apple">&#63743;</span><b>Claude</b><span>File</span><span>Edit</span><span>View</span><span>Go</span><span>Window</span><span>Help</span>
+ <div class="r"><svg><use href="#i-search"/></svg><div class="bat"></div><svg><use href="#i-wifi"/></svg><svg><use href="#i-bars"/></svg><svg><use href="#i-ctl"/></svg><span style="margin:0">Mon 23 Nov&nbsp;&nbsp;19:36</span></div></div>
+
+<div class="win">
+ <div class="side">
+  <div class="top"><div class="tl"><i></i><i></i><i></i></div><svg class="ic"><use href="#i-side"/></svg><svg class="ic"><use href="#i-left"/></svg><svg class="ic dimic"><use href="#i-right"/></svg>
+   <div class="seg"><span><svg><use href="#i-chat"/></svg></span><span class="on"><svg><use href="#i-code"/></svg></span></div></div>
+  <div class="nav"><div><svg><use href="#i-plus"/></svg>New</div><div><svg><use href="#i-search"/></svg>Search</div><div><svg><use href="#i-bag"/></svg>Customize</div><div><svg><use href="#i-dots"/></svg>More</div></div>
+  <div class="grp"><div class="gh">jansen-family-tree<svg class="chev"><use href="#i-down"/></svg><svg class="plus"><use href="#i-plus"/></svg></div>
+   <div class="ses on" id="cur">Swedish side<span class="spin" id="spin" hidden></span><svg class="dots" id="curdots"><use href="#i-dots"/></svg></div>
+   <div class="ses">Story cards for Grandma</div><div class="ses">Scan the 1923 letters</div></div>
+  <div class="grp cl"><div class="gh">recipe-box<svg class="chev"><use href="#i-right"/></svg><svg class="plus"><use href="#i-plus"/></svg></div>
+   <div class="gh">garden-planner<svg class="chev"><use href="#i-right"/></svg><svg class="plus"><use href="#i-plus"/></svg></div>
+   <div class="gh">bike-repair-log<svg class="chev"><use href="#i-right"/></svg><svg class="plus"><use href="#i-plus"/></svg></div>
+   <div class="gh">wedding-site<svg class="chev"><use href="#i-right"/></svg><svg class="plus"><use href="#i-plus"/></svg></div></div>
+  <div class="me"><b>C</b>Chris<svg><use href="#i-down"/></svg></div>
+ </div>
+ <div class="vl"></div>
+ <div class="main">
+  <div class="hdr">Swedish side<svg class="chev"><use href="#i-down"/></svg><div class="icons"><svg><use href="#i-list"/></svg><svg><use href="#i-term"/></svg><svg><use href="#i-diff"/></svg><svg class="on"><use href="#i-globe"/></svg><svg><use href="#i-folder"/></svg><svg><use href="#i-dots"/></svg></div></div>
+  <div id="log">
+   <div class="ran">Ran 2 commands, read <span class="fn">family-tree.json</span><svg><use href="#i-right"/></svg></div>
+   <p class="p">Done: round 12 is in. Femke's tree now has <b>133 people</b>, and Anna Lindqvist's parents are still an open question. Her baptism should be in a Swedish parish register.</p>
+  </div>
+  <div class="inp"><svg><use href="#i-plus"/></svg><div id="q" data-ph="Reply…"></div><span class="stop" id="stop" hidden></span><svg><use href="#i-mic"/></svg></div>
+  <div class="stat">Opus 5.5 <span class="m">Medium</span><span style="margin-left:6px">Auto</span><span class="ring" id="ring"></span></div>
+ </div>
+ <div class="vl2"></div>
+ <div class="pane">
+  <div class="tabs"><div class="tab"><svg><use href="#i-globe"/></svg><span id="tabt">New Tab</span><svg style="width:16px;height:16px"><use href="#i-x"/></svg></div><svg class="add"><use href="#i-plus"/></svg>
+   <div class="icons"><svg><use href="#i-layout"/></svg><svg><use href="#i-dots"/></svg><svg><use href="#i-pip"/></svg><svg><use href="#i-expand"/></svg><svg><use href="#i-x"/></svg></div></div>
+  <div class="url"><svg><use href="#i-left"/></svg><svg><use href="#i-right"/></svg><svg class="rl"><use href="#i-reload"/></svg><div class="box" id="url">&nbsp;</div><svg class="rl"><use href="#i-send"/></svg></div>
+  <div class="view"><iframe id="ws" title="Workshop"></iframe></div>
+ </div>
+</div>
+<script>
+/* the director (record.mjs) calls these */
+const $=s=>document.querySelector(s),log=$("#log"),wait=ms=>new Promise(r=>setTimeout(r,ms));
+const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"})[c]);
+const chev='<svg><use href="#i-right"/></svg>';
+function add(html,cls,tag="div"){const d=document.createElement(tag);d.className=cls+" enter";d.innerHTML=html;$("#think")?.remove();log.appendChild(d);
+ while(log.scrollHeight>log.clientHeight&&log.children.length>1)log.firstChild.remove();return d}
+let todo=null,tStart=0,tTimer=0;
+window.demo={
+ async type(text,ms=28){const q=$("#q");q.classList.add("typing");for(const ch of text){q.textContent+=ch;await wait(ms*(ch===" "?1.5:1))}},
+ async send(){const q=$("#q");add(esc(q.textContent),"u");q.textContent="";q.classList.remove("typing");q.dataset.ph="⌘↩ to queue";
+  $("#spin").hidden=false;$("#curdots").style.display="none";$("#stop").hidden=false;$("#ring").classList.add("busy");demo.think()},
+ think(){$("#think")?.remove();const d=document.createElement("div");d.id="think";d.className="think enter";d.innerHTML=`<span class="spark"><i></i><i></i><i></i><i></i></span><span>Thinking <span id="ts">1s</span></span>${chev}`;
+  log.appendChild(d);tStart=Date.now();clearInterval(tTimer);tTimer=setInterval(()=>{const e=$("#ts");if(e)e.textContent=Math.max(1,Math.round((Date.now()-tStart)/1000/1.8))+"s"},250)},
+ say(html){add(html,"p","p");demo.think()},
+ ran(text,file){add(`${esc(text)}${file?` <span class="fn">${esc(file)}</span>`:""}${chev}`,"ran");demo.think()},
+ todos(items){todo=add(items.map((t,i)=>`<div id="td${i}"><span class="ck"></span>${esc(t)}</div>`).join(""),"todo");demo.think()},
+ step(i,state){const d=$("#td"+i);if(d)d.className=state},
+ card(url){add(`<div class="shot"><iframe src="${url}"></iframe></div><div class="ft"><div>Workshop<small>localhost:8790, opened in Browser</small></div><span class="open">Open</span><svg><use href="#i-dots"/></svg></div>`,"card");demo.think()},
+ open(url,title){const f=$("#ws");f.onload=()=>f.classList.add("on");f.src=url;$("#tabt").textContent=title;$("#url").textContent="localhost:8790"},
+ finish(html){$("#think")?.remove();clearInterval(tTimer);add(html,"p","p");$("#spin").hidden=true;$("#curdots").style.display="";$("#stop").hidden=true;$("#ring").classList.remove("busy");$("#q").dataset.ph="Reply…"}
+};
+</script>
+</body></html>
