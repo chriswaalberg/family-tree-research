@@ -11,10 +11,16 @@
   focus <I4 or name> ["what you look for"]            who you are working on now: ring + name at their star
   progress "<task>" <done> <total> [--person I4] [--text ...]
                                                         a progress bar for a long script; send it every step
+  status [--json] [--wait 10]                           not running / running but hidden / in view (exit 0 = in view);
+                                                        --wait: wait up to that many seconds for the page to be in view
+
+The Workshop is only "open" when the user can see it: the page reports whether it is in view, and /ping answers
+with `viewers` (pages that have it open) and `visible`. note/focus/progress say every time when nobody sees it.
 
 Events go only to the Workshop of the tree you work in: the one whose folder holds the current folder (or the file
 that rebuild/check writes, or FTR_TREE / --tree). Run scripts from the tree's folder. In a tree's folder (one with
-family-tree.json / stamboom.json) with its Workshop closed, emit() says so once an hour on stderr (FTR_QUIET=1: never).
+family-tree.json / stamboom.json) where its Workshop isn't running or nobody sees it, emit() says so on stderr (at most
+every 10 / 5 minutes; FTR_QUIET=1: never).
 
 The page has a Changes tab: the server compares every data.json with the one before (tree_changes) and keeps the list
 of real changes for the whole session, plus the round steps data.json can't show; `hello` and every `data` event
@@ -136,21 +142,74 @@ def tree_root(spot=None):
     return None
 
 
-WARN_EVERY = 3600  # seconds: the "Workshop is not open" hint at most once an hour per tree
+# ---------------------------------------------------------------- can the user see it? (three states)
+# A running server is not enough: the desktop app's browser pane can be hidden, or no page has the Workshop open at all.
+# The page (live.html) tells the server whether it is in view (POST /seen, on every visibility change and every
+# BEAT_MS while visible; in view = visibilityState "visible", a real size and frames at screen speed, because the
+# desktop app's closed pane keeps "visible" and its size but paints at ~30 fps, see live.html); /ping answers with `viewers` and `visible`. The states:
+#   none     no Workshop answers for this tree
+#   hidden   it runs, but nobody sees it (no page open, or the page is hidden)
+#   visible  a page shows it right now
+#   unknown  an older live.py runs it, which can't tell (restart it)
+# Whether a page is still open comes from its event stream (/events), not from its timers: a hidden pane runs as a
+# background page whose timers the browser slows to about once a minute, so "hidden" never turns into "closed".
+WARN_NONE_EVERY = 600    # seconds: "not running" on stderr from emit() at most once per 10 minutes per tree
+WARN_HIDDEN_EVERY = 300  # "nobody sees it" at most once per 5 minutes (live.py note/focus/progress say it every time)
+BEAT_FRESH = 20   # a "visible" report counts this long (a page in view reports every 3 s; its timers aren't slowed)
+VIEWER_TTL = 150  # a page without an open event stream counts this long after its last report
 
 
-def warn_closed(where=None):
-    """Research in a tree's folder while its Workshop is closed: say so once (on stderr), so Claude opens it.
-    Silent outside a tree, with FTR_QUIET set, and again for an hour after it said it."""
-    if os.environ.get("FTR_QUIET"):
-        return
-    root = tree_root(os.environ.get("FTR_TREE") or where)
-    if not root:
-        return
-    mark = os.path.join(tempfile.gettempdir(), "family-tree-research-warned", _key(root))
+def _paint_hint(port):
+    return ("load and call mcp__ccd_view__show_pane with pane 'preview' now, then check that "
+            f"`live.py status --wait 10` (or curl -s http://127.0.0.1:{port}/ping) says \"visible\": true")
+
+
+def state_text(st):
+    """One plain line for Claude about what the user can see of this tree's Workshop (hooks and live.py use it)."""
+    port, state = st.get("port"), st.get("state")
+    term = f" (In a terminal without a browser pane: give the user the address http://127.0.0.1:{port}/ instead.)"
+    if state == "none":
+        return ("this tree's Workshop is NOT RUNNING, so the user can't watch. Open it: live.py launch --config "
+                "<settings file>, then preview_start name \"workshop\", then load and call mcp__ccd_view__show_pane with "
+                "pane 'preview', then check that /ping says \"visible\": true (references/workshop.md).")
+    if state == "unknown":
+        return (f"this tree's Workshop runs on port {port} with an older live.py that can't tell whether anyone sees it: "
+                "restart it (preview_stop it, live.py launch, preview_start name \"workshop\"), then " + _paint_hint(port) + ".")
+    if state == "hidden":
+        if not st.get("viewers"):
+            return (f"this tree's Workshop runs on port {port} but NO PAGE HAS IT OPEN, so the user sees nothing. "
+                    f"preview_start name \"workshop\" (or navigate the browser pane to http://127.0.0.1:{port}/), then "
+                    + _paint_hint(port) + "." + term)
+        return (f"this tree's Workshop runs on port {port} and a page has it open, but it is HIDDEN (not in view), so the "
+                "user sees nothing. Do this: " + _paint_hint(port) + "." + term)
+    where = "" if st.get("visible_here", True) else " (on a phone only; the side panel here doesn't show it)"
+    return f"this tree's Workshop is in view on port {port}{where}"
+
+
+def workshop_state(where=None, timeout=0.6):
+    """What the user can see of the Workshop of the tree here: {"state": none|hidden|visible|unknown, "port", ...}.
+    Asks the server itself: a pointer file with a live pid is not enough (pids get reused, a server can hang)."""
+    w = workshop_for(where)
+    if not w:
+        return {"state": "none"}
     try:
-        if time.time() - os.path.getmtime(mark) < WARN_EVERY:
-            return
+        with urllib.request.urlopen(f"http://127.0.0.1:{w['port']}/ping", timeout=timeout) as r:
+            j = json.load(r)
+    except Exception:
+        return {"state": "none", "port": w["port"]}
+    if os.path.realpath(j.get("data", "")) != os.path.realpath(w.get("data", "")):
+        return {"state": "none", "port": w["port"]}
+    if "visible" not in j:
+        return {"state": "unknown", "port": w["port"]}
+    return dict(j, state="visible" if j.get("visible") else "hidden", port=w["port"])
+
+
+def _once(root, kind, every):
+    """True at most once per `every` seconds per tree and kind (a mark file in the temp folder)."""
+    mark = os.path.join(tempfile.gettempdir(), "family-tree-research-warned", _key(root) + "-" + kind)
+    try:
+        if time.time() - os.path.getmtime(mark) < every:
+            return False
     except OSError:
         pass
     try:
@@ -158,17 +217,39 @@ def warn_closed(where=None):
         open(mark, "w").close()
     except OSError:
         pass
-    print("Note (Claude Code only, ignore in Cowork): this tree's Workshop is not open, so the user can't watch this "
-          "research. Open it first: live.py launch --config <settings file>, then preview_start \"workshop\", and tell it "
-          "what you are doing (live.py note). See references/workshop.md.", file=sys.stderr)
+    return True
 
 
-def emit(kind, _where=None, **fields):
-    """Send one event to the Workshop of this tree. Silent and fast when none is running or none belongs here
-    (inside a tree's folder it says once an hour that the Workshop is closed)."""
+def warn_state(st, where=None):
+    """Research in a tree's folder while the user can't see its Workshop: say so on stderr, so Claude acts on it.
+    Silent outside a tree, when it is in view, with FTR_QUIET set, and for a while after it said it (WARN_*_EVERY)."""
+    if os.environ.get("FTR_QUIET") or st.get("state") == "visible":
+        return
+    root = tree_root(os.environ.get("FTR_TREE") or where)
+    if not root:
+        return
+    if not _once(root, st.get("state") or "none", WARN_NONE_EVERY if st.get("state") == "none" else WARN_HIDDEN_EVERY):
+        return
+    print("Note (Claude Code only, ignore in Cowork): " + state_text(st), file=sys.stderr)
+
+
+def warn_closed(where=None):  # the old name, kept for scripts that call it
+    warn_state({"state": "none"}, where)
+
+
+LAST = {}  # what the last emit() learned: {"state", "port", "viewers", "visible", ...}
+
+
+def emit(kind, _where=None, _warn=True, **fields):
+    """Send one event to the Workshop of this tree. Silent and fast when none is running or none belongs here.
+    Inside a tree's folder it says on stderr (now and then) when the Workshop isn't running or nobody sees it.
+    LAST keeps what the server answered, so live.py note/focus/progress can say it every time."""
+    LAST.clear()
     p = workshop_for(_where)
     if not p:
-        warn_closed(_where)
+        LAST.update(state="none")
+        if _warn:
+            warn_state(LAST, _where)
         return False
     ev = {"kind": kind, "t": round(time.time(), 2)}
     who = os.environ.get("FTR_WHO") or os.environ.get("STAMBOOM_WIE")
@@ -178,10 +259,20 @@ def emit(kind, _where=None, **fields):
     try:
         req = urllib.request.Request(f"http://127.0.0.1:{p['port']}/event", data=json.dumps(ev).encode("utf-8"),
                                      headers={"Content-Type": "application/json"}, method="POST")
-        urllib.request.urlopen(req, timeout=0.6).read()
-        return True
+        raw = urllib.request.urlopen(req, timeout=0.6).read()
     except Exception:
+        LAST.update(state="none", port=p["port"])
+        if _warn:
+            warn_state(LAST, _where)
         return False
+    try:
+        j = json.loads(raw.decode("utf-8"))
+        LAST.update(j, state="visible" if j.get("visible") else "hidden", port=p["port"])
+    except (ValueError, UnicodeDecodeError, AttributeError, TypeError):
+        LAST.update(state="unknown", port=p["port"])  # an older server answers "ok"
+    if _warn:
+        warn_state(LAST, _where)
+    return True
 
 
 # ---------------------------------------------------------------- what changed in the tree (the Changes tab)
@@ -272,6 +363,46 @@ class Hub:
         self.start = round(time.time(), 2)
         self.timeline, self.versions = [], []
         self.changes = []  # [{t, n?, title?, items}] every real change to the tree in this session, for the Changes tab
+        self.viewers = {}  # page id → {"sse": open event streams, "vis": in view, "beat": last report, "local": this computer}
+
+    # ---- who sees it (the three states, see BEAT_FRESH / VIEWER_TTL)
+    def _viewer(self, vid, local):
+        v = self.viewers.setdefault(vid, {"sse": 0, "vis": False, "beat": 0.0, "local": local})
+        v["local"] = v["local"] or local
+        return v
+
+    def viewer_join(self, vid, local):
+        with self.lock:
+            self._viewer(vid, local)["sse"] += 1
+
+    def viewer_leave(self, vid):
+        with self.lock:
+            v = self.viewers.get(vid)
+            if v:
+                v["sse"] = max(0, v["sse"] - 1)
+
+    def viewer_report(self, vid, local, visible=False, gone=False, now=None, size=None):
+        with self.lock:
+            if gone:  # the page closes (pagehide): it is gone at once, even before its event stream breaks
+                self.viewers.pop(vid, None)
+                return
+            v = self._viewer(vid, local)
+            v["vis"], v["beat"] = bool(visible), now if now is not None else time.time()
+            if size:
+                v["size"] = size
+
+    def view_state(self, now=None):
+        """{"viewers": pages that have it open, "visible": any page shows it now, "visible_here": one on this computer}.
+        Open = its event stream is connected (or it reported within VIEWER_TTL). In view = it said so within BEAT_FRESH."""
+        now = now if now is not None else time.time()
+        with self.lock:
+            for k in [k for k, v in self.viewers.items() if not v["sse"] and now - v["beat"] > VIEWER_TTL]:
+                del self.viewers[k]
+            vs = list(self.viewers.values())
+        seen = [v for v in vs if v["vis"] and now - v["beat"] <= BEAT_FRESH]
+        pages = [{"visible": v in seen, "here": v["local"], "size": v.get("size", ""),
+                  "said": round(now - v["beat"]) if v["beat"] else None} for v in vs]
+        return {"viewers": len(vs), "visible": bool(seen), "visible_here": any(v["local"] for v in seen), "pages": pages}
 
     def add_changes(self, t, items, n=None, title=None):
         if not items:
@@ -336,6 +467,18 @@ class Hub:
 
 
 MAX_VERSIONS, MAX_TIMELINE = 600, 60000  # ~150 kB per version of a 1,200-person tree
+KEEPALIVE = 10  # seconds between keep-alive lines on an event stream: a page that went away is noticed within ~2 of them
+
+
+def _plugin_version():
+    try:
+        with open(os.path.join(HERE, "..", "..", "..", ".claude-plugin", "plugin.json"), encoding="utf-8") as fh:
+            return json.load(fh).get("version") or ""
+    except (OSError, ValueError):
+        return ""
+
+
+PLUGIN_VERSION = _plugin_version()
 
 
 def watch(path, hub, stop):
@@ -428,7 +571,7 @@ def make_handler(cfg, hub):
             if p in ("/viewer", "/viewer/"):
                 return self.file(os.path.join(VIEWER, "index.html"), extra)
             if p == "/events":
-                return self.events()
+                return self.events((qs.get("id") or [""])[0][:40])
             if p == "/session":  # the replay: when it started and everything that happened, in order
                 return self.body(200, json.dumps({"start": hub.start, "events": hub.timeline}).encode("utf-8"), "application/json")
             if p.startswith("/session/data/"):  # one data.json version of this session (0 = how the tree was at the start)
@@ -445,8 +588,9 @@ def make_handler(cfg, hub):
                 ip = lan_ip()  # asked on every tap: a laptop changes networks
                 body = {"url": f"http://{ip}:{cfg['port']}/?k={cfg['token']}"} if ip else {"url": None, "why": "nonet"}
                 return self.body(200, json.dumps(body).encode("utf-8"), "application/json")
-            if p == "/ping":  # which tree this Workshop shows (live.py serve/launch use it to reuse a running one)
-                return self.body(200, json.dumps({"data": cfg["data"], "pid": os.getpid()}).encode("utf-8"), "application/json")
+            if p == "/ping":  # which tree this Workshop shows (serve/launch reuse a running one) and whether anyone sees it
+                body = dict({"data": cfg["data"], "pid": os.getpid(), "version": PLUGIN_VERSION}, **hub.view_state())
+                return self.body(200, json.dumps(body).encode("utf-8"), "application/json")
             if p.startswith("/viewer/"):  # media next to the viewer: media/x.jpg
                 rel = os.path.normpath(p[len("/viewer/"):])
                 if rel.startswith("..") or os.path.isabs(rel):
@@ -458,7 +602,22 @@ def make_handler(cfg, hub):
             self.body(404, b"not found", "text/plain")
 
         def do_POST(self):
-            if urlparse(self.path).path != "/event" or not self.local():
+            u = urlparse(self.path)
+            if u.path == "/seen":  # a page says whether it is in view (live.html; a phone with the key too)
+                if not self.allowed(parse_qs(u.query)):
+                    return self.body(403, b"no key", "text/plain")
+                try:
+                    n = int(self.headers.get("Content-Length") or 0)
+                    r = json.loads(self.rfile.read(min(n, 4000)).decode("utf-8") or "{}")
+                    vid = str(r.get("id") or "")[:40]
+                    if not vid:
+                        raise ValueError
+                except (ValueError, UnicodeDecodeError, AttributeError):
+                    return self.body(400, b"bad report", "text/plain")
+                size = (f"{r.get('w')}x{r.get('h')} {r.get('vs') or ''}" + (f" {r['fps']} fps" if "fps" in r else "")).strip() if "w" in r else None
+                hub.viewer_report(vid, self.local(), visible=r.get("visible"), gone=r.get("gone"), size=size)
+                return self.body(200, json.dumps(hub.view_state()).encode("utf-8"), "application/json")
+            if u.path != "/event" or not self.local():
                 return self.body(403, b"only this computer can send events", "text/plain")
             try:
                 n = int(self.headers.get("Content-Length") or 0)
@@ -469,14 +628,16 @@ def make_handler(cfg, hub):
                 return self.body(400, b"bad event", "text/plain")
             ev = {k: (v[:400] if isinstance(v, str) else v) for k, v in ev.items()}
             hub.send(ev)
-            self.body(200, b"ok", "text/plain")
+            self.body(200, json.dumps(dict({"ok": True}, **hub.view_state())).encode("utf-8"), "application/json")
 
-        def events(self):
+        def events(self, vid=""):
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream")
             self.send_header("Cache-Control", "no-store")
             self.end_headers()
             q = hub.join()
+            if vid:
+                hub.viewer_join(vid, self.local())
             try:
                 hello = {"kind": "hello", "history": list(hub.history), "tasks": list(hub.tasks.values()),
                          "changes": list(hub.changes)}
@@ -484,15 +645,17 @@ def make_handler(cfg, hub):
                 self.wfile.flush()
                 while True:
                     try:
-                        ev = q.get(timeout=15)
+                        ev = q.get(timeout=KEEPALIVE)
                         self.wfile.write(f"data: {json.dumps(ev)}\n\n".encode("utf-8"))
                     except queue.Empty:
-                        self.wfile.write(b": still here\n\n")
+                        self.wfile.write(b": still here\n\n")  # also how a closed page is noticed (the write fails)
                     self.wfile.flush()
             except (BrokenPipeError, ConnectionResetError, OSError):
                 pass
             finally:
                 hub.leave(q)
+                if vid:
+                    hub.viewer_leave(vid)
 
     return H
 
@@ -653,29 +816,66 @@ def cmd_launch(a):
         json.dump(conf, fh, indent=2, ensure_ascii=False)
     os.replace(tmp, path)
     print(f"{path}: entry \"{a.name}\" on port {port}" + (" (this tree's Workshop is already running there)" if w else "")
-          + f". Open it with preview_start name \"{a.name}\".")
+          + ".")
+    print(launch_steps(a.name, port))
+
+
+def launch_steps(name, port):
+    """The steps after `launch`, spelled out: the Workshop is only open once the user can see it."""
+    return (
+        "Next, in the Claude desktop app (all three, every time):\n"
+        f"  1. preview_start with name \"{name}\"\n"
+        "  2. load and call mcp__ccd_view__show_pane with pane 'preview' (ToolSearch \"select:mcp__ccd_view__show_pane\"); "
+        "the pane can stay hidden after preview_start\n"
+        "  3. check: live.py status --wait 10 must say \"visible\" (it waits for the page's own signal; or "
+        f"curl -s http://127.0.0.1:{port}/ping: \"visible\": true and this tree's data.json).\n"
+        "     Not visible = the user sees nothing yet: call show_pane again (or tabs_select the Workshop tab). If show_pane\n"
+        "     says the session isn't open in any window, the user is elsewhere: say in the chat that the Workshop is ready.\n"
+        "Only then tell the user it is there, and send a note with what you are doing.\n"
+        f"In a terminal without a browser pane: run `live.py serve` in the background and give the user http://127.0.0.1:{port}/")
+
+
+def _say_state(what):
+    """After note/focus/progress: say plainly when the user can't see it (every time; silent when in view)."""
+    if LAST.get("state") != "visible":
+        print(f"({what} {'sent' if LAST.get('state') != 'none' else 'not shown'}, but {state_text(LAST)})")
 
 
 def cmd_focus(a):
     if a.tree:
         os.environ["FTR_TREE"] = a.tree
-    if not emit("focus", person=a.person, text=a.text):
-        print("(no Workshop for this tree: focus not shown)")
+    emit("focus", _warn=False, person=a.person, text=a.text)
+    _say_state("focus")
 
 
 def cmd_progress(a):
     if a.tree:
         os.environ["FTR_TREE"] = a.tree
-    if not emit("progress", task=a.task, done=a.done, total=a.total, person=a.person, text=a.text):
-        print("(no Workshop for this tree: progress not shown)")
+    emit("progress", _warn=False, task=a.task, done=a.done, total=a.total, person=a.person, text=a.text)
+    _say_state("progress")
 
 
 def cmd_note(a):
     if a.tree:
         os.environ["FTR_TREE"] = a.tree
-    ok = emit(a.kind, text=a.text, person=a.person)
-    if not ok:
-        print("(no Workshop for this tree: note not shown)")
+    emit(a.kind, _warn=False, text=a.text, person=a.person)
+    _say_state("note")
+
+
+def cmd_status(a):
+    """Which of the three states this tree's Workshop is in (exit 0 only when the user can see it)."""
+    if a.tree:
+        os.environ["FTR_TREE"] = a.tree
+    st = workshop_state()
+    end = time.time() + max(0, a.wait or 0)
+    while st["state"] != "visible" and time.time() < end:  # wait for the page's own signal, not a guess
+        time.sleep(0.5)
+        st = workshop_state()
+    if a.json:
+        print(json.dumps(st))
+    else:
+        print(st["state"] + ": " + state_text(st))
+    sys.exit(0 if st["state"] == "visible" else 1)
 
 
 def main():
@@ -722,6 +922,11 @@ def main():
     g.add_argument("--text", "--tekst", help="one line about this step")
     g.add_argument("--tree", "--boom", help="the tree's folder, when you run this from somewhere else")
     g.set_defaults(func=cmd_progress)
+    t = sp.add_parser("status", help="is this tree's Workshop running, and can the user see it? (exit 0 = in view)")
+    t.add_argument("--json", action="store_true")
+    t.add_argument("--wait", type=float, default=0, help="seconds to wait until it is in view (after show_pane)")
+    t.add_argument("--tree", "--boom", help="the tree's folder, when you run this from somewhere else")
+    t.set_defaults(func=cmd_status)
     a = ap.parse_args()
     if getattr(a, "kind", None):
         a.kind = {"notitie": "note", "lees": "read", "gevonden": "found", "niets": "nothing", "vraag": "ask"}.get(a.kind, a.kind)

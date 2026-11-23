@@ -330,7 +330,7 @@ const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k
 
 /* ===== TUNING (all numbers that shape the Workshop) ===== */
 let VIEW="cosmos";
-const CFG={CHG_OPEN:6,HL_MAX:60,HL_NAMES:6,IDLE_S:180,QR_STYLE:2,SRC_MAX:3,FOCUS_MS:180000,SWEEP_BIG:400,TICK_MS:120,TAP_PX:22,COS_R0:40,STEPS_ONE_BY_ONE:8,CERT_ONE_BY_ONE:4,WHY_ANIM_MAX:80,BREATHE_MAX:40,MAX_PARTS:1500,STAR_MS:250,MAXG:14,R0:62,RMAX:490,Q:.8,MIN_DEG:.12,ONE_BY_ONE:10,TRAY:6,BEAM_IDLE:30000,FEED:120,GAPS_TO:9,SWEEP_MS:5200,FLY_MS:1400};
+const CFG={BEAT_MS:3000,FPS_MS:400,MIN_FPS:45,PAINT_MS:1500,MIN_VIEW:40,CHG_OPEN:6,HL_MAX:60,HL_NAMES:6,IDLE_S:180,QR_STYLE:2,SRC_MAX:3,FOCUS_MS:180000,SWEEP_BIG:400,TICK_MS:120,TAP_PX:22,COS_R0:40,STEPS_ONE_BY_ONE:8,CERT_ONE_BY_ONE:4,WHY_ANIM_MAX:80,BREATHE_MAX:40,MAX_PARTS:1500,STAR_MS:250,MAXG:14,R0:62,RMAX:490,Q:.8,MIN_DEG:.12,ONE_BY_ONE:10,TRAY:6,BEAM_IDLE:30000,FEED:120,GAPS_TO:9,SWEEP_MS:5200,FLY_MS:1400};
 
 /* ===== DATA ===== */
 let D=null,P=[],ROOT=null,L=null;            // L = current layout
@@ -923,9 +923,31 @@ async function start(){const d=await fetchData();if(!d){$("#feed").innerHTML=`<l
  const md=$("#menuDlg");$("#menuBtn").onclick=()=>md.showModal();md.addEventListener("click",e=>{if(e.target===md||e.target.closest("[data-close]"))md.close()});
  $("#menuRoot").addEventListener("click",()=>setTimeout(rootPick,0));renderWorkers();renderTray();
  connect()}
+/* ===== IN VIEW: tell live.py whether this page can be seen, so Claude knows the user is watching (/ping "visible").
+   Open = this page's event stream (events?id=VID) is connected; timers don't decide that, because a hidden pane runs as a
+   background page whose timers are slowed. In view = visibilityState "visible" AND a size AND frames at screen speed.
+   Measured in the Claude desktop app (macOS, 120 Hz): pane shown 512×993 at ~120 fps; pane closed while the session is
+   on screen: still "visible" and 512×993, but ~32 fps; session not on screen: "visible" at ~120 fps but 0×0. So both the
+   size and the frame rate count. A busy frame can be slow, so it takes two slow samples in a row to say "not in view". */
+const VID=Math.random().toString(36).slice(2,10)+Date.now().toString(36);
+function seen(o){const b=JSON.stringify(Object.assign({id:VID,w:innerWidth,h:innerHeight,vs:document.visibilityState},o));
+ try{if(o.gone&&navigator.sendBeacon&&navigator.sendBeacon("seen",new Blob([b],{type:"text/plain"})))return;
+  fetch("seen",{method:"POST",body:b,keepalive:true,cache:"no-store"}).catch(()=>{})}catch(e){}}
+let beatBusy=false,beatLast=null,beatSlow=0;
+function fpsSample(ms){return new Promise(res=>{let n=0,t0=0;const f=t=>{if(!t0)t0=t;n++;if(t-t0<ms)requestAnimationFrame(f);else res(n>1?(n-1)*1000/(t-t0):0)};
+ requestAnimationFrame(f);setTimeout(()=>res(n>1&&t0?(n-1)*1000/(performance.now()-t0):0),ms+CFG.PAINT_MS)})}
+async function beat(){if(document.visibilityState!=="visible"||innerWidth<CFG.MIN_VIEW||innerHeight<CFG.MIN_VIEW){beatSlow=0;beatLast=false;seen({visible:false});return}
+ if(beatBusy)return;beatBusy=true;let fps=0;try{fps=await fpsSample(CFG.FPS_MS)}finally{beatBusy=false}
+ const fast=fps>=CFG.MIN_FPS;beatSlow=fast?0:beatSlow+1;
+ const v=fast||(beatLast===true&&beatSlow<2);beatLast=v;seen({visible:v,fps:Math.round(fps)})}
+document.addEventListener("visibilitychange",beat);
+addEventListener("pageshow",beat);addEventListener("focus",beat);
+{let rt=0;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(beat,150)})} /* the pane opens or closes: say so at once */
+addEventListener("pagehide",()=>seen({gone:true}));
+setInterval(()=>{if(document.visibilityState==="visible")beat();else seen({visible:false})},CFG.BEAT_MS);
 function connect(){const pill=$("#pill"),pt=$("#pillT");let es;
- try{es=new EventSource("events")}catch(e){pt.textContent=_t("offline");return}
- es.onopen=()=>{pill.classList.add("on");pt.textContent=_t("live")};
+ try{es=new EventSource("events?id="+VID)}catch(e){pt.textContent=_t("offline");return}
+ es.onopen=()=>{pill.classList.add("on");pt.textContent=_t("live");beat()};
  es.onerror=()=>{pill.classList.remove("on");pt.textContent=_t("offline")};
  let first=true;es.onmessage=m=>{if(REPLAY)return;let ev;try{ev=JSON.parse(m.data)}catch(e){return}
   if(ev.kind==="hello"&&!first){if(ev.changes)chgReset(ev.changes);enqueue({kind:"data"});return} /* reconnected: catch up on the data, not the old log */

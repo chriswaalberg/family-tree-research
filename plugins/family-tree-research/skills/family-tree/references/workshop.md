@@ -10,12 +10,26 @@ In Claude Code, before the first research round of a session (or a check of an i
 
 Every tree has its own Workshop. Several can run at once (two family trees, or a test tree next to the real one), each on its own port; opening one that already runs reuses it.
 
+**The Workshop is only open when the user can see it.** A running server is not enough: the desktop app's browser pane can be hidden, or no page has the Workshop open at all. The page tells `live.py` whether it is in view, and `/ping` answers with `viewers` (pages that have it open) and `visible`. `python3 -I <skill>/scripts/live.py status` says it in one line (exit 0 only when in view). There are three states, and the hooks, `note`, `focus` and `progress` name them:
+
+| State | `/ping` | What to do |
+|---|---|---|
+| not running | no answer | the four steps below |
+| running, not in view | `"visible": false` (`"viewers": 0`: no page has it; more: the page is hidden) | load and call `mcp__ccd_view__show_pane` with pane `"preview"` now (with no page: `preview_start` first), then check `/ping` again |
+| in view | `"visible": true` | tell it what you do |
+
+If the user goes to another session before the Workshop is shown, `show_pane` can't show it (it says the session isn't open in any window): say in the chat that the Workshop is ready in this session's side panel, and check again on the next request.
+
+Never tell the user the Workshop is open, or act as if it is, while `/ping` says `"visible": false`.
+
 **The Claude desktop app (a browser pane is available, tools named like `preview_start`)**, every time, in this order:
 
-1. From the tree's folder: `python3 -I <skill>/scripts/live.py launch --config family-tree.json`. It writes the `workshop` entry in that folder's `.claude/launch.json` with the live.py of the current plugin version (a plugin update moves the path) and this tree's own port (its running Workshop's port, else a free one). Other entries stay. Never write that entry by hand.
+1. From the tree's folder: `python3 -I <skill>/scripts/live.py launch --config family-tree.json`. It writes the `workshop` entry in that folder's `.claude/launch.json` with the live.py of the current plugin version (a plugin update moves the path) and this tree's own port (its running Workshop's port, else a free one). Other entries stay. Never write that entry by hand. It prints the next steps; follow all of them.
 2. `preview_start` with `name: "workshop"`.
-3. Show the side panel: `show_pane` with `pane: "preview"` (the pane can be hidden after `preview_start`).
-4. Check that it is **this** tree: `curl -s http://127.0.0.1:<port>/ping` must name this tree's data.json, and `tabs_context` (or a screenshot) shows the tab "Werkplaats · <start person>" / "Workshop · <start person>". Close tabs of another tree's Workshop in the pane (`tabs_close`). Only then tell the user it's there.
+3. Show the side panel: `show_pane` with `pane: "preview"`. It is a deferred tool (`mcp__ccd_view__show_pane`): load it with ToolSearch (`select:mcp__ccd_view__show_pane`) and call it. Never skip this step: after `preview_start` the pane is often hidden, and then the user sees nothing.
+4. Check: `python3 -I <skill>/scripts/live.py status --wait 10` must say `visible` (or `curl -s http://127.0.0.1:<port>/ping`: this tree's data.json **and** `"visible": true`). Still `false`? The pane is hidden or another tab is in front: call `show_pane` again, or `tabs_select` the Workshop tab, and check again. If `show_pane` says the session isn't open in any window, the user isn't looking at this session: say in the chat that the Workshop is ready in the side panel. Also check the tab "Werkplaats · <start person>" / "Workshop · <start person>" (`tabs_context`) and close tabs of another tree's Workshop in the pane (`tabs_close`). Only then tell the user it's there.
+
+How the page knows: it reports on every visibility change, on every resize and every 3 seconds while in view. In view means: `document.visibilityState` is "visible", the page has a size, **and** it paints at screen speed. Both checks are needed, measured in the desktop app: with the session on screen and the pane closed, the page still says "visible" and keeps its size, but paints at ~30 frames a second instead of the screen's 60–120; with the session not on screen it paints fast but is 0 × 0. Whether a page is open at all comes from its event stream, not from its timers: a hidden pane runs as a background page with slow timers, so "hidden" never turns into "closed", and a closed page is gone at once (or within about 20 seconds when it closes without saying so). After `show_pane` it takes a few seconds: `live.py status --wait 10` waits for the page's own report (exit 0 = in view) instead of guessing. `/ping` lists every page under `pages` (in view, size, frame rate, seconds since its last report) for when something looks wrong.
 
 **The terminal (no browser pane)**: from the tree's folder, start `python3 -I <skill>/scripts/live.py serve --config family-tree.json` as a background task and give the user the address it prints. If this tree's Workshop already runs, it prints that address and stops.
 
@@ -29,7 +43,7 @@ Say in one sentence what it is: "Next to our conversation you can now watch your
 
 **Then say at once what you are doing.** As soon as it is open, send a note with where the session stands and what comes next ("Reading last night's report: 12 open questions in Katwijk; next the parents of Jan Plokker"). If you already did something before it was open, say that too. From then on, every step gets a `focus`, `note` or `progress`; a Workshop that stays silent while you work looks broken.
 
-**A tree folder reminds you.** The plugin has a hook: in a folder with `family-tree.json`/`stamboom.json` every session starts with the instruction to load this skill and open the Workshop (also when the project's own CLAUDE.md already explains the research), and every request gets one line saying whether the Workshop is open. `archives.py`, `delpher.py` and `gedcom_tool.py` say once an hour, on stderr, when they run in a tree's folder while its Workshop is closed. Act on it: open the Workshop.
+**A tree folder reminds you.** The plugin has a hook: in a folder with `family-tree.json`/`stamboom.json` every session starts with the instruction to load this skill and open the Workshop (also when the project's own CLAUDE.md already explains the research), and every request gets one line with the Workshop's state, asked of the Workshop itself: not running, running but nobody sees it, or in view. `archives.py`, `delpher.py` and `gedcom_tool.py` say it on stderr when they run in a tree's folder while the user can't see the Workshop (not running: at most every 10 minutes; not in view: every 5), and `note`, `focus` and `progress` say it every time. Act on it at once: open or show the Workshop, then check `/ping`.
 
 **Search through the skill's scripts.** `archives.py` and `delpher.py` report to the Workshop by themselves. A search script of the project's own stays silent there: use the skill's scripts, or let the own script call `live.emit` (see "Tell what you do" below).
 

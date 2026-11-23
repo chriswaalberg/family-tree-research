@@ -17,7 +17,8 @@ Then check the workspace (connected folder, see SKILL.md) and create the folders
 ```
 ## Before any work on this tree
 - Load the skill family-tree-research:family-tree first, also when this file already explains the research.
-- Open the Workshop before the first step, preparation included, and tell it right away what you are doing
+- Open the Workshop before the first step, preparation included, and tell it right away what you are doing.
+  It is only open when `live.py status` (or /ping) says it is visible: in the desktop app call show_pane with pane "preview"
   (references/workshop.md). Search with the skill's scripts (archives.py, delpher.py); own scripts must call live.emit.
 ```
 

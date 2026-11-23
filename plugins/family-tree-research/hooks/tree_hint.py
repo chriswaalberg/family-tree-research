@@ -2,7 +2,8 @@
 """tree_hint.py — a short reminder for Claude in a family tree's folder (plugin hook; standard library only).
 
   start    SessionStart: this folder is a family tree → load the skill, open the Workshop before any work on it.
-  prompt   UserPromptSubmit: one line: the Workshop is closed (open it before research), or open (tell it what you do).
+  prompt   UserPromptSubmit: one line in one of three states, asked of the Workshop itself (/ping):
+           not running (open it) · running but nobody sees it (show the pane now, then check /ping) · in view (tell it).
 
 Prints nothing outside a tree (no family-tree.json / stamboom.json in this folder or above it), so other projects
 never see it. What it prints is added to Claude's context. It never fails the session: any error → silence.
@@ -26,26 +27,28 @@ def main():
     root = live.tree_root(cwd)
     if not root:
         return
-    w = live.workshop_for(cwd)
+    st = live.workshop_state(cwd)  # asks the server: running is not enough, the user must be able to see it
     if mode == "start":
         print(
             f"This folder ({root}) holds a family tree made with the Family Tree Research plugin.\n"
             "- Before any work on the tree (research, preparation, reading reports, rebuilding), load the skill "
             "family-tree-research:family-tree, also when this project's CLAUDE.md already explains the research.\n"
             "- Claude Code only (never in Cowork or claude.ai): open the Workshop before the first step, preparation "
-            "included (references/workshop.md: live.py launch, preview_start \"workshop\", show the pane). As soon as it "
-            "is open, send a note there with what you are doing now and what comes next, and keep telling it "
+            "included (references/workshop.md: live.py launch, preview_start \"workshop\", then load and call "
+            "mcp__ccd_view__show_pane with pane 'preview', then check that /ping says \"visible\": true). As soon as it "
+            "is in view, send a note there with what you are doing now and what comes next, and keep telling it "
             "(live.py focus / note / progress).\n"
             "- Search through the skill's scripts (archives.py, delpher.py): they report to the Workshop by themselves. "
             "A script of the project's own stays silent there unless it calls live.emit.\n"
-            + (f"- This tree's Workshop is running on port {w['port']}." if w else "- This tree's Workshop is not running yet.")
+            "- The Workshop only counts as open when the user can see it: `curl -s http://127.0.0.1:<port>/ping` "
+            "says \"visible\": true (or `live.py status`).\n"
+            "- Now: " + live.state_text(st) + ("." if st["state"] == "visible" else "")
         )
-    elif w:
-        print(f"(Family tree: the Workshop is open on port {w['port']}. Tell it what you do for this request, "
+    elif st["state"] == "visible":
+        print(f"(Family tree: {live.state_text(st)}. Tell it what you do for this request, "
               "preparation too: live.py focus / note / progress.)")
     else:
-        print("(Family tree, Claude Code only: the Workshop is not open. Open it before research or preparation "
-              "on the tree: references/workshop.md.)")
+        print(f"(Family tree, Claude Code only: {live.state_text(st)})")
 
 
 if __name__ == "__main__":

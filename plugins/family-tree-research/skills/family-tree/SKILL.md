@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.72"
+  version: "0.9.73"
 ---
 
 # Family-tree research, hand in hand
@@ -85,7 +85,7 @@ The core:
 
 ## The Workshop (Claude Code only)
 
-In Claude Code, open the Workshop before the first step of any work on the tree (preparation too: reading reports, planning a round), without asking, and send a note there at once with what you are doing and what comes next. It is: a local page that shows the fan as a night sky and plays live what you search, check, add and reject (`scripts/live.py`, `viewer/live.html`). In the desktop app it goes in the side panel next to the conversation: `live.py launch` (writes the `workshop` entry with the current path and this tree's port), `preview_start`, show the pane, check it is this tree (`/ping`, tab title); in a terminal give the user the address. Run the scripts from the tree's folder: events only go to that tree's Workshop. With it open, rebuild the tree and data.json after every confirmed find instead of only at the end of a round, say who you turn to with `live.py focus <id or name>` (the names the user reads in the chat then light up in the sky), send a `live.py note` for work the scripts don't see, a `live.py progress` from long scripts of your own, and give helpers `FTR_WHO=<name>`. Search with the skill's scripts (`archives.py`, `delpher.py`): a project's own search scripts stay silent in the Workshop unless they call `live.emit`. A plugin hook reminds you in every tree folder; the scripts say when the Workshop is closed. A phone can always watch: the phone button in the Workshop shows a QR code (`--local` = this computer only). Never offer or mention it in Cowork or claude.ai. All of it: `references/workshop.md`.
+In Claude Code, open the Workshop before the first step of any work on the tree (preparation too: reading reports, planning a round), without asking, and send a note there at once with what you are doing and what comes next. It is: a local page that shows the fan as a night sky and plays live what you search, check, add and reject (`scripts/live.py`, `viewer/live.html`). In the desktop app it goes in the side panel next to the conversation: `live.py launch` (writes the `workshop` entry with the current path and this tree's port), `preview_start`, then load and call `mcp__ccd_view__show_pane` with pane `"preview"`, then check `/ping`: it must name this tree and say `"visible": true`; in a terminal give the user the address. **The Workshop is only open when `/ping` says it is visible** (`live.py status`): running but not in view means the user sees nothing, so show the pane at once. Run the scripts from the tree's folder: events only go to that tree's Workshop. With it open, rebuild the tree and data.json after every confirmed find instead of only at the end of a round, say who you turn to with `live.py focus <id or name>` (the names the user reads in the chat then light up in the sky), send a `live.py note` for work the scripts don't see, a `live.py progress` from long scripts of your own, and give helpers `FTR_WHO=<name>`. Search with the skill's scripts (`archives.py`, `delpher.py`): a project's own search scripts stay silent in the Workshop unless they call `live.emit`. A plugin hook reminds you in every tree folder and says which state the Workshop is in (not running, not in view, in view); the scripts and `note` say it too. A phone can always watch: the phone button in the Workshop shows a QR code (`--local` = this computer only). Never offer or mention it in Cowork or claude.ai. All of it: `references/workshop.md`.
 
 ## Viewer
 
@@ -194,7 +194,7 @@ Users may add photos, scans of records and other documents per person. They're s
 | `scripts/geocode_places.py` | GEDCOM (+stories) → coordinates per place (Nominatim, cached, manual fixes stay) for the maps |
 | `scripts/standalone_viewer.py` | Viewer + data (+ media) in one standalone HTML file |
 | `scripts/archives.py` | Archives without a browser: Open Archives (search, show, scans), Amsterdam open data and Transkribus, SchiedamGEN, Erfgoed Leiden, Riksarkivet |
-| `scripts/live.py` | The Workshop: `serve` (local page, watches data.json), `note`, `progress` |
+| `scripts/live.py` | The Workshop: `serve` (local page, watches data.json), `launch`, `status`, `note`, `focus`, `progress` |
 | `scripts/delpher.py` | Delpher newspapers: `search`, `text`, `locate` (crop with ruler) and `cut` (the clipping) |
 | `viewer/index.html`, `viewer/DATA-FORMAT.md` | The viewer and the data format |
 | `viewer/live.html` | The Workshop page (served by `live.py`, never published) |

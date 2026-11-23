@@ -820,7 +820,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.72",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.73",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -2675,20 +2675,37 @@ function mediaIsImg(m){return /^data:image\//.test(m.bestand)||MEDIA_IMG.test(m.
 function portraitOf(imgs){const pf=m=>/^(foto|photo)$/i.test(m.soort||"");return imgs.find(m=>m.portret&&(pf(m)||!m.soort))||imgs.find(pf)||null}
 function mediaList(p){const a=Array.isArray(p.media)?p.media:[];return a.map(m=>typeof m==="string"?{bestand:m}:m).filter(m=>m&&m.bestand)}
 function mediaName(m){return m.titel||decodeURIComponent(String(m.bestand).split(/[\/\\]/).pop().replace(/\.[^.]+$/,"")).slice(0,80)}
-const MV_SWIPE=50; /* px a finger must travel sideways in the photo viewer to change photo */
+/* swiping in the photo viewer: swipe = px a finger must travel sideways to change photo; flick = px/ms that also counts as a swipe;
+   anim: 0 snap, 1 the photo slides out and the next slides in, 2 slides out and the next fades in, 3 like 1 at the finger's speed; ms = slide time */
+const MV={swipe:50,flick:0.5,anim:1,ms:260};
 function mediaView(items,k){
   let dlg=document.getElementById("mediaDlg");
   if(!dlg){dlg=document.createElement("dialog");dlg.id="mediaDlg";document.body.appendChild(dlg);
     dlg.tabIndex=-1;dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close()});
     /* on the document, not the dialog: show() rebuilds the content, so the focused button disappears and focus falls back to body */
     addEventListener("keydown",e=>{if(!dlg.open||!dlg._go)return;const d={ArrowLeft:-1,ArrowRight:1}[e.key];if(d){e.preventDefault();e.stopPropagation();dlg._go(d)}},true);
-    /* swipe left/right on the photo: it follows the finger, past MV_SWIPE px it changes (figure has touch-action:pinch-zoom, so the browser leaves sideways moves to us) */
-    let sw=null,swiped=0;
-    dlg.addEventListener("pointerdown",e=>{const f=e.target.closest("figure");if(e.pointerType==="mouse"||!f||!dlg.classList.contains("many"))return;sw={id:e.pointerId,x:e.clientX,y:e.clientY,f,dx:0}});
-    dlg.addEventListener("pointermove",e=>{if(!sw||e.pointerId!==sw.id)return;sw.dx=e.clientX-sw.x;if(Math.abs(sw.dx)>Math.abs(e.clientY-sw.y))sw.f.style.transform=`translateX(${sw.dx}px)`});
+    /* swipe left/right on the photo: it follows the finger; past MV.swipe px (or a flick) it changes, finishing the move as MV.anim says
+       (figure has touch-action:pinch-zoom, so the browser leaves sideways moves to us) */
+    let sw=null,swiped=0,busy=false;
+    const slide=(f,x,ms,op)=>new Promise(r=>{f.style.transition=ms?`transform ${ms}ms cubic-bezier(.2,.7,.3,1),opacity ${ms}ms`:"";
+      f.style.transform=x?`translateX(${x}px)`:"";if(op!=null)f.style.opacity=op;if(!ms)return r();
+      let done=false;const fin=()=>{if(!done){done=true;f.style.transition="";r()}};f.addEventListener("transitionend",fin,{once:true});setTimeout(fin,ms+60)});
+    const change=async(s,d,v)=>{busy=true;const W=dlg.clientWidth+40,a=MV.anim;
+      const ms=a===3?Math.max(120,Math.min(MV.ms*1.4,(W-Math.abs(s.dx))/Math.max(Math.abs(v),0.6))):MV.ms;
+      if(a)await slide(s.f,-d*W,ms);
+      dlg._go(d);const f=dlg.querySelector("figure");
+      if(a===1||a===3){slide(f,d*W,0);f.getBoundingClientRect();await slide(f,0,ms)}
+      else if(a===2){slide(f,0,0,0);f.getBoundingClientRect();await slide(f,0,ms,1)}
+      busy=false};
+    dlg.addEventListener("pointerdown",e=>{const f=e.target.closest("figure");if(busy||e.pointerType==="mouse"||!f||!dlg.classList.contains("many"))return;
+      f.style.transition="";sw={id:e.pointerId,x:e.clientX,y:e.clientY,f,dx:0,v:0,t:performance.now()}});
+    dlg.addEventListener("pointermove",e=>{if(!sw||e.pointerId!==sw.id)return;const t=performance.now(),dx=e.clientX-sw.x;
+      if(t>sw.t)sw.v=0.6*sw.v+0.4*(dx-sw.dx)/(t-sw.t);sw.t=t;sw.dx=dx;
+      if(Math.abs(dx)>Math.abs(e.clientY-sw.y))sw.f.style.transform=`translateX(${dx}px)`});
     const end=e=>{if(!sw||e.pointerId!==sw.id)return;const s=sw;sw=null;
-      if(e.type==="pointerup"&&Math.abs(s.dx)>MV_SWIPE){swiped=performance.now();dlg._go(s.dx<0?1:-1)}
-      else{s.f.style.transition="transform .2s";s.f.style.transform="";setTimeout(()=>s.f.style.transition="",200)}};
+      const flick=Math.abs(s.v)>MV.flick&&Math.abs(s.dx)>15&&Math.sign(s.v)===Math.sign(s.dx);
+      if(e.type==="pointerup"&&(Math.abs(s.dx)>MV.swipe||flick)){swiped=performance.now();change(s,s.dx<0?1:-1,s.v)}
+      else slide(s.f,0,200)};
     dlg.addEventListener("pointerup",end);dlg.addEventListener("pointercancel",end);
     /* the click after a swipe must not close the dialog or press a button */
     dlg.addEventListener("click",e=>{if(performance.now()-swiped<400){e.stopPropagation();e.preventDefault()}},true)}
