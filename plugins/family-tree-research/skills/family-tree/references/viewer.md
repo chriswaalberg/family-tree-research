@@ -1,6 +1,6 @@
 # Building and updating the viewer
 
-The viewer (`viewer/index.html`) contains nothing about a specific family: everything comes from `data.json`. At the top: **Story** (step by step back in time, choosing father or mother each time), **▶ Cards** (the same story as full-screen cards that play by themselves) and **Family tree**, with the tree views **Family** (vertical tree with side branches), **Line** (couple by couple upwards), **Timeline** (ancestors by birth year), **Fan** and **Cosmos**. The title reads "Family tree of {start person}"; click the name to start with someone else. Search, details per person with source and certainty, English/Dutch, works on phones. Full data format: `viewer/DATA-FORMAT.md`.
+The viewer (`viewer/index.html`) contains nothing about a specific family: everything comes from `data.json`. At the top: **Story** (step by step back in time, choosing father or mother each time), **▶ Cards** (the same story as full-screen cards that play by themselves) and **Family tree**, with the tree views **Family** (vertical tree with side branches), **Line** (couple by couple upwards), **Timeline** (ancestors by birth year), **Fan**, **Cosmos** and **List** (everyone in the tree, to search and sort by name, by when they were added or last changed; filter on ancestors). The title reads "Family tree of {start person}"; click the name to start with someone else. Search, details per person with source and certainty, English/Dutch, works on phones. Full data format: `viewer/DATA-FORMAT.md`.
 
 ## 1. Building data.json
 

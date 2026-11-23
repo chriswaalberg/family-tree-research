@@ -54,6 +54,8 @@ Without a region code the viewer also recognises the country from the last part 
 | `woon_feiten` | list | no | What happened where, so a map can say why someone was there: `[[1794, "Rotterdam, Zuid-Holland, Nederland", "huwelijk", "", 20]]` (year, place, kind, extra, partner). Kinds: `doop`, `woonde` (RESI), `volkstelling`, `beroep` (extra = the occupation), `school`, `emigratie`, `immigratie`, `naturalisatie`, `gebeurtenis` (extra = the EVEN type), `huwelijk`, `ondertrouw`, `verloving`, `scheiding` (5th element: the partner's index in `personen`). Birth, death and the children's births are not repeated here (the viewer has them). Made by `make_viewer_data.py`; left out for living people with `--hide-living`. |
 | `weg` | list | no | Periods abroad: `[[1952, 1978, "AU"]]` (from, to, country: a code like `AU`, or the last part of the place name). Made by `make_viewer_data.py`. From = the earliest possible year of an `EMIG`, an `IMMI` or `RESI` abroad, or an `EVEN` with `TYPE` Emigratie/Emigration (`AFT 1952` → 1952, `BET 1950 AND 1955` → 1950). To = the first later dated fact in the home country (a `RESI`, `OCCU` or other event with a place, a marriage, a child born there, an `IMMI` back, death); nothing: the year of death (`null` when unknown). The home country is the country with the most dated facts (a tie: the birth country), so for someone who emigrated for good and stayed, the new country is home. In those years the viewer shows no zeitgeist (life, events, images, national events) of the home country. Left out with `--hide-living`. |
 | `media` | list | no | Photos and documents, see below. |
+| `toegevoegd` | list | no | When this person came into the tree, for the **List** view: `[when, kind, text, order]`. `when` = `"2026-11-23"` or `"2026-11-23 14:35"`; `kind` = `"r"` (a research round: `text` is the round's title, `order` = round × 100000 + step, so steps of one day keep their order) or `"g"` (a date the family tree program wrote, e.g. MyHeritage `_CREA`). From GEDCOM `_CREA` (written by `gedcom_tool.py rebuild` for everyone a round added). Missing = in the original tree. |
+| `gewijzigd` | list | no | The last change to this person, same shape as `toegevoegd`, with two more kinds: `"v"` (their own story, from `bijgewerkt`/`updated` in stories.json) and `"m"` (a photo or document, from the `added` column of media.csv; `text` = its title). The latest of: the last round step that named this person (GEDCOM `CHAN`, written by `rebuild`; `_UPD`/`CHAN` of other programs work too), their story, their media. |
 | `verhaal`, `verhaal_bronnen`, `verhaal_beelden` | | no | Own story, see "Stories" below. |
 
 ### Other names (`aka`)
@@ -61,6 +63,8 @@ Without a region code the viewer also recognises the country from the last part 
 `aka`: list of other names the person was known by, e.g. `["Jopie"]`. Made by `make_viewer_data.py` from a `NICK` under any `NAME` and from every `NAME` after the first (`2 TYPE aka`, a married name, …); with the same surname only the first names are kept, with another surname the whole name. Search finds people by these names too, and the viewer shows them after the name: "Johanna Maria Elisabeth Jansen (Jopie)".
 
 ### Photos and documents (`media`)
+
+A media item can carry `toegevoegd` (`"2026-11-24 09:15"`): when it was added (media.csv column `added`/`toegevoegd` → GEDCOM `2 _CREA` under the OBJE). It counts as a change of the person in the List view.
 
 Each item: `{"bestand": "media/grandma-1950.jpg", "titel": "Grandma Riet, 1950", "soort": "foto"}` (`bestand` = file, `titel` = caption, `soort` = kind). Only `bestand` is required (a plain string also works).
 
@@ -165,6 +169,8 @@ For most people the viewer writes a text from the data (birth, age at the child'
 | `verhaal_plekken` | list | Places the story points at, for its map (input key `plekken` or `places`): `[{"plaats": "Ahuys", "alinea": 1, "kaart": 1}]` (`plaats` = place, `alinea` = paragraph, `kaart` = card of `verhaal_kaarten`, both 1-based like story images; optional `jaar` (year) and `bijschrift` (caption, text or `{"en": …, "nl": …}`)). Every map gets a sentence that says why: with a `bijschrift` that is the caption, under the map in Story and in Cards (the place to say what is uncertain: "Probably his birthplace."); without one, "Around {jaar} the story takes place in {place}", or without `jaar` "Part of the story takes place in {place}". Use it for a place the story mentions that is not a birth place or home in the tree (a port someone sailed from, a town abroad). Every `plaats` needs coordinates (see "Coordinates"). Plain strings work too: `"plekken": ["Ahuys"]`. |
 
 A sibling with their own story appears as "Remarkable relative" with the ancestor on the trail.
+
+Give every story `"bijgewerkt": "2026-11-23 14:35"` (or `updated`) when you write or change it: the List view counts it as the person's last change.
 
 With the script: `--stories stories.json`, keyed by GEDCOM id (`@I12@`) or full name. English keys (`text`, `cards`, `sources`, `images`) and Dutch keys (`tekst`, `kaarten`, `bronnen`, `beelden`) both work. `make_viewer_data.py` warns (no error) when cards differ in number per language, a card has more than 250 characters, card 1 has a year or age, an image has no or a wrong `kaart`, or a story without cards has a paragraph over 350 characters:
 

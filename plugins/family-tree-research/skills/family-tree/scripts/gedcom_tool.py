@@ -501,8 +501,9 @@ MEDIA_TYPE = {"foto": "photo", "photo": "photo", "scan": "document", "akte": "do
 
 
 def cmd_media(a):
-    """media.csv columns: person (GEDCOM id or name with optional (year)), file, title, type (photo/scan/document).
-    Dutch column names (persoon, bestand, titel, soort) also work. Paths are relative to the tree folder
+    """media.csv columns: person (GEDCOM id or name with optional (year)), file, title, type (photo/scan/document),
+    optional portrait (y) and added (when it was added: 2026-11-23 or 2026-11-23 14:35).
+    Dutch column names (persoon, bestand, titel, soort, portret, toegevoegd) also work. Paths are relative to the tree folder
     (e.g. scans/1830 death.jpg or photos/grandma.jpg). Existing links (same FILE on the same person) are not duplicated."""
     lines = read(a.gedcom)
     recs, indi, fam = tree(lines)
@@ -547,10 +548,11 @@ def cmd_media(a):
             continue
         if f in [e[0] for e in extra.get(x, [])]:
             continue
-        extra.setdefault(x, []).append((f, row.get("title") or row.get("titel") or "", row.get("type") or row.get("soort") or "", prim))
+        extra.setdefault(x, []).append((f, row.get("title") or row.get("titel") or "", row.get("type") or row.get("soort") or "", prim,
+                                        row.get("added") or row.get("toegevoegd") or ""))
     for x, items in extra.items():
         rec = indi[x][2]
-        for f, title, kind, prim in items:
+        for f, title, kind, prim, when in items:
             ext = os.path.splitext(f)[1].lstrip(".").lower() or "jpg"
             rec += ["1 OBJE"] + (["2 _PRIM Y"] if prim else []) + [f"2 FILE {f}", f"3 FORM {ext}"]
             typ = MEDIA_TYPE.get(kind.lower())
@@ -558,6 +560,8 @@ def cmd_media(a):
                 rec.append(f"4 TYPE {typ}")
             if title:
                 rec.append(f"2 TITL {title}")
+            if when:  # when it was added: the viewer's List counts it as a change of this person
+                rec.append(f"2 _CREA {when.strip()}")
             added += 1
     write(a.output, [l for r in recs for l in r[2]])
     print(f"media: {added} links added for {len(extra)} people" + (f", {marked} existing photo(s) marked as portrait" if marked else "") + f" -> {a.output}")
@@ -720,6 +724,7 @@ class Rebuild:
         self.recs = [r for r in recs if r[1] != "TRLR"]
         self.idx = {r[0]: r for r in self.recs if r[0]}
         self.ever = set(self.idx)  # every id that ever existed, so a fixed id is never reused
+        self.orig = {r[0] for r in self.recs if r[1] == "INDI"}  # people of the original: they keep its own _CREA
         self.alias = {}            # dropped/merged id -> kept id
         self.rel = {}              # (child, parent) -> [status, source, note, type]
         self.rejected, self.gone_people, self.gone_events = [], [], []
@@ -729,6 +734,10 @@ class Rebuild:
         self.round_src = None
         self.n_fam = 0
         self.log = []
+        # when each person came in and last changed (the viewer's List): round + step of the first/last step that named them
+        self.touched = set()       # people named by the current step
+        self.crea, self.chan = {}, {}  # id -> (round n, step i)
+        self.rmeta = {}            # round n -> (date as written, title)
 
     # --- records
     def add_rec(self, x, tag, body):
@@ -738,6 +747,8 @@ class Rebuild:
         self.recs.append(r)
         self.idx[x] = r
         self.ever.add(x)
+        if tag == "INDI":
+            self.touched.add(x)
         return r[2]
 
     def delete(self, x):
@@ -770,6 +781,7 @@ class Rebuild:
         want = "FAM" if what == "family" else "INDI"
         if self.kind(x) != want:
             raise RoundError(f"unknown {what} '{v}'")
+        self.touched.update([x] if want == "INDI" else self.refs_in_fam(x, "HUSB") + self.refs_in_fam(x, "WIFE"))
         return x
 
     def refs_in_fam(self, f, tag):
@@ -1390,9 +1402,11 @@ class Rebuild:
         title = g(data, "title", "titel", default="")
         date = g(data, "date", "datum", default="")
         self.round_title = f"{self.t['round_src'].format(n=n)}" + (f": {title}" if title else "") + (f" ({date})" if date else "")
+        self.rmeta[n] = (str(date or ""), str(title or ""))
         default_src = g(data, "source", "bron")
         steps = g(data, "steps", "stappen", default=[])
         for i, s in enumerate(steps, 1):
+            self.touched = set()
             op = OPS.get(str(g(s, "op", "do", "doe", default="")).strip().lower())
             if not op:
                 raise SystemExit(f"{path}, step {i}: unknown op {g(s, 'op', 'do', 'doe')!r}. "
@@ -1403,6 +1417,10 @@ class Rebuild:
                 raise SystemExit(f"{path}, step {i} ({op}): {e}")
             self.log.append(f"  {n}.{i} {msg}")
             self.live_steps.append(live_step(op, s, msg))
+            for x in self.touched:
+                if x not in self.orig and x not in self.crea:
+                    self.crea[x] = (n, i)
+                self.chan[x] = (n, i)
         return len(steps)
 
     # --- end
@@ -1427,10 +1445,46 @@ class Rebuild:
                         rest[v] = rest.get(v, 0) + 1
         return changed, rest
 
+    def stamp(self, tag, n, i):
+        """A _CREA or CHAN block: the round's date (and time, when the round has one), its title, and round.step to
+        order steps of one day. Rounds are dated by `date`/`datum`: "2026-11-23" or "2026-11-23 14:35"."""
+        date, title = self.rmeta.get(n, ("", ""))
+        out = [f"1 {tag}"]
+        m = re.match(r"^\s*(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?", date) \
+            or re.match(r"^\s*(\d{1,2})-(\d{1,2})-(\d{4})(?:[ T](\d{1,2}):(\d{2}))?", date)
+        if m:
+            a, b, c, hh, mm = m.groups()
+            y, mo, d = (a, b, c) if len(a) == 4 else (c, b, a)
+            if 1 <= int(mo) <= 12:
+                out.append(f"2 DATE {int(d)} {MNUM[int(mo) - 1]} {y}")
+                if hh:
+                    out.append(f"3 TIME {int(hh):02d}:{mm}")
+        out.append(f"2 NOTE {self.t['round_src'].format(n=n)}" + (f": {title}" if title else ""))
+        out.append(f"2 _SEQ {n}.{i}")
+        return out
+
+    def stamped(self, r):
+        """A person's lines with this rebuild's _CREA (came in during a round) and CHAN (last round step about them).
+        The original's own _CREA/CHAN stay for people no round added or changed."""
+        x, ls = r[0], r[2]
+        drop = {t for t, have in (("_CREA", x in self.crea), ("CHAN", x in self.chan)) if have}
+        if not drop:
+            return ls
+        out, skip = [], False
+        for l in ls:
+            if lvl(l) == 1:
+                skip = tag_of(l) in drop
+            if not skip:
+                out.append(l)
+        for tag, d in (("_CREA", self.crea), ("CHAN", self.chan)):
+            if x in d:
+                out += self.stamp(tag, *d[x])
+        return out
+
     def lines(self, header_note):
         out = []
         for r in self.recs:
-            out += r[2]
+            out += self.stamped(r) if r[1] == "INDI" else r[2]
             if r[1] == "HEAD" and header_note:
                 out.append(f"1 NOTE {header_note}")
         return out + ["0 TRLR"]

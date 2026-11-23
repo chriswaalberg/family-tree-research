@@ -11,7 +11,7 @@ description: >
   researches ancestors in open archives with a source for every link, and
   publishes an interactive family-tree viewer. Works in English and Dutch.
 metadata:
-  version: "0.9.70"
+  version: "0.9.71"
 ---
 
 # Family-tree research, hand in hand
@@ -98,6 +98,7 @@ The viewer has a **Story** view: from the start person step by step back in time
 - **Look for stories yourself.** After every research round, scan the tree for remarkable lives: a place of death in a camp or at sea, war, emigration, the Dutch East India Company or the army, a famous event, an unusual occupation, a sibling with a history of their own. Suggest them actively; don't wait for the user to ask.
 - **Ask about family legends** ("we descend from French nobility", "grandpa sailed the seven seas"). Test them against the tree and the archives and tell honestly what holds up, what doesn't, and what's still open.
 - Only write a story with sources (listed under the story), name what's uncertain, and invent nothing. Hard things about people long dead (a conviction, a police report, forced labour, a divorce) may go in, factually and with the source; be careful with the living. Siblings with a story appear automatically as "Remarkable relative" with the ancestor.
+- **Date what you change.** A round file gets `"date": "2026-11-23 14:35"` (the moment you write it), a story `"bijgewerkt": "…"` whenever you write or edit it, a row in media.csv the `added` column. The viewer's List sorts people by when they came in and last changed; without a date a change doesn't show there.
 - **Two layers: `text` to read, `cards` to swipe.** The Story view shows `text`; it may be rich, with paragraphs like in an article. The Cards view plays the story as full-screen cards on a phone, like Instagram Stories, and people drop off most after the first card. So give every story a short card version too, `cards` (blank line = new card). Rules for cards:
   - **Card 1 is a hook**: the most striking fact, or a question, **without a year or age**. Not "X was born on … as the son of …": the intro card already says that. (The viewer places cards by year; a hook with "December 1943" pulls the whole series to 1943.)
   - **One moment per card**, at most ~200 characters (2–3 short sentences).
@@ -171,7 +172,7 @@ If the user says a parent wasn't the biological parent but raised the child as t
 Users may add photos, scans of records and other documents per person. They're stored in the GEDCOM as standard `OBJE`/`FILE` links (so they also work in other genealogy programs) and appear in the viewer under "Photos and documents" for that person.
 
 - Files belong in the connected folder: records in `scans/`, family photos in `photos/`. Let the user put them there (or in Downloads; then move them), with who's in it in the file name.
-- Linking: one row per file in `data/media.csv` → `gedcom_tool.py media` (see `references/gedcom-tool.md`). A scan you read yourself and used as a source: link it right away too. A good photo of the person themselves (a portrait, a wedding photo): put `yes` in the `portrait` column, so it becomes the polaroid at the top of their block in Story; without it the first photo is used.
+- Linking: one row per file in `data/media.csv`, with the moment in the `added` column (`2026-11-24 09:15`) → `gedcom_tool.py media` (see `references/gedcom-tool.md`). A scan you read yourself and used as a source: link it right away too. A good photo of the person themselves (a portrait, a wedding photo): put `yes` in the `portrait` column, so it becomes the polaroid at the top of their block in Story; without it the first photo is used.
 - Viewer: `make_viewer_data.py … --media-dir viewer/media` copies and publishes them (see `references/viewer.md`).
 - **Crop screenshots first.** If an image is a screenshot, cut away all browser and system chrome before linking: tab bar, address bar, menu bar, Dock, buttons and toolbars of the archive viewer. Only the record or photo remains. Set the original aside first (e.g. `_to_delete/originals-with-browser-chrome/`), crop (Pillow), and look at the result. An archive header line with the source reference is not browser chrome; keep it unless the user wants otherwise.
 - **Privacy:** photos of living people only if the user wants that; they'll be in the (private) artifact. Ask at the first photo of a living person.

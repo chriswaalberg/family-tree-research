@@ -547,7 +547,29 @@ main{padding-top:6px}
 .rootdlg h2{font:700 20px Fraunces,Georgia,serif;margin:0 0 4px}.rootdlg p{margin:0 0 12px;color:var(--muted-foreground);font-size:13.5px}
 .rp-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
 .rp-list button,.rp-search{all:unset;cursor:pointer;display:flex;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#fff}
-.rp-list button:hover,.rp-search:hover{border-color:var(--gold)}.rp-list button.on{border-color:var(--gold);background:#f6eddd}
+.rp-list button:hover,.rp-search:hover{border-color:var(--gold)}/* ===== LIJST (List) */
+.ls{max-width:980px;margin:0 auto;padding:4px 0 30px}
+.ls-bar{position:sticky;top:0;z-index:3;display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:10px 0;background:var(--bg)}
+.ls-q{flex:1 1 220px;min-width:0;font:15px Inter,system-ui,sans-serif;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink)}
+.ls-q:focus{outline:2px solid var(--gold);outline-offset:1px}
+.ls-seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.ls-seg button{all:unset;cursor:pointer;font:600 13px Inter,system-ui,sans-serif;padding:8px 11px;color:#7a7068;white-space:nowrap}
+.ls-seg button+button{border-left:1px solid var(--line)}
+.ls-seg button[aria-pressed=true]{background:var(--walnut2);color:#fffaf1}.ls-dir{margin-left:4px}
+.ls-count{font:600 12px Inter,system-ui,sans-serif;color:#7a7068;margin-left:auto}
+.ls-list{display:flex;flex-direction:column}
+.ls-r{all:unset;box-sizing:border-box;cursor:pointer;display:grid;width:100%;border-bottom:1px solid var(--line);padding:10px 12px;color:var(--ink)}
+.ls-r:hover{background:#fffaf1}.ls-r:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+.ls-n{font:600 17px/1.25 Fraunces,Georgia,serif}.ls-r .aka{color:#7a7068;font-style:italic}
+.ls-y{color:#7a7068;font-size:13px;margin-left:8px;white-space:nowrap}.ls-rel{color:var(--gold);font-weight:600}
+.ls-none{padding:40px 0;text-align:center;color:#7a7068}
+/* a row: two lines, the date of the sort on the right */
+.ls .ls-r{grid-template-columns:minmax(0,1fr) auto;gap:3px 14px;align-items:baseline}
+.ls .ls-l1{min-width:0}.ls .ls-l2{grid-column:1;min-width:0;display:flex;flex-wrap:wrap;gap:2px 12px;color:#7a7068;font-size:12.5px}.ls .ls-l2>span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ls .ls-d{grid-column:2;grid-row:1/3;align-self:center;font:600 13px Inter,system-ui,sans-serif;color:var(--walnut2);background:var(--parch2);border:1px solid var(--line);border-radius:99px;padding:4px 10px;white-space:nowrap}
+.ls .ls-d:empty{display:none}
+@media (max-width:640px){.ls-bar{gap:8px}.ls-count{margin-left:0}.ls-n{font-size:16px}}
+.rp-list button.on{border-color:var(--gold);background:#f6eddd}
 .rp-list button span{color:var(--muted-foreground)}.rp-search{color:#6b5a48;font-weight:600;justify-content:flex-start;box-sizing:border-box;width:100%}
 @media (max-width:700px){
   .topband .brand{align-items:flex-start}.tools{gap:6px}.topband .crest{display:none}.topband h1{font-size:21px;line-height:1.15}
@@ -712,6 +734,7 @@ main{padding-top:6px}
       <button type="button" role="tab" data-v="tijdlijn" data-t="v_tijdlijn"></button>
       <button type="button" role="tab" data-v="waaier" data-t="v_waaier"></button>
       <button type="button" role="tab" data-v="kosmos" data-t="v_kosmos"></button>
+      <button type="button" role="tab" data-v="lijst" data-t="v_lijst"></button>
     </nav></div>
     <div id="vhPickWrap" hidden></div>
     <div id="starts" role="group" hidden></div>
@@ -792,7 +815,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.70",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.71",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -2707,8 +2730,69 @@ function applyTexts(){const up=updatedText();$("made").innerHTML=_t("madeWith",{
 function emptyState(view){const d=document.createElement("div");d.className="empty";
   d.innerHTML=`<div class="et">${_t("emptyTitle")}</div><p>${_t("emptyBody",{name:slEsc(short(P[state.root])),view:_t("v_"+view).toLowerCase()})}</p>`;return d}
 
+/* ===== LIJST (List): everyone in the tree, to search and sort by name, when they were added or last changed.
+   data.json `toegevoegd` / `gewijzigd` = [when, kind, text, order]: kind r = research round (order = round*100000+step),
+   v = own story, m = photo or document (text = its title), g = the program that made the GEDCOM. Nothing = in the original tree. */
+Object.assign(I18N.nl,{v_lijst:"Lijst",ls_find:"Zoek in de lijst…",ls_name:"Naam",ls_added:"Toegevoegd",ls_changed:"Gewijzigd",
+ ls_all:"Iedereen",ls_anc:"Voorouders",ls_n:"{n} mensen",ls_n1:"1 persoon",ls_none:"Niemand gevonden.",ls_orig:"in de oorspronkelijke stamboom",
+ ls_round:"ronde {n}",ls_story:"eigen verhaal",ls_photo:"foto of document",ls_prog:"stamboomprogramma",ls_root:"startpersoon",
+ ls_sortT:"Sorteren op",ls_rev:"Andere volgorde",ls_today:"vandaag",ls_yest:"gisteren"});
+Object.assign(I18N.en,{v_lijst:"List",ls_find:"Search the list…",ls_name:"Name",ls_added:"Added",ls_changed:"Changed",
+ ls_all:"Everyone",ls_anc:"Ancestors",ls_n:"{n} people",ls_n1:"1 person",ls_none:"Nobody found.",ls_orig:"in the original tree",
+ ls_round:"round {n}",ls_story:"own story",ls_photo:"photo or document",ls_prog:"family tree program",ls_root:"start person",
+ ls_sortT:"Sort by",ls_rev:"Reverse order",ls_today:"today",ls_yest:"yesterday"});
+/* a row: name + years, below it relation, added and changed; the date of the sort on the right (chosen from three) */
+const LS_CFG={MAX_ROWS:2000};
+function lsState(){if(!state.ls){let s={};try{s=JSON.parse(localStorage.getItem("ftrList")||"{}")}catch(e){}
+  state.ls={sort:["naam","toeg","wijz"].includes(s.sort)?s.sort:"wijz",rev:!!s.rev,anc:!!s.anc,q:""}}return state.ls}
+function lsSave(){const s=state.ls;try{localStorage.setItem("ftrList",JSON.stringify({sort:s.sort,rev:s.rev,anc:s.anc}))}catch(e){}}
+/* "2026-11-23 14:35" -> "23 nov 2026, 14:35" (today / yesterday in words) */
+function lsDate(w,short){const m=/^(\d{4})-(\d{2})-(\d{2})(?: (\d{2}):(\d{2}))?/.exec(w||"");if(!m)return"";
+  const d=new Date(+m[1],+m[2]-1,+m[3]),t=new Date();t.setHours(0,0,0,0);const diff=Math.round((t-d)/864e5);
+  let s=diff===0?_t("ls_today"):diff===1?_t("ls_yest"):`${+m[3]} ${VH_MN[LANG][+m[2]-1].slice(0,short?3:99)}${short&&+m[1]===t.getFullYear()?"":" "+m[1]}`;
+  if(m[4]!=null){const h=+m[4],mi=m[5];s+=", "+(LANG==="nl"?`${h}:${mi}`:`${h%12||12}:${mi} ${h<12?"am":"pm"}`)}
+  return s}
+function lsWhat(st){if(!st)return _t("ls_orig");const[,k,t,o]=st;
+  if(k==="r")return _t("ls_round",{n:Math.floor((o||0)/100000)})+(t?": "+t:"");
+  if(k==="v")return _t("ls_story");if(k==="m")return _t("ls_photo")+(t?": "+t:"");return _t("ls_prog")}
+function lsRel(i,gen){if(i===state.root)return _t("ls_root");const g=gen.get(i);return g?vhRelWord(g,P[i].x):""}
+function lsRows(){const s=lsState(),gen=ancestorStats(state.root).gen,q=(s.q||"").trim().toLowerCase();
+  let ids=P.map((p,i)=>i).filter(i=>!s.anc||gen.has(i));
+  if(q){const ws=q.split(/\s+/);ids=ids.filter(i=>{const p=P[i],h=[p.n,...(p.aka||[]),p.by||"",p.dy||""].join(" ").toLowerCase();return ws.every(w=>h.includes(w))})}
+  const key=st=>st?st[0]+"|"+String(st[3]||0).padStart(9,"0"):"";
+  const sur=p=>(p.s||p.n||"").replace(/^((van|de|der|den|ter|ten|het|von|du|la|le|'t)\s+)+/i,""),  /* by surname without "van der": De Vries under V */
+    byName=(a,b)=>sur(P[a]).localeCompare(sur(P[b]),LANG,{sensitivity:"base"})||(P[a].g||P[a].n||"").localeCompare(P[b].g||P[b].n||"",LANG,{sensitivity:"base"})||((P[a].by||0)-(P[b].by||0));
+  const f=s.sort==="naam"?null:(s.sort==="toeg"?"toegevoegd":"gewijzigd");
+  ids.sort((a,b)=>{if(!f)return byName(a,b);const ka=key(P[a][f]),kb=key(P[b][f]);
+    if(!ka!==!kb)return ka?-1:1;  /* without a date always at the end, whatever the direction */
+    return(kb.localeCompare(ka))*(s.rev?-1:1)||byName(a,b)});
+  if(!f&&s.rev)ids.reverse();
+  return{ids,gen}}
+function lsRowHtml(i,gen){const p=P[i],s=lsState(),rel=lsRel(i,gen),a=p.toegevoegd,c=p.gewijzigd,y=/^\?\s*[–-]\s*\??$/.test(yrs(p))?"":yrs(p);
+  const nm=`<b class="ls-n">${slEsc(p.n)}</b>${akaHtml(p)}`,dA=a?lsDate(a[0],true):"",dC=c?lsDate(c[0],true):"";
+  /* added: date + round number only (or "original tree"); changed: date + what, with the round's title */
+  const added=a?dA+(a[1]==="r"?" · "+_t("ls_round",{n:Math.floor((a[3]||0)/100000)}):""):lsWhat(null),badge=s.sort==="toeg"?dA:dC;
+  return`<button type="button" class="ls-r" data-i="${i}"><span class="ls-l1">${nm}<span class="ls-y">${slEsc(y)}</span></span>`
+    +`<span class="ls-l2">${rel?`<span class="ls-rel">${slEsc(rel)}</span>`:""}<span>${slEsc(_t("ls_added"))} ${slEsc(added)}</span>${c?`<span>${slEsc(_t("ls_changed"))} ${slEsc(dC)} · ${slEsc(lsWhat(c))}</span>`:""}</span>`
+    +`<span class="ls-d">${slEsc(badge||"")}</span></button>`}
+function lsListHtml(){const{ids,gen}=lsRows();if(!ids.length)return`<p class="ls-none">${_t("ls_none")}</p>`;
+  return ids.slice(0,LS_CFG.MAX_ROWS).map(i=>lsRowHtml(i,gen)).join("")}
+function drawLijst(){const s=lsState(),w=document.createElement("div");w.className="ls";
+  const sortBtn=(k,l)=>`<button type="button" data-sort="${k}" aria-pressed="${s.sort===k}">${_t(l)}${s.sort===k?`<span class="ls-dir" aria-hidden="true">${(k==="naam")!==s.rev?"↑":"↓"}</span>`:""}</button>`;
+  w.innerHTML=`<div class="ls-bar"><input type="search" class="ls-q" placeholder="${slEsc(_t("ls_find"))}" value="${slEsc(s.q)}" autocomplete="off">
+    <div class="ls-seg" role="group" aria-label="${slEsc(_t("ls_sortT"))}">${sortBtn("naam","ls_name")}${sortBtn("toeg","ls_added")}${sortBtn("wijz","ls_changed")}</div>
+    <div class="ls-seg" role="group">${[["0","ls_all"],["1","ls_anc"]].map(([v,l])=>`<button type="button" data-anc="${v}" aria-pressed="${s.anc===(v==="1")}">${_t(l)}</button>`).join("")}</div>
+    <span class="ls-count"></span></div><div class="ls-list"></div>`;
+  const list=w.querySelector(".ls-list"),count=w.querySelector(".ls-count");
+  const fill=()=>{list.innerHTML=lsListHtml();const n=lsRows().ids.length;count.textContent=n===1?_t("ls_n1"):_t("ls_n",{n:n.toLocaleString(LANG)})};
+  w.querySelector(".ls-q").addEventListener("input",e=>{s.q=e.target.value;fill()});
+  w.querySelectorAll("[data-sort]").forEach(b=>b.onclick=()=>{const k=b.dataset.sort;if(s.sort===k)s.rev=!s.rev;else{s.sort=k;s.rev=false}lsSave();render()});
+  w.querySelectorAll("[data-anc]").forEach(b=>b.onclick=()=>{s.anc=b.dataset.anc==="1";lsSave();render()});
+  list.addEventListener("click",e=>{const r=e.target.closest(".ls-r");if(r)personSheet(+r.dataset.i)});
+  fill();return w}
+
 /* ================= shell ================= */
-const VIEWS=["familie","stamlijn","verhaal","tijdlijn","waaier","kosmos"];
+const VIEWS=["familie","stamlijn","verhaal","tijdlijn","waaier","kosmos","lijst"];
 /* ===== LIJN: "In the tree" in Story's route bar shows the Story trail (state.vh.path) in every tree view; the rest dims (ln-dim).
    state.line is only the on/off switch: the line itself is always the current Story trail, so it follows Story and ends when the start person changes. */
 function lineInfo(){const v=state.vh;if(!state.line||!v||v.root!==state.root||v.path.length<2)return null;
@@ -2770,8 +2854,9 @@ function render(){
   const stage=$("stage");stage.innerHTML="";{const sh=$("slsheet");if(sh)sh.remove()}
   $("legend").style.display="";$("hint").textContent="";
   const noAnc=!parentsOf(state.root).length;
-  if(noAnc&&v!=="familie"){stage.appendChild(emptyState(v));$("legend").style.display="none"}
+  if(noAnc&&v!=="familie"&&v!=="lijst"){stage.appendChild(emptyState(v));$("legend").style.display="none"}
   else{
+  if(v==="lijst"){stage.appendChild(drawLijst());$("legend").style.display="none"}
   if(v==="stamlijn"){stage.appendChild(drawStamlijn());legend(colorLegend("lijn").concat(hasAdopt()?[[_t("lg_adopt_line"),ADOPT_COL]]:[]))}
   if(v==="familie"){stage.appendChild(drawFamilie());legend(colorLegend("lijn").concat(hasAdopt()?[[_t("lg_adopt_line"),ADOPT_COL]]:[]))}
   if(v==="verhaal"){stage.appendChild(drawVerhaal());$("legend").style.display="none"}

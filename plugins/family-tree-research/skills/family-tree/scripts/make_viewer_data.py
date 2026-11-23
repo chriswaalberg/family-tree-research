@@ -186,6 +186,56 @@ def col(row, *names):
                 return (row[k] or "").strip()
     return ""
 
+# ---------------------------------------------------------------- when someone came in and last changed (the List view)
+MON = {m: i for i, m in enumerate(["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"], 1)}
+
+def when_of(s, time=""):
+    """'2026-11-23', '2026-11-23 14:35', '2026-11-23T14:35:02', '23 NOV 2026' (+ TIME) or '26 JUL 2022 21:13:53 GMT -0500'
+    -> '2026-11-23' or '2026-11-23 14:35' (sorts as text). None when it is no date."""
+    s = str(s or "").strip()
+    m = re.match(r"^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?", s)
+    if m:
+        y, mo, d, hh, mm = m.groups()
+    else:
+        m = re.match(r"^(\d{1,2}) ([A-Za-z]{3})[A-Za-z]* (\d{4})(?: (\d{1,2}):(\d{2}))?", s)
+        if not m or m.group(2).upper() not in MON:
+            m = re.match(r"^(\d{1,2})-(\d{1,2})-(\d{4})(?:[ T](\d{1,2}):(\d{2}))?", s)
+            if not m:
+                return None
+            d, mo, y, hh, mm = m.groups()
+        else:
+            d, mo, y, hh, mm = m.group(1), MON[m.group(2).upper()], m.group(3), m.group(4), m.group(5)
+    try:
+        out = f"{int(y):04d}-{int(mo):02d}-{int(d):02d}"
+    except ValueError:
+        return None
+    t = re.match(r"^(\d{1,2}):(\d{2})", str(time or "").strip())
+    if t:
+        hh, mm = t.groups()
+    return out + (f" {int(hh):02d}:{mm}" if hh else "")
+
+def stamp_of(indi, tags):
+    """[when, kind, text, order] from the first of `tags` (_CREA, CHAN, _UPD) a person has. kind "r" = a research round
+    (written by gedcom_tool.py rebuild, with _SEQ round.step), "g" = the program that made the GEDCOM."""
+    for tag in tags:
+        n = sub(indi, tag)
+        if not n:
+            continue
+        d = sub(n, "DATE")
+        when = when_of(d["v"], (sub(d, "TIME") or {}).get("v", "")) if d else when_of(n["v"])
+        if not when:
+            continue
+        seq = (sub(n, "_SEQ") or {}).get("v", "").strip()
+        order = 0
+        if re.match(r"^\d+\.\d+$", seq):
+            r, s = seq.split(".")
+            order = int(r) * 100000 + int(s)
+        note = (sub(n, "NOTE") or {}).get("v", "").strip()
+        if seq:  # "Research round 92: Katwijk" -> "Katwijk": the viewer writes "Round 92" in its own language (round = order // 100000)
+            note = note.split(": ", 1)[1] if ": " in note else ""
+        return [when, "r" if seq else "g", note, order]
+    return None
+
 # ---------------------------------------------------------------- media (OBJE)
 SOORT_GED = {"photo": "foto", "foto": "foto", "document": "document", "scan": "scan", "certificate": "scan",
              "akte": "scan", "book": "document", "card": "document", "newspaper": "document"}
@@ -211,6 +261,11 @@ def media_of(indi, objs):
                     if srt: m["soort"] = srt
                     prim = (sub(n, "_PRIM") or sub(o, "_PRIM") or {}).get("v", "").strip().upper()
                     if prim in ("Y", "YES", "1"): m["portret"] = True  # the main photo (Ancestry, FTM, RootsMagic; media.csv "portrait")
+                    cr = sub(n, "_CREA") or sub(o, "_CREA")  # when it was added (media.csv "added", via gedcom_tool.py media)
+                    if cr:
+                        d = sub(cr, "DATE")
+                        w = when_of(d["v"], (sub(d, "TIME") or {}).get("v", "")) if d else when_of(cr["v"])
+                        if w: m["toegevoegd"] = w
                     if m not in out: out.append(m)
             continue
         stack.extend(n["c"])
@@ -973,6 +1028,10 @@ def main():
         md = media_of(r, objs)
         if md:
             p["media"] = md
+        st = stamp_of(r, ("_CREA",))
+        if st: p["toegevoegd"] = st
+        st = stamp_of(r, ("CHAN", "_UPD"))
+        if st: p["gewijzigd"] = st
         people.append(p)
     for i, r in enumerate(indis):
         for c in subs(r, "FAMS"):
@@ -1207,6 +1266,8 @@ def main():
                 if plk: people[i]["verhaal_plekken"] = plk
                 if src: people[i]["verhaal_bronnen"] = src
                 if img: people[i]["verhaal_beelden"] = img_kinds(img)
+                w = when_of(val.get("bijgewerkt") or val.get("updated") or "")  # when the story was written or last edited
+                if w: people[i]["_story_when"] = w
             else:
                 people[i]["verhaal"] = val
             n_vh += 1
@@ -1227,6 +1288,17 @@ def main():
         if n_vh: print("  Card budget per person (exact, with zeitgeist): open the viewer with #kaartbudget (or #cardbudget) at the end of the address")
 
     for p in people: p.pop("_media_orig", None)
+    # last change = the latest of: the last round step about them (CHAN), their own story (stories.json "updated"),
+    # a photo or document added (media.csv "added"). Same moment: the round wins (it carries the most detail).
+    for p in people:
+        best = p.get("gewijzigd")
+        cands = [[p.pop("_story_when"), "v", "", 0]] if p.get("_story_when") else []
+        cands += [[m["toegevoegd"], "m", m.get("titel", ""), 0] for m in p.get("media", []) if m.get("toegevoegd")]
+        for c in cands:
+            if not best or c[0] > best[0]:
+                best = c
+        if best: p["gewijzigd"] = best
+        p.pop("_story_when", None)
     fam = a.familienaam or surn0[starts[0]["persoon"]] or ""
     out = {"versie": 2, "taal": a.taal}
     upd = a.bijgewerkt or datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")

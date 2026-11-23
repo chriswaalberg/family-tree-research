@@ -29,7 +29,7 @@ python3 -I scripts/gedcom_tool.py rebuild source/original-ancestry-2026-11-19.ge
 ```json
 {
   "title": "Parents of Hendrik Jansen",
-  "date": "2026-11-19",
+  "date": "2026-11-19 14:35",
   "source": "Death record Zwolle 1868, no. 41 https://www.openarchieven.nl/...",
   "steps": [
     {"op": "event", "person": "@I7@", "type": "death", "date": "3-1-1868", "place": "Zwolle"},
@@ -43,6 +43,8 @@ python3 -I scripts/gedcom_tool.py rebuild source/original-ancestry-2026-11-19.ge
   ]
 }
 ```
+
+**Date the round with the time** (`"date": "2026-11-19 14:35"`, the moment you write it; a day alone also works). `rebuild` gives every person a round names a GEDCOM `_CREA` (the round that added them) and `CHAN` (the last round step about them: date, time, the round's title and `_SEQ round.step`); the viewer's **List** sorts by them. People of the original keep their own `_CREA`/`CHAN`, if their program wrote one.
 
 Dutch: `titel`, `datum`, `bron`, `stappen`, and the Dutch step names and keys below. The round's `source` is the default for every step without its own `source`. A source is text with an optional link (`"... https://..."`), or `{"text": "...", "url": "..."}`, or a list of those. In the GEDCOM it becomes a citation (`SOUR` / `PAGE` / `WWW`) of a source record for the round.
 
@@ -137,7 +139,7 @@ Gives counts, ancestors per generation (expected/found), the gaps and things wor
 python3 -I scripts/gedcom_tool.py media source/tree.ged data/media.csv source/tree.ged
 ```
 
-`data/media.csv` (delimiter `,` `;` or tab), one row per file:
+`data/media.csv` (delimiter `,` `;` or tab), one row per file (optional column `added`/`toegevoegd`: when you added it, `2026-11-24 09:15`; the List view counts it as a change of that person):
 
 ```
 person,file,title,type
