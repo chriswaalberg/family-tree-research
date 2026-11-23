@@ -41,7 +41,7 @@ svg{display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:
 .ran .fn{color:var(--text)}
 .u{align-self:flex-end;background:var(--bubble);border-radius:14px;padding:12px 18px;font-size:17px;line-height:24.5px;max-width:640px;margin:26px 0 30px}
 .card{width:556px;border:1px solid #262626;border-radius:12px;overflow:hidden;margin:0 0 14px;background:#141414}
-.card .shot{height:208px;overflow:hidden;position:relative}.card iframe{border:0;width:556px;height:620px;pointer-events:none}
+.card .shot{height:208px;overflow:hidden;position:relative}.card img{display:block;width:556px;height:auto}
 .card .ft{height:72px;border-top:1px solid #262626;display:flex;align-items:center;padding:0 16px;gap:10px;background:#171717}
 .card .ft div{flex:1;font-size:15.5px;line-height:21px}.card .ft small{display:block;color:var(--dim);font-size:14.5px}
 .card .open{background:#333;border-radius:8px;padding:5px 11px;font-size:16px}.card .ft svg{width:18px;height:18px;color:#ccc}
@@ -152,7 +152,7 @@ window.demo={
  ran(text,file){add(`${esc(text)}${file?` <span class="fn">${esc(file)}</span>`:""}${chev}`,"ran");demo.think()},
  todos(items){todo=add(items.map((t,i)=>`<div id="td${i}"><span class="ck"></span>${esc(t)}</div>`).join(""),"todo");demo.think()},
  step(i,state){const d=$("#td"+i);if(d)d.className=state},
- card(url){add(`<div class="shot"><iframe src="${url}"></iframe></div><div class="ft"><div>Workshop<small>localhost:8790, opened in Browser</small></div><span class="open">Open</span><svg><use href="#i-dots"/></svg></div>`,"card");demo.think()},
+ card(img){add(`<div class="shot"><img src="${img}" alt=""></div><div class="ft"><div>Workshop<small>localhost:8790, opened in Browser</small></div><span class="open">Open</span><svg><use href="#i-dots"/></svg></div>`,"card");demo.think()},
  open(url,title){const f=$("#ws");f.onload=()=>f.classList.add("on");f.src=url;$("#tabt").textContent=title;$("#url").textContent="localhost:8790"},
  finish(html){$("#think")?.remove();clearInterval(tTimer);add(html,"p","p");$("#spin").hidden=true;$("#curdots").style.display="";$("#stop").hidden=true;$("#ring").classList.remove("busy");$("#q").dataset.ph="Reply…"}
 };

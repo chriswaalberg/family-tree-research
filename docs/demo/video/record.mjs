@@ -65,10 +65,14 @@ try {
   await s(300);
   const url = `http://127.0.0.1:${PORT}/`;
   await D("open", url, "Workshop · Femke de Vries");
-  await D("ran", "Ran 2 commands, started preview, opened browser", "");
-  await D("card", url);
   await page.waitForFunction(() => document.querySelector("#ws").classList.contains("on"));
-  for (const fr of page.frames().filter(f => f.url().startsWith(url))) {
+  await s(400);
+  // the chat card is a still screenshot of the preview, like the app's own
+  const box = await page.locator("#ws").boundingBox();
+  const shot = await page.screenshot({ clip: { x: box.x, y: box.y, width: box.width, height: Math.round(box.width * 208 / 556) } });
+  await D("ran", "Ran 2 commands, started preview, opened browser", "");
+  await D("card", "data:image/png;base64," + shot.toString("base64"));
+  for (const fr of page.frames().filter(f => f.url().startsWith(url))) {   // the Workshop pane
     await fr.waitForFunction(() => typeof CFG === "object").catch(() => {});
     await fr.evaluate(() => { CFG.ONE_BY_ONE = 4; CFG.CERT_ONE_BY_ONE = 3; }).catch(() => {});   // fewer one-by-one arrivals for a 15 s video
   }
