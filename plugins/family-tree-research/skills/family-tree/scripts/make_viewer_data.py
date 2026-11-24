@@ -1305,7 +1305,7 @@ def main():
                 img = val.get("beelden") or val.get("images")
                 crd = val.get("kaarten") or val.get("cards")  # short version for Cards (blank line = new card)
                 if crd: people[i]["verhaal_kaarten"] = crd
-                jm = val.get("verzamelkaart", val.get("journey_map"))  # false: no journey map in Cards, one map per place
+                jm = val.get("verzamelkaart", val.get("journey_map"))  # false: no journey map (Story, Cards), one map per place
                 if jm is False: people[i]["verzamelkaart"] = False
                 plk = story_places(val.get("plekken") or val.get("places"))  # places the story points at (for its map)
                 if plk: people[i]["verhaal_plekken"] = plk

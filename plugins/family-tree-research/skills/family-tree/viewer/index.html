@@ -643,6 +643,7 @@ main{padding-top:6px}
 .sw-trip{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;line-height:1.35}
 .sw-trip li{display:flex;align-items:baseline;gap:5px}
 .sw-trip i{font-style:normal;font-weight:700;font-size:11px;color:#fff;background:#b3342b;border-radius:9px;min-width:18px;padding:1px 5px;text-align:center}
+.vh-trip .sw-trip{display:block;margin:6px 0 4px;font-size:13px}.vh-trip .sw-trip li{display:block;margin:2px 0}.vh-trip .sw-trip i{margin-right:5px}.vh-trip .sw-trip span{opacity:.8}.vh-trip .vh-tl{display:block}
 .sw-cap .sw-trip b{display:inline;font-family:inherit;font-size:14px;line-height:inherit;margin:0}
 .sw-cap .sw-trip span{display:inline;margin:0;font-size:13px;opacity:.8}
 .sw .sw-opts{display:flex;flex-direction:column;gap:12px;margin-top:16px}
@@ -827,7 +828,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.83",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.84",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1709,8 +1710,9 @@ function vhTijdgeest(i,seen){const T=vhTG();if(!T)return"";const p=P[i];if(p.liv
   if(pick.length){pick.forEach(x=>seen.add(x.key));
     html+=`<div class="vh-k">${_t("vh_tg_events")}</div><ul class="vh-ev">${pick.map(({ev,lok})=>`<li data-y="${ev.jaar||ev.van||""}"${lok?' data-lok="1"':""}${ev.gewicht!=null&&isFinite(+ev.gewicht)?` data-w="${+ev.gewicht}"`:""}><b>${ev.van&&ev.tot&&ev.van!==ev.tot?ev.van+"–"+String(ev.tot).slice(-2):ev.jaar}</b><span>${slEsc(lab(ev.tekst))}${ev.bron?` <a href="${slEsc(ev.bron[1])}" target="_blank" rel="noopener" title="${slEsc(ev.bron[0])}">${_t("vh_src1")}</a>`:""}${ev.links&&ev.links.length?`<span class="vh-evl">${slEsc(lab(ev.links_label)||"")} ${ev.links.map(l=>`<a href="${slEsc(l[1])}" target="_blank" rel="noopener">${slEsc(lab(l[0]))}</a>`).join(" · ")}</span>`:""}</span></li>`).join("")}</ul>`}
   return html?`<section class="vh-tg">${html}</section>`:""}
-/* Story: a map at each moment from mapEvents, with its caption and the note about present-day coastlines */
-function vhMapEl(e){const c=mapCap(e),cap=mapCapText(e);return `<figure class="vh-map">${mapOf(e)}<figcaption>${cap?`<span class="vh-mcap">${slEsc(cap)}</span>`:""}<b>${slEsc(c.name)}</b>${c.sub?" · "+slEsc(c.sub):""}${c.line?" · "+slEsc(c.line):""}<small>${slEsc(_t("map_note"))}</small></figcaption></figure>`}
+/* Story: a map at each moment from mapEvents (a journey from mapTrips: one numbered map with its list, as in Cards), with its caption and the note about present-day coastlines */
+function vhMapEl(p,it){if(it.trip){const T=mapTripText(p,it);return `<figure class="vh-map vh-trip">${mapTrip(it)}<figcaption><span class="vh-mcap">${slEsc(T.why)}</span>${T.list}${T.line?`<span class="vh-tl">${slEsc(T.line)}</span>`:""}<small>${slEsc(_t("map_note"))}</small></figcaption></figure>`}
+  const e=it,c=mapCap(e),cap=mapCapText(e);return `<figure class="vh-map">${mapOf(e)}<figcaption>${cap?`<span class="vh-mcap">${slEsc(cap)}</span>`:""}<b>${slEsc(c.name)}</b>${c.sub?" · "+slEsc(c.sub):""}${c.line?" · "+slEsc(c.line):""}<small>${slEsc(_t("map_note"))}</small></figcaption></figure>`}
 function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
   const S=vhState(),path=S.path,root=P[path[0]],rfn=vhFn(root),flags={dtb:false},tgSeen=new Set(),mapMS={seen:[],here:null};tgSeen.assign=vhAssignImages(path);
   const w=document.createElement("div");w.className="vh";
@@ -1739,27 +1741,27 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     const facts=[p.bdate||p.bplac?`° ${[p.bdate,p.bplac].filter(Boolean).map(slEsc).join(" · ")}`:"",p.ddate||p.dplac?`† ${[p.ddate,p.dplac].filter(Boolean).map(slEsc).join(" · ")}`:""].filter(Boolean).join("<br>");
     const own=vhHas(p);
     const tpl=vhTemplate(i,child,flags);
-    const tgHtml=vhTijdgeest(i,tgSeen),mev=mapEvents(p,mapMS);let body;const mTok=e=>"\u0001M"+mev.indexOf(e)+"\u0001";
+    const tgHtml=vhTijdgeest(i,tgSeen),mev=mapTrips(p,mapEvents(p,mapMS));let body;const mTok=e=>"\u0001M"+mev.indexOf(e)+"\u0001";
     if(own){/* one timeline: paragraphs (with their images) and zeitgeist pieces sorted by year */
       const paras=vhParaList(lab(p.verhaal)),pimgs=(Array.isArray(p.verhaal_beelden)?p.verhaal_beelden:[]).filter(b=>b&&b.bestand),slot=vhImgSlots(paras,pimgs),py=vhParaYears(paras,p);
       /* the map right after the paragraph that names the place someone moved to; no such paragraph: by the year of the move */
       /* maps: right after the paragraph that names the new place (mapPara), else at the year of that moment */
-      const mj=mev.map(e=>mapPara(e,paras,p));
+      const mj=mev.map(e=>mapPara(mapFirst(e),paras,p));
       const items=paras.map((x,j)=>({type:"p",y:py[j],html:`<p>${vhMd(x)}</p>`+mev.filter((e,k)=>mj[k]===j).map(mTok).join("")+pimgs.filter((b,k)=>slot[k]===j).map(vhFig).join("")}))
-        .concat(mev.filter((e,k)=>mj[k]<0).map(e=>({type:"p",y:e.y,html:(mapCapText(e)?"":`<p class="vh-mw">${slEsc(mapWhy(p,e))}</p>`)+mTok(e)})),vhTgPieces(tgHtml));
+        .concat(mev.filter((e,k)=>mj[k]<0).map(e=>({type:"p",y:e.y,html:(e.trip||mapCapText(e)?"":`<p class="vh-mw">${slEsc(mapWhy(p,e))}</p>`)+mTok(e)})),vhTgPieces(tgHtml));
       body="";let run=[],tg=[];const flush=()=>{if(run.length){body+=`<div class="vh-txt">${run.join("")}</div>`;run=[]}if(tg.length){body+=vhTgBox(tg);tg=[]}};
       for(const it of vhSortByYear(items)){if(it.type==="p"){if(tg.length)flush();run.push(it.html)}else{if(run.length){body+=`<div class="vh-txt">${run.join("")}</div>`;run=[]}tg.push(it)}}
       flush();body+=`<div class="vh-txt">${vhSources(p)}</div>`}
     else{const P1=g=>g&&g.length?`<p>${slEsc(g.join(" "))}</p>`:"";
       /* every map right after a sentence that names its place and says why: the birthplace map after the birth text (which names it),
          the place of death after the death sentence, every other place (homes from "woon") with a sentence of its own (mapWhy) */
-      const bc=mapCo(p.bplac),born=e=>(e.y==null||p.by==null||e.y<=p.by)&&bc&&mapSame(bc,e.t)&&NORM(tpl.g1.join(" ")).includes(NORM(mapName(e.t.n))),died=e=>!born(e)&&p.dplac&&tpl.nd&&mapDeathOnly(p,e);
-      const why=e=>(mapCapText(e)?"":`<div class="vh-txt"><p class="vh-mw">${slEsc(mapWhy(p,e))}</p></div>`)+mTok(e);
+      const bc=mapCo(p.bplac),born=e=>!e.trip&&(e.y==null||p.by==null||e.y<=p.by)&&bc&&mapSame(bc,e.t)&&NORM(tpl.g1.join(" ")).includes(NORM(mapName(e.t.n))),died=e=>!e.trip&&!born(e)&&p.dplac&&tpl.nd&&mapDeathOnly(p,e);
+      const why=e=>(e.trip||mapCapText(e)?"":`<div class="vh-txt"><p class="vh-mw">${slEsc(mapWhy(p,e))}</p></div>`)+mTok(e);
       const g2a=tpl.g2.slice(0,tpl.nd),g2b=tpl.g2.slice(tpl.nd),dm=mev.filter(died).map(mTok).join(""),note=tpl.note.map(n=>`<p class="vh-note">${slEsc(n)}</p>`).join("");
       body=`<div class="vh-txt">${P1(tpl.g1)}${note}</div>${mev.filter(born).map(mTok).join("")}${tgHtml}${mev.filter(e=>!born(e)&&!died(e)).map(why).join("")}`
         +(dm?`<div class="vh-txt">${P1(g2a)}</div>${dm}<div class="vh-txt">${P1(g2b)}</div>`:`<div class="vh-txt">${P1(tpl.g2)}</div>`)}
     /* maps in the order they are shown, each from the map before it (mapChain) */
-    if(mev.length){mapChain([...body.matchAll(/\u0001M(\d+)\u0001/g)].map(m=>mev[+m[1]]),p);body=body.replace(/\u0001M(\d+)\u0001/g,(_,k)=>vhMapEl(mev[+k]))}
+    if(mev.length){mapChain([...body.matchAll(/\u0001M(\d+)\u0001/g)].map(m=>mev[+m[1]]),p);body=body.replace(/\u0001M(\d+)\u0001/g,(_,k)=>vhMapEl(p,mev[+k]))}
     /* broers/zussen met een eigen verhaal */
     const sib=vhSibs(i).filter(j=>vhHas(P[j])).map(j=>{const q=P[j],ppr=vhPro(p);
       const rl=_t(q.x==="M"?"vh_sib_M":q.x==="F"?"vh_sib_F":"vh_sib_X",ppr);
@@ -2341,7 +2343,7 @@ function mapFor(t,from,others){const d=from?mapKm(from,t):0;return d>=MAP.FAR_KM
    ("Bourke, 873 km from Adelaide" before Adelaide's map) then becomes the place of the map shown just before it. A "from" already shown,
    never shown in this person's maps, or their birthplace (a route from Karlshamn still tells where she came from) stays. */
 function mapChain(items,p){const T=it=>it.trip?it.evs.map(e=>e.t):[it.t],bc=p&&mapCo(p.bplac);
-  items.forEach((it,k)=>{const e=it.trip?it.evs[0]:it;if(!e.from||(bc&&mapSame(bc,e.from)))return;const before=items.slice(0,k).flatMap(T),after=items.slice(k+1).flatMap(T);
+  items.forEach((it,k)=>{const e=mapFirst(it);if(!e.from||(bc&&mapSame(bc,e.from)))return;const before=items.slice(0,k).flatMap(T),after=items.slice(k+1).flatMap(T);
     if(before.some(t=>mapSame(t,e.from))||!after.some(t=>mapSame(t,e.from)))return;
     const pv=before[before.length-1]||null;e.from=pv;e.d=pv?mapKm(pv,e.t):0;e.far=e.d>=MAP.FAR_KM});return items}
 /* ----- journeys: a run of map moments in one country abroad (the country of a "woon" period that make_viewer_data.py marked as abroad) */
@@ -2351,6 +2353,9 @@ function mapDateKey(f){if(!f||f.y==null)return Infinity;const t=f.d?mapDt(f):nul
 /* the earliest fact at a journey's place (its date), with what happened there from a fact of that year that says more than "lived" */
 function mapTripYear(p,e){const F=mapFacts(p,e.t).filter(x=>x.k!=="b"&&x.k!=="d"&&x.k!=="kid"&&x.y!=null).sort((a,b)=>mapDateKey(a)-mapDateKey(b)),f=F[0];
   if(!f)return {y:e.y!=null?Math.round(e.y):null};const w=F.find(x=>x.y===f.y&&x.k!=="woonde"&&x.k!=="volkstelling")||f;return Object.assign({},f,{k:w.k,x:w.x})}
+/* a map item from mapTrips (one moment, or a journey) → the moment it is placed by: a journey's first place */
+function mapFirst(it){return it.trip?it.evs[0]:it}
+/* Story and Cards both: a person's map moments with every journey folded into one item (verzamelkaart:false = one map per place) */
 function mapTrips(p,evs){const items=evs;if(p.verzamelkaart===false)return items.slice();
   const ab={};(p.woon||[]).forEach(w=>{if(w[3])ab[mapLand(w[0])]=w[3]});
   const out=[];let run=[];
@@ -2619,7 +2624,7 @@ function mapPara(e,paras,p,cards){const at=cards?(e.t.ka!=null?e.t.ka:e.t.al):e.
 /* Cards: one map card per moment */
 function swMapCard(p,MS,add,cards){const evs=mapEvents(p,MS);if(!evs.length)return;const cp=vhHas(p)?vhParaList(swCardText(p)):[],py=cp.length?vhParaYears(cp,p):[];
   /* the card's html is made in swMapHtml, once the cards are in their final order (see mapChain) */
-  mapTrips(p,evs).forEach(it=>{const e=it.trip?it.evs[0]:it;let y=e.y;const after=cp.length?mapPara(e,cp,p,1):-1;if(after>=0&&py[after]!=null)y=py[after];
+  mapTrips(p,evs).forEach(it=>{const e=mapFirst(it);let y=e.y;const after=cp.length?mapPara(e,cp,p,1):-1;if(after>=0&&py[after]!=null)y=py[after];
     add("map","",{y,len:it.trip?140:60,mapIt:it});
     /* right after that story card (past its image), so the stable sort by year keeps it there */
     if(after>=0&&cards){const m=cards.pop(),ref=cards.filter(x=>x.kind==="story")[after];if(ref){let k=cards.indexOf(ref)+1;while(cards[k]&&(cards[k].kind==="img"||cards[k].kind==="map")&&cards[k].y===ref.y)k++;cards.splice(k,0,m)}else cards.push(m)}})}
