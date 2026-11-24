@@ -82,7 +82,7 @@ python3 -I scripts/live.py note "Reading the baptism register of Leiden, 1802" -
 python3 -I scripts/live.py note "Is this Jan your great-grandfather? See the question in the chat" --kind ask --person I87
 ```
 
-Kinds: `note` (default), `read`, `found`, `nothing` (searched and found nothing: say where and which years, e.g. "Burial registers Göteborg 1760-1777 read in full: no Lindqvist"; the person's slot greys out briefly; a negative result is research too), `ask` (a red callout on that person: use it when you ask the user something). `--person` is a GEDCOM id or a name; the beam turns there. Write the text in the user's language. Don't narrate every step: one line per real step is enough.
+Kinds: `note` (default), `read`, `found`, `nothing` (searched and found nothing: say where and which years, e.g. "Burial registers Göteborg 1760-1777 read in full: no Lindqvist"; the person's slot greys out briefly; a negative result is research too), `ask` (a red callout on that person: use it when you ask the user something). `--person` is a GEDCOM id or a name; the beam turns there. Without `--person` (and without a name the Workshop knows in the text) the beam stays on the last person you worked on for 15 minutes; name the person whenever you turn to someone else. Write the text in the user's language. Don't narrate every step: one line per real step is enough.
 
 **A long script of your own** (checking 123 families, harvesting an index) shows a progress bar with time left. Send the progress every step, with the person or family being checked:
 

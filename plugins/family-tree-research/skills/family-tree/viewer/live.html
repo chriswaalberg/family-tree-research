@@ -330,7 +330,7 @@ const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k
 
 /* ===== TUNING (all numbers that shape the Workshop) ===== */
 let VIEW="cosmos";
-const CFG={BEAT_MS:3000,FPS_MS:400,MIN_FPS:45,PAINT_MS:1500,MIN_VIEW:40,CHG_OPEN:6,HL_MAX:60,HL_NAMES:6,IDLE_S:180,QR_STYLE:2,SRC_MAX:3,FOCUS_MS:180000,SWEEP_BIG:400,TICK_MS:120,TAP_PX:22,COS_R0:40,STEPS_ONE_BY_ONE:8,CERT_ONE_BY_ONE:4,WHY_ANIM_MAX:80,BREATHE_MAX:40,MAX_PARTS:1500,STAR_MS:250,MAXG:14,R0:62,RMAX:490,Q:.8,MIN_DEG:.12,ONE_BY_ONE:10,TRAY:6,BEAM_IDLE:30000,FEED:120,GAPS_TO:9,SWEEP_MS:5200,FLY_MS:1400};
+const CFG={BEAT_MS:3000,FPS_MS:400,MIN_FPS:45,PAINT_MS:1500,MIN_VIEW:40,CHG_OPEN:6,HL_MAX:60,HL_NAMES:6,IDLE_S:180,QR_STYLE:2,SRC_MAX:3,FOCUS_MS:180000,FOLLOW_MS:900000,SWEEP_BIG:400,TICK_MS:120,TAP_PX:22,COS_R0:40,STEPS_ONE_BY_ONE:8,CERT_ONE_BY_ONE:4,WHY_ANIM_MAX:80,BREATHE_MAX:40,MAX_PARTS:1500,STAR_MS:250,MAXG:14,R0:62,RMAX:490,Q:.8,MIN_DEG:.12,ONE_BY_ONE:10,TRAY:6,BEAM_IDLE:30000,FEED:120,GAPS_TO:9,SWEEP_MS:5200,FLY_MS:1400};
 
 /* ===== DATA ===== */
 let D=null,P=[],ROOT=null,L=null;            // L = current layout
@@ -586,10 +586,12 @@ function place(i){const k=key(P[i],i),c=codeOf(k);if(c!=null)return{i,code:c,rel
  for(const j of[p.f,p.m])if(inFan(j))return rel(j,sx("r_daughterOf","r_sonOf","r_childOf"));
  for(const j of[p.f,p.m])if(j>=0&&P[j])for(const b of P[j].ch||[])if(b!==i&&inFan(b))return rel(b,sx("r_sisterOf","r_brotherOf","r_siblingOf"));
  return{i,code:null,rel:""}}
+/* a note or search that names nobody (no --person, no name we know) is about the helper's last person, for CFG.FOLLOW_MS */
+function orLast(ev,r){if(r||ev.person)return r;const l=LASTP.get(ev.who||""),now=ev.t?ev.t*1000:Date.now();return l&&now-l.t<CFG.FOLLOW_MS?l.r:null}
 function findTarget(person,q,ev){const r=resolvePerson(person,q,ev);return r?r.code:null}
 /* ===== NOW: a lasting marker per helper on who is being worked on (ring + name at the star), and a line above the log */
-const FOCUS=new Map();
-function setFocus(who,r){who=who||"";if(!r)return;const old=FOCUS.get(who);if(old)clearTimeout(old.timer);
+const FOCUS=new Map(),LASTP=new Map();  /* LASTP: the last person each helper worked on, for a note that names nobody */
+function setFocus(who,r,t){who=who||"";if(!r)return;LASTP.set(who,{r,t:t?t*1000:Date.now()});const old=FOCUS.get(who);if(old)clearTimeout(old.timer);
  FOCUS.set(who,{r,timer:setTimeout(()=>{FOCUS.delete(who);drawFocus()},CFG.FOCUS_MS)});drawFocus()}
 function drawFocus(){$$("#fxG .focus").forEach(e=>e.remove());let h="";
  for(const[who,f]of FOCUS){const p=P[f.r.i];if(!p)continue;const b=beamFor(who),s=slotAt(f.r.code);
@@ -755,14 +757,14 @@ async function drain(){busy=true;while(QUEUE.length){const ev=QUEUE.shift();try{
 async function handle(ev){
  if(ev.kind==="hello"){for(const h of ev.history||[]){const d=describe(h);if(d)feed(d[0],d[1],d[2],h.who,true);
    if(["search","read","scan","clip","note","found","ask","nothing","focus"].includes(h.kind)){if(h.kind==="focus")workSeen(h.who,h.text||"","",h.t);
-    const r=resolvePerson(h.person,h.q||h.text,h);if(r){setFocus(h.who,r);if(r.code!=null)beamAim(h.who,r.code)}}}  /* a reopened page knows again who is on whom */
+    const r=orLast(h,resolvePerson(h.person,h.q||h.text,h));if(r){setFocus(h.who,r,h.t);if(r.code!=null)beamAim(h.who,r.code)}}}  /* a reopened page knows again who is on whom */
   feedEmpty();for(const t of ev.tasks||[])progress(t,true);if(ev.changes)chgReset(ev.changes);return}
  if(ev.kind==="data")return dataChanged();
  const d=describe(ev);if(!d)return;feed(d[0],d[1],d[2],ev.who);
  if(ev.kind==="steps")return stepsEv(ev);
- if(["search","read","scan","clip","note","found","ask","nothing","focus"].includes(ev.kind)){const r=resolvePerson(ev.person,ev.q||ev.text,ev),c=r?r.code:null;
+ if(["search","read","scan","clip","note","found","ask","nothing","focus"].includes(ev.kind)){const r=orLast(ev,resolvePerson(ev.person,ev.q||ev.text,ev)),c=r?r.code:null;
   if(ev.kind==="focus")workSeen(ev.who,ev.text||"","");  /* the row already shows who and how related: only what they look for */
-  if(r){setFocus(ev.who,r);const li=$("#feed").lastElementChild;if(li&&ev.kind!=="focus"){const sm=li.querySelector("small")||li.querySelector("div").appendChild(document.createElement("small"));sm.textContent+=` → ${short(P[r.i])}${r.rel?" ("+r.rel+")":""}`}}
+  if(r){setFocus(ev.who,r,ev.t);const li=$("#feed").lastElementChild;if(li&&ev.kind!=="focus"){const sm=li.querySelector("small")||li.querySelector("div").appendChild(document.createElement("small"));sm.textContent+=` → ${short(P[r.i])}${r.rel?" ("+r.rel+")":""}`}}
   if(c!=null||(ev.kind!=="note"&&ev.kind!=="focus"))beamAim(ev.who,c);
   if(ev.kind==="ask")callout(c,`<b>${esc(_t("ask"))}</b>${esc(ev.text||"")}`,"red",8000);
   if(ev.kind==="nothing"&&c!=null){await wait(900);flash(segEl(c),"nada")}await wait(500);return}

@@ -860,6 +860,9 @@ def cmd_note(a):
         os.environ["FTR_TREE"] = a.tree
     emit(a.kind, _warn=False, text=a.text, person=a.person)
     _say_state("note")
+    if not a.person:  # the page then points at the last person this helper worked on; say so, so a new person gets named
+        print("(no --person: the beam stays on the last person you worked on; add --person <GEDCOM id or full name> when this is about someone else)",
+              file=sys.stderr)
 
 
 def cmd_status(a):
