@@ -827,7 +827,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.82",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.83",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -2346,11 +2346,19 @@ function mapChain(items,p){const T=it=>it.trip?it.evs.map(e=>e.t):[it.t],bc=p&&m
     const pv=before[before.length-1]||null;e.from=pv;e.d=pv?mapKm(pv,e.t):0;e.far=e.d>=MAP.FAR_KM});return items}
 /* ----- journeys: a run of map moments in one country abroad (the country of a "woon" period that make_viewer_data.py marked as abroad) */
 function mapLand(pl){return NORM(mapParts(pl).pop()||"")}
-function mapTripYear(p,e){const f=mapFacts(p,e.t).filter(x=>x.k!=="b"&&x.k!=="d"&&x.k!=="kid"&&x.y!=null).sort((a,b)=>a.y-b.y)[0];return f||{y:e.y!=null?Math.round(e.y):null}}
+/* a fact's date as one number for ordering: year, then month, then day (a year alone sorts after dated ones in that year) */
+function mapDateKey(f){if(!f||f.y==null)return Infinity;const t=f.d?mapDt(f):null;return t&&t.k==="ym"?t.y*10000+(t.mo+1)*100+(t.day||0):(t?t.a:f.y)*10000+1300}
+/* the earliest fact at a journey's place (its date), with what happened there from a fact of that year that says more than "lived" */
+function mapTripYear(p,e){const F=mapFacts(p,e.t).filter(x=>x.k!=="b"&&x.k!=="d"&&x.k!=="kid"&&x.y!=null).sort((a,b)=>mapDateKey(a)-mapDateKey(b)),f=F[0];
+  if(!f)return {y:e.y!=null?Math.round(e.y):null};const w=F.find(x=>x.y===f.y&&x.k!=="woonde"&&x.k!=="volkstelling")||f;return Object.assign({},f,{k:w.k,x:w.x})}
 function mapTrips(p,evs){const items=evs;if(p.verzamelkaart===false)return items.slice();
   const ab={};(p.woon||[]).forEach(w=>{if(w[3])ab[mapLand(w[0])]=w[3]});
   const out=[];let run=[];
-  const flush=()=>{if(run.length>=MAP.TRIP_MIN){const ys=run.map(e=>mapTripYear(p,e).y).filter(y=>y!=null);
+  const flush=()=>{if(run.length>=MAP.TRIP_MIN){
+      /* in date order (the "woon" periods only know years); the first keeps where the trail came from */
+      const r0=run[0];run=run.map((e,k)=>({e,k,key:mapDateKey(mapTripYear(p,e))})).sort((a,b)=>a.key-b.key||a.k-b.k).map(x=>x.e);
+      if(run[0]!==r0){const e=run[0];e.from=r0.from;e.d=e.from?mapKm(e.from,e.t):0;e.far=e.d>=MAP.FAR_KM;e.y=r0.y}
+      const ys=run.map(e=>mapTripYear(p,e).y).filter(y=>y!=null);
       out.push({trip:true,evs:run,code:ab[mapLand(run[0].t.n)],land:mapParts(run[0].t.n).pop(),y1:Math.min(...ys),y2:Math.max(...ys),y:run[0].y})}
     else out.push(...run);run=[]};
   items.forEach(e=>{const l=mapLand(e.t.n),y=mapTripYear(p,e).y,py=run.length?mapTripYear(p,run[run.length-1]).y:null;
@@ -2561,13 +2569,13 @@ function mapCapText(e){const c=e&&e.t&&e.t.cap;if(!c)return "";return typeof c==
    (BET over one whole decade) / bet / from / to / ft (FROM..TO); a = the earliest year it can mean, for ordering */
 function mapDt(f){const s=String(f.d||"").toUpperCase().replace(/\s+/g," ").trim(),yr=t=>{const m=String(t).match(/(\d{3,4})(?!.*\d{3,4})/);return m?+m[1]:null};let m;
   if(!s)return {k:"y",y:f.y,a:f.y};
-  if((m=s.match(/^(?:\d{1,2} )?(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) (\d{3,4})$/)))return {k:"ym",y:+m[2],a:+m[2],mo:"JANFEBMARAPRMAYJUNJULAUGSEPOCTNOVDEC".indexOf(m[1])/3};
+  if((m=s.match(/^(?:(\d{1,2}) )?(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) (\d{3,4})$/)))return {k:"ym",y:+m[3],a:+m[3],mo:"JANFEBMARAPRMAYJUNJULAUGSEPOCTNOVDEC".indexOf(m[2])/3,day:m[1]?+m[1]:0};
   if((m=s.match(/^BET (.+) AND (.+)$/))||(m=s.match(/^FROM (.+) TO (.+)$/))){const a=yr(m[1]),b=yr(m[2]);if(a!=null&&b!=null)return {k:s[0]==="F"?"ft":a%10===0&&b===a+9?"dec":"bet",a,b,y:a}}
   if((m=s.match(/^(ABT|EST|CAL|BEF|AFT|FROM|TO)\.? (.+)$/))){const y=yr(m[2]);if(y!=null)return {k:{ABT:"abt",EST:"abt",CAL:"abt",BEF:"bef",AFT:"aft",FROM:"from",TO:"to"}[m[1]],y,a:y}}
   return {k:"abt",y:f.y,a:f.y}}
 /* that date in words: mode "a" starts a sentence ("Rond 2000", "In de jaren zeventig"), "s" the start of a stay ("Vanaf de jaren zeventig"), "e" its end ("tot rond 2000") */
 const MW_DEC_NL=["","tien","twintig","dertig","veertig","vijftig","zestig","zeventig","tachtig","negentig"];
-function mapWhen(f,mode){const t=mapDt(f);let dec="";
+function mapWhen(f,mode){let t=mapDt(f),dec="";if(t.k==="ym"&&f.k!=="gebeurtenis")t={k:"y",y:t.y,a:t.a};
   if(t.k==="dec")dec=LANG!=="en"&&t.a>=1910&&t.a<2000?_t("mw_decW",{w:MW_DEC_NL[(t.a%100)/10],a:t.a}):_t("mw_dec",{a:t.a});
   const mon=t.k==="ym"?_t("mw_months").split(",")[t.mo]:"";
   return _t("mw"+(mode||"a")+"_"+t.k,{y:t.y,a:t.a,b:t.b,dec,mon})}
