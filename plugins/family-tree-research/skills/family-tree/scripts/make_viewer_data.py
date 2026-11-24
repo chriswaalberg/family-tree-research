@@ -404,8 +404,15 @@ def placed_facts(node, tags):
             pl = ((sub(ad, "CITY") or {}).get("v", "") if ad else "").strip()
         if not (y and pl): continue
         x = e["v"].strip() if e["t"] == "OCCU" else (sub(e, "TYPE") or {}).get("v", "").strip() if e["t"] == "EVEN" else ""
-        out.append([y, pl, FACT_KIND[e["t"]]] + ([x] if x else []))
+        row = [y, pl, FACT_KIND[e["t"]]] + ([x] if x else [])
+        # an imprecise date ("ABT 2000", "BET 1970 AND 1979") goes along as 6th element, so the map sentence can say "around 2000" / "the 1970s"
+        d = " ".join((sub(e, "DATE") or {}).get("v", "").split())
+        if not PLAIN_DATE.match(d): row = row + [""] * (4 - len(row)) + [None, d]
+        out.append(row)
     return out
+
+
+PLAIN_DATE = re.compile(r"^(\d{1,2} )?((JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) )?\d{3,4}$", re.I)
 
 
 def residence_spans(points, by, dy):
@@ -1092,8 +1099,12 @@ def main():
                 pts += dated_places(fam, ("MARR", "MARB", "MARL", "ENGA", "DIV", "RESI", "CENS", "EVEN"))
                 h, w2 = sub(fam, "HUSB"), sub(fam, "WIFE")
                 sp = [idx.get(o["v"]) for o in (h, w2) if o and idx.get(o["v"]) not in (None, i)]
-                wf += [x + ([] if len(x) > 3 else [""]) + ([sp[0]] if sp and x[2] in ("huwelijk", "ondertrouw", "verloving", "scheiding") else [])
-                       for x in placed_facts(fam, ("MARR", "MARB", "MARL", "ENGA", "DIV", "RESI", "CENS", "EVEN"))]
+                for x in placed_facts(fam, ("MARR", "MARB", "MARL", "ENGA", "DIV", "RESI", "CENS", "EVEN")):
+                    x = x + ([] if len(x) > 3 else [""])
+                    if sp and x[2] in ("huwelijk", "ondertrouw", "verloving", "scheiding"):
+                        if len(x) > 4: x[4] = sp[0]
+                        else: x.append(sp[0])
+                    wf.append(x)
         for j in p["ch"]:
             q = people[j]
             if q.get("by") and q.get("bplac"): pts.append((q["by"], q["bplac"]))
