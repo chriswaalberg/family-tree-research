@@ -640,6 +640,11 @@ main{padding-top:6px}
 .sw .sw-cap b{display:block;font-family:Fraunces,Georgia,serif;font-size:21px;line-height:1.2;margin-bottom:4px}
 .sw .sw-cap span{display:block;margin-top:6px;font-size:15px}
 .sw .sw-cap .sw-why{font-size:17px;line-height:1.4;margin:0 0 10px;opacity:1}
+.sw-trip{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;line-height:1.35}
+.sw-trip li{display:flex;align-items:baseline;gap:5px}
+.sw-trip i{font-style:normal;font-weight:700;font-size:11px;color:#fff;background:#b3342b;border-radius:9px;min-width:18px;padding:1px 5px;text-align:center}
+.sw-cap .sw-trip b{display:inline;font-family:inherit;font-size:14px;line-height:inherit;margin:0}
+.sw-cap .sw-trip span{display:inline;margin:0;font-size:13px;opacity:.8}
 .sw .sw-opts{display:flex;flex-direction:column;gap:12px;margin-top:16px}
 .sw .sw-opt{all:unset;cursor:pointer;display:block;padding:14px 16px;border-radius:14px;border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08)}
 .sw .sw-opt.rec{border-color:#dcb56a}
@@ -822,7 +827,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.81",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.82",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1310,7 +1315,7 @@ function personSheet(i){const r=state.root,pth=i===r?null:pathTo(r,i);
 /* ================= VERHAAL (kies-je-eigen-pad terug in de tijd) ================= */
 Object.assign(I18N.nl,{v_verhaal:"Verhaal",
  vh_title:"Het verhaal van {name}",
- map_k:"Op de kaart",mw_born:"{Fn} werd geboren in {place}.",mw_kids1:"In {y} woonde {wie} in {place}: daar werd {list} geboren.",mw_kidsN1:"In {y} woonde {wie} in {place}: daar werden {list} geboren.",mw_kidsN:"Van {y1} tot {y2} woonde {wie} in {place}: daar werden {list} geboren.",mw_fam:"het gezin",mw_kidsR1:"{from} woonde {wie} in {place}{until}: daar werd {list} geboren.",mw_kidsRN:"{from} woonde {wie} in {place}{until}: daar werden {list} geboren.",mwa_y:"In {y}",mwa_abt:"Rond {y}",mwa_bef:"Vóór {y}",mwa_aft:"Na {y}",mwa_dec:"In {dec}",mwa_bet:"Tussen {a} en {b}",mwa_from:"Vanaf {y}",mwa_to:"Tot {y}",mwa_ft:"Van {a} tot {b}",mwa_ym:"In {mon} {y}",mws_ym:"Vanaf {mon} {y}",mwe_ym:"tot {mon} {y}",mw_months:"januari,februari,maart,april,mei,juni,juli,augustus,september,oktober,november,december",mw_was:"{When} was {hij} in {place}{what}.",mw_bapt:"{When} werd {hij} in {place} gedoopt.",mw_k_naturalisatie:"naturalisatie",mw_k_verloving:"verloving",mw_k_scheiding:"scheiding",mw_k_ondertrouw:"ondertrouw",mw_k_immigratie:"immigratie",mws_y:"Vanaf {y}",mws_abt:"Vanaf rond {y}",mws_bef:"Al vóór {y}",mws_aft:"Ergens na {y}",mws_dec:"Vanaf {dec}",mws_bet:"Vanaf ergens tussen {a} en {b}",mws_from:"Vanaf {y}",mws_to:"Al vóór {y}",mws_ft:"Vanaf {a}",mwe_y:"tot {y}",mwe_abt:"tot rond {y}",mwe_bef:"tot uiterlijk {y}",mwe_aft:"tot na {y}",mwe_dec:"tot in {dec}",mwe_bet:"tot ergens tussen {a} en {b}",mwe_from:"tot {y}",mwe_to:"tot {y}",mwe_ft:"tot {a}",mw_decW:"de jaren {w}",mw_dec:"de jaren {a}",mw_rel1:"{zijn} {rel} {name}",mw_relN:"{zijn} kinderen {list}",mw_son:"zoon",mw_dau:"dochter",mw_kid:"kind",mw_marr:"{When} trouwde {hij} in {place} met {partner}.",mw_marr0:"{When} trouwde {hij} in {place}.",mw_bann:"{When} ging {hij} in {place} in ondertrouw met {partner}.",mw_emig:"{When} vertrok {hij} naar {place}.",mw_immi:"{When} kwam {hij} in {place} wonen.",mw_job:"{When} werkte {hij} in {place} als {job}.",mw_school:"{When} ging {hij} in {place} naar school.",mw_lived:"{When} woonde {hij} in {place}.",mw_lived0:"{Hij} woonde een tijd in {place}.",mw_died:"{Hij} overleed in {y} in {place}.",mw_died0:"{Hij} overleed in {place}.",mw_story:"Rond {y} speelt het verhaal in {place}.",mw_story0:"Het verhaal speelt ook in {place}.",map_from:"{km} km van {from}",map_vague:"precieze plek onbekend",map_note:"Kustlijnen en grenzen van nu (Natural Earth).",
+ map_k:"Op de kaart",mw_born:"{Fn} werd geboren in {place}.",mw_kids1:"In {y} woonde {wie} in {place}: daar werd {list} geboren.",mw_kidsN1:"In {y} woonde {wie} in {place}: daar werden {list} geboren.",mw_kidsN:"Van {y1} tot {y2} woonde {wie} in {place}: daar werden {list} geboren.",mw_fam:"het gezin",mw_kidsR1:"{from} woonde {wie} in {place}{until}: daar werd {list} geboren.",mw_kidsRN:"{from} woonde {wie} in {place}{until}: daar werden {list} geboren.",mwa_y:"In {y}",mwa_abt:"Rond {y}",mwa_bef:"Vóór {y}",mwa_aft:"Na {y}",mwa_dec:"In {dec}",mwa_bet:"Tussen {a} en {b}",mwa_from:"Vanaf {y}",mwa_to:"Tot {y}",mwa_ft:"Van {a} tot {b}",mwa_ym:"In {mon} {y}",mws_ym:"Vanaf {mon} {y}",mwe_ym:"tot {mon} {y}",mw_months:"januari,februari,maart,april,mei,juni,juli,augustus,september,oktober,november,december",mw_was:"{When} was {hij} in {place}{what}.",mw_bapt:"{When} werd {hij} in {place} gedoopt.",mw_k_naturalisatie:"naturalisatie",mw_k_verloving:"verloving",mw_k_scheiding:"scheiding",mw_k_ondertrouw:"ondertrouw",mw_k_immigratie:"immigratie",mw_k_arr:"aankomst",mw_trip:"Van {y1} tot {y2} was {hij} in {land}, op deze plekken:",mw_trip1:"In {y} was {hij} in {land}, op deze plekken:",mws_y:"Vanaf {y}",mws_abt:"Vanaf rond {y}",mws_bef:"Al vóór {y}",mws_aft:"Ergens na {y}",mws_dec:"Vanaf {dec}",mws_bet:"Vanaf ergens tussen {a} en {b}",mws_from:"Vanaf {y}",mws_to:"Al vóór {y}",mws_ft:"Vanaf {a}",mwe_y:"tot {y}",mwe_abt:"tot rond {y}",mwe_bef:"tot uiterlijk {y}",mwe_aft:"tot na {y}",mwe_dec:"tot in {dec}",mwe_bet:"tot ergens tussen {a} en {b}",mwe_from:"tot {y}",mwe_to:"tot {y}",mwe_ft:"tot {a}",mw_decW:"de jaren {w}",mw_dec:"de jaren {a}",mw_rel1:"{zijn} {rel} {name}",mw_relN:"{zijn} kinderen {list}",mw_son:"zoon",mw_dau:"dochter",mw_kid:"kind",mw_marr:"{When} trouwde {hij} in {place} met {partner}.",mw_marr0:"{When} trouwde {hij} in {place}.",mw_bann:"{When} ging {hij} in {place} in ondertrouw met {partner}.",mw_emig:"{When} vertrok {hij} naar {place}.",mw_immi:"{When} kwam {hij} in {place} wonen.",mw_job:"{When} werkte {hij} in {place} als {job}.",mw_school:"{When} ging {hij} in {place} naar school.",mw_lived:"{When} woonde {hij} in {place}.",mw_lived0:"{Hij} woonde een tijd in {place}.",mw_died:"{Hij} overleed in {y} in {place}.",mw_died0:"{Hij} overleed in {place}.",mw_story:"Rond {y} speelt het verhaal in {place}.",mw_story0:"Het verhaal speelt ook in {place}.",map_from:"{km} km van {from}",map_vague:"precieze plek onbekend",map_note:"Kustlijnen en grenzen van nu (Natural Earth).",
  vh_intro:"Stap voor stap terug in de tijd. Bij elke persoon kies je wiens verhaal je volgt: dat van de vader of dat van de moeder. Het gouden sterretje wijst het rijkste spoor aan: het verst terug, best onderbouwd en met de meeste verhalen.",
  vh_auto:"Volg het rijkste spoor tot het eind",vh_restart:"Opnieuw beginnen",vh_pick:"✦ Interessante personen",vh_pick_rich:"Rijkste verhalen",vh_pick_sib:"Broers en zussen van voorouders",vh_pick_old:"Oudste voorouders",vh_link:"Kopieer een link naar {name}",vh_link_ok:"Link gekopieerd",vh_link_frame:"Gekopieerd: {h} — plak dit achter het adres van deze pagina",vh_link_fail:"Kopieer deze link:",vh_route:"Je route",
  vh_step0:"Hier begint het",vh_stepN:"Stap {k} · {rel} van {root}",
@@ -1337,7 +1342,7 @@ Object.assign(I18N.nl,{v_verhaal:"Verhaal",
  vh_special:"Bijzonder familielid",vh_tg_life:"Het leven in {plaats}",vh_tg_events:"In die tijd",vh_adopt_big:"{fn} was niet de biologische {rel} van {child}. {Hij} nam {child} aan als {zijn} eigen kind en was in alles {czijn} {papa}. Vanaf hier volgen we de familie waarin {child} opgroeide.",vh_adopt:"aangenomen als eigen kind",vh_adopt_par:"nam {child} aan als eigen kind",vh_papa_v:"papa",vh_papa_m:"mama",vh_sib_M:"{Zijn} broer",vh_sib_F:"{Zijn} zus",vh_sib_X:"{Zijn} broer of zus",vh_sources:"Bronnen",vh_details:"Alle gegevens"});
 Object.assign(I18N.en,{v_verhaal:"Story",
  vh_title:"The story of {name}",
- map_k:"On the map",mw_born:"{Fn} was born in {place}.",mw_kids1:"In {y} {wie} lived in {place}, where {list} was born.",mw_kidsN1:"In {y} {wie} lived in {place}, where {list} were born.",mw_kidsN:"From {y1} to {y2} {wie} lived in {place}, where {list} were born.",mw_fam:"the family",mw_kidsR1:"{from} {wie} lived in {place}{until}, where {list} was born.",mw_kidsRN:"{from} {wie} lived in {place}{until}, where {list} were born.",mwa_y:"In {y}",mwa_abt:"Around {y}",mwa_bef:"Before {y}",mwa_aft:"After {y}",mwa_dec:"In {dec}",mwa_bet:"Between {a} and {b}",mwa_from:"From {y}",mwa_to:"Until {y}",mwa_ft:"From {a} to {b}",mwa_ym:"In {mon} {y}",mws_ym:"From {mon} {y}",mwe_ym:"until {mon} {y}",mw_months:"January,February,March,April,May,June,July,August,September,October,November,December",mw_was:"{When} {hij} was in {place}{what}.",mw_bapt:"{When} {hij} was baptised in {place}.",mw_k_naturalisatie:"naturalisation",mw_k_verloving:"engagement",mw_k_scheiding:"divorce",mw_k_ondertrouw:"banns",mw_k_immigratie:"immigration",mws_y:"From {y}",mws_abt:"From around {y}",mws_bef:"From before {y}",mws_aft:"From some time after {y}",mws_dec:"From {dec}",mws_bet:"From some time between {a} and {b}",mws_from:"From {y}",mws_to:"From before {y}",mws_ft:"From {a}",mwe_y:"until {y}",mwe_abt:"until around {y}",mwe_bef:"until {y} at the latest",mwe_aft:"until after {y}",mwe_dec:"until {dec}",mwe_bet:"until some time between {a} and {b}",mwe_from:"until {y}",mwe_to:"until {y}",mwe_ft:"until {a}",mw_decW:"the {a}s",mw_dec:"the {a}s",mw_rel1:"{zijn} {rel} {name}",mw_relN:"{zijn} children {list}",mw_son:"son",mw_dau:"daughter",mw_kid:"child",mw_marr:"{When} {hij} married {partner} in {place}.",mw_marr0:"{When} {hij} married in {place}.",mw_bann:"{When} {hij} gave notice of marriage to {partner} in {place}.",mw_emig:"{When} {hij} left for {place}.",mw_immi:"{When} {hij} came to live in {place}.",mw_job:"{When} {hij} worked in {place} as {job}.",mw_school:"{When} {hij} went to school in {place}.",mw_lived:"{When} {hij} lived in {place}.",mw_lived0:"{Hij} lived in {place} for a while.",mw_died:"{Hij} died in {place} in {y}.",mw_died0:"{Hij} died in {place}.",mw_story:"Around {y} the story takes place in {place}.",mw_story0:"Part of the story takes place in {place}.",map_from:"{km} km from {from}",map_vague:"exact spot unknown",map_note:"Present-day coastlines and borders (Natural Earth).",
+ map_k:"On the map",mw_born:"{Fn} was born in {place}.",mw_kids1:"In {y} {wie} lived in {place}, where {list} was born.",mw_kidsN1:"In {y} {wie} lived in {place}, where {list} were born.",mw_kidsN:"From {y1} to {y2} {wie} lived in {place}, where {list} were born.",mw_fam:"the family",mw_kidsR1:"{from} {wie} lived in {place}{until}, where {list} was born.",mw_kidsRN:"{from} {wie} lived in {place}{until}, where {list} were born.",mwa_y:"In {y}",mwa_abt:"Around {y}",mwa_bef:"Before {y}",mwa_aft:"After {y}",mwa_dec:"In {dec}",mwa_bet:"Between {a} and {b}",mwa_from:"From {y}",mwa_to:"Until {y}",mwa_ft:"From {a} to {b}",mwa_ym:"In {mon} {y}",mws_ym:"From {mon} {y}",mwe_ym:"until {mon} {y}",mw_months:"January,February,March,April,May,June,July,August,September,October,November,December",mw_was:"{When} {hij} was in {place}{what}.",mw_bapt:"{When} {hij} was baptised in {place}.",mw_k_naturalisatie:"naturalisation",mw_k_verloving:"engagement",mw_k_scheiding:"divorce",mw_k_ondertrouw:"banns",mw_k_immigratie:"immigration",mw_k_arr:"arrival",mw_trip:"From {y1} to {y2} {hij} was in {land}, in these places:",mw_trip1:"In {y} {hij} was in {land}, in these places:",mws_y:"From {y}",mws_abt:"From around {y}",mws_bef:"From before {y}",mws_aft:"From some time after {y}",mws_dec:"From {dec}",mws_bet:"From some time between {a} and {b}",mws_from:"From {y}",mws_to:"From before {y}",mws_ft:"From {a}",mwe_y:"until {y}",mwe_abt:"until around {y}",mwe_bef:"until {y} at the latest",mwe_aft:"until after {y}",mwe_dec:"until {dec}",mwe_bet:"until some time between {a} and {b}",mwe_from:"until {y}",mwe_to:"until {y}",mwe_ft:"until {a}",mw_decW:"the {a}s",mw_dec:"the {a}s",mw_rel1:"{zijn} {rel} {name}",mw_relN:"{zijn} children {list}",mw_son:"son",mw_dau:"daughter",mw_kid:"child",mw_marr:"{When} {hij} married {partner} in {place}.",mw_marr0:"{When} {hij} married in {place}.",mw_bann:"{When} {hij} gave notice of marriage to {partner} in {place}.",mw_emig:"{When} {hij} left for {place}.",mw_immi:"{When} {hij} came to live in {place}.",mw_job:"{When} {hij} worked in {place} as {job}.",mw_school:"{When} {hij} went to school in {place}.",mw_lived:"{When} {hij} lived in {place}.",mw_lived0:"{Hij} lived in {place} for a while.",mw_died:"{Hij} died in {place} in {y}.",mw_died0:"{Hij} died in {place}.",mw_story:"Around {y} the story takes place in {place}.",mw_story0:"Part of the story takes place in {place}.",map_from:"{km} km from {from}",map_vague:"exact spot unknown",map_note:"Present-day coastlines and borders (Natural Earth).",
  vh_intro:"Step by step back in time. At every person you choose whose story to follow: the father's or the mother's. The golden star marks the richest trail: furthest back, best supported and with the most stories.",
  vh_auto:"Follow the richest trail to the end",vh_restart:"Start over",vh_pick:"✦ Interesting people",vh_pick_rich:"Richest stories",vh_pick_sib:"Brothers and sisters of ancestors",vh_pick_old:"Oldest ancestors",vh_link:"Copy a link to {name}",vh_link_ok:"Link copied",vh_link_frame:"Copied: {h} — paste it after the address of this page",vh_link_fail:"Copy this link:",vh_route:"Your route",
  vh_step0:"Where it begins",vh_stepN:"Step {k} · {rel} of {root}",
@@ -1734,14 +1739,14 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     const facts=[p.bdate||p.bplac?`° ${[p.bdate,p.bplac].filter(Boolean).map(slEsc).join(" · ")}`:"",p.ddate||p.dplac?`† ${[p.ddate,p.dplac].filter(Boolean).map(slEsc).join(" · ")}`:""].filter(Boolean).join("<br>");
     const own=vhHas(p);
     const tpl=vhTemplate(i,child,flags);
-    const tgHtml=vhTijdgeest(i,tgSeen),mev=mapEvents(p,mapMS);let body;
+    const tgHtml=vhTijdgeest(i,tgSeen),mev=mapEvents(p,mapMS);let body;const mTok=e=>"\u0001M"+mev.indexOf(e)+"\u0001";
     if(own){/* one timeline: paragraphs (with their images) and zeitgeist pieces sorted by year */
       const paras=vhParaList(lab(p.verhaal)),pimgs=(Array.isArray(p.verhaal_beelden)?p.verhaal_beelden:[]).filter(b=>b&&b.bestand),slot=vhImgSlots(paras,pimgs),py=vhParaYears(paras,p);
       /* the map right after the paragraph that names the place someone moved to; no such paragraph: by the year of the move */
       /* maps: right after the paragraph that names the new place (mapPara), else at the year of that moment */
       const mj=mev.map(e=>mapPara(e,paras,p));
-      const items=paras.map((x,j)=>({type:"p",y:py[j],html:`<p>${vhMd(x)}</p>`+mev.filter((e,k)=>mj[k]===j).map(vhMapEl).join("")+pimgs.filter((b,k)=>slot[k]===j).map(vhFig).join("")}))
-        .concat(mev.filter((e,k)=>mj[k]<0).map(e=>({type:"p",y:e.y,html:(mapCapText(e)?"":`<p class="vh-mw">${slEsc(mapWhy(p,e))}</p>`)+vhMapEl(e)})),vhTgPieces(tgHtml));
+      const items=paras.map((x,j)=>({type:"p",y:py[j],html:`<p>${vhMd(x)}</p>`+mev.filter((e,k)=>mj[k]===j).map(mTok).join("")+pimgs.filter((b,k)=>slot[k]===j).map(vhFig).join("")}))
+        .concat(mev.filter((e,k)=>mj[k]<0).map(e=>({type:"p",y:e.y,html:(mapCapText(e)?"":`<p class="vh-mw">${slEsc(mapWhy(p,e))}</p>`)+mTok(e)})),vhTgPieces(tgHtml));
       body="";let run=[],tg=[];const flush=()=>{if(run.length){body+=`<div class="vh-txt">${run.join("")}</div>`;run=[]}if(tg.length){body+=vhTgBox(tg);tg=[]}};
       for(const it of vhSortByYear(items)){if(it.type==="p"){if(tg.length)flush();run.push(it.html)}else{if(run.length){body+=`<div class="vh-txt">${run.join("")}</div>`;run=[]}tg.push(it)}}
       flush();body+=`<div class="vh-txt">${vhSources(p)}</div>`}
@@ -1749,10 +1754,12 @@ function drawVerhaal(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
       /* every map right after a sentence that names its place and says why: the birthplace map after the birth text (which names it),
          the place of death after the death sentence, every other place (homes from "woon") with a sentence of its own (mapWhy) */
       const bc=mapCo(p.bplac),born=e=>(e.y==null||p.by==null||e.y<=p.by)&&bc&&mapSame(bc,e.t)&&NORM(tpl.g1.join(" ")).includes(NORM(mapName(e.t.n))),died=e=>!born(e)&&p.dplac&&tpl.nd&&mapDeathOnly(p,e);
-      const why=e=>(mapCapText(e)?"":`<div class="vh-txt"><p class="vh-mw">${slEsc(mapWhy(p,e))}</p></div>`)+vhMapEl(e);
-      const g2a=tpl.g2.slice(0,tpl.nd),g2b=tpl.g2.slice(tpl.nd),dm=mev.filter(died).map(vhMapEl).join(""),note=tpl.note.map(n=>`<p class="vh-note">${slEsc(n)}</p>`).join("");
-      body=`<div class="vh-txt">${P1(tpl.g1)}${note}</div>${mev.filter(born).map(vhMapEl).join("")}${tgHtml}${mev.filter(e=>!born(e)&&!died(e)).map(why).join("")}`
+      const why=e=>(mapCapText(e)?"":`<div class="vh-txt"><p class="vh-mw">${slEsc(mapWhy(p,e))}</p></div>`)+mTok(e);
+      const g2a=tpl.g2.slice(0,tpl.nd),g2b=tpl.g2.slice(tpl.nd),dm=mev.filter(died).map(mTok).join(""),note=tpl.note.map(n=>`<p class="vh-note">${slEsc(n)}</p>`).join("");
+      body=`<div class="vh-txt">${P1(tpl.g1)}${note}</div>${mev.filter(born).map(mTok).join("")}${tgHtml}${mev.filter(e=>!born(e)&&!died(e)).map(why).join("")}`
         +(dm?`<div class="vh-txt">${P1(g2a)}</div>${dm}<div class="vh-txt">${P1(g2b)}</div>`:`<div class="vh-txt">${P1(tpl.g2)}</div>`)}
+    /* maps in the order they are shown, each from the map before it (mapChain) */
+    if(mev.length){mapChain([...body.matchAll(/\u0001M(\d+)\u0001/g)].map(m=>mev[+m[1]]),p);body=body.replace(/\u0001M(\d+)\u0001/g,(_,k)=>vhMapEl(mev[+k]))}
     /* broers/zussen met een eigen verhaal */
     const sib=vhSibs(i).filter(j=>vhHas(P[j])).map(j=>{const q=P[j],ppr=vhPro(p);
       const rl=_t(q.x==="M"?"vh_sib_M":q.x==="F"?"vh_sib_F":"vh_sib_X",ppr);
@@ -2190,7 +2197,9 @@ function drawFamilie(){
    small overview in the corner (red box = the detail). A far move: a route map (curved red dotted line, open circle at the place the
    trail came from, pin at the new place, distance halfway); above GLOBE_KM a paper globe. Precision "regio"/"land": no pin, the caption
    says the exact spot is unknown. All numbers to tune are here. */
-const MAP={FAR_KM:300,SAME_KM:1,DETAIL_KM:120,NEAR_X:5,NEAR_MIN_KM:8,OVER_KM:1500,GLOBE_KM:5000,REGIO_KM:320,LAND_KM:1800,BEND:.22,
+const MAP={FAR_KM:300,SAME_KM:1,
+  /* a journey: TRIP_MIN or more map moments in a row in one country abroad, at most TRIP_GAP years apart, become one numbered map in Cards */
+  TRIP_MIN:3,TRIP_GAP:5,DETAIL_KM:120,NEAR_X:5,NEAR_MIN_KM:8,OVER_KM:1500,GLOBE_KM:5000,REGIO_KM:320,LAND_KM:1800,BEND:.22,
   W:360,H:360,IW:128,IH:104,PAD:.3,MINPX:.7,
   /* rivers (variant 2b): bed RIV_BED x the line width, line width RIV_W x 1.6 / 1.2 / 0.8 by scalerank (<= 4, <= 7, other); route maps x RIV_ROUTE, scalerank <= RIV_ROUTE_MAX */
   RIV_W:.5,RIV_BED:3.2,RIV_OP:.7,RIV_ROUTE:.7,RIV_ROUTE_MAX:6,river:"#c8b796",riverBed:"#efe5cf",
@@ -2327,6 +2336,56 @@ function mapRoute(from,t){const km=mapKm(from,t),prj=mapFit([from,t],400),id="mh
   return mapSvg(s+mapFrame(MAP.W,MAP.H),mapName(from.n)+" → "+mapName(t.n))}
 /* one map for a new place in the trail: a route when the trail comes from far, else the detail map */
 function mapFor(t,from,others){const d=from?mapKm(from,t):0;return d>=MAP.FAR_KM?mapRoute(from,t):mapDetail(t,others,d||0)}
+/* ----- the order maps are shown in: a map's "from" (the route and "97 km from …") is where the person was before, in time. Story and Cards put
+   a map after the paragraph or card that names its place, which can show a later place first; a "from" that only gets its own map further on
+   ("Bourke, 873 km from Adelaide" before Adelaide's map) then becomes the place of the map shown just before it. A "from" already shown,
+   never shown in this person's maps, or their birthplace (a route from Karlshamn still tells where she came from) stays. */
+function mapChain(items,p){const T=it=>it.trip?it.evs.map(e=>e.t):[it.t],bc=p&&mapCo(p.bplac);
+  items.forEach((it,k)=>{const e=it.trip?it.evs[0]:it;if(!e.from||(bc&&mapSame(bc,e.from)))return;const before=items.slice(0,k).flatMap(T),after=items.slice(k+1).flatMap(T);
+    if(before.some(t=>mapSame(t,e.from))||!after.some(t=>mapSame(t,e.from)))return;
+    const pv=before[before.length-1]||null;e.from=pv;e.d=pv?mapKm(pv,e.t):0;e.far=e.d>=MAP.FAR_KM});return items}
+/* ----- journeys: a run of map moments in one country abroad (the country of a "woon" period that make_viewer_data.py marked as abroad) */
+function mapLand(pl){return NORM(mapParts(pl).pop()||"")}
+function mapTripYear(p,e){const f=mapFacts(p,e.t).filter(x=>x.k!=="b"&&x.k!=="d"&&x.k!=="kid"&&x.y!=null).sort((a,b)=>a.y-b.y)[0];return f||{y:e.y!=null?Math.round(e.y):null}}
+function mapTrips(p,evs){const items=evs;if(p.verzamelkaart===false)return items.slice();
+  const ab={};(p.woon||[]).forEach(w=>{if(w[3])ab[mapLand(w[0])]=w[3]});
+  const out=[];let run=[];
+  const flush=()=>{if(run.length>=MAP.TRIP_MIN){const ys=run.map(e=>mapTripYear(p,e).y).filter(y=>y!=null);
+      out.push({trip:true,evs:run,code:ab[mapLand(run[0].t.n)],land:mapParts(run[0].t.n).pop(),y1:Math.min(...ys),y2:Math.max(...ys),y:run[0].y})}
+    else out.push(...run);run=[]};
+  items.forEach(e=>{const l=mapLand(e.t.n),y=mapTripYear(p,e).y,py=run.length?mapTripYear(p,run[run.length-1]).y:null;
+    if(!(l in ab)||mapLand(p.bplac)===l){flush();out.push(e);return}
+    if(run.length&&(mapLand(run[0].t.n)!==l||(y!=null&&py!=null&&y-py>MAP.TRIP_GAP)))flush();run.push(e)});
+  flush();return out}
+/* the country's name in the reader's language (a code like "AU" from make_viewer_data.py), else as written */
+function mapLandName(tr){try{if(/^[A-Z]{2}$/.test(tr.code||""))return new Intl.DisplayNames([LANG==="nl"?"nl":"en"],{type:"region"}).of(tr.code)}catch(e){}return tr.land||""}
+/* one map for a journey: every place of it, numbered in time order, a dotted line from each to the next, a small overview of where it is */
+function mapTrip(tr){const pts=[],nums=[];tr.evs.forEach((e,k)=>{let j=pts.findIndex(q=>mapSame(q,e.t));if(j<0){pts.push(e.t);nums.push([])}nums[j<0?pts.length-1:j].push(k+1)});
+  const prj=mapFit(pts,400),id="mh"+(++MAP_UID);
+  let s=`<defs>${mapHatch(id)}</defs>`+(prj.globe?mapGlobeBase(prj,id):mapBase(prj,MAP.W,MAP.H,{fill:MAP.pap,sea:`url(#${id})`,borders:1,sw:.9,rivers:"route"}));
+  tr.evs.forEach((e,k)=>{if(k&&!mapSame(tr.evs[k-1].t,e.t))s+=mapLeg(prj,tr.evs[k-1].t,e.t,0).svg.replace('stroke-width="2.2"','stroke-width="1.8"')});
+  /* markers: one that would cover an earlier one moves aside (away from it), with a thin line to its real spot; names right, left, above or below */
+  const xy=pts.map(q=>prj(q.lon,q.lat)),box=[],hit=(a,b)=>a[0]<b[2]&&a[2]>b[0]&&a[1]<b[3]&&a[3]>b[1],free=b=>b[0]>12&&b[2]<MAP.W-12&&b[1]>12&&b[3]<MAP.H-12&&!box.some(o=>hit(o,b));
+  const mk=xy.map(([x0,y0],j)=>{const t=nums[j].join(","),w=Math.max(18,t.length*7+8);let x=x0,y=y0,k=0;const at=()=>[x-w/2-2,y-11,x+w/2+2,y+11];
+    while(!free(at())&&k<24){const o=box.find(b=>hit(b,at()))||[x0-1,y0+1,x0-1,y0+1],cx=(o[0]+o[2])/2,cy=(o[1]+o[3])/2;let dx=x-cx,dy=y-cy;const l=Math.hypot(dx,dy)||1;
+      if(l<2){dx=.7;dy=-.7}x+=dx/l*4;y+=dy/l*4;k++}
+    box.push(at());return {x0,y0,x,y,t,w}});
+  mk.forEach(m=>{if(Math.hypot(m.x-m.x0,m.y-m.y0)>3)s+=`<line x1="${m.x0.toFixed(1)}" y1="${m.y0.toFixed(1)}" x2="${m.x.toFixed(1)}" y2="${m.y.toFixed(1)}" stroke="${MAP.red}" stroke-width="1"/>`+mapDot(m.x0,m.y0,2.5)});
+  mk.forEach(m=>s+=`<g transform="translate(${m.x.toFixed(1)},${m.y.toFixed(1)})"><rect x="${-m.w/2}" y="-9" width="${m.w}" height="18" rx="9" fill="${MAP.red}" stroke="#fff" stroke-width="1.5"/><text y="4" font-family="${MAP.font}" font-size="11" font-weight="bold" text-anchor="middle" fill="#fff">${m.t}</text></g>`);
+  mk.forEach((m,j)=>{const n=mapName(pts[j].n),lw=n.length*6.6+4,h=m.w/2+5,
+      o=[[m.x+h,m.y+4,"start",m.x+h],[m.x-h,m.y+4,"end",m.x-h-lw],[m.x,m.y-14,"middle",m.x-lw/2],[m.x,m.y+24,"middle",m.x-lw/2]].find(([,y,,x0])=>free([x0,y-11,x0+lw,y+3]));
+    if(o){box.push([o[3],o[1]-11,o[3]+lw,o[1]+3]);s+=mapLabel(o[0],o[1],n,{size:12,anchor:o[2]})}});
+  if(!prj.globe){const la=pts.map(q=>q.lat),lo=pts.map(q=>q.lon),c={lat:(Math.min(...la)+Math.max(...la))/2,lon:(Math.min(...lo)+Math.max(...lo))/2};
+    const span=Math.max(400,Math.max(...pts.map(a=>Math.max(...pts.map(b=>mapKm(a,b)))))*1.45);s+=mapInset(c,span,box.flatMap(b=>[[b[0],b[1]],[b[2],b[3]],[b[0],b[3]],[b[2],b[1]]]))}
+  return mapSvg(s+mapFrame(MAP.W,MAP.H),pts.map(q=>mapName(q.n)).join(" → "))}
+/* the words with a journey map: one sentence, then the places with their year (and month) and what happened there */
+function mapTripText(p,tr){const pr=vhPro(p),land=mapLandName(tr);
+  const why=tr.y1===tr.y2?_t("mw_trip1",Object.assign({y:tr.y1,land},pr)):_t("mw_trip",Object.assign({y1:tr.y1,y2:tr.y2,land},pr));
+  const li=tr.evs.map((e,k)=>{const f=mapTripYear(p,e),t=f.d?mapDt(f):null,when=t&&t.k==="ym"?_t("mw_months").split(",")[t.mo]+" "+t.y:t&&t.k!=="y"?(w=>w[0].toLowerCase()+w.slice(1))(mapWhen(f)):f.y!=null?String(f.y):"",
+      what=f.k==="emigratie"||f.k==="immigratie"?_t("mw_k_arr"):f.k==="beroep"&&f.x?f.x:f.k&&f.k!=="woonde"&&f.k!=="volkstelling"?mapWhat(f).replace(/^ \(|\)$/g,""):"";
+    return `<li><i>${k+1}</i><b>${slEsc(mapName(e.t.n))}</b>${when||what?` <span>${slEsc([when,what].filter(Boolean).join(" · "))}</span>`:""}</li>`}).join("");
+  const from=tr.evs[0].from,d=from?mapKm(from,tr.evs[0].t):0;
+  return {why,list:`<ol class="sw-trip">${li}</ol>`,line:from&&d>=MAP.SAME_KM?_t("map_from",{km:mapNum(d),from:mapName(from.n)}):""}}
 /* the first paragraph that names a place: the town, or for a move abroad also the country ("Australie" matches "Australië") */
 function mapMention(paras,pl,home){const t=NORM(mapName(pl)),last=a=>NORM(String(a||"").split(",").pop()).trim(),c=last(pl),abroad=String(pl).includes(",")&&home&&c!==last(home);
   return paras.findIndex(x=>{const n=NORM(x);return n.includes(t)||(abroad&&c.length>3&&n.includes(c))})}
@@ -2466,7 +2525,7 @@ function swBuild(){VH_RICH=null;VH_DEPTH=null;VH_STO=null;
     /* the first card of a card version is the hook: always right after the intro */
     const head=cards.filter(c=>c.kind==="intro"||c.hook),tail=cards.filter(c=>c.kind==="death"||c.kind==="fork"||c.kind==="end"),mid=vhSortByYear(cards.filter(c=>!head.includes(c)&&!tail.includes(c)));
     const merged=[];for(const c of mid){const l=merged[merged.length-1];if(c.kind==="events"&&l&&l.kind==="events"&&l.len+c.len<=220){l.li+=c.li;l.len+=c.len;l.html=`<div class="sw-k">${slEsc(l.head)}</div><ul class="sw-ev">${l.li}</ul>`}else merged.push(c)}
-    return {i,lc,fn,cards:swOverlay(head.concat(merged,tail))}})}
+    return {i,lc,fn,cards:swOverlay(swMapHtml(p,head.concat(merged,tail)))}})}
 /* the map moments of one person on the trail (Story and Cards alike): walking through their life from where the trail was (MS.here = the birthplace
    of the person before), every place that is new on the trail (MS.seen; the same place = mapSame: same core name or within MAP.SAME_KM) and every move of MAP.FAR_KM
    or more gets a map, each at its own moment. A country or region alone ("Australie") gives way to a town in that country later in life (and gives it its year). */
@@ -2551,10 +2610,16 @@ function mapDeathOnly(p,e){const F=mapFacts(p,e.t);return F.length>0&&F.every(f=
 function mapPara(e,paras,p,cards){const at=cards?(e.t.ka!=null?e.t.ka:e.t.al):e.t.al;if(at!=null)return at-1<paras.length?at-1:-1;return e.nw?mapMention(paras,e.t.n,p.bplac):-1}
 /* Cards: one map card per moment */
 function swMapCard(p,MS,add,cards){const evs=mapEvents(p,MS);if(!evs.length)return;const cp=vhHas(p)?vhParaList(swCardText(p)):[],py=cp.length?vhParaYears(cp,p):[];
-  evs.forEach(e=>{const c=mapCap(e);let y=e.y;const after=cp.length?mapPara(e,cp,p,1):-1;if(after>=0&&py[after]!=null)y=py[after];
-    add("map",`<div class="sw-k">${_t("map_k")}</div><figure class="sw-map">${mapOf(e)}</figure><div class="sw-cap"><p class="sw-why">${slEsc(mapWhy(p,e))}</p><b>${slEsc(c.name)}</b>${c.sub?slEsc(c.sub):""}${c.line?`<span>${slEsc(c.line)}</span>`:""}</div>`,{y,len:60});
+  /* the card's html is made in swMapHtml, once the cards are in their final order (see mapChain) */
+  mapTrips(p,evs).forEach(it=>{const e=it.trip?it.evs[0]:it;let y=e.y;const after=cp.length?mapPara(e,cp,p,1):-1;if(after>=0&&py[after]!=null)y=py[after];
+    add("map","",{y,len:it.trip?140:60,mapIt:it});
     /* right after that story card (past its image), so the stable sort by year keeps it there */
     if(after>=0&&cards){const m=cards.pop(),ref=cards.filter(x=>x.kind==="story")[after];if(ref){let k=cards.indexOf(ref)+1;while(cards[k]&&(cards[k].kind==="img"||cards[k].kind==="map")&&cards[k].y===ref.y)k++;cards.splice(k,0,m)}else cards.push(m)}})}
+function swMapHtml(p,cs){const ms=cs.filter(c=>c.mapIt);if(!ms.length)return cs;mapChain(ms.map(c=>c.mapIt),p);
+  ms.forEach(c=>{const it=c.mapIt;
+    if(it.trip){const T=mapTripText(p,it);c.html=`<div class="sw-k">${_t("map_k")}</div><figure class="sw-map">${mapTrip(it)}</figure><div class="sw-cap"><p class="sw-why">${slEsc(T.why)}</p>${T.list}${T.line?`<span>${slEsc(T.line)}</span>`:""}</div>`;return}
+    const e=it,cp=mapCap(e);c.html=`<div class="sw-k">${_t("map_k")}</div><figure class="sw-map">${mapOf(e)}</figure><div class="sw-cap"><p class="sw-why">${slEsc(mapWhy(p,e))}</p><b>${slEsc(cp.name)}</b>${cp.sub?slEsc(cp.sub):""}${cp.line?`<span>${slEsc(cp.line)}</span>`:""}</div>`});
+  return cs}
 /* text on the image (like Stories): a story card and the story image right after it, or a life card and the zeitgeist image right
    after (else right before) it, become one card: the photo full-screen, the text over it, a small credit line below.
    Clippings, scans, documents and maps stay cards of their own. */
