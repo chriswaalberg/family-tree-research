@@ -286,7 +286,7 @@ en:{title:"Workshop",treeOf:"Family tree of",people:"people",links:"links",open:
  storyEdit:"Story updated: {n}",tg:"Life and times of {p}",tgD:"{e} events · {b} images · {l} periods",tgNew:"new place",certN:"{n} links changed certainty",
  st_note:"Note on {n}",st_event:"{t}: {n}",st_drop_event:"Removed: {t} of {n}",st_aka:"Also known as: {t}",st_places:"{n} place names made uniform",stN:"{t}: {n} new steps",
  c_z:"certain",c_w:"probable",c_p:"possible",c_n:"not checked",c_x:"wrong",
- ev_baptism:"Baptism",ev_burial:"Burial",ev_birth:"Birth",ev_death:"Death",ev_marriage:"Marriage",ev_residence:"Residence",ev_divorce:"Divorce",ev_census:"Census",ev_emigration:"Emigration",taskStart:"Started: {t}",taskDone:"Finished: {t}",eta:"about {m} min to go",etaS:"almost done",ring:"A generation further back",ringD:"Your tree grows by a generation."},
+ ev_baptism:"Baptism",ev_burial:"Burial",ev_birth:"Birth",ev_death:"Death",ev_marriage:"Marriage",ev_residence:"Residence",ev_divorce:"Divorce",ev_census:"Census",ev_emigration:"Emigration",taskStart:"Started: {t}",helperJoin:"Joins the work",taskDone:"Finished: {t}",eta:"about {m} min to go",etaS:"almost done",ring:"A generation further back",ringD:"Your tree grows by a generation."},
 nl:{title:"Werkplaats",treeOf:"Stamboom van",people:"mensen",links:"relaties",open:"open vragen",sources:"bronnen",now:"Wat Claude nu doet",
  waiting:"Wacht op Claude…",live:"live",offline:"verbinding kwijt",viewer:"Viewer",loose:"Niet in de waaier",pick:"Wie staat in het midden?",find:"Zoek iemand…",
  search:"Zoekt in {src}",read:"Leest in {src}",scan:"Haalt scans op uit {src}",clip:"Knipt een krantenbericht uit {src}",
@@ -305,7 +305,7 @@ nl:{title:"Werkplaats",treeOf:"Stamboom van",people:"mensen",links:"relaties",op
  storyEdit:"Verhaal bijgewerkt: {n}",tg:"Tijdgeest van {p}",tgD:"{e} gebeurtenissen · {b} beelden · {l} periodes",tgNew:"nieuwe plaats",certN:"{n} koppelingen veranderden van zekerheid",
  st_note:"Notitie bij {n}",st_event:"{t}: {n}",st_drop_event:"Weggehaald: {t} van {n}",st_aka:"Ook bekend als: {t}",st_places:"{n} plaatsnamen gelijkgetrokken",stN:"{t}: {n} nieuwe stappen",
  c_z:"zeker",c_w:"waarschijnlijk",c_p:"mogelijk",c_n:"niet gecheckt",c_x:"fout",
- ev_baptism:"Doop",ev_burial:"Begrafenis",ev_birth:"Geboorte",ev_death:"Overlijden",ev_marriage:"Huwelijk",ev_residence:"Woonplaats",ev_divorce:"Scheiding",ev_census:"Volkstelling",ev_emigration:"Emigratie",taskStart:"Gestart: {t}",taskDone:"Klaar: {t}",eta:"nog ±{m} min",etaS:"bijna klaar",ring:"Een generatie verder terug",ringD:"Je boom groeit een generatie."}};
+ ev_baptism:"Doop",ev_burial:"Begrafenis",ev_birth:"Geboorte",ev_death:"Overlijden",ev_marriage:"Huwelijk",ev_residence:"Woonplaats",ev_divorce:"Scheiding",ev_census:"Volkstelling",ev_emigration:"Emigratie",taskStart:"Gestart: {t}",helperJoin:"Doet mee",taskDone:"Klaar: {t}",eta:"nog ±{m} min",etaS:"bijna klaar",ring:"Een generatie verder terug",ringD:"Je boom groeit een generatie."}};
 /* the Changes tab */
 Object.assign(I18N.en,{tabChg:"Changes",tabChgS:"Changes",chgFull:"Full screen",chgClose:"Close",chgEmpty:"Nothing in the tree has changed in this session yet.",
  chgSum:"{n} changes this session",chgSum1:"1 change this session",chgPeople:"{n} new",chgLinks:"{n} links",chgCert:"{n} certainty",chgWhy:"{n} sources/reasons",
@@ -706,13 +706,14 @@ function humanQ(q){const ids=String(q||"").split(/[\s,]+/).filter(Boolean);if(!i
 function feed(kind,title,detail,who,quiet){const f=$("#feed");f.querySelector(".empty")?.remove();
  if(kind!=="focus"&&(kind!=="rebuild"&&kind!=="check"&&kind!=="warn"&&!(kind==="add"||kind==="del"||kind==="cert"||kind==="why"||kind==="fix")||who)){workSeen(who,title,detail);renderWorkers()}
  if(!quiet&&TAB!=="log")$("#nL").classList.add("on");const li=document.createElement("li");li.className="k-"+kind+(quiet?" q":"");
- const ic={focus:"◎",nothing:"∅",why:"❝",search:"⌕",read:"❐",scan:"▤",clip:"✂",result:"↳",check:"✓",warn:"!",add:"✦",del:"✕",cert:"◆",fix:"✎",note:"✎",ask:"?",found:"★",rebuild:"⟳"}[kind]||"·";
+ const ic={focus:"◎",nothing:"∅",why:"❝",search:"⌕",read:"❐",scan:"▤",clip:"✂",result:"↳",check:"✓",warn:"!",add:"✦",del:"✕",cert:"◆",fix:"✎",note:"✎",ask:"?",found:"★",rebuild:"⟳",helper:"+"}[kind]||"·";
  li.innerHTML=`<span class="ic">${ic}</span><div><b>${esc(shortUrls(title))}${who?`<span class="who">${esc(who)}</span>`:""}</b>${detail?`<small>${esc(shortUrls(detail))}</small>`:""}</div>`;
  f.append(li);while(f.children.length>CFG.FEED)f.firstChild.remove();const pl=$("#pLog");if(pl)pl.scrollTop=pl.scrollHeight}
 function feedEmpty(){const f=$("#feed");if(!f.children.length)f.innerHTML=`<li class="empty">${esc(_t("waiting"))}</li>`}
 function describe(ev){const src=ev.source||"";
  switch(ev.kind){
   case"search":case"read":case"scan":case"clip":if(!src&&ev.text)return[ev.kind,ev.text,humanQ(ev.q||"")];return[ev.kind,_t(ev.kind,{src}),[humanQ(ev.q),ev.place,(ev.frm||ev.to)?`${ev.frm||""}–${ev.to||""}`:""].filter(Boolean).join(" · ")];
+  case"helper":return["helper",_t("helperJoin"),""];  /* a helper (subagent) started: its row appears before its first step */
   case"result":return["result",_t(ev.n?"result":"result0",{n:ev.n,src}),ev.q||""];
   case"check":return["check",_t("check"),_t("checkD",{p:ev.people,g:ev.gaps,o:ev.odd})];
   case"warn":return["warn",_t("warn"),ev.text||""];

@@ -9,7 +9,9 @@ This repo is a **Claude plugin marketplace** with one plugin: `family-tree-resea
 plugins/family-tree-research/
   .claude-plugin/plugin.json         name, version, description
   hooks/hooks.json, tree_hint.py     SessionStart + UserPromptSubmit: in a tree's folder (family-tree.json / stamboom.json) load
-                                     the skill and open/tell the Workshop; prints nothing outside a tree
+                                     the skill and open/tell the Workshop; prints nothing outside a tree. Helpers (Workshop
+                                     running): PreToolUse Agent queues the description as name, SubagentStart briefs the helper
+                                     + `helper` event, PreToolUse Bash (only with agent_id) prefixes FTR_WHO/FTR_TREE to our scripts
   README.md                          user-facing (English)
   skills/family-tree/
     SKILL.md                         instructions Claude follows (English, with a language rule)
@@ -19,6 +21,7 @@ plugins/family-tree-research/
     scripts/standalone_viewer.py     index.html + data.json → one HTML file
     scripts/geocode_places.py        GEDCOM (+stories) → coordinates per place (Nominatim, cached; manual fixes stay)
     scripts/delpher.py               Delpher newspapers via SRU: search / text / locate (crop with ruler) / cut (needs Pillow)
+    scripts/scans.py                 local scans at true size: strips (page halves + strips) / crop; sends a `read` event (needs Pillow)
     scripts/live.py                  the Workshop (Claude Code only): serve (local page + SSE, watches data.json) / note / progress;
                                      emit() is loaded by path by archives.py, delpher.py and gedcom_tool.py (check, rebuild)
     scripts/archives.py              archives without a browser: Open Archives (search/show/scans), Amsterdam open data (saa), Transkribus,

@@ -103,7 +103,16 @@ Only the start and the end of a task go into the log; the bar follows every step
 
 ## Helpers (subagents)
 
-Give every research helper a short name and let it put `FTR_WHO=<name>` in front of its commands (`FTR_WHO=Noord-Holland python3 -I scripts/archives.py oa search …`). Each name gets its own coloured beam in the fan, labelled with that name, so five helpers are five beams searching at once. Put this in the helper's brief.
+Give every research helper a short name and let it put `FTR_WHO=<name>` in front of its commands (`FTR_WHO=Noord-Holland python3 -I scripts/archives.py oa search …`). Each name gets its own coloured beam in the fan, labelled with that name, so five helpers are five beams searching at once. Put this in the helper's brief, also for helpers that only read scans:
+
+```
+Your name in the Workshop is <reader-1>. Put FTR_WHO='<reader-1>' FTR_TREE='<tree folder>' in front of every command.
+Per scan: python3 -I <skill>/scripts/scans.py strips <image> --person <id> --task "<book>" --done <n> --total <pages>,
+then read the strips (scans.py crop <image> x,y for one spot at true size).
+A find or a dead end: python3 -I <skill>/scripts/live.py note "<one line>" --kind found|nothing --person <id>.
+```
+
+You don't have to remember it: while the Workshop runs, a plugin hook does it for every helper. It names the helper after the Agent call's short description (`description`), shows it in the Workshop at once ("Joins the work"), gives it these instructions with the full paths, and puts `FTR_WHO`/`FTR_TREE` in front of any of the skill's scripts the helper runs without them. A brief that already sets `FTR_WHO` keeps its own name. So give helpers a description that reads well as a name ("Karlshamn 1790s", "reader Åhus").
 
 ## On a phone
 
