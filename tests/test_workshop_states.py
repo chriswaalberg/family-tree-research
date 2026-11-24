@@ -52,6 +52,7 @@ class States(unittest.TestCase):
         if cls.srv:
             cls.srv.terminate()
             cls.srv.wait(5)
+        subprocess.run([sys.executable, "-I", LIVE, "stop"], cwd=cls.tree, env=cls.env, capture_output=True, timeout=20)
         shutil.rmtree(cls.tmp, ignore_errors=True)
 
     # ---- helpers
@@ -151,6 +152,22 @@ class States(unittest.TestCase):
         for s in ('preview_start with name "workshop"', "mcp__ccd_view__show_pane with pane 'preview'", '"visible": true'):
             self.assertIn(s, out)
 
+        # the desktop app archives the session that started it: it stops the keeper (SIGTERM), the Workshop stays
+        self.srv.terminate()
+        self.assertEqual(self.srv.wait(10), 0)
+        type(self).srv = None
+        self.assertIn("viewers", self.ping())
+        # a new start reuses it and keeps it company
+        k = subprocess.Popen([sys.executable, "-I", LIVE, "serve", "--config", "family-tree.json", "--port", str(self.port),
+                              "--exact", "--local"], cwd=self.tree, env=self.env, stdout=subprocess.PIPE, text=True)
+        self.assertIn("already running", k.stdout.readline())
+        self.assertIsNone(k.poll())
+        # stop ends the Workshop, and its keeper follows
+        self.assertIn("stopped", self.run_py(LIVE, "stop").stdout)
+        self.assertEqual(k.wait(15), 0)
+        k.stdout.close()
+        self.assertEqual(self.status()[0]["state"], "none")
+
 
 class Timing(unittest.TestCase):
     """Hidden must never turn into closed (slow background timers), and a stale 'visible' must not stay visible."""
@@ -158,6 +175,17 @@ class Timing(unittest.TestCase):
     def setUp(self):
         self.live = load_live()
         self.hub = self.live.Hub()
+
+    def test_idle(self):
+        h = self.hub
+        h.last -= 100
+        self.assertGreaterEqual(h.idle(), 100)
+        q = h.join()  # an open page is never idle
+        self.assertEqual(h.idle(), 0)
+        h.leave(q)
+        h.last -= 100
+        h.send({"kind": "note", "text": "x"})  # an event is use too
+        self.assertLess(h.idle(), 5)
 
     def test_hidden_page_stays_open_without_beats(self):
         self.hub.viewer_join("a", True)

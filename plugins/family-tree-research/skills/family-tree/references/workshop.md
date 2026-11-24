@@ -8,7 +8,7 @@ The Workshop is a local page (`viewer/live.html`, served by `scripts/live.py`) t
 
 In Claude Code, before the first research round of a session (or a check of an imported tree), open the Workshop without asking. It is part of the experience, like the first viewer.
 
-Every tree has its own Workshop. Several can run at once (two family trees, or a test tree next to the real one), each on its own port; opening one that already runs reuses it.
+Every tree has its own Workshop. Several can run at once (two family trees, or a test tree next to the real one), each on its own port; opening one that already runs reuses it. The Workshop belongs to the tree, not to one session: archiving or closing the session that started it doesn't stop it (only its small keeper process ends). It stops itself after 6 hours with no page open and nothing sent; `live.py stop` stops it at once.
 
 **The Workshop is only open when the user can see it.** A running server is not enough: the desktop app's browser pane can be hidden, or no page has the Workshop open at all. The page tells `live.py` whether it is in view, and `/ping` answers with `viewers` (pages that have it open) and `visible`. `python3 -I <skill>/scripts/live.py status` says it in one line (exit 0 only when in view). There are three states, and the hooks, `note`, `focus` and `progress` name them:
 
@@ -31,7 +31,7 @@ Never tell the user the Workshop is open, or act as if it is, while `/ping` says
 
 How the page knows: it reports on every visibility change, on every resize and every 3 seconds while in view. In view means: `document.visibilityState` is "visible", the page has a size, **and** it paints at screen speed. Both checks are needed, measured in the desktop app: with the session on screen and the pane closed, the page still says "visible" and keeps its size, but paints at ~30 frames a second instead of the screen's 60–120; with the session not on screen it paints fast but is 0 × 0. Whether a page is open at all comes from its event stream, not from its timers: a hidden pane runs as a background page with slow timers, so "hidden" never turns into "closed", and a closed page is gone at once (or within about 20 seconds when it closes without saying so). After `show_pane` it takes a few seconds: `live.py status --wait 10` waits for the page's own report (exit 0 = in view) instead of guessing. `/ping` lists every page under `pages` (in view, size, frame rate, seconds since its last report) for when something looks wrong.
 
-**The terminal (no browser pane)**: from the tree's folder, start `python3 -I <skill>/scripts/live.py serve --config family-tree.json` as a background task and give the user the address it prints. If this tree's Workshop already runs, it prints that address and stops.
+**The terminal (no browser pane)**: from the tree's folder, start `python3 -I <skill>/scripts/live.py serve --config family-tree.json` as a background task and give the user the address it prints. If this tree's Workshop already runs, it prints that address and reuses it.
 
 `--config` reads the same settings file as `make_viewer_data.py` (`--data data/data.json` also works). data.json must exist: build the first viewer before you open the Workshop.
 

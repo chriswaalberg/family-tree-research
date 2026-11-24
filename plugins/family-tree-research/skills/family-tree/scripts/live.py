@@ -2,7 +2,12 @@
 """live.py — the Workshop: watch the family tree grow while Claude researches (Claude Code only).
 
   serve [--config family-tree.json | --data data.json]   start the local Workshop page (viewer/live.html); one per tree:
-        [--port 8790] [--local] [--media DIR ...]         if this tree's Workshop already runs, it says where and stops (0)
+        [--port 8790] [--local] [--media DIR ...]         the server runs on its own (a session that ends or is archived
+                                                        doesn't stop it); this command stays as its keeper while it runs
+                                                        and reuses a Workshop that already runs for this tree.
+                                                        Ctrl+C stops it; a stop from the desktop app only ends the keeper.
+                                                        Nobody watching and nothing sent for IDLE_STOP: it stops itself.
+  stop [--tree DIR]                                     stop this tree's Workshop
   launch [--config ... | --data ...] [--local]          desktop app: write the `workshop` entry in the tree's
                                                         .claude/launch.json (this live.py, this tree's own port);
                                                         run it before every preview_start
@@ -43,7 +48,7 @@ Helpers (subagents) set FTR_WHO=<short name> in front of their commands: each ge
 
 Standard library only. Dutch aliases: serveer/start, notitie (--persoon, --soort, --boom), voortgang (--tekst, --boom).
 """
-import argparse, errno, hashlib, json, zlib, os, queue, secrets, signal, socket, sys, tempfile, threading, time, urllib.request
+import argparse, errno, hashlib, json, zlib, os, queue, secrets, signal, socket, subprocess, sys, tempfile, threading, time, urllib.request
 from collections import deque
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs, unquote
@@ -67,6 +72,8 @@ def workshops():
     except OSError:
         return out
     for n in names:
+        if not n.endswith(".json"):
+            continue  # the server logs live there too
         f = os.path.join(POINTERS, n)
         try:
             with open(f, encoding="utf-8") as fh:
@@ -364,6 +371,7 @@ class Hub:
         self.timeline, self.versions = [], []
         self.changes = []  # [{t, n?, title?, items}] every real change to the tree in this session, for the Changes tab
         self.viewers = {}  # page id → {"sse": open event streams, "vis": in view, "beat": last report, "local": this computer}
+        self.last = time.time()  # last sign of use (an event, a page): IDLE_STOP counts from here
 
     # ---- who sees it (the three states, see BEAT_FRESH / VIEWER_TTL)
     def _viewer(self, vid, local):
@@ -425,7 +433,16 @@ class Hub:
         if len(self.timeline) < MAX_TIMELINE and ev.get("kind") != "hello":
             self.timeline.append(ev)
 
+    def idle(self, now=None):
+        """Seconds without use: 0 while a page has an event stream open."""
+        with self.lock:
+            if self.clients:
+                self.last = time.time()
+                return 0
+        return (now if now is not None else time.time()) - self.last
+
     def send(self, ev, keep=True):
+        self.last = time.time()
         if ev.get("kind") == "steps":
             rnd, new = str(ev.get("round") or ""), []
             for st in ev.get("steps") or []:
@@ -467,6 +484,8 @@ class Hub:
 
 
 MAX_VERSIONS, MAX_TIMELINE = 600, 60000  # ~150 kB per version of a 1,200-person tree
+IDLE_STOP = 6 * 3600  # a Workshop nobody has open and nobody sends anything to stops itself after this long
+KEEPER_CHECK = 3  # seconds between the keeper's checks that its Workshop still answers
 KEEPALIVE = 10  # seconds between keep-alive lines on an event stream: a page that went away is noticed within ~2 of them
 
 
@@ -727,11 +746,80 @@ def free_port(start, n=40):
     return None
 
 
+def _log_path(data):
+    return os.path.join(POINTERS, _key(data) + ".log")
+
+
 def cmd_serve(a):
-    data, media, root = resolve(a)
+    """Make sure this tree's Workshop runs, on its own, then keep it company.
+    The desktop app stops a session's servers when that session is archived; the Workshop belongs to the tree, not
+    to one session, so the server itself runs in its own process group and this process is only its keeper: it
+    stays while the Workshop answers (so the app sees a running server) and ends quietly on the app's stop (SIGTERM).
+    Ctrl+C (in a terminal) stops the Workshop too."""
+    if a.detached:
+        return serve_here(a)
+    data, _, _ = resolve(a)
     old = running_for(data)
-    if old:  # this tree already has a Workshop: use that one (exit 0, so the desktop app's preview_start doesn't fail)
+    if old:
         print(f"Workshop for this tree is already running: http://127.0.0.1:{old['port']}/")
+    else:
+        os.makedirs(POINTERS, exist_ok=True)
+        log = _log_path(data)
+        with open(log, "w", encoding="utf-8") as fh:
+            child = subprocess.Popen([sys.executable, "-I", os.path.abspath(__file__)] + sys.argv[1:] + ["--detached"],
+                                     stdin=subprocess.DEVNULL, stdout=fh, stderr=subprocess.STDOUT,
+                                     start_new_session=True, close_fds=True)
+        end = time.time() + 20
+        while not old and child.poll() is None and time.time() < end:
+            time.sleep(0.2)  # its own signal: the pointer file plus an answer on /ping
+            old = running_for(data)
+        try:
+            print(open(log, encoding="utf-8").read().rstrip())
+        except OSError:
+            pass
+        if not old:
+            if child.poll() is None:
+                child.terminate()
+            sys.exit(child.returncode or "The Workshop did not start (see above)")
+    sys.stdout.flush()
+    keep(old, data)
+
+
+def keep(w, data):
+    """Stay while the Workshop answers. SIGTERM (the desktop app) leaves it running; Ctrl+C stops it."""
+    done = threading.Event()
+    signal.signal(signal.SIGTERM, lambda *_: done.set())
+    try:
+        while not done.wait(KEEPER_CHECK):
+            if not running_for(data):
+                print("The Workshop stopped.")
+                return
+    except KeyboardInterrupt:
+        try:
+            os.kill(int(w["pid"]), signal.SIGTERM)
+            print("Workshop stopped.")
+        except (OSError, ValueError, KeyError):
+            pass
+
+
+def cmd_stop(a):
+    if a.tree:
+        os.environ["FTR_TREE"] = a.tree
+    w = workshop_for()
+    if not w:
+        print("No Workshop runs for this tree.")
+        return
+    try:
+        os.kill(int(w["pid"]), signal.SIGTERM)
+    except (OSError, ValueError) as e:
+        sys.exit(f"Could not stop it: {e}")
+    print(f"Workshop on port {w['port']} stopped.")
+
+
+def serve_here(a):
+    """The server itself (started by cmd_serve in its own process group)."""
+    data, media, root = resolve(a)
+    if running_for(data):
         return
     hub = Hub()
     cfg = {"data": data, "media": media, "local": a.local, "token": secrets.token_urlsafe(9) if a.local else tree_key(data)}
@@ -762,6 +850,15 @@ def cmd_serve(a):
         print(f"(port {a.port} was taken, probably by another tree's Workshop: this one uses {port})")
     stop = threading.Event()
     threading.Thread(target=watch, args=(data, hub, stop), daemon=True).start()
+
+    def idle_stop():
+        while not stop.wait(60):
+            if hub.idle() > IDLE_STOP:
+                print(f"Nobody watched and nothing was sent for {IDLE_STOP // 3600} hours: the Workshop stops.")
+                sys.stdout.flush()
+                srv.shutdown()
+                return
+    threading.Thread(target=idle_stop, daemon=True).start()
     print(f"Workshop: http://127.0.0.1:{port}/   (viewer: http://127.0.0.1:{port}/viewer/)")
     print(f"watching {data}")
     if not cfg["local"]:
@@ -893,7 +990,11 @@ def main():
     s.add_argument("--media", action="append", help="extra folder to serve viewer media from (repeatable)")
     s.add_argument("--root", help="the tree's folder (default: where the settings file is, else above data/)")
     s.add_argument("--exact", action="store_true", help="only this port (launch.json entries use it)")
+    s.add_argument("--detached", action="store_true", help=argparse.SUPPRESS)  # the server itself, started by serve
     s.set_defaults(func=cmd_serve)
+    st = sp.add_parser("stop", help="stop this tree's Workshop")
+    st.add_argument("--tree", "--boom", help="the tree's folder, when you run this from somewhere else")
+    st.set_defaults(func=cmd_stop)
     la = sp.add_parser("launch", help="write the workshop entry in the tree's .claude/launch.json (desktop app)")
     la.add_argument("--config", "--instellingen")
     la.add_argument("--data")
