@@ -407,12 +407,14 @@ def placed_facts(node, tags):
         row = [y, pl, FACT_KIND[e["t"]]] + ([x] if x else [])
         # an imprecise date ("ABT 2000", "BET 1970 AND 1979") goes along as 6th element, so the map sentence can say "around 2000" / "the 1970s"
         d = " ".join((sub(e, "DATE") or {}).get("v", "").split())
-        if not PLAIN_DATE.match(d): row = row + [""] * (4 - len(row)) + [None, d]
+        # a one-off event (EVEN) with a month goes along too, so its map sentence can say "in May 1957"
+        if not PLAIN_DATE.match(d) or (e["t"] == "EVEN" and MONTH_DATE.match(d)): row = row + [""] * (4 - len(row)) + [None, d]
         out.append(row)
     return out
 
 
 PLAIN_DATE = re.compile(r"^(\d{1,2} )?((JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) )?\d{3,4}$", re.I)
+MONTH_DATE = re.compile(r"^(\d{1,2} )?(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) \d{3,4}$", re.I)
 
 
 def residence_spans(points, by, dy):
