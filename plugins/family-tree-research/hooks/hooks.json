@@ -1,5 +1,5 @@
 {
-  "description": "In a family tree's folder (family-tree.json / stamboom.json): load the family-tree skill and keep the Workshop open and told what happens, even when the project's own CLAUDE.md already explains the research; helpers (subagents) get a Workshop name and brief of their own.",
+  "description": "In a family tree's folder (family-tree.json / stamboom.json): load the family-tree skill and keep the Workshop open and told what happens, even when the project's own CLAUDE.md already explains the research; helpers (subagents) get a Workshop name and brief of their own; a helper that ends closes its open progress bars.",
   "hooks": {
     "SessionStart": [
       {
@@ -51,6 +51,17 @@
           {
             "type": "command",
             "command": "python3 -I \"${CLAUDE_PLUGIN_ROOT}/hooks/tree_hint.py\" helper",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I \"${CLAUDE_PLUGIN_ROOT}/hooks/tree_hint.py\" helper_end",
             "timeout": 10
           }
         ]

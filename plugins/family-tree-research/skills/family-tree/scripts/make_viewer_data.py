@@ -539,7 +539,9 @@ def story_image_warnings(p, images):
 # or a newspaper's name in a source's label
 NEWS_LINK = re.compile(r"resolver\.kb\.nl|delpher\.nl|trove\.nla\.gov\.au|newspapers\.com|chroniclingamerica", re.I)
 NEWS_NAME = re.compile(r"\b(\w*(courant|krant|dagblad|nieuwsblad|handelsblad|weekblad|telegraaf|tidning|zeitung)\w*"
-                       r"|\w*(residentie|maas|nieuws|dorps|stads|amstel|zaan|gooi|eem|graafschap|grens|lands?)bode|newspaper|gazette|herald|tribune|chronicle|advertiser|weekly)\b", re.I)
+                       r"|newspaper|gazette|herald|tribune|chronicle|advertiser|weekly)\b", re.I)
+# "-bode" papers only as a title with a capital (Leidse Stadsbode, Amstelbode): a "stadsbode" was also a job.
+NEWS_BODE = re.compile(r"\b(Residentie|Maas|Nieuws|Dorps|Stads|Amstel|Zaan|Gooi|Eem|Graafschap|Grens|Lands?)bode\b")
 NEWS_TITLE = re.compile(r"\b(De Tijd|Het Vaderland|Het Volk|The Times)\b")  # titles that are plain words in lower case
 
 
@@ -578,7 +580,7 @@ def story_clipping_warnings(p):
         label, url = (s[0] if s else "", s[1] if len(s) > 1 else "") if isinstance(s, (list, tuple)) else \
                      ((s.get("label") or s.get("titel") or s.get("title") or "", s.get("url") or "") if isinstance(s, dict) else (str(s), ""))
         label = next(iter(label.values()), "") if isinstance(label, dict) else str(label)
-        m = NEWS_LINK.search(str(url)) or NEWS_LINK.search(label) or NEWS_NAME.search(label) or NEWS_TITLE.search(label)
+        m = NEWS_LINK.search(str(url)) or NEWS_LINK.search(label) or NEWS_NAME.search(label) or NEWS_BODE.search(label) or NEWS_TITLE.search(label)
         if m: hits.append(label.strip() or str(url))
     if not hits: return 0
     print(f"  warning, story of {p['n']}: this story cites a newspaper without a clipping ({hits[0][:70]}"

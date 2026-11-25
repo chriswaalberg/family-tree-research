@@ -99,7 +99,7 @@ live = importlib.util.module_from_spec(spec); spec.loader.exec_module(live)
 live.emit("progress", task="side branches", done=42, total=123, person="I87")
 ```
 
-Only the start and the end of a task go into the log; the bar follows every step. Reading scans page by page (a burial register, a parish book, alone or with reading helpers) is such a task too: `progress "Göteborg burials 1752-1767" 23 50 --person <whose parents you look for>`.
+Only the start and the end of a task go into the log; the bar follows every step. A task that ends early (the baptism was on page 2) is closed with `progress "<task>" --stop`; a bar without that last step turns grey by itself ("stopped at 2 / 5") after 30 minutes without a new step, or at once when the helper that sent it ends, and leaves the list later or when a new session starts (the times are `TASK_*` in `live.py`). Reading scans page by page (a burial register, a parish book, alone or with reading helpers) is such a task too: `progress "Göteborg burials 1752-1767" 23 50 --person <whose parents you look for>`.
 
 ## Helpers (subagents)
 

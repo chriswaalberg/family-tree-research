@@ -16,6 +16,7 @@
   focus <I4 or name> ["what you look for"]            who you are working on now: ring + name at their star
   progress "<task>" <done> <total> [--person I4] [--text ...]
                                                         a progress bar for a long script; send it every step
+  progress "<task>" --stop                              close a bar that won't finish (grey, then gone; see TASK_QUIET)
   status [--json] [--wait 10]                           not running / running but hidden / in view (exit 0 = in view);
                                                         --wait: wait up to that many seconds for the page to be in view
 
@@ -441,8 +442,41 @@ class Hub:
                 return 0
         return (now if now is not None else time.time()) - self.last
 
-    def send(self, ev, keep=True):
-        self.last = time.time()
+    def stop_tasks(self, task=None, who=None, why="stop", now=None):
+        """Grey the open bars of one task or one worker (or every bar when both are None)."""
+        now = now if now is not None else time.time()
+        hits = [e for e in list(self.tasks.values()) if not e.get("stopped")
+                and (task is None or e.get("task") == task) and (who is None or e.get("who") == who)]
+        for e in hits:
+            self.send(dict(e, t=round(now, 2), stopped=why, last=e.get("t")), use=False)
+        return len(hits)
+
+    def drop_grey(self):
+        """A new session: the grey bars of earlier work leave the list now."""
+        for e in [e for e in list(self.tasks.values()) if e.get("stopped")]:
+            self.send({"kind": "progress", "t": round(time.time(), 2), "task": e.get("task"), "gone": True}, keep=False, use=False)
+
+    def sweep_tasks(self, now=None):
+        """Bars nobody finishes: grey after TASK_QUIET, gone later. Not a sign of use (IDLE_STOP keeps counting)."""
+        now = now if now is not None else time.time()
+        for e in list(self.tasks.values()):
+            if not e.get("stopped"):
+                if now - (e.get("t") or now) > TASK_QUIET:
+                    self.stop_tasks(task=e.get("task"), why="quiet", now=now)
+                continue
+            gone = (e.get("last") or e["t"]) + TASK_QUIET_GONE if e["stopped"] == "quiet" else e["t"] + TASK_STOPPED_GONE
+            if now > gone:
+                self.send({"kind": "progress", "t": round(now, 2), "task": e.get("task"), "gone": True}, keep=False, use=False)
+
+    def send(self, ev, keep=True, use=True):
+        if use:
+            self.last = time.time()
+        if ev.get("kind") == "stop":  # live.py progress --stop, a helper that ended, a new session
+            if ev.get("grey"):
+                self.drop_grey()
+            elif ev.get("task") is not None or ev.get("who"):
+                self.stop_tasks(task=ev.get("task"), who=ev.get("who") if ev.get("task") is None else None, now=ev.get("t"))
+            return
         if ev.get("kind") == "steps":
             rnd, new = str(ev.get("round") or ""), []
             for st in ev.get("steps") or []:
@@ -459,11 +493,14 @@ class Hub:
                 ev["ch"] = g
         if ev.get("kind") == "progress":
             name = str(ev.get("task") or "")
-            first, done = name not in self.tasks, ev.get("done") == ev.get("total")
+            old = self.tasks.get(name)
+            first = not old or bool(old.get("stopped"))
+            done = ev.get("done") == ev.get("total") or bool(ev.get("gone"))
             self.tasks[name] = ev
             if done:
                 self.tasks.pop(name, None)
-            keep = keep and (first or done)  # the log keeps only the start and the end of a task
+            # the log keeps only the start and the end of a task (finished or stopped), never the bar leaving
+            keep = keep and not ev.get("gone") and (first or done or bool(ev.get("stopped")))
         if keep:
             self.history.append(ev)
         self.record(ev)
@@ -484,6 +521,10 @@ class Hub:
 
 
 MAX_VERSIONS, MAX_TIMELINE = 600, 60000  # ~150 kB per version of a 1,200-person tree
+# progress bars that never got their last step (a helper stopped early, a usage limit, the end of the night):
+TASK_QUIET = 30 * 60         # a bar without a new step this long turns grey: "stopped at 53 / 80"
+TASK_QUIET_GONE = 3 * 3600   # ...and leaves the list this long after its last step (the log keeps one line)
+TASK_STOPPED_GONE = 10 * 60  # a bar stopped on purpose (progress --stop, its helper ended) stays grey this long
 IDLE_STOP = 6 * 3600  # a Workshop nobody has open and nobody sends anything to stops itself after this long
 KEEPER_CHECK = 3  # seconds between the keeper's checks that its Workshop still answers
 KEEPALIVE = 10  # seconds between keep-alive lines on an event stream: a page that went away is noticed within ~2 of them
@@ -502,7 +543,7 @@ PLUGIN_VERSION = _plugin_version()
 
 def watch(path, hub, stop):
     """Tell the pages when data.json changed (and is complete JSON again); keep every version for the replay."""
-    last, doc = None, None
+    last, doc, swept = None, None, 0.0
     while not stop.is_set():
         try:
             st = os.stat(path)
@@ -529,6 +570,9 @@ def watch(path, hub, stop):
                 last, doc = sig, new
             except (OSError, ValueError):
                 pass  # still being written: try again in a moment
+        if time.time() - swept > 30:
+            hub.sweep_tasks()
+            swept = time.time()
         stop.wait(0.5)
 
 
@@ -948,7 +992,12 @@ def cmd_focus(a):
 def cmd_progress(a):
     if a.tree:
         os.environ["FTR_TREE"] = a.tree
-    emit("progress", _warn=False, task=a.task, done=a.done, total=a.total, person=a.person, text=a.text)
+    if a.stop:  # a bar that won't finish (the find came early): grey now, gone in a few minutes
+        emit("stop", _warn=False, task=a.task)
+    elif a.done is None or a.total is None:
+        sys.exit('live.py progress "<task>" <done> <total>, or progress "<task>" --stop')
+    else:
+        emit("progress", _warn=False, task=a.task, done=a.done, total=a.total, person=a.person, text=a.text)
     _say_state("progress")
 
 
@@ -1020,8 +1069,9 @@ def main():
     f.set_defaults(func=cmd_focus)
     g = sp.add_parser("progress", aliases=["voortgang"], help="a progress bar for a long script (send it every step)")
     g.add_argument("task", help="short name of the task, e.g. 'side branches'")
-    g.add_argument("done", type=int)
-    g.add_argument("total", type=int)
+    g.add_argument("done", type=int, nargs="?")
+    g.add_argument("total", type=int, nargs="?")
+    g.add_argument("--stop", action="store_true", help="close this bar without finishing it (it turns grey, then goes)")
     g.add_argument("--person", "--persoon", help="who is being checked now (GEDCOM id or name): the scanner points there")
     g.add_argument("--text", "--tekst", help="one line about this step")
     g.add_argument("--tree", "--boom", help="the tree's folder, when you run this from somewhere else")

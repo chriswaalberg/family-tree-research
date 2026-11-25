@@ -108,6 +108,7 @@ details.chg-many ul{padding-left:18px}
 .task .bar{grid-column:1/-1;height:6px;border-radius:99px;background:var(--line);overflow:hidden}
 .task .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--gold2));box-shadow:0 0 10px var(--gold);transition:width .6s ease-out}
 .task.done{opacity:0}
+.task.stopped{opacity:.6}.task.stopped .bar i{background:var(--mut);box-shadow:none}
 .card{position:relative;padding:12px 54px 12px 16px;border-radius:12px;color:var(--ink);
  background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 13%,transparent),color-mix(in srgb,var(--bg) 88%,transparent) 55%);border:1px solid color-mix(in srgb,var(--gold) 45%,transparent);
  box-shadow:0 0 34px color-mix(in srgb,var(--gold) 14%,transparent),inset 0 1px 0 color-mix(in srgb,var(--gold2) 15%,transparent);transform-origin:top center;animation:unfold .9s cubic-bezier(.2,.9,.3,1.2)}
@@ -286,7 +287,7 @@ en:{title:"Workshop",treeOf:"Family tree of",people:"people",links:"links",open:
  storyEdit:"Story updated: {n}",tg:"Life and times of {p}",tgD:"{e} events · {b} images · {l} periods",tgNew:"new place",certN:"{n} links changed certainty",
  st_note:"Note on {n}",st_event:"{t}: {n}",st_drop_event:"Removed: {t} of {n}",st_aka:"Also known as: {t}",st_places:"{n} place names made uniform",stN:"{t}: {n} new steps",
  c_z:"certain",c_w:"probable",c_p:"possible",c_n:"not checked",c_x:"wrong",
- ev_baptism:"Baptism",ev_burial:"Burial",ev_birth:"Birth",ev_death:"Death",ev_marriage:"Marriage",ev_residence:"Residence",ev_divorce:"Divorce",ev_census:"Census",ev_emigration:"Emigration",taskStart:"Started: {t}",helperJoin:"Joins the work",taskDone:"Finished: {t}",eta:"about {m} min to go",etaS:"almost done",ring:"A generation further back",ringD:"Your tree grows by a generation."},
+ ev_baptism:"Baptism",ev_burial:"Burial",ev_birth:"Birth",ev_death:"Death",ev_marriage:"Marriage",ev_residence:"Residence",ev_divorce:"Divorce",ev_census:"Census",ev_emigration:"Emigration",taskStart:"Started: {t}",helperJoin:"Joins the work",taskDone:"Finished: {t}",taskStopped:"Stopped: {t}",stoppedAt:"stopped at {d} / {n}",eta:"about {m} min to go",etaS:"almost done",ring:"A generation further back",ringD:"Your tree grows by a generation."},
 nl:{title:"Werkplaats",treeOf:"Stamboom van",people:"mensen",links:"relaties",open:"open vragen",sources:"bronnen",now:"Wat Claude nu doet",
  waiting:"Wacht op Claude…",live:"live",offline:"verbinding kwijt",viewer:"Viewer",loose:"Niet in de waaier",pick:"Wie staat in het midden?",find:"Zoek iemand…",
  search:"Zoekt in {src}",read:"Leest in {src}",scan:"Haalt scans op uit {src}",clip:"Knipt een krantenbericht uit {src}",
@@ -305,7 +306,7 @@ nl:{title:"Werkplaats",treeOf:"Stamboom van",people:"mensen",links:"relaties",op
  storyEdit:"Verhaal bijgewerkt: {n}",tg:"Tijdgeest van {p}",tgD:"{e} gebeurtenissen · {b} beelden · {l} periodes",tgNew:"nieuwe plaats",certN:"{n} koppelingen veranderden van zekerheid",
  st_note:"Notitie bij {n}",st_event:"{t}: {n}",st_drop_event:"Weggehaald: {t} van {n}",st_aka:"Ook bekend als: {t}",st_places:"{n} plaatsnamen gelijkgetrokken",stN:"{t}: {n} nieuwe stappen",
  c_z:"zeker",c_w:"waarschijnlijk",c_p:"mogelijk",c_n:"niet gecheckt",c_x:"fout",
- ev_baptism:"Doop",ev_burial:"Begrafenis",ev_birth:"Geboorte",ev_death:"Overlijden",ev_marriage:"Huwelijk",ev_residence:"Woonplaats",ev_divorce:"Scheiding",ev_census:"Volkstelling",ev_emigration:"Emigratie",taskStart:"Gestart: {t}",helperJoin:"Doet mee",taskDone:"Klaar: {t}",eta:"nog ±{m} min",etaS:"bijna klaar",ring:"Een generatie verder terug",ringD:"Je boom groeit een generatie."}};
+ ev_baptism:"Doop",ev_burial:"Begrafenis",ev_birth:"Geboorte",ev_death:"Overlijden",ev_marriage:"Huwelijk",ev_residence:"Woonplaats",ev_divorce:"Scheiding",ev_census:"Volkstelling",ev_emigration:"Emigratie",taskStart:"Gestart: {t}",helperJoin:"Doet mee",taskDone:"Klaar: {t}",taskStopped:"Gestopt: {t}",stoppedAt:"gestopt bij {d} / {n}",eta:"nog ±{m} min",etaS:"bijna klaar",ring:"Een generatie verder terug",ringD:"Je boom groeit een generatie."}};
 /* the Changes tab */
 Object.assign(I18N.en,{tabChg:"Changes",tabChgS:"Changes",chgFull:"Full screen",chgClose:"Close",chgEmpty:"Nothing in the tree has changed in this session yet.",
  chgSum:"{n} changes this session",chgSum1:"1 change this session",chgPeople:"{n} new",chgLinks:"{n} links",chgCert:"{n} certainty",chgWhy:"{n} sources/reasons",
@@ -718,7 +719,7 @@ function describe(ev){const src=ev.source||"";
   case"check":return["check",_t("check"),_t("checkD",{p:ev.people,g:ev.gaps,o:ev.odd})];
   case"warn":return["warn",_t("warn"),ev.text||""];
   case"rebuild":return["rebuild",_t("rebuild"),_t("rebuildD",{t:ev.title||"",s:ev.steps,p:ev.people})];
-  case"progress":return["rebuild",_t(ev.done>=ev.total?"taskDone":"taskStart",{t:ev.task||""}),`${ev.done} / ${ev.total}`+(ev.text?" · "+ev.text:"")];
+  case"progress":return["rebuild",_t(ev.stopped?"taskStopped":ev.done>=ev.total?"taskDone":"taskStart",{t:ev.task||""}),`${ev.done} / ${ev.total}`+(ev.text?" · "+ev.text:"")];
   case"note":case"ask":case"found":case"nothing":return[ev.kind,ev.kind==="note"?ev.text:_t(ev.kind),ev.kind==="note"?"":ev.text];
   case"focus":{const r=resolvePerson(ev.person,ev.text,ev);return["focus",_t("focusT",{n:r?short(P[r.i]):(ev.person||"?")}),[r&&r.rel,ev.text].filter(Boolean).join(" · ")]}
   case"steps":return["rebuild",_t("stN",{t:ev.title||ev.round||"",n:(ev.steps||[]).length}),""];
@@ -743,11 +744,18 @@ async function stepsEv(ev){const all=ev.steps||[],vis=all.filter(s=>STEP_SHOW.ha
 /* ===== QUEUE: events play one after another, so the fan and the log stay in step ===== */
 /* ===== TASKS: progress bars of long scripts (not queued: they follow the script live) ===== */
 const TASKS=new Map();
+/* The server greys a bar nobody finishes (live.py TASK_QUIET, progress --stop, its helper ended) and later says it is gone */
 function progress(ev,quiet){const name=String(ev.task||"");let t=TASKS.get(name);const now=Date.now()/1000;
+ if(ev.gone){if(t){t.el.classList.add("done");TASKS.delete(name);setTimeout(()=>t.el.remove(),1200)}return}
  if(!t){t={t0:ev.t||now,d0:ev.done,el:document.createElement("div"),who:"",person:null};t.el.className="task";$("#tasks").append(t.el);TASKS.set(name,t);
-  if(!quiet&&ev.done<ev.total)feed("rebuild",_t("taskStart",{t:name}),`${ev.done} / ${ev.total}`,ev.who)}
+  if(!quiet&&!ev.stopped&&ev.done<ev.total)feed("rebuild",_t("taskStart",{t:name}),`${ev.done} / ${ev.total}`,ev.who)}
  const pct=ev.total?Math.min(100,100*ev.done/ev.total):0,el_=(ev.t||now)-t.t0,rate=el_>5?(ev.done-t.d0)/el_:0,left=rate>0?(ev.total-ev.done)/rate:null;
  const eta=left==null?"":left<60?_t("etaS"):_t("eta",{m:Math.round(left/60)});
+ t.el.classList.toggle("stopped",!!ev.stopped);
+ if(ev.stopped){t.el.innerHTML=`<b>${esc(name)}</b><span>${esc(_t("stoppedAt",{d:ev.done,n:ev.total}))}</span><div class="bar"><i style="width:${pct.toFixed(1)}%"></i></div>`;
+  if(!quiet&&!t.stopped)feed("rebuild",_t("taskStopped",{t:name}),_t("stoppedAt",{d:ev.done,n:ev.total})+(ev.who?" · "+ev.who:""));  /* no who: a stop is not a sign of work */
+  t.stopped=true;t.person=null;if(FOCUS.has(ev.who||name)){clearTimeout(FOCUS.get(ev.who||name).timer);FOCUS.delete(ev.who||name);drawFocus()}return}
+ t.stopped=false;
  t.el.innerHTML=`<b>${esc(name)}</b><span>${ev.done} / ${ev.total}${eta?" · "+esc(eta):""}</span><div class="bar"><i style="width:${pct.toFixed(1)}%"></i></div>${ev.text?`<small>${esc(ev.text)}</small>`:""}`;
  if(ev.person&&ev.person!==t.person&&L){t.person=ev.person;const r=resolvePerson(ev.person,ev.text,ev);if(r){setFocus(ev.who||name,r);if(r.code!=null)beamAim(ev.who||name,r.code)}}
  if(ev.total&&ev.done>=ev.total&&FOCUS.has(ev.who||name)){clearTimeout(FOCUS.get(ev.who||name).timer);FOCUS.delete(ev.who||name);drawFocus()}

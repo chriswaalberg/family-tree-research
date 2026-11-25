@@ -182,7 +182,10 @@ def cmd_oa_search(a):
             q[k] = v
     if a.scans:
         q["only_results_with_scans"] = "true"
-    r = fetch_json(OA + "search.json?" + urllib.parse.urlencode(q))["response"]
+    r = fetch_json(OA + "search.json?" + urllib.parse.urlencode(q))
+    if "response" not in r:
+        sys.exit(f"Open Archives: {r.get('error_description', r)} (archive codes: e.g. srt = Rotterdam, elo = Leiden, saa = Amsterdam)")
+    r = r["response"]
     docs = r.get("docs", [])
     live("result", source="Open Archives", q=q["name"], n=r["number_found"])
     print(f"## {q['name']}: {r['number_found']} found, showing {a.start + 1}-{a.start + len(docs)}")
@@ -220,6 +223,10 @@ def remarks(x):
     return "; ".join(out)
 
 
+def clip(t, n):
+    return t if len(t) <= n else t[:n].rsplit(" ", 1)[0] + " …"
+
+
 def cmd_oa_show(a):
     for ref in a.records:
         try:
@@ -235,6 +242,10 @@ def cmd_oa_show(a):
         for p in as_list(r.get("a2a_Person")):
             extra = {k.replace("a2a_", ""): short(v) for k, v in p.items() if k not in ("pid", "a2a_PersonName")}
             print(f"   {role.get(p.get('pid'), '?')}: {pname(p)}" + (f"  {extra}" if extra else ""))
+        about = plain(remarks(ev.get("a2a_EventRemark")))
+        if about:
+            # Notarial deeds (Rotterdam and others) keep their summary here, "Inhoud": who, what, which house or debt.
+            print(f"   content: {clip(about, 800)}")
         s = r.get("a2a_Source", {})
         ref_ = {k.replace("a2a_", ""): short(v) for k, v in s.get("a2a_SourceReference", {}).items()}
         print(f"   source: {short(s.get('a2a_SourceType', ''))} | {ref_}")
