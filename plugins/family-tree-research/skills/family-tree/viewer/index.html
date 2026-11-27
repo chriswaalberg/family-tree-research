@@ -309,6 +309,7 @@ body{min-height:100vh;background-color:var(--parch);
 .topband .btn[data-variant=ghost]{color:#d8c7aa}.topband .btn[data-variant=ghost]:hover{background:rgba(255,240,215,.08);color:#fff4df}
 .topband .sbtn{color:#bba88a!important;min-width:200px}.topband .sbtn .kbd{border-color:rgba(255,240,215,.2);color:#bba88a}
 .ctlgrp{display:flex;align-items:center;gap:10px}
+.sibs{gap:7px;font-size:13px;cursor:pointer;white-space:nowrap}.sibs input{margin:0}
 .ctllab{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#bba88a;font-weight:600}
 .topband .select{background-color:rgba(255,240,215,.06);border:1px solid rgba(255,240,215,.18);color:#f3e7d1;border-radius:10px;height:34px;padding:0 32px 0 12px;box-shadow:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23dcb56a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
@@ -755,7 +756,7 @@ main{padding-top:6px}
   </div>
 </header></div>
 <div class="legwrap" id="setbar"><div class="setctl"><div id="genWrap" class="ctlgrp"><span class="ctllab" data-t="gens"></span><div id="gens" class="gsl" role="slider" tabindex="0" aria-valuemin="3" aria-valuemax="12" aria-valuenow="7"><div class="gsl-track"><div class="gsl-fill"></div></div><div class="gsl-ticks"></div><div class="gsl-thumb"><span>7</span></div></div></div>
-  <div id="colorWrap" class="ctlgrp"><span class="ctllab" data-t="color"></span><select id="color" class="select" data-t-aria="color"></select></div></div><div id="legend"></div></div>
+  <div id="colorWrap" class="ctlgrp"><span class="ctllab" data-t="color"></span><select id="color" class="select" data-t-aria="color"></select></div><label id="sibsWrap" class="ctlgrp sibs"><input type="checkbox" id="ksSibs" class="input"><span data-t="ks_sibs"></span></label></div><div id="legend"></div></div>
 <main>
   <div class="linebar" id="lineBar" hidden></div>
   <div class="stage" id="stage"><div id="loading">…</div></div>
@@ -783,6 +784,7 @@ nl:{loading:"Stamboom laden…",loadError:"Kon de stamboom niet laden ({msg}).",
  before1600:"vóór 1600",tipClick:"Klik voor meer over deze persoon",readStory:"Lees het verhaal",relChildTip:"Relatie met kind: ",occursFan:"Komt {n}× voor in deze waaier",
  lg_dup:"komt vaker voor (kwartierverlies)",lg_inlaw:"aangetrouwd",lg_missing:"nog niet gevonden",
  hint_waaier:"Beweeg over een vak voor details, klik om die persoon in het midden te zetten. Een rood stipje betekent dat deze voorouder meerdere keren in de waaier staat.",
+ ks_sibs:"Broers en zussen",ks_sibs_t:"Ook de broers en zussen van elke voorouder, met hun kinderen, kleinkinderen en andere partners",ks_foot_anc:"{n} voorouders · vaders kant links, moeders kant rechts; elke voorouder heeft een vaste plek, dus een volle tak is ver uitgezocht",hint_kosmos_anc:"Elke stip is een voorouder op een vaste plek: hoe voller een tak, hoe verder hij is uitgezocht. Kleine rondjes zijn ouders die nog niet gevonden zijn. Beweeg over een stip om de directe familie te zien.",
  hint_kosmos:"Grote stippen zijn directe voorouders, kleine stippen hun andere nakomelingen (ooms, tantes, neven, nichten). Beweeg over een stip om de directe familie te zien.",
  hint_tijdlijn:"Iedereen staat op de hoogte van zijn of haar geboortejaar. Scrollen = zoomen, slepen = verplaatsen; klik op een naam voor details, het pad naar de startpersoon en de telling per generatie.",genAboveTitle:"{gens} erboven — toon ouders",
  ks_root:"startpersoon",ks_direct:"directe voorouder, {n}e generatie",ks_inlaw:"aangetrouwd",ks_blood:"bloedverwant",ks_foot:"{n} personen · jongste generatie in het midden, elke ring een generatie ouder",
@@ -810,6 +812,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  before1600:"before 1600",tipClick:"Click for more about this person",readStory:"Read the story",relChildTip:"Relation to child: ",occursFan:"Appears {n}× in this fan",
  lg_dup:"appears more than once (pedigree collapse)",lg_inlaw:"related by marriage",lg_missing:"not found yet",
  hint_waaier:"Hover over a segment for details, click to put that person in the centre. A red dot means this ancestor appears more than once in the fan.",
+ ks_sibs:"Brothers and sisters",ks_sibs_t:"Also each ancestor's brothers and sisters, with their children, grandchildren and other partners",ks_foot_anc:"{n} ancestors · father's side left, mother's side right; every ancestor has a fixed place, so a full branch is well researched",hint_kosmos_anc:"Every dot is an ancestor in a fixed place: the fuller a branch, the further it has been researched. Small circles are parents not found yet. Hover over a dot to see the immediate family.",
  hint_kosmos:"Large dots are direct ancestors, small dots their other descendants (uncles, aunts, cousins). Hover over a dot to see the immediate family.",
  hint_tijdlijn:"Everyone is placed at the height of their birth year. Scroll to zoom, drag to move; click a name for details, the path to the start person and counts per generation.",genAboveTitle:"{gens} above — show parents",
  ks_root:"start person",ks_direct:"direct ancestor, generation {n}",ks_inlaw:"related by marriage",ks_blood:"blood relative",ks_foot:"{n} people · youngest generation in the centre, each ring one generation older",
@@ -828,7 +831,7 @@ en:{loading:"Loading family tree…",loadError:"Could not load the family tree (
  notFound:"Not found yet",emptyTitle:"Not found yet",emptyBody:"No parents have been found for {name} yet. Once parents are in the tree, there is more to see here.",emptyPeople:"This tree has no people yet."}};
 let LANG="en";
 /* plugin version, shown in the footer; bump together with plugin.json and SKILL.md (see CLAUDE.md, "Releasing") */
-const PLUGIN_VERSION="0.9.87",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
+const PLUGIN_VERSION="0.9.88",PLUGIN_URL="https://github.com/chriswaalberg/family-tree-research";
 function _t(k,v){let s=(I18N[LANG]&&I18N[LANG][k]!=null)?I18N[LANG][k]:(I18N.nl[k]!=null?I18N.nl[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(v[x]);return s}
 function lab(x){if(x==null)return"";if(typeof x==="string")return x;return x[LANG]||x.nl||x.en||Object.values(x)[0]||""}
 const GEN_NL=["","Ouders","Grootouders","Overgrootouders","Betovergrootouders","Oudouders","Oudgrootouders","Oudovergrootouders","Oudbetovergrootouders","Stamouders","Stamgrootouders","Stamovergrootouders","Stambetovergrootouders","Edelouders","Edelgrootouders","Edelovergrootouders","Edelbetovergrootouders"];
@@ -1032,20 +1035,23 @@ function isLight(hex){if(!hex||hex[0]!=="#")return true;const n=parseInt(hex.sli
 /* ================= KOSMOS ================= */
 function drawCosmos(){
   const G=state.gens,root=state.root,mode=state.color,LN=lineInfo();
-  const V=new Set(),B=[];
-  function mkB(x,g,ped,code){if(V.has(x)||(g>G&&!(LN&&LN.pairs.has(ped+"-"+x))))return null; /* past the slider: only the Story line */V.add(x);const n={x,g,ped,line:code.length>=2?code.slice(0,2):null,bb:true,sp:[],side:[]};B.push(n);
-    const p=P[x];n.fa=p.f>=0?mkB(p.f,g+1,x,code+"v"):null;n.mo=p.m>=0?mkB(p.m,g+1,x,code+"m"):null;return n}
-  const R=mkB(root,0,null,"");
+  const SIBS=!!state.ksSibs; /* off (default): ancestors only, each on a fixed slot like the Fan (father left), so a full branch looks full; on: brothers/sisters and their families too, space by size */
+  const V=new Set(),B=[],GAPS=[];
+  function mkB(x,g,ped,code,a0,a1){if((SIBS&&V.has(x))||(g>G&&!(LN&&LN.pairs.has(ped+"-"+x))))return null; /* past the slider: only the Story line */V.add(x);const n={x,g,ped,code,line:code.length>=2?code.slice(0,2):null,bb:true,sp:[],side:[],a0,a1};B.push(n);
+    const p=P[x],m=(a0+a1)/2,F=g===0?[Math.PI*1.5,Math.PI/2]:[a0,m],M=g===0?[Math.PI*1.5,Math.PI*2.5]:[m,a1];
+    n.fa=p.f>=0?mkB(p.f,g+1,x,code+"v",...F):null;n.mo=p.m>=0?mkB(p.m,g+1,x,code+"m",...M):null;
+    if(!SIBS&&g<G){if(p.f<0)GAPS.push({g:g+1,a:(F[0]+F[1])/2,w:Math.abs(F[1]-F[0])});if(p.m<0)GAPS.push({g:g+1,a:(M[0]+M[1])/2,w:Math.abs(M[1]-M[0])})}return n}
+  const R=mkB(root,0,null,"",0,0);
   function mkS(x,g,line){V.add(x);const n={x,g,line,sp:[],kids:[]};
     for(const s of P[x].sp)if(!V.has(s)){V.add(s);n.sp.push({x:s,g,line,spouse:true})}
     for(const c of P[x].ch)if(!V.has(c))n.kids.push(mkS(c,g-1,line));return n}
   B.sort((a,b)=>a.g-b.g);
-  for(const n of B){for(const s of P[n.x].sp)if(!V.has(s)){V.add(s);n.sp.push({x:s,g:n.g,line:n.line,spouse:true})}
+  if(SIBS)for(const n of B){for(const s of P[n.x].sp)if(!V.has(s)){V.add(s);n.sp.push({x:s,g:n.g,line:n.line,spouse:true})}
     for(const c of P[n.x].ch)if(c!==n.ped&&!V.has(c))n.side.push(mkS(c,n.g-1,n.line))}
   const wS=s=>s.w??(s.w=1+s.sp.length+s.kids.reduce((a,k)=>a+wS(k),0));
   const wB=n=>n?(n.w??(n.w=1+n.sp.length+n.side.reduce((a,k)=>a+wS(k),0)+wB(n.fa)+wB(n.mo))):0;
   wB(R);
-  const nodes=[];
+  const nodes=SIBS?[]:B.slice();
   function placeS(s,a0,a1){const u=(a1-a0)/s.w;s.a=(a0+a1)/2;nodes.push(s);
     s.sp.forEach((sp,j)=>{sp.a=s.a+(j+1)*u*0.9*(j%2?-1:1);sp.of=s;nodes.push(sp)});
     let a=a0;for(const k of s.kids){const span=(a1-a0)*k.w/(s.w);placeS(k,a,a+span);a+=span}
@@ -1063,44 +1069,45 @@ function drawCosmos(){
     cur+=u*selfU;for(const k of Rr){const s=u*wS(k);placeS(k,cur,cur+s);cur+=s}
     if(n.mo){const s=span*n.mo.w/tot;placeB(n.mo,a,a+s);a+=s}
   }
-  placeB(R,-Math.PI/2,Math.PI*1.5);
-  const gmin=Math.min(...nodes.map(n=>n.g)),gmax=Math.max(...nodes.map(n=>n.g));
-  const W=1000,H=860,cx=500,cy=430,r0=30,RM=400,step=(RM-r0)/Math.max(1,gmax-gmin);
-  const rad=g=>r0+(g-gmin)*step;
-  nodes.forEach(n=>{n.r=rad(n.g);n.px=cx+n.r*Math.cos(n.a);n.py=cy+n.r*Math.sin(n.a)});
+  if(SIBS)placeB(R,-Math.PI/2,Math.PI*1.5);else nodes.forEach(n=>n.a=n.g?(n.a0+n.a1)/2:-Math.PI/2);
+  const gmin=Math.min(...nodes.map(n=>n.g)),gmax=Math.max(...nodes.map(n=>n.g),...GAPS.map(q=>q.g));
+  const W=1000,H=860,cx=500,cy=430,r0=SIBS?30:42,RM=400,step=SIBS?(RM-r0)/Math.max(1,gmax-gmin):(RM-r0)/Math.max(1,gmax-1);
+  const rad=SIBS?(g=>r0+(g-gmin)*step):(g=>g?r0+(g-1)*step:0);
+  nodes.forEach(n=>{n.r=rad(n.g);n.px=cx+n.r*Math.cos(n.a);n.py=cy+n.r*Math.sin(n.a);n.arc=SIBS||!n.g?99:n.r*Math.abs(n.a1-n.a0)});
   const byX=new Map(nodes.map(n=>[n.x,n]));
   const svg=el("svg",{viewBox:`0 0 ${W} ${H}`});
-  for(let g=gmin;g<=gmax;g++){el("circle",{cx,cy,r:rad(g),fill:"none",stroke:g===0?"#d9cfc2":"#efe9df","stroke-dasharray":g===0?"":"2 4"},svg)}
+  for(let g=gmin;g<=gmax;g++){if(rad(g))el("circle",{cx,cy,r:rad(g),fill:"none",stroke:g===0?"#d9cfc2":"#efe9df","stroke-dasharray":g===0?"":"2 4"},svg)}
+  if(GAPS.length){const gG=el("g",{fill:"none",stroke:"#cdbfae","stroke-width":1},svg);GAPS.forEach(q=>{const r=rad(q.g);el("circle",{cx:cx+r*Math.cos(q.a),cy:cy+r*Math.sin(q.a),r:Math.min(3,Math.max(.8,r*q.w*.3))},gG)})}
   const col=n=>{if(mode==="land")return landCol(P[n.x]);if(mode==="zekerheid"){const ch=n.bb?n.ped:null;const c=ch!=null?certOf(ch,n.x):null;return c?CERT[c[0]]||NONE:(n.x===root?"#2a2622":NONE)}
     return n.line?LINE_COL[n.line]:"#4a423b"};
   const AD=adoptSet(root);{const markS=s=>{s.ad=true;s.sp.forEach(x=>x.ad=true);s.kids.forEach(markS)};for(const n of B)if(AD.has(n.x)){n.sp.forEach(x=>x.ad=true);n.side.forEach(markS)}}
   const gE=el("g",{fill:"none"},svg),gN=el("g",{},svg);
   const edges=[];
-  nodes.forEach(n=>{for(const q of parentsOf(n.x)){const p=byX.get(q);if(!p)continue;
+  nodes.forEach(n=>{for(const p of (SIBS?parentsOf(n.x).map(q=>byX.get(q)):[n.fa,n.mo])){if(!p)continue;const q=p.x;
       const rm=(p.r+n.r)/2;const c1=[cx+rm*Math.cos(p.a),cy+rm*Math.sin(p.a)],c2=[cx+rm*Math.cos(n.a),cy+rm*Math.sin(n.a)];
-      const e=el("path",{d:`M${p.px},${p.py}C${c1} ${c2} ${n.px},${n.py}`,stroke:col(n.bb&&n.x!==root?n:(n.line?n:p)),"stroke-opacity":n.bb?0.75:0.4,"stroke-width":n.bb?1.8:1},gE);if(isAdopt(n.x,q)){e.setAttribute("stroke",ADOPT_COL);e.setAttribute("stroke-width",3.2);e.setAttribute("stroke-opacity",1)}
+      const e=el("path",{d:`M${p.px},${p.py}C${c1} ${c2} ${n.px},${n.py}`,stroke:col(n.bb&&n.x!==root?n:(n.line?n:p)),"stroke-opacity":n.bb?0.75:0.4,"stroke-width":n.bb?Math.min(1.8,Math.max(.5,p.arc*.35)):1},gE);if(isAdopt(n.x,q)){e.setAttribute("stroke",ADOPT_COL);e.setAttribute("stroke-width",3.2);e.setAttribute("stroke-opacity",1)}
       if(LN){if(LN.pairs.has(n.x+"-"+q)){e.setAttribute("stroke-opacity",1);e.setAttribute("stroke-width",2.8)}else e.classList.add("ln-dim")}edges.push([e,n.x,q])}
     if(n.spouse&&n.of){const o=n.of;const e=el("path",{d:`M${o.px},${o.py}A${o.r},${o.r} 0 0 ${n.a>o.a?1:0} ${n.px},${n.py}`,stroke:"#8d7f6e","stroke-opacity":.6,"stroke-width":2},gE);if(LN)e.classList.add("ln-dim");edges.push([e,n.x,o.x])}});
   nodes.sort((a,b)=>(a.bb?1:0)-(b.bb?1:0));
   const nodeEls=new Map();
-  nodes.forEach(n=>{const isRoot=n.x===root;const r=isRoot?10:n.bb?Math.max(3.5,7-n.g*0.4):n.spouse?3:3.6;
+  nodes.forEach(n=>{const isRoot=n.x===root;const r=isRoot?10:n.bb?Math.min(Math.max(3.5,7-n.g*0.4),Math.max(1.1,n.arc*.42)):n.spouse?3:3.6;
     const c=el("circle",{cx:n.px,cy:n.py,r,fill:n.spouse?"#fffdf9":col(n),stroke:n.spouse?col(n):"#fffdf9","stroke-width":n.spouse?1.6:1.2,class:"node"},gN);
     if(AD.has(n.x)||(n.ad&&!n.spouse)){c.setAttribute("stroke",ADOPT_COL);c.setAttribute("stroke-width",1.8)}
-    nodeEls.set(n.x,c);if(LN&&!LN.set.has(n.x))c.classList.add("ln-dim");
+    if(!nodeEls.has(n.x))nodeEls.set(n.x,[]);nodeEls.get(n.x).push(c);if(LN&&!LN.set.has(n.x))c.classList.add("ln-dim");
     c.addEventListener("mouseenter",e=>{const rel=n.bb?(n.x===root?_t("ks_root"):AD.has(n.x)?_t("ks_direct_adopt",{n:n.g}):_t("ks_direct",{n:n.g})):n.spouse?_t("ks_inlaw"):n.ad?_t("ks_fam_adopt"):_t("ks_blood");
         showTip(e,n.x,`<span class="mut">${rel}</span><br>`);
         const keep=new Set([n.x,...parentsOf(n.x),...P[n.x].ch,...P[n.x].sp]);
         edges.forEach(([e,a,b])=>e.style.opacity=(a===n.x||b===n.x)?1:.08);
-        nodeEls.forEach((el2,x)=>el2.style.opacity=keep.has(x)?1:.25)});
+        nodeEls.forEach((l,x)=>l.forEach(el2=>el2.style.opacity=keep.has(x)?1:.25))});
     c.addEventListener("mousemove",moveTip);
-    c.addEventListener("mouseleave",()=>{hideTip();edges.forEach(([e])=>e.style.opacity="");nodeEls.forEach(e=>e.style.opacity="")});
+    c.addEventListener("mouseleave",()=>{hideTip();edges.forEach(([e])=>e.style.opacity="");nodeEls.forEach(l=>l.forEach(e=>e.style.opacity=""))});
     c.addEventListener("click",()=>{hideTip();personSheet(n.x)});
   });
   const tr=el("text",{x:R.px,y:R.py-15,"text-anchor":"middle","font-size":13,"font-weight":600,fill:"#2a2622","paint-order":"stroke",stroke:"#fffdf9","stroke-width":4},svg);tr.textContent=short(P[root]);
   // surname labels for grandparents
   B.filter(n=>n.g===2).forEach(n=>{const rr=RM+26;const x=cx+rr*Math.cos(n.a),y=cy+rr*Math.sin(n.a);
     const tt=el("text",{x,y,"text-anchor":Math.cos(n.a)>0.2?"start":Math.cos(n.a)<-0.2?"end":"middle","font-size":14,"font-weight":700,fill:LINE_COL[n.line]||"#2a2622","font-family":"Fraunces,serif"},svg);tt.textContent=P[n.x].s||short(P[n.x])});
-  const tl=el("text",{x:16,y:H-14,fill:"#a59a8f","font-size":11},svg);tl.textContent=_t("ks_foot",{n:nodes.length});
+  const tl=el("text",{x:16,y:H-14,fill:"#a59a8f","font-size":11},svg);tl.textContent=_t(SIBS?"ks_foot":"ks_foot_anc",{n:new Set(nodes.map(n=>n.x)).size-(SIBS?0:1)});
   return svg;
 }
 
@@ -2995,7 +3002,7 @@ function render(){
   const v=state.view;
   document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v?"true":"false"));$("storyBtn").setAttribute("aria-pressed",v==="verhaal"?"true":"false");$("treeBtn").setAttribute("aria-pressed",v!=="verhaal"&&v!=="lijst"?"true":"false");$("listBtn").setAttribute("aria-pressed",v==="lijst"?"true":"false");$("tabs").hidden=v==="verhaal"||v==="lijst";{const pw=$("vhPickWrap"),ph=v==="verhaal"?vhPickHtml():"";pw.innerHTML=ph;pw.hidden=!ph;const sel=pw.querySelector("select");if(sel)sel.onchange=()=>{const x=sel.value;sel.value="";sel.blur();if(x!=="")vhOpen(+x,true)}}if(v!=="verhaal"&&v!=="lijst")state.lastTree=v;
   document.querySelectorAll("#starts [data-p]").forEach(b=>b.dataset.variant=+b.dataset.p===state.root?"primary":"outline");
-  const hasP=parentsOf(state.root).length>0,ctl=(v==="waaier"||v==="kosmos")&&hasP;$("genWrap").style.display=ctl||(v==="tijdlijn"&&hasP)?"":"none";$("colorWrap").style.display=ctl?"":"none";if(typeof GSL_SHOW==="function")GSL_SHOW();
+  const hasP=parentsOf(state.root).length>0,ctl=(v==="waaier"||v==="kosmos")&&hasP;$("genWrap").style.display=ctl||(v==="tijdlijn"&&hasP)?"":"none";$("colorWrap").style.display=ctl?"":"none";$("sibsWrap").style.display=v==="kosmos"&&hasP?"":"none";$("ksSibs").checked=!!state.ksSibs;$("sibsWrap").title=_t("ks_sibs_t");if(typeof GSL_SHOW==="function")GSL_SHOW();
   const opts=[["lijn",_t("c_lijn")],["land",_t("c_land")],["zekerheid",v==="waaier"?_t("c_zek_v"):_t("c_zek_d")]];
   $("color").innerHTML=opts.map(([k,l])=>`<option value="${k}"${k===state.color?" selected":""}>${l}</option>`).join("");
   $("back").disabled=!state.hist.length;
@@ -3018,7 +3025,7 @@ function render(){
   if(v==="verhaal"){stage.appendChild(drawVerhaal());$("legend").style.display="none"}
   if(v==="tijdlijn"){stage.appendChild(drawTijdlijn());legend([[_t("lg_fl"),"#5b93c2"],[_t("lg_ml"),"#d47896"],[_t("lg_dash"),"#bfb6a8"],[_t("lg_est"),"#d9cfc2"],[_t("lg_red"),"#c0392b"]].concat(hasAdopt()?[[_t("lg_adopt_line"),ADOPT_COL]]:[]));$("hint").textContent=_t("hint_tijdlijn")}
   if(v==="waaier"){stage.appendChild(drawFan());legend(colorLegend(state.color).concat([[_t("lg_dup"),"#c0392b","ring"],[_t("lg_missing"),"#f6f1ea"]],adoptSet(state.root).size?[[_t("lg_adopt"),ADOPT_COL]]:[]));$("hint").textContent=_t("hint_waaier")}
-  if(v==="kosmos"){stage.appendChild(drawCosmos());legend(colorLegend(state.color).concat([[_t("lg_inlaw"),"#8d7f6e","ring"]],adoptSet(state.root).size?[[_t("lg_adopt_k"),ADOPT_COL,"ring"]]:[]));$("hint").textContent=_t("hint_kosmos")}
+  if(v==="kosmos"){stage.appendChild(drawCosmos());legend(colorLegend(state.color).concat(state.ksSibs?[[_t("lg_inlaw"),"#8d7f6e","ring"]]:[[_t("lg_missing"),"#cdbfae","ring"]],adoptSet(state.root).size?[[_t("lg_adopt_k"),ADOPT_COL,"ring"]]:[]));$("hint").textContent=_t(state.ksSibs?"hint_kosmos":"hint_kosmos_anc")}
   }
   $("setbar").hidden=$("legend").style.display==="none"&&$("genWrap").style.display==="none";
   lineBar();
@@ -3057,6 +3064,8 @@ fetch("data.json").then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.
   $("back").onclick=()=>{if(state.hist.length){state.root=state.hist.pop();render()}};
   initGenSlider();
   $("color").onchange=e=>{state.color=e.target.value;render()};
+  $("ksSibs").onchange=e=>{state.ksSibs=e.target.checked;try{localStorage.setItem("ftrCosmosSibs",state.ksSibs?"1":"")}catch(_){}render()};
+  try{state.ksSibs=localStorage.getItem("ftrCosmosSibs")==="1"}catch(_){}
   document.querySelectorAll("#tabs button,#storyBtn,#listBtn").forEach(b=>b.onclick=()=>{state.view=b.dataset.v;lineFit(b.dataset.v==="familie");render()});
   $("swBtn").onclick=()=>swOpen(state.root);
   $("treeBtn").onclick=()=>{state.view=state.lastTree||"familie";lineFit(state.view==="familie");render()};
